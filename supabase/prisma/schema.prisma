@@ -1,0 +1,225 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  GARZON
+  COCINA
+  CLIENTE
+}
+
+enum OrderStatus {
+  PENDING
+  VALIDATED
+  PREPARING
+  READY
+  DELIVERED
+  REJECTED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+}
+
+enum TableStatus {
+  FREE
+  OCCUPIED
+  RESERVED
+}
+
+model Restaurant {
+  id        String             @id @default(uuid())
+  name      String
+  slug      String             @unique
+  status    SubscriptionStatus @default(ACTIVE)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  // Relationships
+  users               User[]
+  categories          Category[]
+  menuItems           MenuItem[]
+  menuItemIngredients MenuItemIngredient[]
+  menuItemExtras      MenuItemExtra[]
+  tables              Table[]
+  orders              Order[]
+  inventories         Inventory[]
+
+  @@map("restaurants")
+}
+
+model User {
+  id           String  @id // This should match Supabase Auth User ID
+  email        String  @unique
+  role         Role    @default(CLIENTE)
+  restaurantId String? @map("restaurant_id")
+
+  restaurant Restaurant? @relation(fields: [restaurantId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Category {
+  id           String  @id @default(uuid())
+  name         String
+  restaurantId String  @map("restaurant_id")
+  isActive     Boolean @default(true) @map("is_active")
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  menuItems  MenuItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categories")
+}
+
+model MenuItem {
+  id           String  @id @default(uuid())
+  name         String
+  description  String?
+  price        Decimal @db.Decimal(10, 2)
+  imageUrl     String? @map("image_url")
+  categoryId   String  @map("category_id")
+  restaurantId String  @map("restaurant_id")
+  isActive     Boolean @default(true) @map("is_active")
+
+  category    Category             @relation(fields: [categoryId], references: [id])
+  restaurant  Restaurant           @relation(fields: [restaurantId], references: [id])
+  orderItems  OrderItem[]
+  ingredients MenuItemIngredient[]
+  extras      MenuItemExtra[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("menu_items")
+}
+
+model MenuItemIngredient {
+  id           String  @id @default(uuid())
+  menuItemId   String  @map("menu_item_id")
+  inventoryId  String  @map("inventory_id")
+  quantity     Decimal @db.Decimal(10, 2) // Default quantity of this ingredient
+  restaurantId String  @map("restaurant_id")
+
+  menuItem   MenuItem   @relation(fields: [menuItemId], references: [id])
+  inventory  Inventory  @relation(fields: [inventoryId], references: [id])
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@map("menu_item_ingredients")
+}
+
+model MenuItemExtra {
+  id           String  @id @default(uuid())
+  name         String
+  price        Decimal @db.Decimal(10, 2)
+  menuItemId   String  @map("menu_item_id")
+  inventoryId  String? @map("inventory_id") // Optional link to inventory
+  quantity     Decimal @default(1) @db.Decimal(10, 2) // Stock to deduct if chosen
+  restaurantId String  @map("restaurant_id")
+
+  menuItem        MenuItem         @relation(fields: [menuItemId], references: [id])
+  inventory       Inventory?       @relation(fields: [inventoryId], references: [id])
+  restaurant      Restaurant       @relation(fields: [restaurantId], references: [id])
+  orderItemExtras OrderItemExtra[]
+
+  @@map("menu_item_extras")
+}
+
+model Table {
+  id           String      @id @default(uuid())
+  number       Int
+  label        String?
+  status       TableStatus @default(FREE)
+  qrData       String      @unique @map("qr_data")
+  restaurantId String      @map("restaurant_id")
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  orders     Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tables")
+}
+
+model Order {
+  id           String      @id @default(uuid())
+  tableId      String?     @map("table_id")
+  restaurantId String      @map("restaurant_id")
+  status       OrderStatus @default(PENDING)
+  totalAmount  Decimal     @default(0) @map("total_amount") @db.Decimal(10, 2)
+  notes        String?
+
+  table      Table?      @relation(fields: [tableId], references: [id])
+  restaurant Restaurant  @relation(fields: [restaurantId], references: [id])
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String  @id @default(uuid())
+  orderId    String  @map("order_id")
+  menuItemId String  @map("menu_item_id")
+  quantity   Int
+  unitPrice  Decimal @map("unit_price") @db.Decimal(10, 2) // Snapshot of MenuItem price
+  notes      String?
+
+  order    Order    @relation(fields: [orderId], references: [id])
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+
+  extras OrderItemExtra[]
+
+  @@map("order_items")
+}
+
+model OrderItemExtra {
+  id          String  @id @default(uuid())
+  orderItemId String  @map("order_item_id")
+  extraId     String  @map("extra_id")
+  price       Decimal @db.Decimal(10, 2) // Snapshot of Extra price at order time
+
+  orderItem OrderItem     @relation(fields: [orderItemId], references: [id])
+  extra     MenuItemExtra @relation(fields: [extraId], references: [id])
+
+  @@map("order_item_extras")
+}
+
+model Inventory {
+  id           String  @id @default(uuid())
+  name         String
+  stock        Decimal @db.Decimal(10, 2)
+  unit         String // e.g., "kg", "units", "liters"
+  restaurantId String  @map("restaurant_id")
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+
+  ingredientRelations MenuItemIngredient[]
+  extraRelations      MenuItemExtra[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("inventories")
+}
