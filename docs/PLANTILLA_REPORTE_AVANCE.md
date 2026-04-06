@@ -1,6 +1,6 @@
 # Plantilla de Reporte de Avance - PROJ-menu-bites
 
-Este documento debe ser utilizado por el equipo de desarrollo para reportar el progreso semanal o por hitos. La información proporcionada aquí será procesada por Zenith para actualizar la base de datos de Notion y la documentación oficial del proyecto. 
+Este documento debe ser utilizado por el equipo de desarrollo para reportar el progreso semanal o por hitos. La información proporcionada aquí será procesada para actualizar la base de datos de Notion y la documentación oficial del proyecto.
 
 > [!IMPORTANT]
 > **Política de Cero Iconografía:** Al completar este documento, queda estrictamente prohibido el uso de emojis o caracteres gráficos no textuales. Mantenga un tono técnico, formal y en voz pasiva o infinitos directos.

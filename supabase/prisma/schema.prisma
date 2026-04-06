@@ -69,10 +69,10 @@ model User {
   role         Role    @default(CLIENTE)
   restaurantId String? @map("restaurant_id")
 
-  restaurant Restaurant? @relation(fields: [restaurantId], references: [id])
-
-  createdAt DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
+  pushToken    String?     @map("push_token")
+  createdAt    DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime    @updatedAt @db.Timestamptz(3)
 
   @@index([restaurantId])
   @@map("users")
@@ -161,6 +161,8 @@ model Table {
   status       TableStatus @default(FREE)
   qrData       String      @unique @map("qr_data")
   restaurantId String      @map("restaurant_id")
+  helpRequested Boolean    @default(false) @map("help_requested")
+  billRequested Boolean    @default(false) @map("bill_requested")
 
   restaurant Restaurant @relation(fields: [restaurantId], references: [id])
   orders     Order[]
