@@ -17,6 +17,7 @@ pids
 # Dependency directories
 node_modules/
 jspm_packages/
+**/node_modules/
 
 # IDE files
 .vscode/
@@ -30,15 +31,17 @@ jspm_packages/
 .env.development.local
 .env.test.local
 .env.production.local
+**/supabase/.env
 
-# Project specific
-frontend/.next/
-frontend/out/
-App Mobile/.expo/
-App Mobile/dist/
-App Mobile/web-build/
-App Mobile/ios/
-App Mobile/android/
+# Build Artifacts
+**/.next/
+**/.turbo/
+**/out/
+**/dist/
+**/.expo/
+**/web-build/
+**/ios/
+**/android/
 
-#others
+# others
 Entrega 1.pdf
