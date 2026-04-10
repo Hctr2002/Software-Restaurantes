@@ -11,9 +11,15 @@ El gerente recibirá un correo de invitación tras el alta por el Super Admin.
 Para mantener la seguridad perimetral, el sistema implementa mensajes estandarizados:
 - **Error de Credenciales**: *"Credenciales inválidas, reintente en 5 minutos"* (Previene ataques de fuerza bruta).
 - **Acceso Denegado**: *"No tiene permisos para acceder a esta área. Contacte a su administrador."*
-- **Suscripción Expirada**: *"Su suscripción ha vencido. Por favor, regularice su estado de pago."*
 
-## 3. Onboarding de Personal
+## 3. Recuperación de Credenciales
+El sistema dispone de un flujo de autoservicio para la recuperación de acceso:
+1. En la **Interfaz de Login Centralizada**, seleccionar *"¿Olvidaste tus credenciales?"*.
+2. Ingresar el correo corporativo (Base Domain).
+3. Seguir el enlace de un solo uso enviado al correo (Expiración: 1 hora).
+4. Establecer la nueva contraseña cumpliendo con los estándares de seguridad enterprise.
+
+## 4. Onboarding de Personal
 El gerente es responsable de:
 1. Crear los perfiles de **Garzón**, **Cocina** y **Admin**.
 2. Configurar el **Plano de Mesas** (Generará los códigos QR automáticos).
