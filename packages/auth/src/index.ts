@@ -1,9 +1,11 @@
-import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// createBrowserClient from @supabase/ssr automatically manages session cookies
+// so the Next.js middleware can detect the active session and redirect correctly.
+export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
 
 export const getSession = async () => {
   const { data: { session } } = await supabase.auth.getSession();
@@ -24,6 +26,20 @@ export const updateOrderStatus = async (orderId: string, status: string) => {
     .update({ status })
     .eq("id", orderId)
     .select();
+  return { data, error };
+};
+
+export const resetPasswordForEmail = async (email: string, redirectTo: string) => {
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo,
+  });
+  return { data, error };
+};
+
+export const updateUserPassword = async (password: string) => {
+  const { data, error } = await supabase.auth.updateUser({
+    password,
+  });
   return { data, error };
 };
 

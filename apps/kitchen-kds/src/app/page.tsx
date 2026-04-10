@@ -2,14 +2,31 @@
 
 import React, { useEffect, useRef } from "react";
 import { useAuthStore } from "@menu-bites/store";
-import { useKitchenOrders, updateOrderStatus } from "@menu-bites/auth";
-import { OrderTicket, cn } from "@menu-bites/ui";
+import { useKitchenOrders, updateOrderStatus, signOut } from "@menu-bites/auth";
+import { OrderTicket, cn, Button } from "@menu-bites/ui";
 import { ChefHat, Bell, Settings, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function KitchenKDSPage() {
-  const { user, logout } = useAuthStore();
+  const { user, logout: clearAuth } = useAuthStore();
   const { orders, loading } = useKitchenOrders(user?.restaurantId);
   const prevOrdersCount = useRef(0);
+  const [isSigningOut, setIsSigningOut] = React.useState(false);
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    const loginUrl = process.env.NEXT_PUBLIC_AUTH_URL || "http://localhost:3000";
+
+    setIsSigningOut(true);
+    try {
+      await signOut();
+    } finally {
+      clearAuth();
+      router.refresh();
+      window.location.href = loginUrl;
+      setIsSigningOut(false);
+    }
+  };
 
   // Sistema de Alerta Sonora
   useEffect(() => {
@@ -60,15 +77,18 @@ export default function KitchenKDSPage() {
              <Stat label="En Fuego" value={preparingOrders.length} color="text-primary" />
              <Stat label="Listos" value={readyOrders.length} color="text-emerald-500" />
           </div>
-          <button className="p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
+          <Button variant="outline" size="icon" className="rounded-xl">
             <Settings className="w-5 h-5 text-muted-foreground" />
-          </button>
-          <button 
-            onClick={logout}
-            className="p-3 bg-destructive/10 text-destructive rounded-xl hover:bg-destructive/20 transition-colors"
+          </Button>
+          <Button 
+            variant="destructive"
+            size="icon"
+            onClick={handleSignOut}
+            disabled={isSigningOut}
+            className="rounded-xl"
           >
             <LogOut className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
       </header>
 
