@@ -2,15 +2,30 @@
 
 import React from "react";
 import { useAuthStore } from "@menu-bites/store";
-import { useTables } from "@menu-bites/auth";
-import { TableGrid, TableCard } from "@menu-bites/ui";
+import { useTables, signOut } from "@menu-bites/auth";
+import { TableGrid, TableCard, Button } from "@menu-bites/ui";
 import { useRouter } from "next/navigation";
 import { LayoutDashboard, LogOut, User } from "lucide-react";
 
 export default function WaiterDashboard() {
-  const { user, logout } = useAuthStore();
+  const { user, logout: clearAuth } = useAuthStore();
   const { tables, loading } = useTables(user?.restaurantId);
+  const [isSigningOut, setIsSigningOut] = React.useState(false);
   const router = useRouter();
+
+  const handleSignOut = async () => {
+    const loginUrl = process.env.NEXT_PUBLIC_AUTH_URL || "http://localhost:3000";
+
+    setIsSigningOut(true);
+    try {
+      await signOut();
+    } finally {
+      clearAuth();
+      router.refresh();
+      window.location.href = loginUrl;
+      setIsSigningOut(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -41,12 +56,15 @@ export default function WaiterDashboard() {
             <p className="text-xs font-bold">{user?.email}</p>
             <p className="text-[10px] text-primary uppercase font-black">{user?.role}</p>
           </div>
-          <button 
-            onClick={logout}
-            className="p-2.5 rounded-xl bg-white/5 hover:bg-destructive/20 hover:text-destructive transition-all"
+          <Button 
+            variant="outline"
+            size="icon"
+            onClick={handleSignOut}
+            disabled={isSigningOut}
+            className="rounded-xl bg-white/5 border-white/5 hover:bg-destructive/20 hover:text-destructive hover:border-destructive/20 transition-all"
           >
             <LogOut className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
       </header>
 

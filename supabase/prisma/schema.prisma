@@ -46,7 +46,7 @@ model Restaurant {
   slug      String             @unique
   status    SubscriptionStatus @default(ACTIVE)
   createdAt DateTime           @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime           @updatedAt @db.Timestamptz(3)
+  updatedAt DateTime           @default(now()) @updatedAt @db.Timestamptz(3)
 
   // Relationships
   users               User[]
@@ -72,7 +72,7 @@ model User {
   restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
   pushToken    String?     @map("push_token")
   createdAt    DateTime    @default(now()) @db.Timestamptz(3)
-  updatedAt    DateTime    @updatedAt @db.Timestamptz(3)
+  updatedAt    DateTime    @default(now()) @updatedAt @db.Timestamptz(3)
 
   @@index([restaurantId])
   @@map("users")
@@ -88,7 +88,7 @@ model Category {
   menuItems  MenuItem[]
 
   createdAt DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 
   @@unique([id, restaurantId])
   @@index([restaurantId])
@@ -112,7 +112,7 @@ model MenuItem {
   extras      MenuItemExtra[]
 
   createdAt DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 
   @@unique([id, restaurantId])
   @@index([restaurantId])
@@ -168,7 +168,7 @@ model Table {
   orders     Order[]
 
   createdAt DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 
   @@unique([id, restaurantId])
   @@unique([restaurantId, number])
@@ -189,7 +189,7 @@ model Order {
   orderItems OrderItem[]
 
   createdAt DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 
   @@unique([id, restaurantId])
   @@index([restaurantId])
@@ -244,7 +244,7 @@ model Inventory {
   extraRelations      MenuItemExtra[]
 
   createdAt DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 
   @@index([restaurantId])
   @@map("inventories")
