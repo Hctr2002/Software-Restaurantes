@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from("restaurants")
-    .insert([{ name, slug, status }])
+    .insert([{ id: crypto.randomUUID(), name, slug, status }])
     .select("id, name, slug, status, createdAt")
     .single();
 
