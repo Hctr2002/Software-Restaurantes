@@ -33,7 +33,7 @@ export default function LoginPage() {
       if (error) {
         console.log("LOGIN_DEBUG: Error de Supabase:", error);
         if (error.status === 400) {
-          setError("Credenciales inválidas. Verifica tu correo (@menubites.cl) y contraseña.");
+          setError("Credenciales inválidas, intente nuevamente");
         } else {
           setError(error.message);
         }
