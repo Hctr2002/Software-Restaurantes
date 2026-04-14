@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú Digital | MENU BITES</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --navy: oklch(21.4% 0.05 261.27);
+            --sage: oklch(76.8% 0.1 161.27);
+            --sand: oklch(98.48% 0.01 76.24);
+        }
+ 
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        body { font-family: 'Outfit', sans-serif; }
+ 
+        .tray-surface {
+            background: var(--navy);
+            border-top: 1px solid white/10;
+            box-shadow: 0 -20px 40px oklch(0% 0 0 / 0.3);
+            backdrop-filter: blur(20px);
+        }
+ 
+        .menu-item-card {
+            background: white;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: var(--shadow-organic);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .menu-item-card:active { transform: scale(0.94); }
+ 
+        .nav-active {
+            color: var(--navy);
+        }
+        .nav-active::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            width: 8px;
+            height: 8px;
+            background: var(--sage);
+            border-radius: 50%;
+        }
+ 
+        .timeline-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid white;
+            background: oklch(0% 0 0 / 0.05);
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 0 0 4px oklch(0% 0 0 / 0.02);
+        }
+        .timeline-dot.active {
+            background: var(--sage);
+            box-shadow: 0 0 20px var(--sage), 0 0 0 8px oklch(76.8% 0.1 161.27 / 0.1);
+        }
+        .timeline-line {
+            position: absolute;
+            left: 6px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: oklch(0% 0 0 / 0.05);
+        }
+        .timeline-line.active { background: var(--sage); }
+ 
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+    </style>
+</head>
+<body class="bg-sand text-navy pb-32">
+
+    <!-- Header Section -->
+    <header class="sticky top-0 z-50 bg-sand/80 backdrop-blur-3xl px-8 py-6 flex justify-between items-center border-b border-navy/5">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-navy rounded-[18px] flex items-center justify-center text-white font-black text-xs shadow-2xl">M8</div>
+            <div>
+                <h1 class="text-2xl font-black text-navy leading-none tracking-tighter">MENU.</h1>
+                <p class="text-[8px] uppercase tracking-[0.4em] font-black text-navy/30">MENU BITES FINE DINING</p>
+                <h1 class="text-4xl font-black text-navy mt-1 tracking-tighter">Explora el Mundo<span class="text-sage">.</span></h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="switchView('order')" class="relative p-3 bg-white rounded-2xl shadow-sm">
+                <i data-lucide="concierge-bell" class="w-6 h-6 text-navy/40"></i>
+                <span id="tray-badge" class="absolute -top-1 -right-1 bg-sage text-navy text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-4 border-sand hidden">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Content Area -->
+    <main class="max-w-md mx-auto p-5">
+        
+        <!-- Vista: Menú -->
+        <section id="view-menu" class="space-y-10">
+            <div class="relative rounded-[40px] overflow-hidden aspect-[16/11] shadow-2xl">
+                <img src="file:///home/alejandro/.gemini/antigravity/brain/672ff27d-0b3b-40e9-a94b-28257b8e0ac4/flores_rellenas_stuffed_flowers_1774484561066.png" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-navy/90 via-navy/20 to-transparent p-10 flex flex-col justify-end">
+                    <span class="text-sage text-[10px] uppercase font-black tracking-[0.4em] mb-3">Recomendación</span>
+                    <h2 class="text-4xl font-black text-white italic tracking-tighter">Flores Rellenas Gourmet</h2>
+                    <p class="text-white/60 text-xs mt-2 max-w-[200px]">Flores de calabacín rellenas de ricotta y anchoas.</p>
+                </div>
+            </div>
+
+            <!-- Categorías -->
+            <div class="flex gap-3 overflow-x-auto no-scrollbar py-2">
+                <button class="bg-navy text-white px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest flex-shrink-0">Todo</button>
+                <button class="bg-white text-navy/40 border border-navy/5 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest flex-shrink-0">Entradas</button>
+                <button class="bg-white text-navy/40 border border-navy/5 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest flex-shrink-0">Platos Fuertes</button>
+                <button class="bg-white text-navy/40 border border-navy/5 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest flex-shrink-0">Global Fusion</button>
+            </div>
+
+            <!-- Lista de Platos -->
+            <div class="brand-container">
+                <i data-lucide="utensils" class="brand-symbol" style="width: 20px; height: 20px; color: oklch(21.41% 0.07 261.27);"></i>
+                <span class="brand-name" style="color: oklch(21.41% 0.07 261.27); font-size: 14px;">MENU BITES</span>
+            </div>
+            <div class="space-y-6">
+                <!-- Item 1: Láminas de Res -->
+                <div class="menu-item-card flex p-5 gap-6">
+                    <img src="https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?auto=format&fit=crop&w=300&q=80" class="w-28 h-28 rounded-[24px] object-cover shadow-lg">
+                    <div class="flex-1 flex flex-col justify-between py-1">
+                        <div>
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-black text-base text-navy tracking-tight">Láminas de Res de Res Premium</h3>
+                                <span class="text-navy font-black text-sm">$14.900</span>
+                            </div>
+                            <p class="text-[10px] text-stone-400 mt-2 font-medium leading-relaxed">Laminas de res premium, alcaparras, parmesano y rúcula fresca.</p>
+                        </div>
+                        <button onclick="addToTray('Láminas de Res de Res Premium', 14900)" class="w-fit flex items-center gap-2 text-sage text-[9px] font-black uppercase tracking-[0.2em] hover:opacity-70 transition-opacity">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Añadir
+                        </button>
+                    </div>
+                </div>
+ 
+                <!-- Item 2: Tagliatelle -->
+                <div class="menu-item-card flex p-5 gap-6">
+                    <img src="file:///home/alejandro/.gemini/antigravity/brain/672ff27d-0b3b-40e9-a94b-28257b8e0ac4/pasta_trufa_dish_1774484543822.png" class="w-28 h-28 rounded-[24px] object-cover shadow-lg">
+                    <div class="flex-1 flex flex-col justify-between py-1">
+                        <div>
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-black text-base text-navy tracking-tight">Pasta con Trufa Negra</h3>
+                                <span class="text-navy font-black text-sm">$16.500</span>
+                            </div>
+                            <p class="text-[10px] text-stone-400 mt-2 font-medium leading-relaxed">Trufa negra fresca, mantequilla de montaña y parmesano 24 meses.</p>
+                        </div>
+                        <button onclick="addToTray('Pasta con Trufa Negra', 16500)" class="w-fit flex items-center gap-2 text-sage text-[9px] font-black uppercase tracking-[0.2em] hover:opacity-70 transition-opacity">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Añadir
+                        </button>
+                    </div>
+                </div>
+ 
+                <!-- Item 3: Corte de Res -->
+                <div class="menu-item-card flex p-5 gap-6">
+                    <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&q=80" class="w-28 h-28 rounded-[24px] object-cover shadow-lg">
+                    <div class="flex-1 flex flex-col justify-between py-1">
+                        <div>
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-lg font-black text-navy tracking-tight">Angus Ribeye Steak</h3>
+                            </div>
+                            <p class="text-[10px] text-stone-400 mt-2 font-medium leading-relaxed">Corte premium con mantequilla de hierbas y papas rústicas.</p>
+                            <p class="text-lg font-black text-navy mt-4">$18.900</p>
+                        </div>
+                        <button onclick="addToTray('Corte Premium c/ Hierbas', 22900)" class="w-fit flex items-center gap-2 text-sage text-[9px] font-black uppercase tracking-[0.2em] hover:opacity-70 transition-opacity">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Añadir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Vista: Bandeja / Estado -->
+        <section id="view-order" class="hidden space-y-6 animate-slide-up">
+            <div class="flex justify-between items-end">
+                <h2 class="text-3xl serif italic text-stone-900 leading-none">Mi Bandeja</h2>
+                <span class="text-[10px] uppercase font-black text-stone-400 tracking-widest">Estado Mesa: M8</span>
+            </div>
+
+            <!-- Pedido en Preparación -->
+            <div id="active-items" class="space-y-4">
+                <!-- Se poblará dinámicamente o mostrará mockups -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-stone-50 space-y-6">
+                    <div class="flex justify-between items-center bg-orange-50/50 p-4 rounded-2xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
+                            <span class="text-[10px] font-black text-orange-900 uppercase tracking-widest">En preparación</span>
+                        </div>
+                        <span class="text-[10px] font-bold text-orange-700/60 uppercase">Mesa 8 · 20:15</span>
+                    </div>
+
+                    <!-- Timeline -->
+                    <div class="relative space-y-8 pl-4">
+                        <div class="timeline-line active h-[60%]"></div>
+                        
+                        <div class="flex items-center gap-4 relative z-10">
+                            <div class="timeline-dot active"></div>
+                            <div>
+                                <p class="text-[11px] font-black text-stone-800 uppercase leading-none">Orden Confirmada</p>
+                                <p class="text-[9px] text-stone-400 mt-1 uppercase italic">El chef ha recibido tu pedido</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4 relative z-10">
+                            <div class="timeline-dot active"></div>
+                            <div class="flex-1">
+                                <p class="text-[11px] font-black text-stone-800 uppercase leading-none">En Cocina</p>
+                                <div class="flex justify-between items-center mt-2 bg-stone-50 p-3 rounded-xl border border-stone-100">
+                                    <span class="text-[10px] font-medium text-stone-500 italic">Corte Premium c/ Hierbas (x1)</span>
+                                    <span class="text-[8px] bg-stone-200 text-stone-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter">Preparando</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4 relative z-10 opacity-40">
+                            <div class="timeline-dot"></div>
+                            <div>
+                                <p class="text-[11px] font-black text-stone-800 uppercase leading-none">Listo para servir</p>
+                                <p class="text-[9px] text-stone-400 mt-1 uppercase italic">En camino a tu mesa</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-stone-100 flex justify-between items-center">
+                        <div>
+                            <p class="text-[8px] uppercase font-black text-stone-400 tracking-widest">Total Mesa</p>
+                            <p class="text-xl font-black text-accent leading-tight">$22.900</p>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <button onclick="switchView('menu')" class="text-[9px] font-black uppercase text-stone-900 border-b border-stone-900 pb-0.5">Añadir más</button>
+                            <button onclick="requestBill()" class="bg-accent text-white px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-accent/20">Solicitar Cuenta</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- BANDEJA DE PEDIDOS - Overlay Flotante -->
+    <div id="tray-overlay" class="fixed bottom-28 left-6 right-6 tray-surface text-white p-6 rounded-[40px] flex justify-between items-center hidden z-50 animate-slide-up">
+        <div class="flex items-center gap-6">
+            <div class="w-16 h-16 bg-white/10 rounded-[24px] flex items-center justify-center border border-white/5 relative">
+                <i data-lucide="utensils" class="w-8 h-8 text-sage"></i>
+                <div id="tray-count-indicator" class="absolute -top-1 -right-1 bg-sage text-navy text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center border-4 border-navy">1</div>
+            </div>
+            <div>
+                <p class="text-[10px] font-black uppercase tracking-[0.4em] text-sage">Bandeja</p>
+                <p id="tray-total-text" class="text-2xl font-black leading-none mt-1">$0</p>
+            </div>
+        </div>
+        <button onclick="confirmTray()" class="bg-sage text-navy px-10 py-4 rounded-[24px] text-xs font-black uppercase tracking-widest shadow-2xl shadow-black/40 hover:scale-105 active:scale-95 transition-all">
+            Pedir
+        </button>
+    </div>
+
+    <!-- Navegación Móvil Estilo Premium -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-sand/95 backdrop-blur-3xl border-t border-navy/5 px-10 py-10 flex justify-around items-center z-40 rounded-t-[40px]">
+        <button onclick="switchView('menu', this)" id="nav-btn-menu" class="relative nav-link nav-active flex flex-col items-center">
+            <i data-lucide="compass" class="w-7 h-7 mb-2"></i>
+            <span class="text-[9px] uppercase font-black tracking-[0.2em]">Explorar</span>
+        </button>
+        <button onclick="switchView('order', this)" id="nav-btn-order" class="relative nav-link flex flex-col items-center text-navy/20">
+            <i data-lucide="bell" class="w-7 h-7 mb-2"></i>
+            <span class="text-[9px] uppercase font-black tracking-[0.2em]">Mi Mesa</span>
+        </button>
+        <button onclick="callWaiter()" class="relative nav-link flex flex-col items-center text-navy/20">
+            <i data-lucide="hand" class="w-7 h-7 mb-2"></i>
+            <span class="text-[9px] uppercase font-black tracking-[0.2em]">Ayuda</span>
+        </button>
+    </nav>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-24 left-1/2 -translate-x-1/2 bg-stone-900/90 backdrop-blur text-white px-6 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest border border-white/10 opacity-0 transition-opacity pointer-events-none z-[60]">
+        Añadido a la bandeja
+    </div>
+
+    <script>
+        lucide.createIcons();
+        let tray = [];
+        let activeOrder = null;
+
+        function addToTray(name, price) {
+            tray.push({ name, price });
+            updateTrayUI();
+            showToast(`"${name}" en bandeja`);
+            
+            const overlay = document.getElementById('tray-overlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        }
+
+        function updateTrayUI() {
+            const count = tray.length;
+            const total = tray.reduce((sum, item) => sum + item.price, 0);
+            
+            document.getElementById('tray-badge').innerText = count;
+            document.getElementById('tray-badge').classList.toggle('hidden', count === 0);
+            document.getElementById('tray-count-indicator').innerText = count;
+            document.getElementById('tray-total-text').innerText = `$${total.toLocaleString('es-CL')}`;
+        }
+
+        function confirmTray() {
+            if (tray.length === 0) return;
+            
+            activeOrder = {
+                items: [...tray],
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                status: 'En preparación'
+            };
+            
+            showToast("Bandeja enviada a cocina");
+            tray = [];
+            updateTrayUI();
+            
+            document.getElementById('tray-overlay').classList.add('hidden');
+            switchView('order');
+        }
+
+        function switchView(viewId, el) {
+            document.getElementById('view-menu').classList.add('hidden');
+            document.getElementById('view-order').classList.add('hidden');
+            document.getElementById('view-' + viewId).classList.remove('hidden');
+            
+            // Actualizar Navegación
+            document.querySelectorAll('.nav-link').forEach(l => {
+                l.classList.remove('nav-active', 'text-stone-900');
+                l.classList.add('text-stone-400');
+            });
+
+            const targetBtn = el || (viewId === 'menu' ? document.getElementById('nav-btn-menu') : document.getElementById('nav-btn-order'));
+            targetBtn.classList.add('nav-active', 'text-stone-900');
+            targetBtn.classList.remove('text-stone-400');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.replace('opacity-0', 'opacity-100');
+            setTimeout(() => toast.classList.replace('opacity-100', 'opacity-0'), 2000);
+        }
+
+        function callWaiter() {
+            if(confirm('¿Desea llamar al garzón para asistencia?')) {
+                showToast('Solicitud enviada');
+            }
+        }
+
+        function requestBill() {
+            if(confirm('¿Confirmar solicitud de cuenta? Finalizará su sesión en la mesa.')) {
+                showToast('Cuenta solicitada...');
+            }
+        }
+    </script>
+</body>
+</html>

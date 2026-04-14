@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caja | MENU BITES</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        .receipt-paper {
+            background: #fff;
+            background-image: radial-gradient(oklch(0% 0 0 / 0.05) 1px, transparent 1px);
+            background-size: 24px 24px;
+            box-shadow: var(--shadow-organic);
+            position: relative;
+            border-radius: 40px;
+        }
+        .receipt-paper::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 12px;
+            background: linear-gradient(135deg, transparent 6px, #fff 6px), linear-gradient(-135deg, transparent 6px, #fff 6px);
+            background-size: 12px 12px;
+            transform: translateY(-11px);
+        }
+        .table-row-active {
+            border-left: 8px solid var(--navy);
+            background: oklch(50.48% 0.1 261.27 / 0.05);
+        }
+        .animate-pulse-soft {
+            animation: pulse-soft 2s infinite;
+        }
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body class="bg-sand overflow-hidden">
+
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="overlay-login">
+        <div class="login-card animate-fade">
+            <h1 class="text-navy font-black mb-8" style="font-size: 32px;">Acceso de Caja</h1>
+            <p class="mb-8 font-primary" style="font-size: 10px; opacity: 0.7; text-transform: uppercase; letter-spacing: 2px;">Acceso Terminal de Cobro</p>
+            <input type="text" class="input-organic" placeholder="Operador de Caja">
+            <input type="password" class="input-organic" placeholder="PIN de Seguridad">
+            <button onclick="document.getElementById('login-overlay').classList.add('hidden')" class="btn-primary w-full">Iniciar Jornada</button>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="p-12 text-center border-b border-white/10">
+            <h1 class="text-2xl font-black text-white italic tracking-tighter">MENUBITES. <br> <span class="not-italic uppercase text-[8px] tracking-[0.4em] text-sage">Management</span></h1>
+        </div>
+        <nav class="flex-1 mt-6">
+            <a href="javascript:void(0)" onclick="switchView('dashboard')" id="menu-dashboard" class="sidebar-item active">
+                <i data-lucide="receipt"></i> Monitor de Cuentas
+            </a>
+            <a href="javascript:void(0)" onclick="switchView('arqueo')" id="menu-arqueo" class="sidebar-item">
+                <i data-lucide="calculator"></i> Arqueo Diario
+            </a>
+            <a href="javascript:void(0)" onclick="switchView('facturacion')" id="menu-facturacion" class="sidebar-item">
+                <i data-lucide="file-text"></i> Facturación
+            </a>
+            <a href="javascript:void(0)" onclick="switchView('configuracion')" id="menu-configuracion" class="sidebar-item">
+                <i data-lucide="settings"></i> Configuración
+            </a>
+        </nav>
+        <div class="p-8 border-t border-white/5 italic text-[10px] text-white/30 text-center">
+            Cajero: Andrés R. · Terminal #01
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content flex flex-col h-screen">
+        <!-- Dashboard View -->
+        <div id="view-dashboard" class="view-content active flex flex-col h-full">
+            <!-- Live Notifications Bar -->
+            <div id="alert-zone" class="mb-8 empty:hidden space-y-2">
+                <!-- Dynamic alerts will appear here -->
+            </div>
+
+            <header class="flex justify-between items-end mb-12 border-b border-navy/10 pb-6">
+                <div>
+                    <h2 class="text-6xl font-black text-navy tracking-tighter">Caja Central</h2>
+                    <p class="text-sage font-bold uppercase tracking-widest text-[9px] mt-2">Control de Flujo · <span class="text-navy/60">Terminal Activo</span></p>
+                <div class="brand-container">
+                <i data-lucide="utensils" class="brand-symbol" style="width: 24px; height: 24px;"></i>
+                <span class="brand-name">MENU BITES</span>
+            </div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="card-organic !p-6">
+                        <p class="text-[8px] uppercase font-black text-stone-400">Total Turno</p>
+                        <p class="text-2xl font-black text-navy" id="total-cash">$1.240.500</p>
+                    </div>
+                    <div class="card-organic !p-6 border-l-8 border-sage">
+                        <p class="text-[8px] uppercase font-black text-stone-400">Mesas Pendientes</p>
+                        <p class="text-2xl font-black text-navy" id="pending-count">04</p>
+                    </div>
+                </div>
+            </header>
+
+            <div class="flex-1 grid grid-cols-1 xl:grid-cols-3 gap-12 overflow-hidden pb-12">
+                <!-- Table List Monitor -->
+                <div class="xl:col-span-2 flex flex-col overflow-hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-4xl font-black text-navy tracking-tighter">Monitor de Mesas Ocupadas</h3>
+                        <div class="flex gap-2">
+                            <button class="px-6 py-3 bg-white border border-navy/5 rounded-2xl text-[8px] font-black uppercase tracking-widest hover:bg-navy hover:text-white transition-all">Refrescar</button>
+                        </div>
+                    </div>
+ 
+                    <div class="card-organic !p-0 overflow-y-auto pr-2">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-stone-50 text-[10px] uppercase tracking-widest text-stone-400 border-b border-stone-100">
+                                    <th class="p-6 font-bold">Tavola</th>
+                                    <th class="p-6 font-bold">Estado</th>
+                                    <th class="p-6 font-bold">Tiempo</th>
+                                    <th class="p-6 font-bold">Consumo</th>
+                                    <th class="p-6 text-right font-bold">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cashier-table-list">
+                                <tr class="border-b border-navy/5 hover:bg-navy/5 table-row-active animate-pulse-soft">
+                                    <td class="p-6 font-black text-4xl text-navy">02</td>
+                                    <td class="p-6">
+                                        <span class="px-4 py-2 bg-red-500 text-white text-[9px] uppercase font-black rounded-full shadow-lg">Pide Cuenta</span>
+                                    </td>
+                                    <td class="p-6 text-xs text-stone-400 font-bold uppercase">1h 12m</td>
+                                    <td class="p-6 text-2xl font-black text-navy">$45.600</td>
+                                    <td class="p-6 text-right">
+                                        <button onclick="previewInvoice(2, 45600)" class="btn-primary !py-3 !px-8 !text-[8px] tracking-[0.3em]">COBRAR</button>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-stone-50 hover:bg-stone-50">
+                                    <td class="p-6 font-black text-2xl serif italic">04</td>
+                                    <td class="p-6">
+                                        <div class="flex justify-between">
+                                            <span>2x Wagyu Burger Special</span>
+                                            <span>$32.800</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>1x Ribeye Steak Premium</span>
+                                            <span>$18.900</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-6 text-xs text-stone-500 font-mono">45m</td>
+                                    <td class="p-6 serif font-bold text-xl">$32.400</td>
+                                    <td class="p-6 text-right">
+                                        <button onclick="previewInvoice(4, 32400)" class="text-[9px] font-bold text-stone-400 hover:text-accent uppercase">Ver Detalle</button>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-stone-50 hover:bg-stone-50">
+                                    <td class="p-6 font-black text-2xl serif italic">08</td>
+                                    <td class="p-6">
+                                        <span class="px-3 py-1 bg-accent text-white text-[9px] uppercase font-bold">Consumiendo</span>
+                                    </td>
+                                    <td class="p-6 text-xs text-stone-500 font-mono">2h 05m</td>
+                                    <td class="p-6 serif font-bold text-xl">$89.100</td>
+                                    <td class="p-6 text-right">
+                                        <button onclick="previewInvoice(8, 89100)" class="text-[9px] font-bold text-stone-400 hover:text-accent uppercase">Ver Detalle</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Receipt Section -->
+                <div class="flex flex-col h-full overflow-hidden">
+                    <div id="receipt-container" class="receipt-paper flex-1 flex flex-col p-10 border border-stone-200">
+                            <div id="receipt-empty" class="flex-1 flex flex-col items-center justify-center text-center p-12 space-y-6">
+                                <div class="w-32 h-32 bg-navy/5 rounded-[40px] flex items-center justify-center border-2 border-dashed border-navy/10">
+                                    <i data-lucide="credit-card" class="text-navy w-12 h-12 opacity-20"></i>
+                                </div>
+                                <h4 class="text-xl font-black text-stone-300 italic">Seleccione una mesa...</h4>
+                            </div>
+ 
+                            <div id="receipt-content" class="hidden animate-fade h-full flex flex-col">
+                                <div class="text-center mb-12">
+                                    <h4 class="text-3xl font-black text-navy tracking-tighter uppercase">MENU BITES GLOBAL</h4>
+                                    <p class="text-[8px] uppercase tracking-[0.4em] font-black text-stone-300">R.U.T: 76.543.210-K</p>
+                                </div>
+                                <div id="receipt-items" class="flex-1 overflow-y-auto space-y-4 mb-8">
+                                    <!-- Dynamic Receipt Items -->
+                                </div>
+                                <div class="border-t-2 border-navy pt-8">
+                                    <div class="flex justify-between items-end">
+                                        <span class="text-[10px] font-black uppercase text-sage">Total</span>
+                                        <span id="r-total" class="text-5xl font-black text-navy">$0</span>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4 mt-8">
+                                    <button onclick="processPayment('Efectivo')" class="btn-primary !bg-stone-100 !text-navy hover:!bg-navy hover:!text-white !py-6 text-[9px]">EFECTIVO</button>
+                                    <button onclick="processPayment('Tarjeta')" class="btn-primary !py-6 text-[9px]">TARJETA</button>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Arqueo (Cash Up) View -->
+        <div id="view-arqueo" class="view-content hidden flex flex-col h-full animate-fade">
+            <header class="mb-12 border-b-2 border-accent/20 pb-6">
+                <h2 class="text-6xl italic text-stone-700 uppercase tracking-tighter">Arqueo Diario</h2>
+                <p class="text-accent font-bold uppercase tracking-widest text-[9px] mt-2">Cierre de Caja · <span class="text-stone-400">Terminal #01</span></p>
+            </header>
+            <div class="grid grid-cols-2 gap-12">
+                <div class="bg-white p-12 shadow-soft border border-clay-dark/20">
+                    <h3 class="serif text-3xl italic mb-8">Resumen de Ventas</h3>
+                    <div class="space-y-6">
+                        <div class="flex justify-between border-b pb-4">
+                            <span class="text-stone-400 uppercase text-[10px] font-black">Efectivo</span>
+                            <span class="serif font-bold text-xl">$450.000</span>
+                        </div>
+                        <div class="flex justify-between border-b pb-4">
+                            <span class="text-stone-400 uppercase text-[10px] font-black">Tarjetas</span>
+                            <span class="serif font-bold text-xl">$790.500</span>
+                        </div>
+                        <div class="flex justify-between pt-4">
+                            <span class="text-accent uppercase text-[12px] font-black">Total Esperado</span>
+                            <span class="serif font-black text-3xl">$1.240.500</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-stone-900 p-12 shadow-soft text-white flex flex-col justify-center items-center text-center">
+                    <i data-lucide="lock" class="w-12 h-12 text-accent mb-6"></i>
+                    <h3 class="serif text-3xl italic mb-4">Cierre de Jornada</h3>
+                    <p class="text-[10px] text-stone-400 uppercase tracking-widest leading-loose mb-8">Una vez realizado el arqueo, el terminal quedará bloqueado hasta el siguiente turno.</p>
+                    <button class="btn-accent !bg-accent !px-12 py-4">FINALIZAR TURNO</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Facturación View -->
+        <div id="view-facturacion" class="view-content hidden flex flex-col h-full animate-fade">
+            <header class="mb-12 border-b-2 border-accent/20 pb-6">
+                <h2 class="text-6xl italic text-stone-700 uppercase tracking-tighter">Facturación</h2>
+                <p class="text-accent font-bold uppercase tracking-widest text-[9px] mt-2">Historial de Boletas y Facturas</p>
+            </header>
+            <div class="bg-white shadow-soft rounded-sm border border-clay-dark/30">
+                <div class="p-6 border-b flex justify-between items-center bg-stone-50">
+                    <input type="text" placeholder="Buscar folio o mesa..." class="bg-white border p-3 text-xs w-64 focus:outline-accent">
+                    <button class="btn-accent !py-2 !px-8 !text-[10px]">EXPORTAR L. VENTAS</button>
+                </div>
+                <table class="w-full text-left">
+                    <tr class="text-[10px] uppercase font-black text-stone-400 border-b">
+                        <th class="p-6">Folio</th>
+                        <th class="p-6">Fecha/Hora</th>
+                        <th class="p-6">Mesa</th>
+                        <th class="p-6">Total</th>
+                        <th class="p-6">Documento</th>
+                    </tr>
+                    <tr class="border-b text-xs text-stone-600 hover:bg-stone-50">
+                        <td class="p-6 font-bold">#4520</td>
+                        <td class="p-6">25/03/2026 19:45</td>
+                        <td class="p-6">05</td>
+                        <td class="p-6 font-black text-stone-800">$28.900</td>
+                        <td class="p-6"><span class="text-accent font-bold cursor-pointer">PDF <i data-lucide="download" class="inline w-3 h-3"></i></span></td>
+                    </tr>
+                    <tr class="border-b text-xs text-stone-600 hover:bg-stone-50">
+                        <td class="p-6 font-bold">#4519</td>
+                        <td class="p-6">25/03/2026 19:30</td>
+                        <td class="p-6">12</td>
+                        <td class="p-6 font-black text-stone-800">$115.600</td>
+                        <td class="p-6"><span class="text-accent font-bold cursor-pointer">PDF <i data-lucide="download" class="inline w-3 h-3"></i></span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Configuration View -->
+        <div id="view-configuracion" class="view-content hidden flex flex-col h-full animate-fade">
+             <header class="mb-12 border-b-2 border-accent/20 pb-6">
+                <h2 class="text-6xl italic text-stone-700 uppercase tracking-tighter">Configurazione</h2>
+                <p class="text-accent font-bold uppercase tracking-widest text-[9px] mt-2">Ajustes del Terminal de Venta</p>
+            </header>
+            <div class="max-w-4xl space-y-8">
+                <div class="bg-white p-8 shadow-soft flex items-center justify-between">
+                    <div>
+                        <h4 class="serif text-xl italic mb-1">Impresora Térmica</h4>
+                        <p class="text-[10px] text-stone-400 uppercase">Epson TM-T20II · <span class="text-olive">Conectada</span></p>
+                    </div>
+                    <button class="text-accent font-bold text-[10px] uppercase border border-accent px-6 py-2">Test</button>
+                </div>
+                <div class="bg-white p-8 shadow-soft flex items-center justify-between">
+                    <div>
+                        <h4 class="serif text-xl italic mb-1">Integración Transbank</h4>
+                        <p class="text-[10px] text-stone-400 uppercase">POS Terminal #2293 · <span class="text-olive">Activo</span></p>
+                    </div>
+                    <button class="text-accent font-bold text-[10px] uppercase border border-accent px-6 py-2">Configurar</button>
+                </div>
+                <div class="bg-white p-8 shadow-soft flex items-center justify-between">
+                    <div>
+                        <h4 class="serif text-xl italic mb-1">Monto de Apertura</h4>
+                        <p class="text-[10px] text-stone-400 uppercase">Fondo fijo predeterminado</p>
+                    </div>
+                    <span class="serif font-bold text-xl">$50.000</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Payment Success Overlay -->
+    <div id="payment-success" class="fixed inset-0 bg-stone-900/95 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-12">
+        <div class="bg-white p-16 text-center shadow-2xl max-w-lg w-full relative">
+            <div class="w-32 h-32 bg-olive/10 text-olive rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
+                <i data-lucide="check-circle-2" class="w-16 h-16"></i>
+            </div>
+            <h3 class="serif text-5xl italic mb-4">Pagamento Riuscito</h3>
+            <p class="text-stone-500 uppercase tracking-widest text-[10px] font-bold mb-12">Boleta Electrónica #4521 generada con éxito</p>
+            
+            <div class="flex flex-col gap-4">
+                <button onclick="resetCaja()" class="btn-accent !py-8">NUEVO COBRO</button>
+                <button onclick="location.reload()" class="text-[10px] font-bold text-stone-400 uppercase hover:underline tracking-widest">IMPRIMIR COPIA CABOR</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let currentTable = null;
+        let currentAmount = 0;
+
+        function switchView(viewId) {
+            // Hide all views
+            document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
+            // Remove active from all menu items
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            
+            // Show selected view
+            document.getElementById('view-' + viewId).classList.remove('hidden');
+            // Add active to selected menu item
+            document.getElementById('menu-' + viewId).classList.add('active');
+            
+            lucide.createIcons();
+        }
+
+        function previewInvoice(table, amount) {
+            currentTable = table;
+            currentAmount = amount;
+            
+            document.getElementById('receipt-empty').classList.add('hidden');
+            document.getElementById('receipt-content').classList.remove('hidden');
+            document.getElementById('r-table').innerText = table < 10 ? '0'+table : table;
+            document.getElementById('r-total').innerText = '$' + amount.toLocaleString('es-CL');
+            
+            // Notification integration
+            if(table == 2) {
+                hideNotification(2);
+            }
+        }
+
+        function processPayment(method) {
+            // Simulate API call to terminal
+            const loader = document.createElement('div');
+            loader.className = "fixed inset-0 bg-white/50 backdrop-blur-sm z-[300] flex items-center justify-center";
+            loader.innerHTML = `
+                <div class="text-center">
+                    <div class="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p class="serif italic text-xl">Procesando Pago con ${method}...</p>
+                </div>
+            `;
+            document.body.appendChild(loader);
+
+            setTimeout(() => {
+                loader.remove();
+                document.getElementById('payment-success').classList.remove('hidden');
+            }, 2000);
+        }
+
+        function resetCaja() {
+            document.getElementById('payment-success').classList.add('hidden');
+            document.getElementById('receipt-content').classList.add('hidden');
+            document.getElementById('receipt-empty').classList.remove('hidden');
+        }
+
+        // Real-time Notification Simulation
+        function showNotification(tableId, msg) {
+            const zone = document.getElementById('alert-zone');
+            const alert = document.createElement('div');
+            alert.id = `alert-table-${tableId}`;
+            alert.className = "bg-red-600 text-white p-8 rounded-[40px] shadow-organic flex items-center justify-between animate-fade-in-down border-l-[12px] border-navy";
+            alert.innerHTML = `
+                <div class="flex items-center gap-8">
+                    <div class="animate-pulse bg-white/20 p-4 rounded-3xl"><i data-lucide="bell-ring" class="w-8 h-8"></i></div>
+                    <div>
+                        <p class="font-black text-[10px] tracking-[0.4em] uppercase">¡ALERTA DE CUENTA!</p>
+                        <p class="text-2xl font-black italic opacity-90">${msg}</p>
+                    </div>
+                </div>
+                <button onclick="previewInvoice(${tableId}, 45600)" class="btn-primary !bg-white !text-red-600 !py-4 !px-12 !text-[9px]">GESTIONAR PAGO</button>
+            `;
+            zone.appendChild(alert);
+            lucide.createIcons();
+        }
+
+        function hideNotification(tableId) {
+            const el = document.getElementById(`alert-table-${tableId}`);
+            if(el) el.remove();
+        }
+
+        // Simulate incoming account request after 3 seconds
+        setTimeout(() => {
+            showNotification(2, "La Mesa 02 ha solicitado la cuenta final.");
+        }, 3000);
+
+    </script>
+</body>
+</html>

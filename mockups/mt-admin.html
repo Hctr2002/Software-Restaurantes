@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MENU BITES | Master Terminal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/menubites.css">
+    <!-- Lucide CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div class="sidebar-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar-master">
+            <div class="brand-container">
+                <i data-lucide="utensils" class="brand-symbol" style="width: 24px; height: 24px;"></i>
+                <span class="brand-name">MENU BITES</span>
+            </div>
+
+            <nav class="nav-menu">
+                <div class="nav-item active" onclick="switchSection('dashboard', this)">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Panel Principal</span>
+                </div>
+                <div class="nav-item" onclick="switchSection('nodes', this)">
+                    <i data-lucide="server"></i>
+                    <span>Gestión de Nodos</span>
+                </div>
+                <div class="nav-item" onclick="switchSection('users', this)">
+                    <i data-lucide="users"></i>
+                    <span>Usuarios</span>
+                </div>
+                <div class="nav-item" onclick="switchSection('settings', this)">
+                    <i data-lucide="settings"></i>
+                    <span>Configuración</span>
+                </div>
+                <div class="nav-item" onclick="logout()" style="margin-top: auto; color: oklch(60% 0.15 25);">
+                    <i data-lucide="log-out"></i>
+                    <span>Cerrar Sesión</span>
+                </div>
+            </nav>
+
+            <div class="status-node" style="margin-top: auto; font-size: 8px;">
+                <span class="pulse-master"></span>
+                SISTEMA EN LÍNEA // NODO-01
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Section: Dashboard -->
+            <section id="dashboard" class="content-section active">
+                <header class="header-master">
+                    <h3>PANEL DE CONTROL</h3>
+                    <div class="status-node">
+                        MÉTRICAS GLOBALES // TIEMPO REAL
+                    </div>
+                </header>
+
+                <div class="grid-saas">
+                    <div class="card-saas">
+                        <h3>Ingresos Globales</h3>
+                        <div class="stat-value">$12.4M</div>
+                        <div class="stat-label">Proyección Total Anual</div>
+                    </div>
+                    <div class="card-saas">
+                        <h3>Nodos Activos</h3>
+                        <div class="stat-value">24</div>
+                        <div class="stat-label">Restaurantes en Línea</div>
+                    </div>
+                    <div class="card-saas">
+                        <h3>Salud del Sistema</h3>
+                        <div class="stat-value">99.9%</div>
+                        <div class="stat-label">Disponibilidad de Arquitectura</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Nodes -->
+            <section id="nodes" class="content-section">
+                <header class="header-master">
+                    <h3>GESTIÓN DE RESTAURANTES</h3>
+                    <button class="btn-master">+ REGISTRAR SUCURSAL</button>
+                </header>
+
+                <div class="card-saas">
+                    <h3>Panel de Control de Sedes</h3>
+                    <table class="node-list">
+                        <thead>
+                            <tr>
+                                <th>Restaurante</th>
+                                <th>Ubicación</th>
+                                <th>Ocupación</th>
+                                <th>Ventas Diario (D)</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>MENU BITE FINE DINING</td>
+                                <td>Las Condes, RM</td>
+                                <td>95%</td>
+                                <td><span class="status-active">● EN LÍNEA</span></td>
+                                <td><button class="btn-master">GESTIONAR</button></td>
+                            </tr>
+                            <tr>
+                                <td>WORLD KITCHEN BISTRO</td>
+                                <td>Providencia, RM</td>
+                                <td>72%</td>
+                                <td><span class="status-active">● EN LÍNEA</span></td>
+                                <td><button class="btn-master">GESTIONAR</button></td>
+                            </tr>
+                            <tr>
+                                <td>BISTRO SANTIAGO PRO</td>
+                                <td>Providencia, RM</td>
+                                <td>72%</td>
+                                <td>$4.2k</td>
+                                <td><span class="status-active">● EN LÍNEA</span></td>
+                                <td><button class="btn-master">GESTIONAR</button></td>
+                            </tr>
+                            <tr>
+                                <td>GLOBAL BISTRO VALPO</td>
+                                <td>Valparaíso, V</td>
+                                <td>88%</td>
+                                <td>$8.9k</td>
+                                <td><span class="status-active">● EN LÍNEA</span></td>
+                                <td><button class="btn-master">GESTIONAR</button></td>
+                            </tr>
+                            <tr>
+                                <td>GRILL MASTER VIÑA</td>
+                                <td>Viña del Mar, V</td>
+                                <td>15%</td>
+                                <td>$1.1k</td>
+                                <td><span style="color: #666;">STANDBY</span></td>
+                                <td><button class="btn-master">ACTIVAR</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Section: Users -->
+            <section id="users" class="content-section">
+                <header class="header-master">
+                    <h3>GESTIÓN DE IDENTIDADES</h3>
+                    <button class="btn-master">+ NUEVO AGENTE</button>
+                </header>
+                <div class="card-saas">
+                    <table class="node-list">
+                        <thead>
+                            <tr>
+                                <th>Usuario / ID</th>
+                                <th>Rol</th>
+                                <th>Sede Asignada</th>
+                                <th>Último Acceso</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 700;">ZENITH-00</div>
+                                    <div style="font-size: 10px; opacity: 0.5;">ID: AG-8829</div>
+                                </td>
+                                <td><span class="badge badge-admin">ORQUESTADOR</span></td>
+                                <td>GLOBAL / CORE</td>
+                                <td>AHORA</td>
+                                <td><span class="status-active">● ACTIVO</span></td>
+                                <td><button class="btn-master" style="padding: 5px 10px; font-size: 10px;">EDITAR</button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 700;">ALEX KITCHEN</div>
+                                    <div style="font-size: 10px; opacity: 0.5;">ID: AG-1102</div>
+                                </td>
+                                <td><span class="badge badge-manager">GERENTE</span></td>
+                                <td>MODERN FOOD</td>
+                                <td>HACE 2H</td>
+                                <td><span class="status-active">● ACTIVO</span></td>
+                                <td><button class="btn-master" style="padding: 5px 10px; font-size: 10px;">EDITAR</button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 700;">CARLA BISTRO</div>
+                                    <div style="font-size: 10px; opacity: 0.5;">ID: AG-4451</div>
+                                </td>
+                                <td><span class="badge badge-agent">AGENTE</span></td>
+                                <td>BISTRO SANTIAGO</td>
+                                <td>24/03/26</td>
+                                <td><span class="status-inactive">○ INACTIVO</span></td>
+                                <td><button class="btn-master" style="padding: 5px 10px; font-size: 10px;">EDITAR</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Section: Settings -->
+            <section id="settings" class="content-section">
+                <header class="header-master">
+                    <h3>CONFIGURACIÓN DE ARQUITECTURA</h3>
+                </header>
+                
+                <div class="settings-grid">
+                    <div class="card-saas">
+                        <h3>General del Sistema</h3>
+                        <div class="switch-container">
+                            <span>Modo Mantenimiento</span>
+                            <label class="switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="switch-container">
+                            <span>Logs de Auditoría en Tiempo Real</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="switch-container">
+                            <span>Encriptación End-to-End</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="card-saas">
+                        <h3>Identidad de Marca</h3>
+                        <div class="input-group" style="margin-top: 15px;">
+                            <label>Nombre de la Organización</label>
+                            <input type="text" class="input-master" value="MENU BITES" style="width: 100%;">
+                        </div>
+                        <div class="input-group" style="margin-top: 25px;">
+                            <label>Color de Acento (OKLCH)</label>
+                            <input type="text" class="input-master" value="oklch(76.8% 0.1 161.27)">
+                        </div>
+                        <button class="btn-master" style="width: 100%; margin-top: 20px;">GUARDAR CAMBIOS</button>
+                    </div>
+
+                    <div class="card-saas">
+                        <h3>Seguridad y API</h3>
+                        <div class="input-group" style="margin-top: 15px;">
+                            <label>API Key de Producción</label>
+                            <input type="password" class="input-master" value="sk_menu_ia_••••••••" style="width: 100%;" readonly>
+                        </div>
+                        <p style="font-size: 10px; opacity: 0.5; margin-top: 10px;">Última rotación: hace 15 días.</p>
+                        <button class="btn-master" style="width: 100%; margin-top: 20px;">ROTAR CLAVES</button>
+                    </div>
+                </div>
+            </section>
+
+            <footer style="margin-top: 60px; text-align: center; font-size: 10px; opacity: 0.3; letter-spacing: 0.5em; text-transform: uppercase; padding: 20px;">
+                Arquitectura de Supremacía Digital © 2026 MENU BITES
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        function switchSection(sectionId, el) {
+            // Remove active class from all sections and nav items
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Add active class to target section and corresponding nav item
+            document.getElementById(sectionId).classList.add('active');
+            if (el) {
+                el.classList.add('active');
+            }
+            
+            // Refresh icons (optional if content changes dynamically)
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+
+        // Session Protection
+        function logout() {
+            localStorage.removeItem('menu_session');
+            window.location.href = 'admin.html';
+        }
+
+        function checkSession() {
+            // const session = localStorage.getItem('menu_session');
+            // if (!session) {
+            //     window.location.href = 'login.html';
+            // }
+            console.log("CheckSession: Skipping redirect - login.html not found.");
+        }
+
+        // Initialize
+        window.onload = () => {
+            // checkSession();
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        };
+    </script>
+</body>
+
+</html>

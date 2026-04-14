@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cocina | MENU BITES</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        .kanban-column {
+            background: oklch(0% 0 0 / 0.02);
+            border: 1px solid oklch(0% 0 0 / 0.05);
+            min-height: 70vh;
+            padding: 24px;
+            border-radius: 40px;
+        }
+ 
+        .order-ticket {
+            background: white;
+            border-left: 8px solid var(--navy);
+            padding: 28px;
+            margin-bottom: 24px;
+            border-radius: 32px;
+            box-shadow: var(--shadow-organic);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+ 
+        .order-ticket:hover {
+            transform: translateY(-8px);
+            border-left-width: 12px;
+            box-shadow: 0 30px 60px -12px oklch(0% 0 0 / 0.15);
+        }
+ 
+        .order-ticket.preparing {
+            border-left-color: #f59e0b;
+        }
+ 
+        .order-ticket.ready {
+            border-left-color: var(--sage);
+            opacity: 0.6;
+        }
+ 
+        .item-list {
+            border-top: 1px solid oklch(0% 0 0 / 0.05);
+            margin-top: 20px;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+
+<body class="bg-sand text-navy overflow-x-hidden">
+
+
+
+    <aside class="sidebar">
+        <div class="p-12 text-center border-b border-white/10">
+            <h1 class="text-2xl font-black text-white italic tracking-tighter">COCINA. <br> <span
+                    class="not-italic uppercase text-[8px] tracking-[0.4em] text-sage">Bites Elite</span></h1>
+        </div>
+        <nav class="flex-1 pt-8" id="kitchen-nav">
+            <a href="javascript:void(0)" onclick="switchView('kanban', this)"
+                class="sidebar-item active">
+                <i data-lucide="flame"></i> En Preparación
+            </a>
+            <a href="javascript:void(0)" onclick="switchView('inventory', this)"
+                class="sidebar-item">
+                <i data-lucide="utensils-crosses"></i> Menú de Hoy
+            </a>
+            <a href="javascript:void(0)" onclick="switchView('history', this)"
+                class="sidebar-item">
+                <i data-lucide="history"></i> Despachados
+            </a>
+        </nav>
+        <div class="p-8 border-t border-stone-100">
+            <div class="flex items-center gap-4 p-4 bg-stone-50 rounded-lg border border-clay">
+                <div class="w-10 h-10 rounded-full bg-navy flex items-center justify-center font-black text-white">M</div>
+                <div>
+                    <p class="text-[10px] font-bold text-white">MARTÍN R.</p>
+                    <p class="text-[8px] text-white/40 uppercase">Chef Ejecutivo</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content min-h-screen">
+        <!-- VISTA KANBAN VIVO -->
+        <div id="view-kanban" class="kitchen-view animate-fade">
+            <header class="flex justify-between items-end mb-16 border-b border-navy/10 pb-10">
+                <div>
+                    <h2 class="text-6xl font-black text-navy leading-none tracking-tighter">En Preparación</h2>
+                    <div class="flex items-center gap-4 mt-6">
+                        <span class="flex items-center gap-2 text-[10px] uppercase font-bold text-sage">
+                            <span class="w-2 h-2 rounded-full bg-sage animate-pulse"></span> Sistema Online
+                        </span>
+                        <span class="text-stone-300">|</span>
+                        <p class="text-stone-400 font-bold uppercase tracking-widest text-[9px]">Línea de Producción ·
+                            Estación 01</p>
+                    </div>
+                <div class="brand-container">
+                <i data-lucide="utensils" class="brand-symbol" style="width: 24px; height: 24px;"></i>
+                <span class="brand-name">MENU BITES</span>
+            </div>
+            <p class="text-[10px] font-bold uppercase text-stone-400 mb-1">Pendientes</p>
+                        <p class="text-5xl font-black text-navy" id="pending-count">08</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] font-bold uppercase text-stone-400 mb-1">T. Medio</p>
+                        <p class="text-5xl font-black text-stone-300">12m</p>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div class="kanban-column" id="column-new">
+                    <div class="flex justify-between items-center mb-8 border-b border-clay pb-4">
+                        <h3 class="serif text-3xl italic text-stone-800">Nuevos</h3>
+                        <span class="bg-accent text-white text-[9px] font-bold px-3 py-1 rounded-full">4</span>
+                    </div>
+
+                    <div id="order-x92" class="order-ticket">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <span class="text-2xl italic font-black text-stone-800">Mesa 05</span>
+                                <p class="text-[9px] uppercase tracking-widest text-stone-400 mt-1">Orden #X92 · Hace 2m
+                                </p>
+                            </div>
+                            <span
+                                class="bg-accent/10 text-accent text-[8px] font-bold px-3 py-1 border border-accent/30">PRIORIDAD</span>
+                        </div>
+                        <ul class="space-y-3 text-stone-800 text-sm">
+                            <li class="font-bold">1x Wagyu Fusion Burger <span class="text-[9px] text-accent font-black ml-2">TERMINO MEDIO</span></li>
+                            <li>1x Grilled Ribeye Steak</li>
+                            <li>2x Sushi Platter Select</li>
+                        </ul>
+                        <button class="w-full btn-accent !py-4 !text-[9px] mt-8 uppercase tracking-widest font-black"
+                            onclick="startOrder('order-x92')">Iniciar Marcha</button>
+                    </div>
+                </div>
+
+                <div class="kanban-column" id="column-preparing">
+                    <div class="flex justify-between items-center mb-8 border-b border-clay pb-4">
+                        <h3 class="serif text-3xl italic text-stone-800">En Marcha</h3>
+                        <span class="bg-orange-500 text-white text-[9px] font-bold px-3 py-1 rounded-full">3</span>
+                    </div>
+
+                    <div id="order-x85" class="order-ticket preparing">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <span class="text-2xl italic font-black text-stone-800">Mesa 12</span>
+                                <p class="text-[9px] uppercase tracking-widest text-orange-500 mt-1">Orden #X85 · En
+                                    proceso</p>
+                            </div>
+                            <div class="flex items-center gap-2 text-orange-500">
+                                <i data-lucide="clock" class="w-4 h-4 animate-spin-slow"></i>
+                                <span class="text-xl font-bold">08:42</span>
+                            </div>
+                        </div>
+                        <ul class="item-list text-stone-600 text-sm space-y-3">
+                            <li class="flex justify-between font-bold">
+                                <span>3x Sushi Nigiri Box</span>
+                                <i data-lucide="check" class="text-olive w-4 h-4"></i>
+                            </li>
+                            <li class="flex justify-between italic text-stone-300 line-through">
+                                <span>1x Postre de la Casa (Postre)</span>
+                                <span>LISTO</span>
+                            </li>
+                        </ul>
+                        <button
+                            class="w-full !bg-olive hover:!bg-stone-800 text-white p-4 !text-[9px] mt-8 uppercase tracking-widest font-black transition-all"
+                            onclick="finishOrder('order-x85')">Notificar Despacho</button>
+                    </div>
+                </div>
+
+                <div class="kanban-column" id="column-ready">
+                    <div class="flex justify-between items-center mb-8 border-b border-clay pb-4">
+                        <h3 class="serif text-3xl italic text-stone-800">Listos</h3>
+                        <span class="bg-olive text-white text-[9px] font-bold px-3 py-1 rounded-full">1</span>
+                    </div>
+
+                    <div class="order-ticket ready">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-2xl italic font-black text-stone-800">Mesa 08</span>
+                                <p class="text-[9px] uppercase tracking-widest text-olive mt-1">Orden #X82 · Despachada
+                                </p>
+                            </div>
+                            <div
+                                class="w-10 h-10 rounded-full bg-olive/10 flex items-center justify-center border border-olive/30">
+                                <i data-lucide="check-circle-2" class="text-olive w-6 h-6"></i>
+                            </div>
+                        </div>
+                        <div class="item-list mt-6 flex justify-between items-center">
+                            <p class="text-[9px] uppercase tracking-widest text-stone-400 font-bold">Retira: Giovanni A.
+                                (Garzón)</p>
+                            <span class="text-[10px] font-bold text-stone-500">Hace 1m</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA MENÚ DE HOY (INVENTARIO) -->
+        <div id="view-inventory" class="kitchen-view hidden animate-fade-in">
+            <header class="mb-16 border-b-2 border-accent pb-10 text-center">
+                <h2 class="text-6xl italic text-stone-800 leading-none tracking-tight">Menú & Disponibilidad</h2>
+                <p class="text-stone-500 font-bold uppercase tracking-widest text-[9px] mt-4">Gestión de Stock en Tiempo
+                    Real</p>
+            </header>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="p-8 bg-white/50 border border-clay shadow-sm">
+                    <h3 class="serif text-2xl mb-6 flex items-center gap-3 text-stone-800"><i data-lucide="alert-triangle"
+                            class="text-accent"></i> Críticos</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-4 bg-stone-50 border-l-4 border-accent border">
+                            <span class="text-sm font-bold text-stone-700">Pescado Fresco (Corvina)</span>
+                            <span class="text-[10px] font-black text-accent bg-accent/10 px-3 py-1">2 UNID</span>
+                        </div>
+                        <div class="flex justify-between items-center p-4 bg-stone-50 border-l-4 border-orange-500 border">
+                            <span class="text-sm font-bold text-stone-700">Tagliatelle Artesanal</span>
+                            <span class="text-[10px] font-black text-orange-500 bg-orange-500/10 px-3 py-1">5 KG</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-8 bg-white/50 border border-clay shadow-sm">
+                    <h3 class="serif text-2xl mb-6 flex items-center gap-3 text-stone-800"><i data-lucide="check-circle"
+                            class="text-olive"></i> En Abundancia</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-4 bg-stone-50 border-l-4 border-olive border">
+                            <span class="text-sm font-bold text-stone-700">Harina de Semola</span>
+                            <span class="text-[10px] font-black text-olive bg-olive/10 px-3 py-1">OK</span>
+                        </div>
+                        <div class="flex justify-between items-center p-4 bg-stone-50 border-l-4 border-olive border">
+                            <span class="text-sm font-bold text-stone-700">Vino Sangiovese (Para Salsas)</span>
+                            <span class="text-[10px] font-black text-olive bg-olive/10 px-3 py-1">OK</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA HISTORIAL (DESPACHADOS) -->
+        <div id="view-history" class="kitchen-view hidden animate-fade-in">
+            <header class="mb-16 border-b-2 border-accent pb-10 text-center">
+                <h2 class="text-6xl italic text-stone-800 leading-none tracking-tight">Despachados Recientemente</h2>
+                <p class="text-stone-500 font-bold uppercase tracking-widest text-[9px] mt-4">Historial de Turno Actual
+                </p>
+            </header>
+            <div class="max-w-5xl mx-auto overflow-hidden border border-clay bg-white shadow-xl">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-stone-50 text-[10px] uppercase tracking-widest font-black text-accent border-b border-clay">
+                        <tr>
+                            <th class="p-6">Orden</th>
+                            <th class="p-6">Mesa</th>
+                            <th class="p-6">Platillos</th>
+                            <th class="p-6">T. Prep</th>
+                            <th class="p-6 text-right">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm text-stone-600" id="history-table-body">
+                        <tr class="border-b border-stone-100 hover:bg-stone-50 transition-colors">
+                            <td class="p-6 font-bold">#X82</td>
+                            <td class="p-6 italic">Mesa 08</td>
+                            <td class="p-6 text-xs text-stone-400">2x Pasta Pasta Picante, 1x Ravioles de Zapallo Gourmet</td>
+                            <td class="p-6">14:22</td>
+                            <td class="p-6 text-right"><span
+                                    class="text-[10px] font-bold text-olive uppercase tracking-widest border border-olive/30 px-3 py-1">Entregado</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        function switchView(viewId, el) {
+            // Toggle active classes in nav
+            document.querySelectorAll('#kitchen-nav a').forEach(a => a.classList.remove('active'));
+            el.classList.add('active');
+
+            // Hide all views
+            document.querySelectorAll('.kitchen-view').forEach(view => view.classList.add('hidden'));
+
+            // Show target view
+            document.getElementById('view-' + viewId).classList.remove('hidden');
+        }
+
+        function startOrder(id) {
+            const ticket = document.getElementById(id);
+            ticket.classList.add('preparing');
+            ticket.querySelector('button').innerHTML = 'Notificar Despacho';
+            ticket.querySelector('button').classList.add('!bg-olive');
+            ticket.querySelector('button').onclick = () => finishOrder(id);
+            document.getElementById('column-preparing').appendChild(ticket);
+
+            showKitchenToast('Orden ' + id.replace('order-', '') + ' en preparación');
+        }
+
+        function finishOrder(id) {
+            const ticket = document.getElementById(id);
+            ticket.classList.remove('preparing');
+            ticket.classList.add('ready');
+            ticket.querySelector('button').remove();
+            document.getElementById('column-ready').appendChild(ticket);
+
+            // Add to history table
+            const tableBody = document.getElementById('history-table-body');
+            const newRow = document.createElement('tr');
+            newRow.className = 'border-b border-stone-900 hover:bg-stone-900/30 transition-colors';
+            newRow.innerHTML = `
+                <td class="p-6 font-bold">#${id.replace('order-', '').toUpperCase()}</td>
+                <td class="p-6 italic">Verificada</td>
+                <td class="p-6 text-xs text-stone-500">Mesa Processed</td>
+                <td class="p-6">Actual</td>
+                <td class="p-6 text-right"><span class="text-[10px] font-bold text-olive uppercase tracking-widest border border-olive/30 px-3 py-1">Entregado</span></td>
+            `;
+            tableBody.prepend(newRow);
+
+            showKitchenToast('¡Orden Lista! Notificación enviada al garzón.');
+        }
+
+        function showKitchenToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-10 right-10 bg-accent text-white px-8 py-4 text-xs font-black uppercase tracking-[0.2em] shadow-2xl animate-fade-in-up z-[100] border-b-4 border-black';
+            toast.innerHTML = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+
+</html>

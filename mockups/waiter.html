@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garzón | MENU BITES</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        .table-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 24px;
+        }
+        .table-node {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 2px solid oklch(0% 0 0 / 0.05);
+            background: white;
+            border-radius: 40px;
+        }
+        .table-node.occupied { 
+            background: var(--navy); 
+            color: white; 
+            border: none; 
+            box-shadow: var(--shadow-organic); 
+        }
+        .table-node.ready { 
+            border: 4px solid var(--sage); 
+            box-shadow: 0 0 20px oklch(66.52% 0.033 141.69 / 0.2);
+        }
+        .table-node.bill { 
+            animation: pulse-red 1.5s infinite; 
+            border: 4px solid #ef4444; 
+        }
+        
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .notification-dot {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 15px;
+            height: 15px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body class="bg-sand overflow-hidden">
+
+    <!-- Login Overlay (Required by User) -->
+    <div id="login-overlay" class="overlay-login">
+        <div class="login-card animate-fade">
+            <h1 class="text-navy font-black mb-8" style="font-size: 32px;">Garzón Login</h1>
+            <p class="mb-8 font-primary" style="font-size: 10px; opacity: 0.7; text-transform: uppercase; letter-spacing: 2px;">Acceso Personal de Servicio</p>
+            <input type="text" class="input-organic" placeholder="Usuario / ID Garzón">
+            <input type="password" class="input-organic" placeholder="PIN de Acceso">
+            <button onclick="document.getElementById('login-overlay').classList.add('hidden')" class="btn-primary w-full">Entrar al Turno</button>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="p-12 text-center border-b border-white/10">
+            <h1 class="text-2xl font-black text-white italic tracking-tighter">SERVICIO. <br> <span class="not-italic uppercase text-[8px] tracking-[0.4em] text-sage">Providencia</span></h1>
+        </div>
+        <nav class="flex-1 mt-6">
+            <a href="javascript:void(0)" class="sidebar-item active">
+                <i data-lucide="layout-grid"></i> Mapa de Mesas
+            </a>
+            <a href="javascript:void(0)" id="nav-orders" class="sidebar-item">
+                <i data-lucide="clipboard-list"></i> Pedidos Activos
+            </a>
+            <a href="javascript:void(0)" id="nav-notifications" class="sidebar-item">
+                <i data-lucide="bell"></i> Notificaciones
+                <span id="notif-count" class="ml-auto bg-sage text-white px-2 py-1 rounded-full text-[8px]">0</span>
+            </a>
+        </nav>
+        <div class="p-8 border-t border-white/5 italic text-[10px] text-white/30 text-center">
+            Garzón: Alex G.
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content flex flex-col h-screen">
+        <!-- Live Alert Area -->
+        <div id="alert-stack" class="fixed top-8 right-8 z-[200] space-y-4 w-80">
+            <div id="ready-alert" class="bg-sage text-white p-6 rounded-3xl shadow-organic animate-fade hidden">
+                <div class="flex items-center gap-4 mb-4">
+                    <i data-lucide="chef-hat"></i>
+                    <span class="font-bold text-[10px] tracking-widest uppercase">Pedido Listo: Mesa 05</span>
+                </div>
+                <button onclick="this.parentElement.classList.add('hidden')" class="btn-primary !bg-navy !py-2 w-full !text-[8px]">Entregado</button>
+            </div>
+        </div>
+        <header class="flex justify-between items-end mb-12 border-b border-navy/10 pb-6">
+            <div>
+                <h2 class="text-6xl font-black text-navy tracking-tighter">Mapa de Mesas</h2>
+                <p class="text-sage font-bold uppercase tracking-widest text-[9px] mt-2">Salón Principal · <span class="text-navy/60">Turno Almuerzo</span></p>
+            </div>
+            <div class="flex gap-4">
+                <div class="flex items-center gap-2 px-6 py-3 bg-white border border-navy/5 rounded-2xl text-[8px] font-bold uppercase">
+                    <span class="w-2 h-2 bg-navy rounded-full"></span> Ocupado
+                </div>
+                <div class="flex items-center gap-2 px-6 py-3 bg-white border border-navy/5 rounded-2xl text-[8px] font-bold uppercase">
+                    <span class="w-2 h-2 bg-stone-100 rounded-full border border-stone-200"></span> Disponible
+                </div>
+                <div class="flex items-center gap-2 px-6 py-3 bg-white border border-navy/5 rounded-2xl text-[8px] font-bold uppercase">
+                    <span class="w-2 h-2 bg-sage rounded-full"></span> Pedido Listo
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Summary -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <div class="card-organic !p-6 flex items-center gap-4">
+                <div class="p-3 bg-stone-50 rounded-2xl"><i data-lucide="users" class="text-stone-300"></i></div>
+                <div>
+                    <p class="text-[8px] uppercase font-bold text-stone-400">Mesas Libres</p>
+                    <p class="text-2xl font-black text-navy" id="available-count">06 <span class="text-xs font-normal text-stone-300">/ 12</span></p>
+                </div>
+            </div>
+            <div class="card-organic !p-6 flex items-center gap-4">
+                <div class="p-3 bg-navy/5 rounded-2xl"><i data-lucide="utensils" class="text-navy"></i></div>
+                <div>
+                    <p class="text-[8px] uppercase font-bold text-stone-400">Ocupadas</p>
+                    <p class="text-2xl font-black text-navy">06</p>
+                </div>
+            </div>
+            <div class="card-organic !p-6 flex items-center gap-4">
+                <div class="p-3 bg-sage/5 rounded-2xl"><i data-lucide="check-circle" class="text-sage"></i></div>
+                <div>
+                    <p class="text-[8px] uppercase font-bold text-stone-400">Por Servir</p>
+                    <p class="text-2xl font-black text-navy" id="ready-count">02</p>
+                </div>
+            </div>
+            <div class="card-organic !p-6 flex items-center gap-4">
+                <div class="p-3 bg-red-50 rounded-2xl"><i data-lucide="receipt" class="text-red-400"></i></div>
+                <div>
+                    <p class="text-[8px] uppercase font-bold text-stone-400">Piden Cuenta</p>
+                    <p class="text-2xl font-black text-navy">01</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Role Main Views -->
+        <div id="view-map" class="role-view">
+            <!-- Table Grid -->
+            <div class="table-grid overflow-y-auto pr-4 max-h-[60vh]">
+                <!-- Table 1 -->
+                <div class="table-node" onclick="viewTable(1, 'Libre', 0)">
+                    <span class="text-[10px] uppercase font-black text-stone-200 absolute top-4 left-4">T1</span>
+                    <span class="text-5xl font-black text-stone-100">1</span>
+                    <p class="text-[8px] uppercase tracking-widest mt-2 font-bold text-stone-200">Disponible</p>
+                </div>
+
+                <!-- Table 2 (Occupied + Account Requested) -->
+                <div class="table-node occupied bill" onclick="viewTable(2, 'Pide Cuenta', 45600)">
+                    <span class="text-[10px] uppercase font-black text-white/30 absolute top-4 left-4">T2</span>
+                    <span class="text-5xl font-black">2</span>
+                    <p class="text-[8px] uppercase tracking-widest mt-2 font-bold text-white/70">Pide Cuenta</p>
+                    <div class="brand-container">
+                <i data-lucide="utensils" class="brand-symbol" style="width: 24px; height: 24px;"></i>
+                <span class="brand-name">MENU BITES</span>
+            </div>
+                </div>
+
+                <!-- Table 3 -->
+                <div class="table-node occupied" onclick="viewTable(3, 'Ocupada', 15900)">
+                    <span class="text-[10px] uppercase font-black text-white/30 absolute top-4 left-4">T3</span>
+                    <span class="text-5xl font-black">3</span>
+                    <p class="text-[9px] uppercase tracking-widest mt-2 font-black text-white">Ocupada</p>
+                </div>
+
+                <!-- Table 4 -->
+                <div class="table-node bg-white" onclick="viewTable(4, 'Libre', 0)">
+                    <span class="text-[10px] uppercase font-bold text-stone-300 absolute top-4 left-4">T4</span>
+                    <span class="serif text-5xl font-black italic text-stone-200">4</span>
+                    <p class="text-[8px] uppercase tracking-widest mt-2 font-bold text-stone-300">Disponible</p>
+                </div>
+
+                <!-- Table 5 (Ready) -->
+                <div class="table-node occupied ready" onclick="viewTable(5, 'Pedido Listo', 12400)">
+                    <span class="text-[10px] uppercase font-bold text-white/50 absolute top-4 left-4">T5</span>
+                    <span class="serif text-5xl font-black italic">5</span>
+                    <p class="text-[8px] uppercase tracking-widest mt-2 font-bold text-white/70">A Servir</p>
+                    <div class="notification-dot !bg-olive"></div>
+                </div>
+
+                <!-- Table 6 (Confirming) -->
+                <div class="table-node occupied" onclick="viewTable(6, 'Confirmar', 28900)">
+                    <span class="text-[10px] uppercase font-bold text-white/50 absolute top-4 left-4">T6</span>
+                    <span class="serif text-5xl font-black italic">6</span>
+                    <p class="text-[8px] uppercase tracking-widest mt-2 font-bold text-white/70">Confirmar</p>
+                    <div class="notification-dot"></div>
+                </div>
+
+                <div class="table-node bg-white" onclick="viewTable(7, 'Libre', 0)">
+                    <span class="text-[10px] uppercase font-bold text-stone-300 absolute top-4 left-4">T7</span>
+                    <span class="serif text-5xl font-black italic text-stone-200">7</span>
+                    <p class="text-[8px] uppercase tracking-widest mt-2 font-bold text-stone-300">Disponible</p>
+                </div>
+                <div class="table-node occupied" onclick="viewTable(8, 'Ocupada', 42000)">
+                    <span class="text-[10px] uppercase font-bold text-white/50 absolute top-4 left-4">T8</span>
+                    <span class="serif text-5xl font-black italic">8</span>
+                    <p class="text-[11px] uppercase tracking-widest mt-2 font-black text-white">Ocupada</p>
+                </div>
+                <div class="table-node bg-white" onclick="viewTable(9, 'Libre', 0)">
+                    <span class="text-[10px] uppercase font-bold text-stone-300 absolute top-4 left-4">T9</span>
+                    <span class="serif text-5xl font-black italic text-stone-200">9</span>
+                    <p class="text-[8px] uppercase tracking-widest mt-2 font-bold text-stone-300">Disponible</p>
+                </div>
+                <div class="table-node bg-white" onclick="viewTable(10, 'Libre', 0)">
+                    <span class="text-[10px] uppercase font-bold text-stone-300 absolute top-4 left-4">T10</span>
+                    <span class="serif text-5xl font-black italic text-stone-200">10</span>
+                    <p class="text-[8px] uppercase tracking-widest mt-2 font-bold text-stone-300">Disponible</p>
+                </div>
+                <div class="table-node occupied" onclick="viewTable(11, 'Ocupada', 21500)">
+                    <span class="text-[10px] uppercase font-bold text-white/50 absolute top-4 left-4">T11</span>
+                    <span class="serif text-5xl font-black italic">11</span>
+                    <p class="text-[11px] uppercase tracking-widest mt-2 font-black text-white">Ocupada</p>
+                </div>
+                <div class="table-node bg-white" onclick="viewTable(12, 'Libre', 0)">
+                    <span class="text-[10px] uppercase font-bold text-stone-300 absolute top-4 left-4">T12</span>
+                    <span class="serif text-5xl font-black italic text-stone-200">12</span>
+                    <p class="text-[8px] uppercase tracking-widest mt-2 font-bold text-stone-300">Disponible</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-orders" class="role-view hidden space-y-6 overflow-y-auto max-h-[70vh]">
+            <div class="flex justify-between items-center border-b border-navy/5 pb-4">
+                <h3 class="text-4xl font-black text-navy tracking-tighter">Pedidos Activos</h3>
+                <div class="flex gap-2">
+                    <span class="px-3 py-1 bg-navy text-white text-[8px] font-bold uppercase rounded-full">6 En Cocina</span>
+                    <span class="px-3 py-1 bg-sage text-white text-[8px] font-bold uppercase rounded-full">2 Listos</span>
+                </div>
+            </div>
+            <div id="orders-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Sample Active Order -->
+                <div class="bg-white p-6 shadow-soft border-l-4 border-accent group">
+                    <div class="flex justify-between mb-4">
+                        <span class="text-[10px] font-black uppercase text-stone-400">Mesa 03 · Id #882</span>
+                        <span class="text-[10px] font-bold text-accent uppercase">En Preparación</span>
+                    </div>
+                    <ul class="text-xs space-y-2 text-stone-600 mb-4">
+                        <li class="flex justify-between"><span>2x Pasta Alfredo con Crema</span> <span>$24.000</span></li>
+                        <li class="flex justify-between"><span>1x Vino de la Casa</span> <span>$8.500</span></li>
+                    </ul>
+                    <div class="pt-4 border-t border-stone-100 flex justify-between items-center">
+                        <p class="font-bold text-stone-800">$32.500</p>
+                        <button class="text-[9px] font-bold text-stone-400 uppercase hover:text-accent transition-colors">Ver Comanda</button>
+                    </div>
+                </div>
+
+                <div class="card-organic !p-6 border-l-8 border-sage group">
+                    <div class="flex justify-between mb-4">
+                        <span class="text-[10px] font-black uppercase text-stone-400">Mesa 05 · Id #885</span>
+                        <span class="text-[10px] font-bold text-sage uppercase">Listo para Servir</span>
+                    </div>
+                    <ul class="text-xs space-y-2 text-stone-600 mb-4">
+                        <li class="flex justify-between"><span>1x Arroz Cremoso de Hongos Silvestres</span> <span>$12.400</span></li>
+                    </ul>
+                    <div class="pt-4 border-t border-stone-100 flex justify-between items-center">
+                        <p class="font-bold text-navy">$12.400</p>
+                        <button onclick="viewTable(5, 'Pedido Listo', 12400)" class="btn-primary !bg-sage !py-2 !px-4 !text-[8px]">SERVIR AHORA</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-notifications" class="role-view hidden space-y-6 overflow-y-auto max-h-[70vh]">
+            <div class="flex justify-between items-center border-b border-navy/5 pb-4">
+                <h3 class="text-4xl font-black text-navy tracking-tighter">Centro de Notificaciones</h3>
+                <button onclick="clearNotifications()" class="text-[10px] font-bold text-navy uppercase tracking-widest hover:underline">Marcar todas como leídas</button>
+            </div>
+            <div id="notifications-list" class="grid grid-cols-1 gap-4">
+                <!-- Notifications will be injected here -->
+                <div class="bg-navy/5 p-12 text-center border-2 border-dashed border-navy/10 rounded-[40px]">
+                    <p class="text-xl font-black italic text-stone-300">No hay notificaciones nuevas...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Table Detail Overlay -->
+    <div id="table-overlay" class="fixed inset-0 bg-navy/80 backdrop-blur-md z-[100] hidden flex items-center justify-center p-12">
+        <div class="bg-white w-full max-w-2xl p-16 rounded-[60px] relative animate-scale-up shadow-organic">
+            <button class="absolute top-12 right-12 text-stone-300 hover:text-navy transition-colors" onclick="closeOverlay()">
+                <i data-lucide="x" class="w-8 h-8"></i>
+            </button>
+            
+            <header class="mb-12 border-b border-navy/5 pb-8">
+                <h3 class="text-7xl font-black text-navy tracking-tighter mb-2">Tavola <span id="overlay-table-id" class="text-sage">0</span></h3>
+                <div class="flex items-center gap-4">
+                    <span id="overlay-status-dot" class="w-3 h-3 rounded-full bg-navy"></span>
+                    <p id="overlay-status-label" class="text-[10px] uppercase tracking-[0.4em] font-black text-stone-800">Ocupada</p>
+                </div>
+            </header>
+            
+            <div class="grid grid-cols-2 gap-16 mb-12">
+                <div>
+                    <h4 class="text-[9px] uppercase font-bold text-stone-300 mb-6 tracking-widest">Consumo Actual</h4>
+                    <ul class="space-y-3 text-sm font-medium text-stone-600" id="overlay-consumption-list">
+                        <li class="flex justify-between"><span>1x Ribeye Steak Premium</span> <span>$18.900</span></li>
+                        <li class="flex justify-between"><span>2x Sushi Platter (12 pcs)</span> <span class="text-stone-100">...</span></li>
+                        <li class="flex justify-between"><span>1x Postre de la Casa</span> <span class="text-stone-100">...</span></li>
+                    </ul>
+                </div>
+                <div class="text-right flex flex-col justify-end">
+                    <h4 class="text-[9px] uppercase font-bold text-stone-300 mb-2 tracking-widest">Total a Pagar</h4>
+                    <p id="overlay-amount" class="text-6xl font-black text-navy">$0</p>
+                </div>
+            </div>
+ 
+            <div class="flex gap-4 pt-8 border-t border-navy/5">
+                <button id="btn-action" class="flex-[2] btn-primary !py-8 text-xs tracking-[0.3em]" onclick="confirmAction()">CONFIRMAR PEDIDO</button>
+                <button class="flex-1 btn-primary !bg-stone-100 !text-navy hover:!bg-navy hover:!text-white !py-8 text-xs tracking-[0.3em]" onclick="closeOverlay()">VOLVER</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let currentTableId = 0;
+        let currentStatus = '';
+        let notifications = [];
+
+        function switchRoleView(viewId, el) {
+            document.querySelectorAll('.role-view').forEach(v => v.classList.add('hidden'));
+            document.getElementById('view-' + viewId).classList.remove('hidden');
+            
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            if(el) el.classList.add('active');
+        }
+
+        function pushNotification(type, title, message, tableId, amount = 0) {
+            const id = Date.now();
+            const notif = { id, type, title, message, tableId, amount, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
+            notifications.unshift(notif);
+            
+            // Show Toast
+            const stack = document.getElementById('alert-stack');
+            const toast = document.createElement('div');
+            const bgColor = type === 'urgent' ? 'bg-red-600' : 'bg-olive';
+            toast.className = `${bgColor} text-white p-6 shadow-rustic animate-fade-in-up flex flex-col gap-2 border-l-8 border-stone-900`;
+            toast.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <i data-lucide="${type === 'urgent' ? 'alert-circle' : 'chef-hat'}" class="w-4 h-4"></i>
+                    <span class="text-[10px] font-bold uppercase tracking-widest">${title}</span>
+                </div>
+                <p class="text-[9px] opacity-90">${message}</p>
+            `;
+            stack.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 500);
+            }, 5000);
+
+            renderNotifications();
+        }
+
+        function renderNotifications() {
+            const list = document.getElementById('notifications-list');
+            const count = document.getElementById('notif-count');
+            
+            count.innerText = notifications.length;
+            
+            if (notifications.length === 0) {
+                list.innerHTML = `
+                    <div class="bg-white/50 p-12 text-center border-2 border-dashed border-clay-dark">
+                        <p class="serif text-xl italic text-stone-400">No hay notificaciones nuevas...</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = notifications.map(n => `
+                <div class="bg-white p-6 shadow-soft flex justify-between items-center border-l-4 ${n.type === 'urgent' ? 'border-red-500' : 'border-olive'} group hover:bg-stone-50 transition-all">
+                    <div class="flex items-center gap-6">
+                        <div class="w-12 h-12 ${n.type === 'urgent' ? 'bg-red-50' : 'bg-olive/10'} flex items-center justify-center ${n.type === 'urgent' ? 'text-red-500' : 'text-olive'} font-bold serif text-xl italic">
+                            ${n.tableId < 10 ? '0' + n.tableId : n.tableId}
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-stone-800 uppercase tracking-widest">${n.title}</p>
+                            <p class="text-[10px] text-stone-500">${n.message}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-6 text-right">
+                        <div>
+                            <p class="text-[8px] text-stone-400 uppercase">Recibido</p>
+                            <p class="text-xs font-mono font-bold text-stone-600">${n.time}</p>
+                        </div>
+                        <button onclick="viewTable(${n.tableId}, '${n.title.includes('CUENTA') ? 'Pide Cuenta' : 'Pedido Listo'}', ${n.amount})" class="btn-accent !bg-stone-900 !py-2 !px-4 !text-[8px]">GESTIONAR</button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function clearNotifications() {
+            notifications = [];
+            renderNotifications();
+        }
+
+        function viewTable(id, status, amount) {
+            currentTableId = id;
+            currentStatus = status;
+            document.getElementById('overlay-table-id').innerText = id < 10 ? '0' + id : id;
+            document.getElementById('overlay-status-label').innerText = status;
+            document.getElementById('overlay-amount').innerText = '$' + amount.toLocaleString('es-CL');
+            
+            const btn = document.getElementById('btn-action');
+            const dot = document.getElementById('overlay-status-dot');
+            
+            // UI Adjustment based on status
+            dot.className = "w-3 h-3 rounded-full";
+            if(status === 'Libre') dot.classList.add('bg-stone-200');
+            else if(status === 'Pedido Listo') dot.classList.add('bg-olive');
+            else if(status === 'Pide Cuenta') dot.classList.add('bg-red-500');
+            else dot.classList.add('bg-accent');
+
+            if (status === 'Pide Cuenta') {
+                btn.innerText = 'PROCESAR PAGO (CAJA)';
+                btn.style.display = 'block';
+            } else if (status === 'Confirmar') {
+                btn.innerText = 'ENVIAR A COCINA';
+                btn.style.display = 'block';
+            } else if (status === 'Pedido Listo') {
+                btn.innerText = 'MARCAR EN MESA';
+                btn.style.display = 'block';
+            } else if (status === 'Libre') {
+                btn.innerText = 'ABRIR CUENTA';
+                btn.style.display = 'block';
+            } else {
+                btn.style.display = 'none';
+            }
+
+            document.getElementById('table-overlay').classList.remove('hidden');
+        }
+
+        function closeOverlay() {
+            document.getElementById('table-overlay').classList.add('hidden');
+        }
+
+        function confirmAction() {
+            let msg = '';
+            if (currentStatus === 'Pide Cuenta') {
+                msg = 'Solicitud de cuenta enviada a terminal de Caja.';
+            } else if (currentStatus === 'Confirmar') {
+                msg = 'Comanda sincronizada con KDS (Cocina).';
+            } else if (currentStatus === 'Pedido Listo') {
+                msg = 'Platos marcados como servidos en mesa.';
+            } else if (currentStatus === 'Libre') {
+                msg = 'Mesa ' + currentTableId + ' abierta correctamente.';
+            }
+            
+            if(msg) {
+                pushNotification('info', 'OPERACIÓN EXITOSA', msg, currentTableId);
+            }
+            
+            closeOverlay();
+        }
+
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const text = this.innerText.toLowerCase();
+                if(text.includes('mapa')) switchRoleView('map', this);
+                else if(text.includes('pedido')) switchRoleView('orders', this);
+                else if(text.includes('notif')) switchRoleView('notifications', this);
+            });
+        });
+
+        // Simulation: Cooking Ready
+        setTimeout(() => {
+            pushNotification('ready', 'PEDIDO LISTO', 'Ribeye y Sushi para Mesa 05', 5, 32400);
+        }, 5000);
+
+        // Simulation: Bill Requested
+        setTimeout(() => {
+            pushNotification('urgent', 'SOLICITUD DE CUENTA', 'Mesa 02 solicita el cierre de cuenta.', 2, 45600);
+        }, 12000);
+    </script>
+</body>
+</html>

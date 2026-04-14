@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MENU BITES | Panel Maestro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/global.css">
+</head>
+<body class="bg-sand overflow-x-hidden">
+
+    <!-- Login Overlay Obligatorio -->
+    <div id="login-overlay" class="overlay-login flex">
+        <div class="login-card animate-fade-in">
+            <div class="mb-12">
+                <div class="w-20 h-20 bg-navy/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-navy/10">
+                    <i data-lucide="lock" class="text-navy w-10 h-10"></i>
+                </div>
+                <h2 class="text-4xl font-black text-navy mb-2">Administración</h2>
+                <p class="text-[10px] uppercase tracking-[0.3em] text-sage font-bold">Panel de Control Local</p>
+            </div>
+            <div class="space-y-6 text-left mb-10">
+                <div>
+                    <label class="text-[9px] uppercase tracking-widest text-stone-400 font-bold mb-2 block">Usuario Administrador</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 w-4 h-4"></i>
+                        <input type="text" value="admin_local" class="input-organic">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[9px] uppercase tracking-widest text-stone-400 font-bold mb-2 block">Contraseña de Seguridad</label>
+                    <div class="relative">
+                        <i data-lucide="key" class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 w-4 h-4"></i>
+                        <input type="password" placeholder="••••••••" class="input-organic">
+                    </div>
+                </div>
+            </div>
+            <button onclick="document.getElementById('login-overlay').style.display='none'" class="btn-primary w-full !py-5">Acceder al Sistema</button>
+            <p class="mt-8 text-[9px] text-stone-400 uppercase tracking-widest">Sucursal: Providencia #001</p>
+        </div>
+    </div>
+
+    <aside class="sidebar">
+        <div class="p-12 text-center border-b border-white/10">
+            <h1 class="text-2xl font-black text-white italic tracking-tighter">MENU BITES. <br> <span class="not-italic uppercase text-[8px] tracking-[0.4em] text-sage">Admin Local</span></h1>
+        </div>
+        <nav class="flex-1 mt-10">
+            <a href="javascript:void(0)" class="sidebar-item active" onclick="switchAdminView('transactions', this)">
+                <i data-lucide="bar-chart-3"></i> Transacciones
+            </a>
+            <a href="javascript:void(0)" class="sidebar-item" onclick="switchAdminView('shifts', this)">
+                <i data-lucide="users-2"></i> Gestión de Turnos
+            </a>
+            <a href="javascript:void(0)" class="sidebar-item" onclick="switchAdminView('inventory', this)">
+                <i data-lucide="clipboard-list"></i> Inventario
+            </a>
+            <a href="javascript:void(0)" class="sidebar-item" onclick="switchAdminView('settings', this)">
+                <i data-lucide="settings"></i> Configuración
+            </a>
+        </nav>
+        <div class="p-8 border-t border-white/5 italic text-[10px] text-white/30 text-center">
+            <p>Menu Bites Cloud v2.1.0-st</p>
+            <a href="index.html" class="inline-block mt-4 text-sage hover:underline">Log Out</a>
+        </div>
+    </aside>
+
+    <main class="main-content min-h-screen">
+        <!-- View: Transacciones -->
+        <div id="view-transactions" class="admin-view animate-fade">
+            <header class="flex justify-between items-end mb-16 border-b border-navy/10 pb-10">
+                <div>
+                    <h2 class="text-6xl font-black text-navy tracking-tighter leading-none">Reporte de Ventas</h2>
+                    <div class="flex items-center gap-4 mt-6">
+                        <p class="text-sage font-bold uppercase tracking-[0.3em] text-[10px]">Registro de Ventas en Vivo</p>
+                        <span class="text-stone-300">|</span>
+                        <span class="text-[10px] text-stone-400 uppercase font-black">25 de Marzo, 2026</span>
+                    </div>
+                </div>
+                <div class="flex gap-6">
+                    <button class="bg-white px-8 py-5 border border-stone-100 rounded-2xl shadow-sm text-[10px] uppercase font-black tracking-widest flex items-center gap-4 hover:border-sage transition-all">
+                        <i data-lucide="download" class="w-4 h-4 text-sage"></i> Exportar Reporte
+                    </button>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
+                <div class="card-organic">
+                    <p class="text-[9px] uppercase tracking-widest text-stone-400 font-bold mb-4">Ventas Brutas</p>
+                    <p class="text-4xl text-navy font-black">$1.450.200</p>
+                </div>
+                <div class="card-organic">
+                    <p class="text-[9px] uppercase tracking-widest text-stone-400 font-bold mb-4">Ticket Promedio</p>
+                    <p class="text-4xl text-navy font-black">$34.500</p>
+                </div>
+                <div class="card-organic">
+                    <p class="text-[9px] uppercase tracking-widest text-stone-400 font-bold mb-4">Mesas Atendidas</p>
+                    <p class="text-4xl text-navy font-black">42</p>
+                </div>
+                <div class="bg-white p-8 border-b-4 border-accent shadow-sm">
+                    <p class="text-[9px] uppercase tracking-widest text-stone-400 font-bold mb-4">Propinas Sugeridas</p>
+                    <p class="text-4xl serif italic text-stone-800">$145.020</p>
+                </div>
+            </div>
+
+            <!-- Transaction List -->
+            <div class="bg-white shadow-xl card-classic !p-0 overflow-hidden border border-clay">
+                <div class="p-10 border-b border-stone-100 flex justify-between items-center bg-stone-50/50">
+                    <div class="flex items-center gap-4">
+                        <div class="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
+                        <h3 class="serif text-3xl italic text-stone-800">Flujo de Transacciones</h3>
+                    </div>
+                    <div class="flex gap-4">
+                        <span class="text-[10px] uppercase tracking-widest font-black text-stone-500 bg-white px-4 py-2 border border-clay">Filtrar por Fecha</span>
+                    </div>
+                </div>
+                <table class="w-full text-left">
+                    <thead class="bg-stone-50/80 backdrop-blur">
+                        <tr class="text-[9px] uppercase tracking-[0.2em] text-stone-500 border-b border-stone-100">
+                            <th class="p-8">ID Operación</th>
+                            <th class="p-8">Fecha y Hora</th>
+                            <th class="p-8">Ubicación</th>
+                            <th class="p-8">Responsable</th>
+                            <th class="p-8">Método Pago</th>
+                            <th class="p-8 text-right">Importe Total</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                        <tr class="border-b border-stone-50 hover:bg-stone-50 transition-colors group">
+                            <td class="p-8 font-black text-accent tracking-tighter">#TR-5021</td>
+                            <td class="p-8 text-stone-400 font-bold text-[11px]">25/03 @ 14:22:15</td>
+                            <td class="p-8 serif italic text-lg">Mesa Central 04</td>
+                            <td class="p-8 text-[11px] font-black uppercase tracking-widest text-stone-600">M. R. (Caja)</td>
+                            <td class="p-8">
+                                <span class="flex items-center gap-3 text-[10px] font-bold text-stone-800 uppercase tracking-widest">
+                                    <i data-lucide="credit-card" class="w-4 h-4 text-accent"></i> DÉBITO TBK
+                                </span>
+                            </td>
+                            <td class="p-8 text-right font-black text-xl text-stone-900">$58.400</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="p-10 bg-stone-50 text-center border-t border-stone-100">
+                    <button class="text-[10px] uppercase tracking-[0.4em] font-black text-accent hover:tracking-[0.6em] transition-all">Ver Archivados <i data-lucide="chevron-right" class="inline w-4 h-4 ml-2"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- View: Gestión de Turnos -->
+        <div id="view-shifts" class="admin-view hidden animate-fade">
+            <header class="flex justify-between items-end mb-16 border-b-2 border-accent pb-10">
+                <div>
+                    <h2 class="text-6xl italic text-stone-800 tracking-tight leading-none">Gestión de Turnos</h2>
+                    <p class="text-olive font-bold uppercase tracking-[0.3em] text-[10px] mt-6">Planificación y Control de Staff</p>
+                </div>
+                <button class="bg-accent text-white px-8 py-4 text-[10px] uppercase font-black tracking-widest hover:bg-stone-800 transition-all">
+                    Programar Turno
+                </button>
+            </header>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                <div class="lg:col-span-2 bg-white border border-clay shadow-sm overflow-hidden">
+                    <div class="p-8 border-b border-stone-100 bg-stone-50/50">
+                        <h3 class="serif text-2xl italic text-stone-800">Personal en Servicio (Ahora)</h3>
+                    </div>
+                    <table class="w-full text-left">
+                        <thead class="bg-stone-50 text-[9px] uppercase tracking-widest text-stone-500 border-b">
+                            <tr>
+                                <th class="p-6">Nombre Apellido</th>
+                                <th class="p-6">Rol / Área</th>
+                                <th class="p-6">Entrada</th>
+                                <th class="p-6">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm">
+                            <tr class="border-b border-stone-50">
+                                <td class="p-6 font-bold">Martín R.</td>
+                                <td class="p-6 text-[11px] uppercase tracking-widest text-stone-400 font-black">Caja Central</td>
+                                <td>MENU BITES FINE DINING</td>
+                                <td>MODERN FOOD</td>
+                                <td>95%</td>
+                                <td>$12.5k</td>
+                                <td><span class="status-active">● EN LÍNEA</span></td>
+                                <td><button class="btn-master">GESTIONAR</button></td>
+                            </tr>
+                            <tr>
+                                <td>MODERN FOOD VALPARAÍSO</td>
+                                <td>Providencia, RM</td>
+                                <td>72%</td>
+                                <td>$4.2k</td>
+                                <td><span class="status-active">● EN LÍNEA</span></td>
+                                <td><button class="btn-master">GESTIONAR</button></td>
+                            </tr>
+                            <tr>
+                                <td>GASTRONOMÍA GLOBAL</td>
+                                <td>Valparaíso, V</td>
+                                <td>88%</td>
+                                <td>$8.9k</td>
+                                <td><span class="status-active">● EN LÍNEA</span></td>
+                                <td><button class="btn-master">GESTIONAR</button></td>
+                            </tr>
+                            <tr class="border-b border-stone-50">
+                                <td class="p-6 font-bold">Alex G.</td>
+                                <td class="p-6 text-[11px] uppercase tracking-widest text-stone-400 font-black">Garzón Piso 1</td>
+                                <td class="p-6 font-mono text-xs">12:00 PM</td>
+                                <td class="p-6"><span class="badge-ready !bg-olive !text-white px-3 py-1 text-[9px]">EN TURNO</span></td>
+                            </tr>
+                            <tr class="border-b border-stone-50">
+                                <td class="p-6 font-bold">Sofía S.</td>
+                                <td class="p-6 text-[11px] uppercase tracking-widest text-stone-400 font-black">Chef de Cocina</td>
+                                <td class="p-6 font-mono text-xs">10:00 AM</td>
+                                <td class="p-6"><span class="badge-ready !bg-olive !text-white px-3 py-1 text-[9px]">EN TURNO</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="bg-white border border-clay shadow-sm p-8">
+                    <h3 class="serif text-2xl italic mb-6 border-b pb-4">Próximos Turnos</h3>
+                    <div class="space-y-6">
+                        <div class="p-4 bg-stone-50 border-l-4 border-accent">
+                            <p class="text-[10px] font-black uppercase text-stone-400">Turno Noche (19:00)</p>
+                            <p class="text-sm font-bold mt-1 tracking-tight">Lucía B. · <span class="text-accent italic">Caja</span></p>
+                        </div>
+                        <div class="p-4 bg-stone-50 border-l-4 border-stone-300">
+                            <p class="text-[10px] font-black uppercase text-stone-400">Turno Noche (19:00)</p>
+                            <p class="text-sm font-bold mt-1 tracking-tight">Antonio C. · <span class="italic">Garzón</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View: Inventario -->
+        <div id="view-inventory" class="admin-view hidden animate-fade">
+            <header class="flex justify-between items-end mb-16 border-b-2 border-accent pb-10">
+                <div>
+                    <h2 class="text-6xl italic text-stone-800 tracking-tight leading-none">Almacén</h2>
+                    <p class="text-olive font-bold uppercase tracking-[0.3em] text-[10px] mt-6">Control de Stock y Suministros</p>
+                <div class="brand-container">
+                <i data-lucide="utensils" class="brand-symbol" style="width: 24px; height: 24px;"></i>
+                <span class="brand-name">MENU BITES</span>
+            </div>
+                <div class="flex gap-4">
+                    <div class="relative">
+                        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-300"></i>
+                        <input type="text" placeholder="Buscar producto..." class="pl-12 pr-6 py-4 bg-white border border-clay text-[11px] w-64 focus:outline-none focus:border-accent">
+                    </div>
+                    <button class="btn-accent !bg-stone-800 !py-4">Realizar Pedido</button>
+                </div>
+            </header>
+            
+            <div class="bg-white border border-clay shadow-sm overflow-hidden mb-12">
+                <table class="w-full text-left">
+                    <thead class="bg-stone-50/80 text-[9px] uppercase tracking-widest text-stone-500 border-b">
+                        <tr>
+                            <th class="p-8">Producto</th>
+                            <th class="p-8">Categoría</th>
+                            <th class="p-8">Stock Actual</th>
+                            <th class="p-8">Unidad</th>
+                            <th class="p-8">Estado</th>
+                            <th class="p-8 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                        <tr class="border-b border-stone-50 hover:bg-stone-50/50">
+                            <td class="p-8 font-black">Harina de Trigo 00</td>
+                            <td class="p-8 text-[10px] font-bold text-stone-400 italic">DESPENSA</td>
+                            <td class="p-8 font-mono font-bold">120.5</td>
+                            <td class="p-8">KG</td>
+                            <td class="p-8"><span class="px-3 py-1 bg-olive text-white text-[9px] font-black uppercase">Suficiente</span></td>
+                            <td class="p-8 text-right text-accent cursor-pointer hover:underline text-[10px] font-black">EDITAR</td>
+                        </tr>
+                        <tr class="border-b border-stone-50 hover:bg-stone-50/50 bg-accent/5">
+                            <td class="p-8 font-black">Vino Chianti Riserva</td>
+                            <td class="p-8 text-[10px] font-bold text-stone-400 italic">CAVA</td>
+                            <td class="p-8 font-mono font-bold text-accent">14</td>
+                            <td class="p-8">Botellas</td>
+                            <td class="p-8"><span class="px-3 py-1 bg-accent text-white text-[9px] font-black uppercase animate-pulse">STOCK BAJO</span></td>
+                            <td class="p-8 text-right text-accent cursor-pointer hover:underline text-[10px] font-black">REABASTECER</td>
+                        </tr>
+                        <tr class="border-b border-stone-50 hover:bg-stone-50/50">
+                            <td class="p-8 font-black">Queso Parmigiano</td>
+                            <td class="p-8 text-[10px] font-bold text-stone-400 italic">REFRIGERADOS</td>
+                            <td class="p-8 font-mono font-bold">45.0</td>
+                            <td class="p-8">KG</td>
+                            <td class="p-8"><span class="px-3 py-1 bg-olive text-white text-[9px] font-black uppercase">Suficiente</span></td>
+                            <td class="p-8 text-right text-accent cursor-pointer hover:underline text-[10px] font-black">EDITAR</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- View: Configuración -->
+        <div id="view-settings" class="admin-view hidden animate-fade">
+            <header class="flex justify-between items-end mb-16 border-b-2 border-accent pb-10">
+                <div>
+                    <h2 class="text-6xl italic text-stone-800 tracking-tight leading-none">Configurazione</h2>
+                    <p class="text-olive font-bold uppercase tracking-[0.3em] text-[10px] mt-6">Arquitectura y Reglas del Local</p>
+                </div>
+                <button class="btn-accent !py-4 shadow-xl">Guardar Cambios</button>
+            </header>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div class="space-y-12">
+                    <section class="bg-white p-10 border border-clay shadow-soft">
+                        <h4 class="serif text-3xl italic mb-8 flex items-center gap-4">
+                            <i data-lucide="store" class="text-accent w-8 h-8"></i> Identidad del Local
+                        </h4>
+                        <div class="space-y-6">
+                            <div class="space-y-2">
+                                <label class="text-[9px] uppercase font-black text-stone-400 tracking-widest">Nombre Comercial</label>
+                                <input type="text" value="Metro Gourmet Providencia" class="w-full bg-stone-50 border-b border-clay p-4 text-sm font-bold focus:border-accent outline-none transition-all">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[9px] uppercase font-black text-stone-400 tracking-widest">Email de Notificaciones</label>
+                                <input type="email" value="admin.providencia@menubites.cl" class="w-full bg-stone-50 border-b border-clay p-4 text-sm focus:border-accent outline-none transition-all">
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="space-y-12">
+                    <section class="bg-white p-10 border border-clay shadow-soft">
+                        <h4 class="serif text-3xl italic mb-8 flex items-center gap-4">
+                            <i data-lucide="calculator" class="text-accent w-8 h-8"></i> Reglas Tributarias & Pagos
+                        </h4>
+                        <div class="space-y-8">
+                            <div class="flex justify-between items-center py-4 border-b border-gray-100">
+                                <div>
+                                    <p class="text-xs font-black uppercase">IVA (Impuesto)</p>
+                                    <p class="text-[10px] text-stone-400 mt-1 italic">Aplicado a todos los productos</p>
+                                </div>
+                                <span class="text-2xl font-serif italic text-accent">19%</span>
+                            </div>
+                            <div class="flex justify-between items-center py-4 border-b border-gray-100">
+                                <div>
+                                    <p class="text-xs font-black uppercase">Propina Sugerida</p>
+                                    <p class="text-[10px] text-stone-400 mt-1 italic">Calculada al cierre de mesa</p>
+                                </div>
+                                <span class="text-2xl font-serif italic text-accent">10%</span>
+                            </div>
+                            <div class="flex justify-between items-center py-4">
+                                <div>
+                                    <p class="text-xs font-black uppercase">Boleta Electrónica</p>
+                                    <p class="text-[10px] text-stone-400 mt-1 italic">Emisión automática vía API SII</p>
+                                </div>
+                                <div class="w-12 h-6 bg-olive rounded-full relative">
+                                    <div style="font-weight: 700;">ALEX GLOBAL</div>
+                                    <div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        function switchAdminView(viewId, el) {
+            // Hide all views
+            document.querySelectorAll('.admin-view').forEach(view => {
+                view.classList.add('hidden');
+            });
+            
+            // Show target view
+            document.getElementById('view-' + viewId).classList.remove('hidden');
+            
+            // Update sidebar active state
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            el.classList.add('active');
+            
+            // Re-render icons to ensure they show in newly visible sections
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
