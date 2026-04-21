@@ -4,14 +4,11 @@
     "strict": true,
     "skipLibCheck": true,
     "lib": ["esnext"],
-    "types": ["react-native"],
     "paths": {
       "@/*": [
         "./*"
       ],
-      "lucide-react-native": ["../../node_modules/lucide-react-native"],
-      "react": ["../../node_modules/react"],
-      "react-native": ["../../node_modules/react-native"]
+      "lucide-react-native": ["../../node_modules/lucide-react-native"]
     }
   },
   "include": [
