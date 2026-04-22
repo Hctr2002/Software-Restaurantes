@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
-type UserRole = 'super_admin' | 'admin' | 'waiter' | 'kitchen' | 'client' | null;
+export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'GARZON' | 'COCINA' | 'CLIENTE' | null;
 
 interface AuthContextType {
   session: Session | null;
@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        setRole(session.user.app_metadata.role || 'client');
+        setRole(session.user.app_metadata.role || 'CLIENTE');
       }
       setLoading(false);
     });
@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        setRole(session.user.app_metadata.role || 'client');
+        setRole(session.user.app_metadata.role || 'CLIENTE');
       } else {
         setRole(null);
       }

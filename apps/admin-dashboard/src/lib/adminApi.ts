@@ -33,14 +33,31 @@ export function createServiceClient() {
 }
 
 export async function requireSuperAdmin(req: NextRequest) {
-  const sessionClient = createSessionClient(req);
-  const {
-    data: { user },
-    error,
-  } = await sessionClient.auth.getUser();
+  let user;
+  const authHeader = req.headers.get("Authorization");
 
-  if (error || !user) {
-    return { errorResponse: NextResponse.json({ error: "No autenticado" }, { status: 401 }) };
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.replace("Bearer ", "");
+    const supabaseAuth = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    const { data, error } = await supabaseAuth.auth.getUser(token);
+    if (error || !data.user) {
+      return { errorResponse: NextResponse.json({ error: "No autenticado (Token)" }, { status: 401 }) };
+    }
+    user = data.user;
+  } else {
+    const sessionClient = createSessionClient(req);
+    const {
+      data: { user: sessionUser },
+      error,
+    } = await sessionClient.auth.getUser();
+
+    if (error || !sessionUser) {
+      return { errorResponse: NextResponse.json({ error: "No autenticado (Cookie)" }, { status: 401 }) };
+    }
+    user = sessionUser;
   }
 
   if (user.app_metadata?.role !== "SUPER_ADMIN") {
