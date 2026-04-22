@@ -40,25 +40,27 @@ export default function TableMenuPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-navy">
+        <div className="w-16 h-16 border-4 border-white/5 border-t-brand-accent rounded-full animate-spin shadow-2xl shadow-brand-accent/20" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white pb-32">
+    <div className="min-h-screen bg-navy bg-body-gradient text-white pb-32">
       {/* Header con Back Button */}
-      <header className="glass sticky top-0 z-50 p-4 flex items-center space-x-4 border-b border-white/5">
-        <button 
+      <header className="glass-navy sticky top-0 z-50 p-5 flex items-center space-x-4">
+        <button
           onClick={() => router.push("/")}
-          className="p-2 bg-white/5 rounded-xl hover:bg-white/10 transition-colors"
+          className="p-3 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all active:scale-95"
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-xl font-black tracking-tight">Mesa {params.id?.slice(0, 4)}</h1>
-          <p className="text-[10px] text-primary uppercase font-bold tracking-widest">Nuevo Pedido</p>
+          <h1 className="text-xl font-black tracking-tighter uppercase italic">
+            Mesa <span className="text-brand-accent">{params.id?.slice(0, 4)}</span>
+          </h1>
+          <p className="text-[10px] text-sage uppercase font-black tracking-[0.2em] mt-0.5">Nuevo Pedido</p>
         </div>
       </header>
 
@@ -89,29 +91,32 @@ export default function TableMenuPage() {
         </div>
 
         {filteredMenu.length === 0 && (
-          <div className="text-center py-20 opacity-30 italic font-medium">
-            No se encontraron platos con ese criterio.
+          <div className="text-center py-24 bg-white/[0.02] rounded-[3rem] border border-dashed border-white/10 flex flex-col items-center mx-4">
+            <p className="text-white/20 font-black uppercase tracking-widest text-xs">No se encontraron platos con ese criterio.</p>
           </div>
         )}
       </main>
 
-      {/* Floating Action Cart (Wow Factor) */}
+      {/* Bandeja Flotante (Wow Factor — from client.html mockup) */}
       {cart.length > 0 && (
         <div className="fixed bottom-6 inset-x-4 z-50 animate-in slide-in-from-bottom-8 duration-500">
-          <div className="max-w-2xl mx-auto glass p-6 rounded-3xl border-primary/20 shadow-2xl shadow-primary/10 space-y-4">
+          <div className="max-w-2xl mx-auto glass-navy p-6 rounded-[2.5rem] shadow-2xl shadow-black/40 space-y-4">
             <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-primary rounded-xl">
-                  <ShoppingBag className="w-5 h-5 text-primary-foreground" />
+              <div className="flex items-center space-x-4">
+                <div className="w-14 h-14 bg-white/10 rounded-[1.25rem] flex items-center justify-center border border-white/5 relative">
+                  <ShoppingBag className="w-6 h-6 text-sage" />
+                  <div className="absolute -top-1 -right-1 bg-sage text-navy text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-navy">
+                    {cart.length}
+                  </div>
                 </div>
                 <div>
-                  <p className="text-xs font-bold opacity-60 uppercase">Total Pedido</p>
-                  <p className="text-2xl font-black text-primary">${total.toLocaleString()}</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.3em] text-sage">Bandeja</p>
+                  <p className="text-2xl font-black leading-none mt-1">${total.toLocaleString()}</p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => setCart([])}
-                className="p-3 text-muted-foreground hover:text-destructive transition-colors"
+                className="p-3 text-white/20 hover:text-destructive transition-colors"
                 title="Limpiar Carrito"
               >
                 <Trash2 className="w-5 h-5" />
@@ -119,10 +124,10 @@ export default function TableMenuPage() {
             </div>
 
             <div className="flex space-x-3">
-              <button className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-xs font-bold uppercase tracking-widest rounded-2xl transition-all">
-                Ver Detalle ({cart.length})
+              <button className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all border border-white/5">
+                Detalle ({cart.length})
               </button>
-              <button className="flex-[2] py-4 bg-primary text-primary-foreground font-black uppercase tracking-widest rounded-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center">
+              <button className="flex-[2] py-4 bg-sage text-navy font-black uppercase tracking-widest rounded-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center shadow-xl shadow-black/30 text-[10px]">
                 Enviar a Cocina <Send className="ml-2 w-4 h-4" />
               </button>
             </div>

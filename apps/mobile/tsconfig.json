@@ -2,10 +2,13 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "skipLibCheck": true,
+    "lib": ["esnext"],
     "paths": {
       "@/*": [
         "./*"
-      ]
+      ],
+      "lucide-react-native": ["../../node_modules/lucide-react-native"]
     }
   },
   "include": [

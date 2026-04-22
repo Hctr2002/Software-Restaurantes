@@ -16,23 +16,36 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@menu-bites/ui": [
+        "../../packages/ui/src/index.ts"
+      ],
+      "@menu-bites/ui/*": [
+        "../../packages/ui/src/*"
+      ],
+      "@menu-bites/auth": [
+        "../../packages/auth/src/index.ts"
+      ],
+      "@menu-bites/auth/*": [
+        "../../packages/auth/src/*"
+      ],
+      "@menu-bites/store": [
+        "../../packages/store/src/index.ts"
+      ],
+      "@menu-bites/store/*": [
+        "../../packages/store/src/*"
+      ]
+    },
+    "target": "ES2017",
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "ignoreDeprecations": "6.0",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@menu-bites/ui": ["../../packages/ui/src/index.ts"],
-      "@menu-bites/ui/*": ["../../packages/ui/src/*"],
-      "@menu-bites/auth": ["../../packages/auth/src/index.ts"],
-      "@menu-bites/auth/*": ["../../packages/auth/src/*"],
-      "@menu-bites/store": ["../../packages/store/src/index.ts"],
-      "@menu-bites/store/*": ["../../packages/store/src/*"]
-    },
-    "target": "ES2017"
+    ]
   },
   "include": [
     "next-env.d.ts",

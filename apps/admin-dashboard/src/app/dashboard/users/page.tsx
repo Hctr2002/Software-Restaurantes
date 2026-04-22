@@ -1,23 +1,26 @@
 "use client";
 
-import React from "react";
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from "@menu-bites/ui";
-import { Eye, EyeOff, Pencil, Plus, Save, Trash2, Users, X } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Button, Input } from "@menu-bites/ui";
+import { Eye, EyeOff, Pencil, Plus, Trash2, Search } from "lucide-react";
 import DashboardShell from "../_components/DashboardShell";
 import { formatDate, Restaurant, ROLES, UserRecord } from "../_components/adminShared";
+import { Table, TableRow, TableCell } from "../_components/Table";
+import { Badge } from "../_components/Badge";
+import Modal from "../_components/Modal";
 
 export default function UsersPage() {
-  const [restaurants, setRestaurants] = React.useState<Restaurant[]>([]);
-  const [users, setUsers] = React.useState<UserRecord[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
-  const [showNewPassword, setShowNewPassword] = React.useState(false);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [users, setUsers] = useState<UserRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const [newUser, setNewUser] = React.useState({ email: "", password: "", role: "ADMIN", restaurantId: "" });
-  const [editingUserId, setEditingUserId] = React.useState<string | null>(null);
-  const [editingUser, setEditingUser] = React.useState({ email: "", password: "", role: "CLIENTE", restaurantId: "" });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({ email: "", password: "", role: "ADMIN", restaurantId: "" });
 
-  const fetchData = React.useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -43,63 +46,64 @@ export default function UsersPage() {
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const createUser = async () => {
-    if (!newUser.email.trim() || !newUser.password.trim()) return;
-
-    const payload = {
-      email: newUser.email,
-      password: newUser.password,
-      role: newUser.role,
-      restaurantId: newUser.restaurantId || null,
-    };
-
-    const res = await fetch("/api/admin/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const json = await res.json();
-    if (!res.ok) {
-      setError(json.error || "No se pudo crear usuario");
-      return;
-    }
-
-    setNewUser({ email: "", password: "", role: "ADMIN", restaurantId: "" });
-    await fetchData();
+  const openCreateModal = () => {
+    setEditingUserId(null);
+    setFormData({ email: "", password: "", role: "ADMIN", restaurantId: "" });
+    setShowPassword(false);
+    setIsModalOpen(true);
   };
 
-  const updateUser = async (id: string) => {
+  const openEditModal = (userRow: UserRecord) => {
+    setEditingUserId(userRow.id);
+    setFormData({
+      email: userRow.email,
+      password: "",
+      role: userRow.role,
+      restaurantId: userRow.restaurant_id || "",
+    });
+    setShowPassword(false);
+    setIsModalOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData.email.trim()) return;
+    if (!editingUserId && !formData.password.trim()) {
+      setError("La contraseña es requerida para usuarios nuevos");
+      return;
+    }
+
     const payload = {
-      email: editingUser.email,
-      password: editingUser.password || undefined,
-      role: editingUser.role,
-      restaurantId: editingUser.restaurantId || null,
+      email: formData.email,
+      password: formData.password || undefined,
+      role: formData.role,
+      restaurantId: formData.restaurantId || null,
     };
 
-    const res = await fetch(`/api/admin/users/${id}`, {
-      method: "PUT",
+    const url = editingUserId ? `/api/admin/users/${editingUserId}` : "/api/admin/users";
+    const method = editingUserId ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
     const json = await res.json();
     if (!res.ok) {
-      setError(json.error || "No se pudo actualizar usuario");
+      setError(json.error || "No se pudo guardar el usuario");
       return;
     }
 
-    setEditingUserId(null);
-    setEditingUser({ email: "", password: "", role: "CLIENTE", restaurantId: "" });
+    setIsModalOpen(false);
     await fetchData();
   };
 
   const deleteUser = async (id: string) => {
-    const confirmed = window.confirm("Eliminar usuario de forma permanente?");
+    const confirmed = window.confirm("¿Eliminar usuario de forma permanente?");
     if (!confirmed) return;
 
     const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
@@ -112,144 +116,175 @@ export default function UsersPage() {
     await fetchData();
   };
 
-  const usersTop20 = users.slice(0, 20);
+  const getRoleVariant = (role: string) => {
+    if (role === "SUPER_ADMIN") return "danger";
+    if (role === "ADMIN") return "info";
+    if (role === "CLIENTE") return "neutral";
+    return "warning"; // GARZON, COCINA
+  };
 
   return (
-    <DashboardShell title="Panel de Super Administrador" subtitle="Usuarios">
+    <DashboardShell title="Directorio" subtitle="Usuarios Globales">
       {error && (
-        <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/10 text-sm text-destructive font-bold">
+        <div className="p-4 rounded-md border border-red-500/30 bg-red-500/10 text-sm text-red-500 font-medium mb-6">
           {error}
         </div>
       )}
 
-      <Card className="border-white/5 bg-white/5 backdrop-blur-md">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" /> Usuarios</CardTitle>
-          <CardDescription>Listado de los ultimos 20 usuarios con opciones por registro</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <Input placeholder="Email" value={newUser.email} onChange={(e) => setNewUser((prev) => ({ ...prev, email: e.target.value }))} />
-            <div className="relative">
-              <Input
-                type={showNewPassword ? "text" : "password"}
-                placeholder="Password"
-                className="pr-10"
-                value={newUser.password}
-                onChange={(e) => setNewUser((prev) => ({ ...prev, password: e.target.value }))}
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white"
-                onClick={() => setShowNewPassword((prev) => !prev)}
-                aria-label={showNewPassword ? "Ocultar password" : "Mostrar password"}
-              >
-                {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            <select
-              className="h-12 rounded-xl border border-white/10 bg-white/5 px-4 text-sm"
-              value={newUser.role}
-              onChange={(e) => setNewUser((prev) => ({ ...prev, role: e.target.value }))}
-            >
-              {ROLES.map((role) => (
-                <option key={role} value={role} className="bg-slate-900">{role}</option>
-              ))}
-            </select>
-            <select
-              className="h-12 rounded-xl border border-white/10 bg-white/5 px-4 text-sm"
-              value={newUser.restaurantId}
-              onChange={(e) => setNewUser((prev) => ({ ...prev, restaurantId: e.target.value }))}
-            >
-              <option value="" className="bg-slate-900">Sin restaurante</option>
-              {restaurants.map((restaurant) => (
-                <option key={restaurant.id} value={restaurant.id} className="bg-slate-900">{restaurant.name}</option>
-              ))}
-            </select>
-          </div>
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Input 
+            placeholder="Buscar usuarios..." 
+            className="pl-9 bg-slate-900 border-slate-800 text-sm focus-visible:ring-blue-500"
+          />
+        </div>
+        <Button onClick={openCreateModal} className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm">
+          <Plus className="w-4 h-4 mr-2" /> Invitar Usuario
+        </Button>
+      </div>
 
-          <Button variant="premium" onClick={createUser} className="w-full md:w-auto">
-            <Plus className="w-4 h-4 mr-2" /> Crear Nuevo Usuario
-          </Button>
-
-          <div className="space-y-3 max-h-[620px] overflow-auto pr-1">
-            {usersTop20.map((userRow) => {
-              const isEditing = editingUserId === userRow.id;
-              const restaurantName = Array.isArray(userRow.restaurants)
+      {/* Data Table */}
+      {loading ? (
+        <div className="py-12 text-center text-sm text-slate-500">Cargando usuarios...</div>
+      ) : (
+        <Table headers={["Correo", "Rol", "Organización", "Creado", ""]}>
+          {users.length === 0 && (
+            <TableRow>
+              <TableCell className="text-center text-slate-500" colSpan={5}>
+                No se encontraron usuarios.
+              </TableCell>
+            </TableRow>
+          )}
+          {users.map((userRow) => {
+            const restaurantName = Array.isArray(userRow.restaurants)
                 ? userRow.restaurants[0]?.name
                 : userRow.restaurants?.name;
 
-              return (
-                <div key={userRow.id} className="p-3 rounded-xl border border-white/10 bg-black/20 space-y-2">
-                  {isEditing ? (
-                    <>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <Input value={editingUser.email} onChange={(e) => setEditingUser((prev) => ({ ...prev, email: e.target.value }))} />
-                        <Input type="password" placeholder="Nueva password (opcional)" value={editingUser.password} onChange={(e) => setEditingUser((prev) => ({ ...prev, password: e.target.value }))} />
-                        <select
-                          className="h-12 rounded-xl border border-white/10 bg-white/5 px-4 text-sm"
-                          value={editingUser.role}
-                          onChange={(e) => setEditingUser((prev) => ({ ...prev, role: e.target.value }))}
-                        >
-                          {ROLES.map((role) => (
-                            <option key={role} value={role} className="bg-slate-900">{role}</option>
-                          ))}
-                        </select>
-                        <select
-                          className="h-12 rounded-xl border border-white/10 bg-white/5 px-4 text-sm"
-                          value={editingUser.restaurantId}
-                          onChange={(e) => setEditingUser((prev) => ({ ...prev, restaurantId: e.target.value }))}
-                        >
-                          <option value="" className="bg-slate-900">Sin restaurante</option>
-                          {restaurants.map((restaurant) => (
-                            <option key={restaurant.id} value={restaurant.id} className="bg-slate-900">{restaurant.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="premium" onClick={() => updateUser(userRow.id)}><Save className="w-4 h-4 mr-1" />Guardar</Button>
-                        <Button size="sm" variant="outline" onClick={() => setEditingUserId(null)}><X className="w-4 h-4 mr-1" />Cancelar</Button>
-                      </div>
-                    </>
+            return (
+              <TableRow key={userRow.id}>
+                <TableCell>
+                  <div className="font-medium text-slate-200">{userRow.email}</div>
+                  <div className="text-[11px] text-slate-500">{userRow.id}</div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant={getRoleVariant(userRow.role)}>
+                    {userRow.role}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-slate-300 text-sm">
+                  {restaurantName ? (
+                    <span className="font-medium">{restaurantName}</span>
                   ) : (
-                    <div className="flex items-center justify-between gap-2">
-                      <div>
-                        <p className="font-bold text-sm">{userRow.email}</p>
-                        <p className="text-xs text-muted-foreground">rol: {userRow.role} | restaurante: {restaurantName || "Sin asignar"}</p>
-                        <p className="text-[11px] text-muted-foreground mt-1">{formatDate(userRow.createdAt)}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => {
-                            setEditingUserId(userRow.id);
-                            setEditingUser({
-                              email: userRow.email,
-                              password: "",
-                              role: userRow.role,
-                              restaurantId: userRow.restaurant_id || "",
-                            });
-                          }}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button size="icon" variant="destructive" onClick={() => deleteUser(userRow.id)}>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
+                    <span className="text-slate-500 italic">Acceso Global</span>
                   )}
-                </div>
-              );
-            })}
-          </div>
+                </TableCell>
+                <TableCell className="text-slate-400 text-xs">
+                  {formatDate(userRow.createdAt)}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10"
+                      onClick={() => openEditModal(userRow)}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                      onClick={() => deleteUser(userRow.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </Table>
+      )}
 
-          {loading && (
-            <p className="text-sm text-muted-foreground">Cargando usuarios...</p>
-          )}
-        </CardContent>
-      </Card>
+      {/* Slide-over Modal for Create/Edit */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingUserId ? "Editar Usuario" : "Invitar Usuario"}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="text-slate-300 hover:bg-slate-800 hover:text-white">
+              Cancelar
+            </Button>
+            <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white">
+              {editingUserId ? "Guardar cambios" : "Invitar"}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Dirección de correo <span className="text-red-500">*</span></label>
+            <Input 
+              placeholder="e.g. jdoe@example.com" 
+              className="bg-slate-950 border-slate-800"
+              value={formData.email}
+              onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              Contraseña {editingUserId ? "(Opcional)" : <span className="text-red-500">*</span>}
+            </label>
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                placeholder={editingUserId ? "Dejar en blanco para mantener la actual" : "••••••••"}
+                className="bg-slate-950 border-slate-800 pr-10"
+                value={formData.password}
+                onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                onClick={() => setShowPassword((prev) => !prev)}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Rol</label>
+            <select
+              className="w-full h-10 rounded-md border border-slate-800 bg-slate-950 px-3 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.role}
+              onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
+            >
+              {ROLES.map((role) => (
+                <option key={role} value={role}>{role}</option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Organización</label>
+            <select
+              className="w-full h-10 rounded-md border border-slate-800 bg-slate-950 px-3 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.restaurantId}
+              onChange={(e) => setFormData((prev) => ({ ...prev, restaurantId: e.target.value }))}
+            >
+              <option value="">-- Acceso Global (Sin Organización) --</option>
+              {restaurants.map((restaurant) => (
+                <option key={restaurant.id} value={restaurant.id}>{restaurant.name}</option>
+              ))}
+            </select>
+            <p className="text-[10px] text-slate-500 mt-1">Dejar en blanco si el usuario es un Super Administrador.</p>
+          </div>
+        </div>
+      </Modal>
     </DashboardShell>
   );
 }
