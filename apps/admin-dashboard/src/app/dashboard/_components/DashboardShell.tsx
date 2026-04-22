@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@menu-bites/store";
 import { signOut } from "@menu-bites/auth";
 import { Button } from "@menu-bites/ui";
-import { LayoutDashboard, Store, Users, LogOut } from "lucide-react";
+import { LayoutDashboard, Store, Users, LogOut, ChevronRight, Settings } from "lucide-react";
 
 type DashboardShellProps = {
   title: string;
@@ -33,83 +33,109 @@ export default function DashboardShell({ title, subtitle, children }: DashboardS
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white selection:bg-primary/30">
-      <aside className="fixed left-0 top-0 h-full w-64 bg-black/40 border-r border-white/5 backdrop-blur-3xl z-50 hidden lg:block">
-        <div className="p-8">
-          <h2 className="text-2xl font-black tracking-tighter uppercase italic">
-            Menu <span className="text-primary">Bites</span>
-          </h2>
-          <p className="text-[8px] text-muted-foreground uppercase tracking-widest font-bold mt-1">
-            Super Admin Console
-          </p>
+    <div className="min-h-screen bg-slate-950 text-slate-300 font-sans flex">
+      {/* JSM Style Sidebar */}
+      <aside className="fixed left-0 top-0 h-full w-64 bg-slate-900 border-r border-slate-800 z-50 hidden lg:flex flex-col">
+        {/* Brand */}
+        <div className="h-16 flex items-center px-6 border-b border-slate-800">
+          <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center mr-3">
+            <Store className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-slate-100 tracking-tight leading-tight">Menu Bites</h2>
+            <p className="text-[10px] text-slate-400 font-medium">Administration</p>
+          </div>
         </div>
 
-        <nav className="mt-8 px-4 space-y-2">
-          <NavItem href="/dashboard" icon={<LayoutDashboard className="w-5 h-5" />} label="Resumen" active={pathname === "/dashboard"} />
-          <NavItem href="/dashboard/restaurants" icon={<Store className="w-5 h-5" />} label="Restaurantes" active={pathname.startsWith("/dashboard/restaurants")} />
-          <NavItem href="/dashboard/users" icon={<Users className="w-5 h-5" />} label="Usuarios" active={pathname.startsWith("/dashboard/users")} />
-        </nav>
+        {/* Navigation */}
+        <div className="flex-1 overflow-y-auto py-6 px-3 space-y-6">
+          
+          <div>
+            <p className="px-3 text-xs font-bold text-slate-500 mb-2 tracking-wider">PANEL PRINCIPAL</p>
+            <nav className="space-y-0.5">
+              <NavItem href="/dashboard" icon={<LayoutDashboard className="w-4 h-4" />} label="Resumen" active={pathname === "/dashboard"} />
+            </nav>
+          </div>
 
-        <div className="absolute bottom-8 left-0 w-full px-6">
+          <div>
+            <p className="px-3 text-xs font-bold text-slate-500 mb-2 tracking-wider">DIRECTORIO</p>
+            <nav className="space-y-0.5">
+              <NavItem href="/dashboard/restaurants" icon={<Store className="w-4 h-4" />} label="Organizaciones" active={pathname.startsWith("/dashboard/restaurants")} />
+              <NavItem href="/dashboard/users" icon={<Users className="w-4 h-4" />} label="Usuarios Globales" active={pathname.startsWith("/dashboard/users")} />
+              <NavItem href="/dashboard/plans" icon={<LayoutDashboard className="w-4 h-4" />} label="Planes de Suscripción" active={pathname.startsWith("/dashboard/plans")} />
+            </nav>
+          </div>
+
+          <div>
+            <p className="px-3 text-xs font-bold text-slate-500 mb-2 tracking-wider">SISTEMA</p>
+            <nav className="space-y-0.5">
+              <NavItem href="/dashboard/settings/profile" icon={<Settings className="w-4 h-4" />} label="Configuración" active={pathname.startsWith("/dashboard/settings")} />
+            </nav>
+          </div>
+        </div>
+
+        {/* User Profile & Sign Out */}
+        <div className="p-4 border-t border-slate-800">
+          <div className="flex items-center space-x-3 mb-4 px-2">
+            <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
+              <span className="text-xs font-bold text-slate-300">{user?.email?.charAt(0).toUpperCase() || "U"}</span>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <p className="text-xs font-medium text-slate-200 truncate">{user?.email}</p>
+              <p className="text-[10px] text-slate-500 truncate">{user?.role}</p>
+            </div>
+          </div>
           <Button
             variant="outline"
-            className="w-full border-white/5 bg-white/5 hover:bg-destructive/20 hover:text-destructive hover:border-destructive/20 transition-all rounded-2xl"
+            className="w-full justify-start h-9 px-3 bg-transparent border-transparent hover:bg-slate-800 text-slate-400 hover:text-slate-200"
             onClick={handleSignOut}
             disabled={isSigningOut}
           >
             <LogOut className="w-4 h-4 mr-2" />
-            {isSigningOut ? "Cerrando..." : "Cerrar Sesion"}
+            <span className="text-sm">{isSigningOut ? "Cerrando..." : "Cerrar Sesion"}</span>
           </Button>
         </div>
       </aside>
 
-      <main className="lg:pl-64 min-h-screen">
-        <header className="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-black/20 backdrop-blur-xl sticky top-0 z-40">
-          <h1 className="text-xl font-bold tracking-tight">
-            {title} <span className="text-muted-foreground font-normal">/ {subtitle}</span>
-          </h1>
-
-          <div className="flex items-center space-x-4">
-            <div className="h-10 w-48 bg-white/5 rounded-2xl border border-white/5 flex items-center px-3 space-x-3">
-              <div className="w-6 h-6 bg-primary/20 rounded-md flex items-center justify-center">
-                <LayoutDashboard className="w-4 h-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-white leading-none">Super Admin</p>
-                <p className="text-[8px] text-muted-foreground uppercase font-black truncate max-w-[100px]">{user?.email}</p>
-              </div>
-            </div>
+      {/* Main Content Area */}
+      <main className="lg:pl-64 flex-1 flex flex-col min-h-screen">
+        {/* JSM Style Header with Breadcrumbs */}
+        <header className="h-16 border-b border-slate-800 flex items-center px-8 bg-slate-950 sticky top-0 z-40">
+          <div className="flex items-center text-sm">
+            <span className="text-slate-400 hover:text-slate-300 cursor-pointer transition-colors">{title}</span>
+            <ChevronRight className="w-4 h-4 mx-2 text-slate-600" />
+            <span className="text-slate-200 font-medium">{subtitle}</span>
           </div>
         </header>
 
-        <div className="p-8 max-w-7xl mx-auto space-y-8">{children}</div>
+        {/* Page Content */}
+        <div className="flex-1 p-8 overflow-x-hidden">
+          <div className="max-w-6xl mx-auto space-y-6">
+            {/* Page Title Header */}
+            <div className="flex items-center justify-between mb-8">
+              <h1 className="text-2xl font-semibold text-slate-100 tracking-tight">{subtitle}</h1>
+            </div>
+            
+            {children}
+          </div>
+        </div>
       </main>
     </div>
   );
 }
 
-function NavItem({
-  href,
-  icon,
-  label,
-  active,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-  active: boolean;
-}) {
+function NavItem({ href, icon, label, active }: { href: string; icon: React.ReactNode; label: string; active: boolean }) {
   return (
     <Link
       href={href}
-      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-2xl transition-all ${
+      className={`w-full flex items-center space-x-3 px-3 py-2 rounded-md transition-colors ${
         active
-          ? "bg-primary/10 text-primary border border-primary/20"
-          : "text-muted-foreground hover:bg-white/5 hover:text-white"
+          ? "bg-blue-900/30 text-blue-400 font-medium"
+          : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
       }`}
     >
       {icon}
-      <span className="text-sm font-bold tracking-tight">{label}</span>
+      <span className="text-sm">{label}</span>
     </Link>
   );
 }
