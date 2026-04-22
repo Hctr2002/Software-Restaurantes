@@ -8,7 +8,7 @@ import {
   StatusBar
 } from 'react-native';
 import { Text, View } from '@/components/Themed';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../constants/MB_Theme';
+import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { ChefHat, Search, ShoppingBag, Star, Timer, Flame, Leaf } from 'lucide-react-native';
 import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
 
@@ -136,6 +136,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: MB_SPACING.lg,
     marginBottom: MB_SPACING.lg,
+  },
+  headerLeft: {
+    flex: 1,
   },
   greeting: {
     fontSize: 14,
