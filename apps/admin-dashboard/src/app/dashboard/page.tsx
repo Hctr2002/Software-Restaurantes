@@ -51,7 +51,7 @@ export default function DashboardPage() {
   const adminUsers = users.filter((userRow) => userRow.role === "ADMIN" || userRow.role === "SUPER_ADMIN").length;
 
   return (
-    <DashboardShell title="Panel de Super Administrador" subtitle="Resumen">
+    <DashboardShell title="Panel Principal" subtitle="Resumen">
       {error && (
         <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/10 text-sm text-destructive font-bold">
           {error}
@@ -59,21 +59,21 @@ export default function DashboardPage() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <KpiCard label="Restaurantes Totales" value={restaurants.length} detail={`${restaurantsActive} activos`} />
-        <KpiCard label="Restaurantes Suspendidos" value={restaurantsSuspended} detail="Estado SUSPENDED" />
+        <KpiCard label="Organizaciones Totales" value={restaurants.length} detail={`${restaurantsActive} activos`} />
+        <KpiCard label="Organizaciones Suspendidas" value={restaurantsSuspended} detail="Estado SUSPENDED" />
         <KpiCard label="Usuarios Totales" value={users.length} detail={`${adminUsers} admins/super admins`} />
-        <KpiCard label="Usuarios Asignados" value={usersWithRestaurant} detail="Con restaurante asociado" />
+        <KpiCard label="Usuarios Asignados" value={usersWithRestaurant} detail="Con organización asociada" />
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         <Card className="border-white/5 bg-white/5 backdrop-blur-md">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Store className="w-5 h-5" /> Ultimos 10 Restaurantes</CardTitle>
-            <CardDescription>Registros mas recientes creados en la plataforma</CardDescription>
+            <CardTitle className="flex items-center gap-2"><Store className="w-5 h-5" /> Últimas 10 Organizaciones</CardTitle>
+            <CardDescription>Registros más recientes creados en la plataforma</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {latestRestaurants.length === 0 && (
-              <p className="text-sm text-muted-foreground">Aun no existen restaurantes registrados.</p>
+              <p className="text-sm text-muted-foreground">Aún no existen organizaciones registradas.</p>
             )}
             {latestRestaurants.map((restaurant) => (
               <div key={restaurant.id} className="p-3 rounded-xl border border-white/10 bg-black/20">
@@ -87,12 +87,12 @@ export default function DashboardPage() {
 
         <Card className="border-white/5 bg-white/5 backdrop-blur-md">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" /> Ultimos 10 Usuarios</CardTitle>
-            <CardDescription>Altas mas recientes de usuarios del sistema</CardDescription>
+            <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" /> Últimos 10 Usuarios</CardTitle>
+            <CardDescription>Altas más recientes de usuarios del sistema</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {latestUsers.length === 0 && (
-              <p className="text-sm text-muted-foreground">Aun no existen usuarios registrados.</p>
+              <p className="text-sm text-muted-foreground">Aún no existen usuarios registrados.</p>
             )}
             {latestUsers.map((userRow) => {
               const restaurantName = Array.isArray(userRow.restaurants)
@@ -102,7 +102,7 @@ export default function DashboardPage() {
               return (
                 <div key={userRow.id} className="p-3 rounded-xl border border-white/10 bg-black/20">
                   <p className="font-bold text-sm">{userRow.email}</p>
-                  <p className="text-xs text-muted-foreground">{userRow.role} - {restaurantName || "Sin restaurante"}</p>
+                  <p className="text-xs text-muted-foreground">{userRow.role} - {restaurantName || "Sin organización"}</p>
                   <p className="text-[11px] text-muted-foreground mt-1">{formatDate(userRow.createdAt)}</p>
                 </div>
               );

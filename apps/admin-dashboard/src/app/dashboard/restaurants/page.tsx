@@ -1,21 +1,24 @@
 "use client";
 
-import React from "react";
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from "@menu-bites/ui";
-import { Pencil, Plus, Save, Store, Trash2, X } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Button, Input } from "@menu-bites/ui";
+import { Pencil, Plus, Trash2, Search, MoreHorizontal } from "lucide-react";
 import DashboardShell from "../_components/DashboardShell";
 import { formatDate, Restaurant, RESTAURANT_STATUSES } from "../_components/adminShared";
+import { Table, TableRow, TableCell } from "../_components/Table";
+import { Badge } from "../_components/Badge";
+import Modal from "../_components/Modal";
 
 export default function RestaurantsPage() {
-  const [restaurants, setRestaurants] = React.useState<Restaurant[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const [newRestaurant, setNewRestaurant] = React.useState({ name: "", slug: "", status: "ACTIVE" });
-  const [editingRestaurantId, setEditingRestaurantId] = React.useState<string | null>(null);
-  const [editingRestaurant, setEditingRestaurant] = React.useState({ name: "", slug: "", status: "ACTIVE" });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingRestaurantId, setEditingRestaurantId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({ name: "", slug: "", status: "ACTIVE" });
 
-  const fetchRestaurants = React.useCallback(async () => {
+  const fetchRestaurants = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -33,153 +36,191 @@ export default function RestaurantsPage() {
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchRestaurants();
   }, [fetchRestaurants]);
 
-  const createRestaurant = async () => {
-    if (!newRestaurant.name.trim() || !newRestaurant.slug.trim()) return;
-
-    const res = await fetch("/api/admin/restaurants", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newRestaurant),
-    });
-
-    const json = await res.json();
-    if (!res.ok) {
-      setError(json.error || "No se pudo crear restaurante");
-      return;
-    }
-
-    setNewRestaurant({ name: "", slug: "", status: "ACTIVE" });
-    await fetchRestaurants();
+  const openCreateModal = () => {
+    setEditingRestaurantId(null);
+    setFormData({ name: "", slug: "", status: "ACTIVE" });
+    setIsModalOpen(true);
   };
 
-  const updateRestaurant = async (id: string) => {
-    const res = await fetch(`/api/admin/restaurants/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editingRestaurant),
-    });
-    const json = await res.json();
+  const openEditModal = (restaurant: Restaurant) => {
+    setEditingRestaurantId(restaurant.id);
+    setFormData({ name: restaurant.name, slug: restaurant.slug, status: restaurant.status });
+    setIsModalOpen(true);
+  };
 
+  const handleSave = async () => {
+    if (!formData.name.trim() || !formData.slug.trim()) return;
+
+    const url = editingRestaurantId ? `/api/admin/restaurants/${editingRestaurantId}` : "/api/admin/restaurants";
+    const method = editingRestaurantId ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    const json = await res.json();
     if (!res.ok) {
-      setError(json.error || "No se pudo actualizar restaurante");
+      setError(json.error || "No se pudo guardar la organización");
+      setIsModalOpen(false);
       return;
     }
 
-    setEditingRestaurantId(null);
+    setIsModalOpen(false);
     await fetchRestaurants();
   };
 
   const deleteRestaurant = async (id: string) => {
-    const confirmed = window.confirm("Eliminar restaurante? Esta accion no se puede deshacer.");
+    const confirmed = window.confirm("¿Eliminar organización? Esta acción no se puede deshacer.");
     if (!confirmed) return;
 
     const res = await fetch(`/api/admin/restaurants/${id}`, { method: "DELETE" });
     const json = await res.json();
     if (!res.ok) {
-      setError(json.error || "No se pudo eliminar restaurante");
+      setError(json.error || "No se pudo eliminar la organización");
       return;
     }
 
     await fetchRestaurants();
   };
 
-  const restaurantsTop20 = restaurants.slice(0, 20);
+  const getStatusVariant = (status: string) => {
+    if (status === "ACTIVE") return "success";
+    if (status === "SUSPENDED") return "danger";
+    return "neutral";
+  };
 
   return (
-    <DashboardShell title="Panel de Super Administrador" subtitle="Restaurantes">
+    <DashboardShell title="Directorio" subtitle="Organizaciones">
       {error && (
-        <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/10 text-sm text-destructive font-bold">
+        <div className="p-4 rounded-md border border-red-500/30 bg-red-500/10 text-sm text-red-500 font-medium mb-6">
           {error}
         </div>
       )}
 
-      <Card className="border-white/5 bg-white/5 backdrop-blur-md">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Store className="w-5 h-5" /> Restaurantes</CardTitle>
-          <CardDescription>Listado de los ultimos 20 restaurantes con acciones por registro</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <Input placeholder="Nombre" value={newRestaurant.name} onChange={(e) => setNewRestaurant((prev) => ({ ...prev, name: e.target.value }))} />
-            <Input placeholder="Slug" value={newRestaurant.slug} onChange={(e) => setNewRestaurant((prev) => ({ ...prev, slug: e.target.value }))} />
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Input 
+            placeholder="Buscar organizaciones..." 
+            className="pl-9 bg-slate-900 border-slate-800 text-sm focus-visible:ring-blue-500"
+          />
+        </div>
+        <Button onClick={openCreateModal} className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm">
+          <Plus className="w-4 h-4 mr-2" /> Crear Organización
+        </Button>
+      </div>
+
+      {/* Data Table */}
+      {loading ? (
+        <div className="py-12 text-center text-sm text-slate-500">Cargando organizaciones...</div>
+      ) : (
+        <Table headers={["Nombre", "Identificador (Slug)", "Estado", "Creado", ""]}>
+          {restaurants.length === 0 && (
+            <TableRow>
+              <TableCell className="text-center text-slate-500" colSpan={5}>
+                No se encontraron organizaciones.
+              </TableCell>
+            </TableRow>
+          )}
+          {restaurants.map((restaurant) => (
+            <TableRow key={restaurant.id}>
+              <TableCell>
+                <div className="font-medium text-slate-200">{restaurant.name}</div>
+                <div className="text-[11px] text-slate-500">{restaurant.id}</div>
+              </TableCell>
+              <TableCell className="font-mono text-xs text-slate-400">
+                {restaurant.slug}
+              </TableCell>
+              <TableCell>
+                <Badge variant={getStatusVariant(restaurant.status)}>
+                  {restaurant.status}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-slate-400 text-xs">
+                {formatDate(restaurant.createdAt)}
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10"
+                    onClick={() => openEditModal(restaurant)}
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                    onClick={() => deleteRestaurant(restaurant.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </Table>
+      )}
+
+      {/* Slide-over Modal for Create/Edit */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingRestaurantId ? "Editar Organización" : "Crear Organización"}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="text-slate-300 hover:bg-slate-800 hover:text-white">
+              Cancelar
+            </Button>
+            <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white">
+              {editingRestaurantId ? "Guardar cambios" : "Crear"}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nombre de la Organización <span className="text-red-500">*</span></label>
+            <Input 
+              placeholder="e.g. Menu Bites Global" 
+              className="bg-slate-950 border-slate-800"
+              value={formData.name}
+              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Identificador (Slug) <span className="text-red-500">*</span></label>
+            <Input 
+              placeholder="e.g. menu-bites" 
+              className="bg-slate-950 border-slate-800 font-mono text-sm"
+              value={formData.slug}
+              onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') }))}
+            />
+            <p className="text-[10px] text-slate-500">Identificador único para URLs y llamadas a la API.</p>
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Estado</label>
             <select
-              className="h-12 rounded-xl border border-white/10 bg-white/5 px-4 text-sm"
-              value={newRestaurant.status}
-              onChange={(e) => setNewRestaurant((prev) => ({ ...prev, status: e.target.value }))}
+              className="w-full h-10 rounded-md border border-slate-800 bg-slate-950 px-3 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.status}
+              onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value }))}
             >
               {RESTAURANT_STATUSES.map((status) => (
-                <option key={status} value={status} className="bg-slate-900">{status}</option>
+                <option key={status} value={status}>{status}</option>
               ))}
             </select>
           </div>
-
-          <Button variant="premium" onClick={createRestaurant} className="w-full md:w-auto">
-            <Plus className="w-4 h-4 mr-2" /> Crear Nuevo Restaurante
-          </Button>
-
-          <div className="space-y-3 max-h-[620px] overflow-auto pr-1">
-            {restaurantsTop20.map((restaurant) => {
-              const isEditing = editingRestaurantId === restaurant.id;
-              return (
-                <div key={restaurant.id} className="p-3 rounded-xl border border-white/10 bg-black/20 space-y-2">
-                  {isEditing ? (
-                    <>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                        <Input value={editingRestaurant.name} onChange={(e) => setEditingRestaurant((prev) => ({ ...prev, name: e.target.value }))} />
-                        <Input value={editingRestaurant.slug} onChange={(e) => setEditingRestaurant((prev) => ({ ...prev, slug: e.target.value }))} />
-                        <select
-                          className="h-12 rounded-xl border border-white/10 bg-white/5 px-4 text-sm"
-                          value={editingRestaurant.status}
-                          onChange={(e) => setEditingRestaurant((prev) => ({ ...prev, status: e.target.value }))}
-                        >
-                          {RESTAURANT_STATUSES.map((status) => (
-                            <option key={status} value={status} className="bg-slate-900">{status}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="premium" onClick={() => updateRestaurant(restaurant.id)}><Save className="w-4 h-4 mr-1" />Guardar</Button>
-                        <Button size="sm" variant="outline" onClick={() => setEditingRestaurantId(null)}><X className="w-4 h-4 mr-1" />Cancelar</Button>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex items-center justify-between gap-2">
-                      <div>
-                        <p className="font-bold text-sm">{restaurant.name}</p>
-                        <p className="text-xs text-muted-foreground">slug: {restaurant.slug} | estado: {restaurant.status}</p>
-                        <p className="text-[11px] text-muted-foreground mt-1">{formatDate(restaurant.createdAt)}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => {
-                            setEditingRestaurantId(restaurant.id);
-                            setEditingRestaurant({ name: restaurant.name, slug: restaurant.slug, status: restaurant.status });
-                          }}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button size="icon" variant="destructive" onClick={() => deleteRestaurant(restaurant.id)}>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {loading && (
-            <p className="text-sm text-muted-foreground">Cargando restaurantes...</p>
-          )}
-        </CardContent>
-      </Card>
+        </div>
+      </Modal>
     </DashboardShell>
   );
 }
