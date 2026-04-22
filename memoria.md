@@ -23,7 +23,9 @@ Estandarización del proyecto `Software-Restaurantes` de Héctor Robledo dentro 
 | RunID | Timestamp ISO-8601 | WorkflowID | Agente | Estado |
 |:--|:--|:--|:--|:--|
 | RUN-20260414-001 | 2026-04-14T20:20:39-04:00 | FLUJO-000 / /zenith | 00_Zenith | 🟢 PRE-FLIGHT OK — Auditoría de Estado en curso |
-| RUN-20260415-001 | 2026-04-15T00:30:00-04:00 | DESIGN-MIGRATION / /zenith | 00_Zenith | 🟢 COMPLETED — Migración Design System aplicada |
+| RUN-20260421-002 | 2026-04-21T20:23:45-04:00 | FLUJO-000 / /zenith | 00_Zenith | 🔴 BLOCKED — Auth Failure (Develop/Frontend) |
+| RUN-20260421-003 | 2026-04-21T21:06:00-04:00 | FLUJO-000 / /zenith | 00_Zenith | 🟡 IN_PROGRESS — Creación de rama feature/front_superadmin |
+
 
 ---
 Desarrollado por OLYMP-IA · Supremacía Digital
