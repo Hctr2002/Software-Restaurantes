@@ -32,11 +32,21 @@ function InitialLayout() {
 
     const inAuthGroup = (segments[0] as string) === '(auth)';
 
-    // Redirect away from the login page if they are signed in.
-    if (session && inAuthGroup) {
-      router.replace('/(tabs)' as any);
-    } else if (!session && !inAuthGroup) {
+    if (!session && !inAuthGroup) {
+      // Redirect to login if not authenticated
       router.replace('/(auth)/login' as any);
+    } else if (session) {
+      // Determine the target group based on role
+      let targetGroup = '(tabs)'; // Default to client
+      if (role === 'SUPER_ADMIN') targetGroup = '(super-admin)';
+      else if (role === 'ADMIN') targetGroup = '(admin)';
+      else if (role === 'GARZON') targetGroup = '(waiter)';
+      else if (role === 'COCINA') targetGroup = '(kitchen)';
+
+      // Redirect if they are in the wrong group
+      if (segments[0] !== targetGroup) {
+        router.replace(`/${targetGroup}` as any);
+      }
     }
   }, [session, loading, segments, role]);
 
@@ -44,6 +54,10 @@ function InitialLayout() {
     <Stack>
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="(super-admin)" options={{ headerShown: false }} />
+      <Stack.Screen name="(admin)" options={{ headerShown: false }} />
+      <Stack.Screen name="(waiter)" options={{ headerShown: false }} />
+      <Stack.Screen name="(kitchen)" options={{ headerShown: false }} />
       <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Detalles' }} />
     </Stack>
   );
