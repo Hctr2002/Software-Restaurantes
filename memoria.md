@@ -14,7 +14,10 @@ Estandarización del proyecto `Software-Restaurantes` de Héctor Robledo dentro 
 ## 4. ESTADO DEL PROYECTO
 - **2026-04-14:** Proyecto estandarizado. Fase de Sincronización pendiente de confirmación manual.
 - **2026-04-14 (06:47):** Migración de interfaces premium sanitizadas (v1.1.0) a la carpeta `/mockups`. Rebranding a "MENU BITES" y lenguaje en español completado.
-- **2026-04-27:** Implementación de nueva aplicación `local-dashboard` (administrador de local, rol ADMIN) en rama `feature/front_superadmin`. Adición de rol `CAJERO` al store compartido. Generación de 22 archivos fuente bajo `apps/local-dashboard/` siguiendo el UX/UI de `admin-dashboard`.
+- **2026-04-27:** Implementación de nueva aplicación `local-dashboard` (administrador de local, rol ADMIN) en rama `feature/front_admin_local`. Adición de rol `CAJERO` al store compartido. Generación de 22 archivos fuente bajo `apps/local-dashboard/` siguiendo el UX/UI de `admin-dashboard`.
+- **2026-04-27:** Corrección y rebuild de `kitchen-kds` (puerto 3001, rama `feature/front_kds`): eliminación de `proxy.ts` y `middleware.ts`, reescritura como componente inteligente sin redirects. Solución definitiva al bucle infinito por sesiones compartidas en localhost.
+- **2026-04-28:** Creación de `cashier-dashboard` (puerto 3004, rol CAJERO, rama `feature/front_cajero`). POS en tiempo real con tabs "Por Cobrar" e "Historial", PaymentModal slide-over, suscripción Supabase para pedidos READY.
+- **2026-04-28:** Enriquecimiento de `local-dashboard` (rama `feature/front_admin_local`): KPIs financieros (ingresos día/mes, ticket promedio), grilla visual de mesas, top items del día, gestión operacional de pedidos con modal de detalle y cambio de estado, CRUD de categorías de menú, sección de reportes (ventas 7 días, top 10 items, ingresos por mesa). Corrección de middleware para validar rol ADMIN y bloquear acceso a sesiones de otros roles.
 
 ## 5. INCIDENTES REGISTRADOS
 - **Incidente 02:25:00:** `fatal: could not read Username for 'https://github.com'`. Bloqueo de Git Pull por autenticación en entorno no interactivo.
