@@ -17,13 +17,33 @@ export type TableRecord = {
   restaurant_id: string;
 };
 
+export type OrderItem = {
+  id: string;
+  menu_item_id: string;
+  menu_items?: { name: string; price: number } | null;
+};
+
 export type Order = {
   id: string;
   table_id: string | null;
   status: string;
   created_at: string;
   tables?: { number: number } | null;
-  order_items?: { id: string; menu_item_id: string }[];
+  order_items?: OrderItem[];
+};
+
+export type Category = {
+  id: string;
+  name: string;
+  is_active: boolean;
+  restaurant_id: string;
+};
+
+export type StatsData = {
+  ingresos_dia: number;
+  ingresos_mes: number;
+  ticket_promedio: number;
+  top_items: { name: string; count: number }[];
 };
 
 export const TABLE_STATUSES = ["AVAILABLE", "OCCUPIED", "RESERVED"];

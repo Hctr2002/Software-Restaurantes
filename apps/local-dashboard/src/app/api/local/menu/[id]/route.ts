@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createServiceClient, ensureServiceConfig } from "@/lib/localApi";
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const cfg = ensureServiceConfig();
   if (cfg) return cfg;
 
@@ -9,6 +9,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   if ("errorResponse" in auth) return auth.errorResponse;
   const { restaurantId } = auth;
 
+  const { id } = await params;
   const body = await req.json();
   const { name, description, price, is_active } = body;
 
@@ -16,7 +17,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   const { data, error } = await db
     .from("menu_items")
     .update({ name, description: description ?? null, price, is_active })
-    .eq("id", params.id)
+    .eq("id", id)
     .eq("restaurant_id", restaurantId)
     .select()
     .single();
@@ -26,19 +27,20 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json({ data });
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const cfg = ensureServiceConfig();
   if (cfg) return cfg;
 
   const auth = await requireAdmin(req);
   if ("errorResponse" in auth) return auth.errorResponse;
   const { restaurantId } = auth;
+  const { id } = await params;
 
   const db = createServiceClient();
   const { error } = await db
     .from("menu_items")
     .delete()
-    .eq("id", params.id)
+    .eq("id", id)
     .eq("restaurant_id", restaurantId);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

@@ -15,6 +15,8 @@ import {
   LogOut,
   ChevronRight,
   Settings,
+  Tag,
+  BarChart2,
 } from "lucide-react";
 
 type LocalShellProps = {
@@ -69,8 +71,16 @@ export default function LocalShell({ title, subtitle, children }: LocalShellProp
             <p className="px-3 text-xs font-bold text-slate-500 mb-2 tracking-wider">GESTIÓN</p>
             <nav className="space-y-0.5">
               <NavItem href="/dashboard/menu" icon={<UtensilsCrossed className="w-4 h-4" />} label="Menú" active={pathname.startsWith("/dashboard/menu")} />
+              <NavItem href="/dashboard/categories" icon={<Tag className="w-4 h-4" />} label="Categorías" active={pathname.startsWith("/dashboard/categories")} />
               <NavItem href="/dashboard/tables" icon={<TableProperties className="w-4 h-4" />} label="Mesas" active={pathname.startsWith("/dashboard/tables")} />
               <NavItem href="/dashboard/orders" icon={<ClipboardList className="w-4 h-4" />} label="Pedidos" active={pathname.startsWith("/dashboard/orders")} />
+            </nav>
+          </div>
+
+          <div>
+            <p className="px-3 text-xs font-bold text-slate-500 mb-2 tracking-wider">REPORTES</p>
+            <nav className="space-y-0.5">
+              <NavItem href="/dashboard/reports" icon={<BarChart2 className="w-4 h-4" />} label="Análisis de Ventas" active={pathname.startsWith("/dashboard/reports")} />
             </nav>
           </div>
 

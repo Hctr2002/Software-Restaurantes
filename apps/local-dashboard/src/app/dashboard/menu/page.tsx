@@ -5,14 +5,15 @@ import LocalShell from "../_components/LocalShell";
 import { Table, TableRow, TableCell } from "../_components/Table";
 import Modal from "../_components/Modal";
 import { Badge } from "../_components/Badge";
-import { formatPrice, MenuItem } from "../_components/localShared";
+import { formatPrice, MenuItem, Category } from "../_components/localShared";
 import { Button, Input } from "@menu-bites/ui";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 
-const EMPTY_FORM = { name: "", description: "", price: "", is_active: true };
+const EMPTY_FORM = { name: "", description: "", price: "", is_active: true, category_id: "" };
 
 export default function MenuPage() {
   const [items, setItems] = useState<MenuItem[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,7 +37,12 @@ export default function MenuPage() {
     }
   }, []);
 
-  useEffect(() => { fetchItems(); }, [fetchItems]);
+  useEffect(() => {
+    fetchItems();
+    fetch("/api/local/categories", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((j) => setCategories(j.data || []));
+  }, [fetchItems]);
 
   const openCreate = () => {
     setEditingItem(null);
@@ -46,7 +52,7 @@ export default function MenuPage() {
 
   const openEdit = (item: MenuItem) => {
     setEditingItem(item);
-    setForm({ name: item.name, description: item.description || "", price: String(item.price), is_active: item.is_active });
+    setForm({ name: item.name, description: item.description || "", price: String(item.price), is_active: item.is_active, category_id: item.category_id || "" });
     setIsModalOpen(true);
   };
 
@@ -59,6 +65,7 @@ export default function MenuPage() {
         description: form.description.trim() || null,
         price: parseFloat(form.price),
         is_active: form.is_active,
+        category_id: form.category_id || null,
       };
 
       const res = editingItem
@@ -109,7 +116,7 @@ export default function MenuPage() {
       {loading ? (
         <p className="text-sm text-muted-foreground">Cargando menú...</p>
       ) : (
-        <Table headers={["Nombre", "Precio", "Estado", "Acciones"]}>
+        <Table headers={["Nombre", "Categoría", "Precio", "Estado", "Acciones"]}>
           {items.length === 0 && (
             <TableRow>
               <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
@@ -122,6 +129,9 @@ export default function MenuPage() {
               <TableCell>
                 <p className="font-medium text-slate-200">{item.name}</p>
                 {item.description && <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>}
+              </TableCell>
+              <TableCell className="text-slate-400 text-xs">
+                {item.categories?.name ?? <span className="text-slate-600">—</span>}
               </TableCell>
               <TableCell className="font-mono">{formatPrice(item.price)}</TableCell>
               <TableCell>
@@ -173,6 +183,19 @@ export default function MenuPage() {
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Precio (CLP) *</label>
             <Input type="number" min="0" step="1" placeholder="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Categoría</label>
+            <select
+              value={form.category_id}
+              onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+              className="w-full px-3 py-2 rounded-md bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+            >
+              <option value="">Sin categoría</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
           </div>
           <div className="flex items-center gap-3">
             <input

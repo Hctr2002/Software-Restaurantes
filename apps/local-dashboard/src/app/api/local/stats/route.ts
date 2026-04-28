@@ -1,0 +1,81 @@
+import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin, createServiceClient, ensureServiceConfig } from "@/lib/localApi";
+
+function dayStart(date: Date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString();
+}
+
+function monthStart(date: Date) {
+  const d = new Date(date);
+  d.setDate(1);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString();
+}
+
+export async function GET(req: NextRequest) {
+  const cfg = ensureServiceConfig();
+  if (cfg) return cfg;
+
+  const auth = await requireAdmin(req);
+  if ("errorResponse" in auth) return auth.errorResponse;
+  const { restaurantId } = auth;
+
+  const now = new Date();
+  const db = createServiceClient();
+
+  // Fetch delivered orders of today with item prices
+  const { data: todayOrders, error: todayErr } = await db
+    .from("orders")
+    .select("id, created_at, order_items(id, menu_items(name, price))")
+    .eq("restaurant_id", restaurantId)
+    .eq("status", "DELIVERED")
+    .gte("created_at", dayStart(now));
+
+  if (todayErr) return NextResponse.json({ error: todayErr.message }, { status: 500 });
+
+  // Fetch delivered orders of this month
+  const { data: monthOrders, error: monthErr } = await db
+    .from("orders")
+    .select("id, order_items(id, menu_items(price))")
+    .eq("restaurant_id", restaurantId)
+    .eq("status", "DELIVERED")
+    .gte("created_at", monthStart(now));
+
+  if (monthErr) return NextResponse.json({ error: monthErr.message }, { status: 500 });
+
+  // Calculate ingresos del día
+  const ingresos_dia = (todayOrders ?? []).reduce((sum: number, order: any) => {
+    return sum + (order.order_items ?? []).reduce((s: number, item: any) => s + (item.menu_items?.price ?? 0), 0);
+  }, 0);
+
+  // Calculate ingresos del mes
+  const ingresos_mes = (monthOrders ?? []).reduce((sum: number, order: any) => {
+    return sum + (order.order_items ?? []).reduce((s: number, item: any) => s + (item.menu_items?.price ?? 0), 0);
+  }, 0);
+
+  // Ticket promedio del día
+  const count_dia = todayOrders?.length ?? 0;
+  const ticket_promedio = count_dia > 0 ? Math.round(ingresos_dia / count_dia) : 0;
+
+  // Top 3 items más pedidos hoy
+  const itemCount: Record<string, { name: string; count: number }> = {};
+  (todayOrders ?? []).forEach((order: any) => {
+    (order.order_items ?? []).forEach((item: any) => {
+      const name = item.menu_items?.name;
+      if (!name) return;
+      const key = name;
+      if (!itemCount[key]) itemCount[key] = { name, count: 0 };
+      itemCount[key].count++;
+    });
+  });
+
+  const top_items = Object.values(itemCount)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3);
+
+  return NextResponse.json({
+    data: { ingresos_dia, ingresos_mes, ticket_promedio, top_items, pedidos_dia: count_dia },
+  });
+}

@@ -11,19 +11,19 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
 
   const body = await req.json();
-  const { number, label, status } = body;
+  const { name, is_active } = body;
 
   const db = createServiceClient();
   const { data, error } = await db
-    .from("tables")
-    .update({ number, label: label ?? null, status })
+    .from("categories")
+    .update({ name: name?.trim(), is_active })
     .eq("id", id)
     .eq("restaurant_id", restaurantId)
     .select()
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  if (!data) return NextResponse.json({ error: "Mesa no encontrada" }, { status: 404 });
+  if (!data) return NextResponse.json({ error: "Categoría no encontrada" }, { status: 404 });
   return NextResponse.json({ data });
 }
 
@@ -38,7 +38,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
   const db = createServiceClient();
   const { error } = await db
-    .from("tables")
+    .from("categories")
     .delete()
     .eq("id", id)
     .eq("restaurant_id", restaurantId);
