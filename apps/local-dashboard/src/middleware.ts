@@ -32,13 +32,25 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith('/forgot-password') ||
     pathname.startsWith('/reset-password');
 
+  const role = session?.user?.app_metadata?.role;
+  const isAdmin = role === 'ADMIN';
+
+  // Sin sesión y ruta protegida → login
   if (!session && !isPublicRoute) {
     const url = req.nextUrl.clone();
     url.pathname = '/';
     return NextResponse.redirect(url);
   }
 
-  if (session && pathname === '/') {
+  // Sesión de otro rol en ruta protegida → login
+  if (session && !isPublicRoute && !isAdmin) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/';
+    return NextResponse.redirect(url);
+  }
+
+  // Sesión ADMIN en login → dashboard
+  if (session && isAdmin && pathname === '/') {
     const url = req.nextUrl.clone();
     url.pathname = '/dashboard';
     return NextResponse.redirect(url);
