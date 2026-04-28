@@ -15,7 +15,7 @@ export type UserRecord = {
   restaurants?: { name: string } | { name: string }[] | null;
 };
 
-export const ROLES = ["SUPER_ADMIN", "ADMIN", "GARZON", "COCINA", "CLIENTE"];
+export const ROLES = ["SUPER_ADMIN", "ADMIN", "GARZON", "COCINA", "CAJERO", "CLIENTE"];
 export const RESTAURANT_STATUSES = ["ACTIVE", "SUSPENDED", "CANCELLED"];
 
 export function formatDate(value: string) {
