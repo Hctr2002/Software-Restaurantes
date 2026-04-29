@@ -6,7 +6,6 @@ import { supabase } from "@menu-bites/auth";
 import { Lock, ArrowRight, Loader2, Mail, Eye, EyeOff } from "lucide-react";
 import { cn, Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@menu-bites/ui";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -15,7 +14,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { setUser } = useAuthStore();
-  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,8 +46,7 @@ export default function LoginPage() {
           restaurantId: data.user.app_metadata.restaurant_id,
         });
 
-        router.refresh();
-        router.push("/dashboard");
+        window.location.replace("/dashboard");
       }
     } catch {
       setError("Error de conexión, intente más tarde");
