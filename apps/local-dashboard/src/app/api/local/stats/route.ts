@@ -26,24 +26,20 @@ export async function GET(req: NextRequest) {
   const db = createServiceClient();
 
   // Fetch delivered orders of today with item prices
-  const { data: todayOrders, error: todayErr } = await db
+  const { data: todayOrders } = await db
     .from("orders")
-    .select("id, created_at, order_items(id, menu_items(name, price))")
+    .select("id, order_items(id, menu_items(name, price))")
     .eq("restaurant_id", restaurantId)
     .eq("status", "DELIVERED")
     .gte("created_at", dayStart(now));
 
-  if (todayErr) return NextResponse.json({ error: todayErr.message }, { status: 500 });
-
   // Fetch delivered orders of this month
-  const { data: monthOrders, error: monthErr } = await db
+  const { data: monthOrders } = await db
     .from("orders")
     .select("id, order_items(id, menu_items(price))")
     .eq("restaurant_id", restaurantId)
     .eq("status", "DELIVERED")
     .gte("created_at", monthStart(now));
-
-  if (monthErr) return NextResponse.json({ error: monthErr.message }, { status: 500 });
 
   // Calculate ingresos del día
   const ingresos_dia = (todayOrders ?? []).reduce((sum: number, order: any) => {

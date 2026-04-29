@@ -44,12 +44,14 @@ export default function DashboardPage() {
       const ordersJson = await ordersRes.json();
       const tablesJson = await tablesRes.json();
 
-      if (!statsRes.ok) throw new Error(statsJson.error || "Error cargando estadísticas");
+      // Stats se trata como no-crítico: si falla muestra ceros, no bloquea el dashboard
+      if (statsRes.ok) {
+        setStats(statsJson.data || null);
+        setPedidosDia(statsJson.data?.pedidos_dia ?? 0);
+      }
       if (!ordersRes.ok) throw new Error(ordersJson.error || "Error cargando pedidos");
       if (!tablesRes.ok) throw new Error(tablesJson.error || "Error cargando mesas");
 
-      setStats(statsJson.data || null);
-      setPedidosDia(statsJson.data?.pedidos_dia ?? 0);
       setOrders(ordersJson.data || []);
       setTables(tablesJson.data || []);
     } catch (err) {
