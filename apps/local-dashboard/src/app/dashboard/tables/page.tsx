@@ -9,10 +9,10 @@ import { TABLE_STATUSES, TableRecord } from "../_components/localShared";
 import { Button, Input } from "@menu-bites/ui";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 
-const EMPTY_FORM = { number: "", label: "", status: "AVAILABLE" };
+const EMPTY_FORM = { number: "", label: "", status: "FREE" };
 
 function tableStatusVariant(status: string) {
-  if (status === "AVAILABLE") return "success";
+  if (status === "FREE") return "success";
   if (status === "OCCUPIED") return "danger";
   if (status === "RESERVED") return "warning";
   return "neutral";

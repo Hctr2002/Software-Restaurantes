@@ -9,7 +9,7 @@ import { Badge } from "./_components/Badge";
 import { cn } from "@menu-bites/ui/lib/utils";
 
 function tableStatusVariant(status: string) {
-  if (status === "AVAILABLE") return "success";
+  if (status === "FREE") return "success";
   if (status === "OCCUPIED") return "danger";
   if (status === "RESERVED") return "warning";
   return "neutral";
@@ -145,7 +145,7 @@ export default function DashboardPage() {
               <div key={order.id} className="flex items-center justify-between p-2.5 rounded-lg border border-white/10 bg-black/20">
                 <div>
                   <p className="text-sm font-bold text-slate-200">Mesa {order.tables?.number ?? "S/N"}</p>
-                  <p className="text-[10px] text-muted-foreground">{formatDate(order.created_at)}</p>
+                  <p className="text-[10px] text-muted-foreground">{formatDate(order.createdAt)}</p>
                 </div>
                 <Badge variant={orderStatusVariant(order.status)}>{order.status}</Badge>
               </div>
@@ -169,15 +169,15 @@ export default function DashboardPage() {
                     key={table.id}
                     className={cn(
                       "flex flex-col items-center justify-center p-3 rounded-xl border text-center",
-                      table.status === "AVAILABLE" && "bg-emerald-500/10 border-emerald-500/20",
+                      table.status === "FREE" && "bg-emerald-500/10 border-emerald-500/20",
                       table.status === "OCCUPIED" && "bg-red-500/10 border-red-500/20",
                       table.status === "RESERVED" && "bg-amber-500/10 border-amber-500/20",
-                      !["AVAILABLE", "OCCUPIED", "RESERVED"].includes(table.status) && "bg-slate-800/40 border-slate-700"
+                      !["FREE", "OCCUPIED", "RESERVED"].includes(table.status) && "bg-slate-800/40 border-slate-700"
                     )}
                   >
                     <p className={cn(
                       "text-lg font-black",
-                      table.status === "AVAILABLE" && "text-emerald-400",
+                      table.status === "FREE" && "text-emerald-400",
                       table.status === "OCCUPIED" && "text-red-400",
                       table.status === "RESERVED" && "text-amber-400",
                     )}>
@@ -188,11 +188,11 @@ export default function DashboardPage() {
                     )}
                     <span className={cn(
                       "text-[9px] font-bold uppercase mt-1",
-                      table.status === "AVAILABLE" && "text-emerald-500",
+                      table.status === "FREE" && "text-emerald-500",
                       table.status === "OCCUPIED" && "text-red-500",
                       table.status === "RESERVED" && "text-amber-500",
                     )}>
-                      {table.status === "AVAILABLE" ? "Libre" : table.status === "OCCUPIED" ? "Ocupada" : "Reservada"}
+                      {table.status === "FREE" ? "Libre" : table.status === "OCCUPIED" ? "Ocupada" : "Reservada"}
                     </span>
                   </div>
                 ))}

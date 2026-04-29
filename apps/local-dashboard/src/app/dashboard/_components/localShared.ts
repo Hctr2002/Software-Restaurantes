@@ -20,14 +20,15 @@ export type TableRecord = {
 export type OrderItem = {
   id: string;
   menu_item_id: string;
-  menu_items?: { name: string; price: number } | null;
+  unit_price: number;
+  menu_items?: { name: string } | null;
 };
 
 export type Order = {
   id: string;
   table_id: string | null;
   status: string;
-  created_at: string;
+  createdAt: string;
   tables?: { number: number } | null;
   order_items?: OrderItem[];
 };
@@ -56,10 +57,11 @@ export type LocalUserRecord = {
 
 export const LOCAL_ROLES = ["ADMIN", "GARZON", "COCINA", "CAJERO"];
 
-export const TABLE_STATUSES = ["AVAILABLE", "OCCUPIED", "RESERVED"];
-export const ORDER_STATUSES = ["PENDING", "PREPARING", "READY", "DELIVERED"];
+export const TABLE_STATUSES = ["FREE", "OCCUPIED", "RESERVED"];
+export const ORDER_STATUSES = ["PENDING", "VALIDATED", "PREPARING", "READY", "DELIVERED", "REJECTED"];
 
-export function formatDate(value: string) {
+export function formatDate(value: string | undefined | null) {
+  if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Fecha inválida";
   return date.toLocaleString("es-CL", {

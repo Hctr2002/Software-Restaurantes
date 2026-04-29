@@ -50,10 +50,10 @@ export default function ReportsPage() {
       }
 
       orders.forEach((order: any) => {
-        const key = order.created_at.slice(0, 10);
+        const key = order.createdAt.slice(0, 10);
         if (!dayMap[key]) return;
         const total = (order.order_items ?? []).reduce(
-          (s: number, item: any) => s + (item.menu_items?.price ?? 0), 0
+          (s: number, item: any) => s + (Number(item.unit_price ?? 0)), 0
         );
         dayMap[key].orders++;
         dayMap[key].revenue += total;
@@ -75,7 +75,7 @@ export default function ReportsPage() {
           if (!name) return;
           if (!itemMap[name]) itemMap[name] = { name, category: "—", count: 0, revenue: 0 };
           itemMap[name].count++;
-          itemMap[name].revenue += item.menu_items?.price ?? 0;
+          itemMap[name].revenue += Number(item.unit_price ?? 0);
         });
       });
       setTopItems(Object.values(itemMap).sort((a, b) => b.count - a.count).slice(0, 10));
@@ -87,7 +87,7 @@ export default function ReportsPage() {
         if (!num) return;
         if (!tblMap[num]) tblMap[num] = { orders: 0, revenue: 0 };
         const total = (order.order_items ?? []).reduce(
-          (s: number, item: any) => s + (item.menu_items?.price ?? 0), 0
+          (s: number, item: any) => s + (Number(item.unit_price ?? 0)), 0
         );
         tblMap[num].orders++;
         tblMap[num].revenue += total;

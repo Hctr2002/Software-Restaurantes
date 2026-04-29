@@ -12,9 +12,9 @@ export async function GET(req: NextRequest) {
   const db = createServiceClient();
   const { data, error } = await db
     .from("orders")
-    .select("*, tables(number), order_items(id, menu_item_id, menu_items(name, price))")
+    .select("id, status, createdAt, table_id, tables(number), order_items(id, menu_item_id, unit_price, menu_items(name))")
     .eq("restaurant_id", restaurantId)
-    .order("created_at", { ascending: false })
+    .order("createdAt", { ascending: false })
     .limit(50);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

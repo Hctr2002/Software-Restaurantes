@@ -21,7 +21,7 @@ function orderStatusVariant(status: string): BadgeVariant {
 
 function orderTotal(order: Order): number {
   return (order.order_items ?? []).reduce(
-    (sum, item) => sum + (item.menu_items?.price ?? 0),
+    (sum, item) => sum + Number(item.unit_price ?? 0),
     0
   );
 }
@@ -36,7 +36,8 @@ function timeAgo(value: string): string {
 }
 
 const NEXT_STATUS: Record<string, string> = {
-  PENDING: "PREPARING",
+  PENDING: "VALIDATED",
+  VALIDATED: "PREPARING",
   PREPARING: "READY",
   READY: "DELIVERED",
 };
@@ -150,7 +151,7 @@ export default function OrdersPage() {
                 {formatPrice(orderTotal(order))}
               </TableCell>
               <TableCell className="text-slate-400 text-xs">
-                {formatDate(order.created_at)}
+                {formatDate(order.createdAt)}
               </TableCell>
               <TableCell>
                 <button
@@ -194,7 +195,7 @@ export default function OrdersPage() {
             {/* Status + time */}
             <div className="flex items-center justify-between">
               <Badge variant={orderStatusVariant(selectedOrder.status)}>{selectedOrder.status}</Badge>
-              <span className="text-xs text-slate-500">{timeAgo(selectedOrder.created_at)}</span>
+              <span className="text-xs text-slate-500">{timeAgo(selectedOrder.createdAt)}</span>
             </div>
 
             {/* Items */}
@@ -208,7 +209,7 @@ export default function OrdersPage() {
                     <div key={item.id} className="flex justify-between items-center py-2 border-b border-slate-800/50">
                       <span className="text-sm text-slate-300">{item.menu_items?.name ?? "Item"}</span>
                       <span className="text-sm font-mono text-slate-400">
-                        {formatPrice(item.menu_items?.price ?? 0)}
+                        {formatPrice(Number(item.unit_price ?? 0))}
                       </span>
                     </div>
                   ))}
@@ -222,7 +223,7 @@ export default function OrdersPage() {
               <span className="text-xl font-black text-slate-100">{formatPrice(orderTotal(selectedOrder))}</span>
             </div>
 
-            <p className="text-[11px] text-slate-500">{formatDate(selectedOrder.created_at)}</p>
+            <p className="text-[11px] text-slate-500">{formatDate(selectedOrder.createdAt)}</p>
           </div>
         )}
       </Modal>
