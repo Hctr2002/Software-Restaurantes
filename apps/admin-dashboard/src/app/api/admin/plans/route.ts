@@ -10,9 +10,9 @@ export async function GET(req: NextRequest) {
 
   const supabase = createServiceClient();
   const { data, error } = await supabase
-    .from("restaurants")
-    .select("id, name, slug, status, plan_id, createdAt, plans(name)")
-    .order("createdAt", { ascending: false });
+    .from("plans")
+    .select("*")
+    .order("createdAt", { ascending: true });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
@@ -29,20 +29,24 @@ export async function POST(req: NextRequest) {
   if ("errorResponse" in auth) return auth.errorResponse;
 
   const body = await req.json();
-  const name = String(body.name || "").trim();
-  const slug = String(body.slug || "").trim();
-  const status = String(body.status || "ACTIVE").trim();
-  const planId = body.planId ? String(body.planId).trim() : null;
+  const { name, price, description, features, popular, period } = body;
 
-  if (!name || !slug) {
-    return NextResponse.json({ error: "name y slug son obligatorios" }, { status: 400 });
+  if (!name || !price) {
+    return NextResponse.json({ error: "Nombre y precio son obligatorios" }, { status: 400 });
   }
 
   const supabase = createServiceClient();
   const { data, error } = await supabase
-    .from("restaurants")
-    .insert([{ id: crypto.randomUUID(), name, slug, status, plan_id: planId }])
-    .select("id, name, slug, status, plan_id, createdAt, plans(name)")
+    .from("plans")
+    .insert([{ 
+      name, 
+      price, 
+      description, 
+      features, 
+      popular: !!popular,
+      period: period || "/mes"
+    }])
+    .select()
     .single();
 
   if (error) {

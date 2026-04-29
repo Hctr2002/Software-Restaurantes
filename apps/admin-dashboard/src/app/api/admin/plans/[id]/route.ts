@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, ensureServiceConfig, requireSuperAdmin } from "@/lib/adminApi";
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function PUT(req: NextRequest, { params }: Params) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const configError = ensureServiceConfig();
   if (configError) return configError;
 
@@ -12,19 +13,22 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
   const { id } = await params;
   const body = await req.json();
-  const updates: Record<string, any> = {};
-
-  if (body.name !== undefined) updates.name = String(body.name).trim();
-  if (body.slug !== undefined) updates.slug = String(body.slug).trim();
-  if (body.status !== undefined) updates.status = String(body.status).trim();
-  if (body.planId !== undefined) updates.plan_id = body.planId ? String(body.planId).trim() : null;
+  const { name, price, description, features, popular, period } = body;
 
   const supabase = createServiceClient();
   const { data, error } = await supabase
-    .from("restaurants")
-    .update(updates)
+    .from("plans")
+    .update({ 
+      name, 
+      price, 
+      description, 
+      features, 
+      popular,
+      period,
+      updatedAt: new Date().toISOString()
+    })
     .eq("id", id)
-    .select("id, name, slug, status, plan_id, createdAt, plans(name)")
+    .select()
     .single();
 
   if (error) {
@@ -34,7 +38,10 @@ export async function PUT(req: NextRequest, { params }: Params) {
   return NextResponse.json({ data });
 }
 
-export async function DELETE(req: NextRequest, { params }: Params) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const configError = ensureServiceConfig();
   if (configError) return configError;
 
@@ -42,12 +49,16 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   if ("errorResponse" in auth) return auth.errorResponse;
 
   const { id } = await params;
+
   const supabase = createServiceClient();
-  const { error } = await supabase.from("restaurants").delete().eq("id", id);
+  const { error } = await supabase
+    .from("plans")
+    .delete()
+    .eq("id", id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ success: true });
 }

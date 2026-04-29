@@ -10,6 +10,13 @@ type Restaurant = {
   slug: string;
   status: string;
   createdAt: string;
+  plan_id?: string | null;
+  plans?: { name: string } | null;
+};
+
+type PlanOption = {
+  id: string;
+  name: string;
 };
 
 export default function OrganizationsTab() {
@@ -21,7 +28,8 @@ export default function OrganizationsTab() {
   // Form State
   const [modalVisible, setModalVisible] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ name: '', slug: '', status: 'ACTIVE' });
+  const [availablePlans, setAvailablePlans] = useState<PlanOption[]>([]);
+  const [formData, setFormData] = useState({ name: '', slug: '', status: 'ACTIVE', planId: '' });
   const [submitting, setSubmitting] = useState(false);
 
   const getApiUrl = async () => {
@@ -59,8 +67,23 @@ export default function OrganizationsTab() {
     }
   };
 
+  const fetchPlans = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const API_URL = await getApiUrl();
+      const res = await fetch(`${API_URL}/api/admin/plans`, {
+        headers: { Authorization: `Bearer ${session?.access_token}` }
+      });
+      const json = await res.json() as { data?: any[] };
+      if (res.ok) setAvailablePlans(json.data || []);
+    } catch (e) {
+      console.error("Error al cargar planes", e);
+    }
+  };
+
   useEffect(() => {
     fetchData();
+    fetchPlans();
   }, []);
 
   const onRefresh = () => {
@@ -70,13 +93,18 @@ export default function OrganizationsTab() {
 
   const openCreateModal = () => {
     setEditingId(null);
-    setFormData({ name: '', slug: '', status: 'ACTIVE' });
+    setFormData({ name: '', slug: '', status: 'ACTIVE', planId: '' });
     setModalVisible(true);
   };
 
   const openEditModal = (rest: Restaurant) => {
     setEditingId(rest.id);
-    setFormData({ name: rest.name, slug: rest.slug, status: rest.status });
+    setFormData({ 
+      name: rest.name, 
+      slug: rest.slug, 
+      status: rest.status,
+      planId: rest.plan_id || ''
+    });
     setModalVisible(true);
   };
 
@@ -195,7 +223,10 @@ export default function OrganizationsTab() {
                   <Text style={styles.badgeText}>{restaurant.status}</Text>
                 </View>
               </View>
-              <Text style={styles.cardItemSub}>{restaurant.slug}</Text>
+              <View style={styles.cardSubRow}>
+                <Text style={styles.cardItemSub}>{restaurant.slug}</Text>
+                <Text style={styles.planBadge}>{restaurant.plans?.name || 'Sin Plan'}</Text>
+              </View>
               
               <View style={styles.cardFooter}>
                 <Text style={styles.cardItemDate}>Registrado el {formatDate(restaurant.createdAt)}</Text>
@@ -259,6 +290,23 @@ export default function OrganizationsTab() {
               </View>
             )}
 
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Plan de Suscripción</Text>
+              <View style={styles.pickerContainer}>
+                {availablePlans.map((plan) => (
+                  <TouchableOpacity 
+                    key={plan.id} 
+                    style={[styles.planOption, formData.planId === plan.id && styles.planOptionActive]}
+                    onPress={() => setFormData({ ...formData, planId: plan.id })}
+                  >
+                    <Text style={[styles.planOptionText, formData.planId === plan.id && styles.planOptionTextActive]}>
+                      {plan.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
             <TouchableOpacity 
               style={[styles.submitButton, submitting && styles.submitButtonDisabled]} 
               onPress={handleSave} 
@@ -293,7 +341,9 @@ const styles = StyleSheet.create({
   cardItem: { backgroundColor: MB_COLORS.glassHeavy, padding: MB_SPACING.lg, borderRadius: MB_RADIUS.lg, marginBottom: MB_SPACING.md, borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: MB_SPACING.xs },
   cardItemTitle: { fontSize: 18, fontWeight: 'bold', color: MB_COLORS.cream, flex: 1 },
-  cardItemSub: { fontSize: 14, color: MB_COLORS.muted, marginBottom: MB_SPACING.sm },
+  cardSubRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: MB_SPACING.sm },
+  cardItemSub: { fontSize: 14, color: MB_COLORS.muted },
+  planBadge: { fontSize: 12, fontWeight: 'bold', color: '#c084fc', backgroundColor: 'rgba(192, 132, 252, 0.1)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: MB_SPACING.sm, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)', paddingTop: MB_SPACING.sm },
   cardItemDate: { fontSize: 12, color: MB_COLORS.muted },
   actionButtons: { flexDirection: 'row', gap: MB_SPACING.sm },
@@ -313,5 +363,10 @@ const styles = StyleSheet.create({
   input: { backgroundColor: 'rgba(0,0,0,0.3)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: MB_RADIUS.md, color: MB_COLORS.cream, padding: MB_SPACING.md, fontSize: 16 },
   submitButton: { backgroundColor: MB_COLORS.brandAccent, padding: MB_SPACING.md, borderRadius: MB_RADIUS.md, alignItems: 'center', marginTop: MB_SPACING.md },
   submitButtonDisabled: { opacity: 0.7 },
-  submitButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
+  submitButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  pickerContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  planOption: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: MB_RADIUS.md, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  planOptionActive: { backgroundColor: 'rgba(192, 132, 252, 0.15)', borderColor: '#c084fc' },
+  planOptionText: { color: MB_COLORS.muted, fontSize: 14, fontWeight: 'bold' },
+  planOptionTextActive: { color: '#c084fc' }
 });

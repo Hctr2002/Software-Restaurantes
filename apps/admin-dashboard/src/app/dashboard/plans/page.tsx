@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import DashboardShell from "../_components/DashboardShell";
 import { Button, Input } from "@menu-bites/ui";
-import { CheckCircle2, Building2, Zap, Rocket } from "lucide-react";
+import { CheckCircle2, Building2, Zap, Rocket, AlertCircle, Loader2 } from "lucide-react";
 import Modal from "../_components/Modal";
 
 type Plan = {
@@ -19,62 +19,13 @@ type Plan = {
   popular?: boolean;
 };
 
-const initialPlans: Plan[] = [
-  {
-    id: "basic",
-    name: "Básico",
-    price: "$29",
-    period: "/mes",
-    description: "Perfecto para pequeños restaurantes que comienzan con menús digitales.",
-    icon: <Rocket className="w-6 h-6 text-blue-400" />,
-    features: [
-      "Hasta 50 ítems en el menú",
-      "Generación de Códigos QR",
-      "Gestión básica de pedidos",
-      "Soporte por correo"
-    ],
-    color: "border-slate-800 bg-slate-900/50",
-    buttonVariant: "outline",
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "$79",
-    period: "/mes",
-    description: "Ideal para restaurantes en crecimiento que necesitan pantallas de cocina y POS.",
-    icon: <Zap className="w-6 h-6 text-purple-400" />,
-    features: [
-      "Ítems de menú ilimitados",
-      "Sistema de Pantalla de Cocina (KDS)",
-      "Acceso a Terminal de Meseros",
-      "Análisis Avanzados",
-      "Soporte prioritario 24/7"
-    ],
-    color: "border-purple-500/50 bg-purple-500/10 relative",
-    buttonVariant: "default",
-    popular: true,
-  },
-  {
-    id: "enterprise",
-    name: "Empresarial",
-    price: "Personalizado",
-    period: "",
-    description: "Para cadenas de restaurantes que necesitan gestión de múltiples ubicaciones.",
-    icon: <Building2 className="w-6 h-6 text-emerald-400" />,
-    features: [
-      "Todo lo de Pro",
-      "Panel multi-tenant",
-      "Soporte de dominio personalizado",
-      "Gerente de cuenta dedicado",
-      "Acceso a la API"
-    ],
-    color: "border-slate-800 bg-slate-900/50",
-    buttonVariant: "outline",
-  }
-];
+const initialPlans: Plan[] = [];
 
 export default function PlansPage() {
-  const [plans, setPlans] = useState<Plan[]>(initialPlans);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
 
@@ -96,23 +47,58 @@ export default function PlansPage() {
     setIsModalOpen(true);
   };
 
-  const handleSave = () => {
+  const fetchPlans = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/admin/plans");
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Error al cargar planes");
+      
+      const mappedPlans = (json.data || []).map((p: any) => ({
+        ...p,
+        icon: p.name.toLowerCase().includes('enterprise') ? <Building2 className="w-6 h-6 text-emerald-400" /> :
+              p.name.toLowerCase().includes('pro') ? <Zap className="w-6 h-6 text-purple-400" /> :
+              <Rocket className="w-6 h-6 text-blue-400" />,
+        color: p.popular ? "border-purple-500/50 bg-purple-500/10 relative" : "border-slate-800 bg-slate-900/50",
+        buttonVariant: p.popular ? "default" : "outline"
+      }));
+      
+      setPlans(mappedPlans);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  const handleSave = async () => {
     if (!editingPlan) return;
     
-    setPlans(plans.map(p => {
-      if (p.id === editingPlan.id) {
-        return {
-          ...p,
-          name: formData.name,
-          price: formData.price,
-          description: formData.description,
+    try {
+      setSaving(true);
+      const res = await fetch(`/api/admin/plans/${editingPlan.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
           features: formData.features.filter(f => f.trim() !== ""),
-        };
-      }
-      return p;
-    }));
-    
-    setIsModalOpen(false);
+        }),
+      });
+
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Error al guardar");
+
+      await fetchPlans();
+      setIsModalOpen(false);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const updateFeature = (index: number, value: string) => {
@@ -135,9 +121,22 @@ export default function PlansPage() {
     <DashboardShell title="Directorio" subtitle="Planes de Suscripción">
       <div className="mb-8 max-w-3xl">
         <p className="text-slate-400">
-          Gestiona los niveles de suscripción disponibles para las organizaciones. Actualmente, estos planes son conceptuales y están pendientes de la integración con Stripe.
+          Gestiona los niveles de suscripción disponibles para las organizaciones en tiempo real.
         </p>
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {loading && (
+        <div className="flex justify-center py-12">
+          <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {plans.map((plan) => (
@@ -181,23 +180,26 @@ export default function PlansPage() {
 
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Editar Plan (Mock)"
+        onClose={() => !saving && setIsModalOpen(false)}
+        title="Editar Plan"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="text-slate-300 hover:bg-slate-800 hover:text-white">
+            <Button variant="ghost" onClick={() => setIsModalOpen(false)} disabled={saving} className="text-slate-300 hover:bg-slate-800 hover:text-white">
               Cancelar
             </Button>
-            <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white">
-              Guardar cambios
+            <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-700 text-white">
+              {saving ? "Guardando..." : "Guardar cambios"}
             </Button>
           </>
         }
       >
         <div className="space-y-6">
-          <div className="p-3 rounded-md border border-blue-500/30 bg-blue-500/10 text-sm text-blue-400 font-medium">
-            Nota: Estos cambios son locales y no se guardan en la base de datos hasta integrar Stripe.
-          </div>
+          {saving && (
+            <div className="p-3 rounded-md border border-blue-500/30 bg-blue-500/10 text-sm text-blue-400 font-medium flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Sincronizando con la base de datos...
+            </div>
+          )}
           <div className="space-y-2">
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nombre del Plan</label>
             <Input 

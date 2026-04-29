@@ -16,7 +16,8 @@ export default function RestaurantsPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRestaurantId, setEditingRestaurantId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ name: "", slug: "", status: "ACTIVE" });
+  const [availablePlans, setAvailablePlans] = useState<{id: string, name: string}[]>([]);
+  const [formData, setFormData] = useState({ name: "", slug: "", status: "ACTIVE", planId: "" });
 
   const fetchRestaurants = useCallback(async () => {
     setLoading(true);
@@ -36,19 +37,35 @@ export default function RestaurantsPage() {
     }
   }, []);
 
+  const fetchPlans = async () => {
+    try {
+      const res = await fetch("/api/admin/plans");
+      const json = await res.json();
+      if (res.ok) setAvailablePlans(json.data || []);
+    } catch (e) {
+      console.error("Error cargando planes", e);
+    }
+  };
+
   useEffect(() => {
     fetchRestaurants();
+    fetchPlans();
   }, [fetchRestaurants]);
 
   const openCreateModal = () => {
     setEditingRestaurantId(null);
-    setFormData({ name: "", slug: "", status: "ACTIVE" });
+    setFormData({ name: "", slug: "", status: "ACTIVE", planId: "" });
     setIsModalOpen(true);
   };
 
   const openEditModal = (restaurant: Restaurant) => {
     setEditingRestaurantId(restaurant.id);
-    setFormData({ name: restaurant.name, slug: restaurant.slug, status: restaurant.status });
+    setFormData({ 
+      name: restaurant.name, 
+      slug: restaurant.slug, 
+      status: restaurant.status,
+      planId: restaurant.plan_id || ""
+    });
     setIsModalOpen(true);
   };
 
@@ -121,7 +138,7 @@ export default function RestaurantsPage() {
       {loading ? (
         <div className="py-12 text-center text-sm text-slate-500">Cargando organizaciones...</div>
       ) : (
-        <Table headers={["Nombre", "Identificador (Slug)", "Estado", "Creado", ""]}>
+        <Table headers={["Nombre", "Identificador (Slug)", "Plan", "Estado", "Creado", ""]}>
           {restaurants.length === 0 && (
             <TableRow>
               <TableCell className="text-center text-slate-500" colSpan={5}>
@@ -137,6 +154,11 @@ export default function RestaurantsPage() {
               </TableCell>
               <TableCell className="font-mono text-xs text-slate-400">
                 {restaurant.slug}
+              </TableCell>
+              <TableCell>
+                <div className="text-sm font-medium text-purple-400">
+                  {restaurant.plans?.name || "Sin Plan"}
+                </div>
               </TableCell>
               <TableCell>
                 <Badge variant={getStatusVariant(restaurant.status)}>
@@ -218,6 +240,20 @@ export default function RestaurantsPage() {
                 <option key={status} value={status}>{status}</option>
               ))}
             </select>
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Plan de Suscripción</label>
+            <select
+              className="w-full h-10 rounded-md border border-slate-800 bg-slate-950 px-3 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.planId}
+              onChange={(e) => setFormData((prev) => ({ ...prev, planId: e.target.value }))}
+            >
+              <option value="">Seleccionar Plan...</option>
+              {availablePlans.map((plan) => (
+                <option key={plan.id} value={plan.id}>{plan.name}</option>
+              ))}
+            </select>
+            <p className="text-[10px] text-slate-500">Define los límites y características disponibles para esta organización.</p>
           </div>
         </div>
       </Modal>
