@@ -7,6 +7,14 @@ import { Lock, ArrowRight, Loader2, Mail, Eye, EyeOff } from "lucide-react";
 import { cn, Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@menu-bites/ui";
 import Link from "next/link";
 
+const ROLE_URLS: Record<string, string> = {
+  SUPER_ADMIN: process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_URL || "http://localhost:3000",
+  ADMIN:       "/dashboard",
+  COCINA:      process.env.NEXT_PUBLIC_KITCHEN_URL         || "http://localhost:3001",
+  CAJERO:      process.env.NEXT_PUBLIC_CASHIER_URL         || "http://localhost:3004",
+  GARZON:      process.env.NEXT_PUBLIC_WAITER_URL          || "http://localhost:3002",
+};
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,21 +40,16 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        const role = data.user.app_metadata.role;
-        if (role !== "ADMIN") {
-          await supabase.auth.signOut();
-          setError("Acceso denegado. Esta plataforma es exclusiva para administradores de local.");
-          return;
-        }
-
+        const role = data.user.app_metadata.role as string;
         setUser({
           id: data.user.id,
           email: data.user.email!,
-          role,
+          role: data.user.app_metadata.role,
           restaurantId: data.user.app_metadata.restaurant_id,
         });
 
-        window.location.replace("/dashboard");
+        const target = ROLE_URLS[role] ?? "http://localhost:3000";
+        window.location.replace(target);
       }
     } catch {
       setError("Error de conexión, intente más tarde");

@@ -6,7 +6,14 @@ import { supabase } from "@menu-bites/auth";
 import { User, Lock, ArrowRight, Loader2, Mail, Eye, EyeOff } from "lucide-react";
 import { cn, Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@menu-bites/ui";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+
+const ROLE_URLS: Record<string, string> = {
+  SUPER_ADMIN: "/dashboard",
+  ADMIN:       process.env.NEXT_PUBLIC_LOCAL_DASHBOARD_URL  || "http://localhost:3003",
+  COCINA:      process.env.NEXT_PUBLIC_KITCHEN_URL          || "http://localhost:3001",
+  CAJERO:      process.env.NEXT_PUBLIC_CASHIER_URL          || "http://localhost:3004",
+  GARZON:      process.env.NEXT_PUBLIC_WAITER_URL           || "http://localhost:3002",
+};
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -15,7 +22,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { setUser } = useAuthStore();
-  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,19 +47,16 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        console.log("LOGIN_DEBUG: Usuario autenticado:", data.user.id);
+        const role = data.user.app_metadata.role as string;
         setUser({
           id: data.user.id,
           email: data.user.email!,
           role: data.user.app_metadata.role,
           restaurantId: data.user.app_metadata.restaurant_id,
         });
-        
-        console.log("LOGIN_DEBUG: Redirigiendo al dashboard...");
-        // router.refresh() fuerza al middleware a releer las cookies de sesión
-        // router.push() navega al dashboard sin perder la sesión
-        router.refresh();
-        router.push("/dashboard");
+
+        const target = ROLE_URLS[role] ?? "/dashboard";
+        window.location.replace(target);
       }
     } catch (err) {
       console.error("LOGIN_DEBUG: Error fatal en handleLogin:", err);
