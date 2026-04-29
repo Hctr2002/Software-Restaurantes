@@ -17,6 +17,7 @@ import {
   Settings,
   Tag,
   BarChart2,
+  Users,
 } from "lucide-react";
 
 type LocalShellProps = {
@@ -70,6 +71,7 @@ export default function LocalShell({ title, subtitle, children }: LocalShellProp
           <div>
             <p className="px-3 text-xs font-bold text-slate-500 mb-2 tracking-wider">GESTIÓN</p>
             <nav className="space-y-0.5">
+              <NavItem href="/dashboard/users" icon={<Users className="w-4 h-4" />} label="Usuarios" active={pathname.startsWith("/dashboard/users")} />
               <NavItem href="/dashboard/menu" icon={<UtensilsCrossed className="w-4 h-4" />} label="Menú" active={pathname.startsWith("/dashboard/menu")} />
               <NavItem href="/dashboard/categories" icon={<Tag className="w-4 h-4" />} label="Categorías" active={pathname.startsWith("/dashboard/categories")} />
               <NavItem href="/dashboard/tables" icon={<TableProperties className="w-4 h-4" />} label="Mesas" active={pathname.startsWith("/dashboard/tables")} />

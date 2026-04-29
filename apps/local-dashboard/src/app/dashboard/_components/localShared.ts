@@ -46,6 +46,16 @@ export type StatsData = {
   top_items: { name: string; count: number }[];
 };
 
+export type LocalUserRecord = {
+  id: string;
+  email: string;
+  role: string;
+  restaurant_id: string;
+  createdAt: string;
+};
+
+export const LOCAL_ROLES = ["ADMIN", "GARZON", "COCINA", "CAJERO"];
+
 export const TABLE_STATUSES = ["AVAILABLE", "OCCUPIED", "RESERVED"];
 export const ORDER_STATUSES = ["PENDING", "PREPARING", "READY", "DELIVERED"];
 
