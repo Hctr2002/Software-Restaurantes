@@ -45,10 +45,12 @@ model Restaurant {
   name      String
   slug      String             @unique
   status    SubscriptionStatus @default(ACTIVE)
+  planId    String?            @map("plan_id")
   createdAt DateTime           @default(now()) @db.Timestamptz(3)
   updatedAt DateTime           @default(now()) @updatedAt @db.Timestamptz(3)
 
   // Relationships
+  plan                Plan?              @relation(fields: [planId], references: [id])
   users               User[]
   categories          Category[]
   menuItems           MenuItem[]
@@ -248,4 +250,20 @@ model Inventory {
 
   @@index([restaurantId])
   @@map("inventories")
+}
+
+model Plan {
+  id          String   @id @default(uuid())
+  name        String
+  price       String   
+  period      String   @default("/mes")
+  description String?
+  features    String[] 
+  popular     Boolean  @default(false)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  restaurants Restaurant[]
+
+  @@map("plans")
 }

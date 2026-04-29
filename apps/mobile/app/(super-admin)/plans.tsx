@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, TextInput } from 'react-native';
-import { CheckCircle2, Rocket, Zap, Building2, X, Plus, Trash2 } from 'lucide-react-native';
+import { CheckCircle2, Rocket, Zap, Building2, X, Plus, Trash2, AlertCircle } from 'lucide-react-native';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { supabase } from '../../lib/supabase';
 
 type Plan = {
   id: string;
@@ -14,41 +15,12 @@ type Plan = {
   popular: boolean;
 };
 
-const INITIAL_PLANS: Plan[] = [
-  {
-    id: "basic",
-    name: "Básico",
-    price: "$29",
-    period: "/mes",
-    description: "Perfecto para pequeños restaurantes que comienzan con menús digitales.",
-    icon: <Rocket color="#60a5fa" size={24} />,
-    features: ["Hasta 50 ítems en el menú", "Generación de Códigos QR", "Gestión básica de pedidos", "Soporte por correo"],
-    popular: false,
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "$79",
-    period: "/mes",
-    description: "Ideal para restaurantes en crecimiento que necesitan pantallas de cocina y POS.",
-    icon: <Zap color="#c084fc" size={24} />,
-    features: ["Ítems de menú ilimitados", "Sistema de Pantalla de Cocina (KDS)", "Acceso a Terminal de Meseros", "Análisis Avanzados", "Soporte prioritario 24/7"],
-    popular: true,
-  },
-  {
-    id: "enterprise",
-    name: "Empresarial",
-    price: "A medida",
-    period: "",
-    description: "Para cadenas de restaurantes que necesitan gestión de múltiples ubicaciones.",
-    icon: <Building2 color="#34d399" size={24} />,
-    features: ["Todo lo de Pro", "Panel multi-tenant", "Soporte de dominio personalizado", "Gerente de cuenta dedicado", "Acceso a la API"],
-    popular: false,
-  }
-];
 
 export default function PlansTab() {
-  const [plans, setPlans] = useState<Plan[]>(INITIAL_PLANS);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   
   const [modalVisible, setModalVisible] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
@@ -71,23 +43,90 @@ export default function PlansTab() {
     setModalVisible(true);
   };
 
-  const handleSave = () => {
+  const fetchPlans = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("No hay sesión activa");
+
+      let API_URL = 'http://10.122.168.197:3000';
+      try {
+        const Constants = await import('expo-constants');
+        const debuggerHost = Constants.default.expoConfig?.hostUri;
+        if (debuggerHost) {
+          const hostIp = debuggerHost.split(':')[0];
+          API_URL = `http://${hostIp}:3000`;
+        }
+      } catch (e) {}
+
+      const res = await fetch(`${API_URL}/api/admin/plans`, {
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      });
+      const json = await res.json() as { data?: any[], error?: string };
+      if (!res.ok) throw new Error(json.error || "Error al cargar planes");
+      
+      // Map icons based on some logic or keep it simple
+      const mappedPlans = (json.data || []).map((p: any) => ({
+        ...p,
+        icon: p.name.toLowerCase().includes('enterprise') ? <Building2 color="#34d399" size={24} /> :
+              p.name.toLowerCase().includes('pro') ? <Zap color="#c084fc" size={24} /> :
+              <Rocket color="#60a5fa" size={24} />
+      }));
+      
+      setPlans(mappedPlans);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  const handleSave = async () => {
     if (!editingPlan) return;
     
-    setPlans(plans.map(p => {
-      if (p.id === editingPlan.id) {
-        return {
-          ...p,
-          name: formData.name,
-          price: formData.price,
-          description: formData.description,
+    try {
+      setSaving(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("No hay sesión activa");
+
+      let API_URL = 'http://10.122.168.197:3000';
+      try {
+        const Constants = await import('expo-constants');
+        const debuggerHost = Constants.default.expoConfig?.hostUri;
+        if (debuggerHost) {
+          const hostIp = debuggerHost.split(':')[0];
+          API_URL = `http://${hostIp}:3000`;
+        }
+      } catch (e) {}
+
+      const res = await fetch(`${API_URL}/api/admin/plans/${editingPlan.id}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}` 
+        },
+        body: JSON.stringify({
+          ...formData,
           features: formData.features.filter(f => f.trim() !== ""),
-        };
-      }
-      return p;
-    }));
-    
-    setModalVisible(false);
+        })
+      });
+
+      const json = await res.json() as { error?: string };
+      if (!res.ok) throw new Error(json.error || "Error al guardar");
+
+      await fetchPlans();
+      setModalVisible(false);
+      Alert.alert("Éxito", "Plan actualizado correctamente");
+    } catch (err: any) {
+      Alert.alert("Error", err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const updateFeature = (index: number, value: string) => {
@@ -114,11 +153,12 @@ export default function PlansTab() {
           <Text style={styles.subtitle}>Gestión de suscripciones y precios</Text>
         </View>
 
-        <View style={styles.infoBox}>
-          <Text style={styles.infoText}>
-            Actualmente, estos planes son conceptuales y están pendientes de la integración con Stripe. Los cambios aplicados son locales.
-          </Text>
-        </View>
+        {error && (
+          <View style={styles.errorBox}>
+            <AlertCircle color="#ef4444" size={20} />
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        )}
 
         {plans.map((plan) => (
           <View key={plan.id} style={[styles.planCard, plan.popular && styles.popularCard]}>
@@ -173,11 +213,11 @@ export default function PlansTab() {
             </View>
 
             <ScrollView style={{ maxHeight: 500 }} showsVerticalScrollIndicator={false}>
-              <View style={styles.mockNoticeBox}>
-                <Text style={styles.mockNoticeText}>
-                  Nota: Estos cambios son locales y no se guardan en la base de datos hasta integrar Stripe.
-                </Text>
-              </View>
+              {saving && (
+                <View style={styles.mockNoticeBox}>
+                  <Text style={styles.mockNoticeText}>Guardando cambios...</Text>
+                </View>
+              )}
 
               <View style={styles.formGroup}>
                 <Text style={styles.label}>Nombre del Plan</Text>
@@ -228,8 +268,14 @@ export default function PlansTab() {
                 </TouchableOpacity>
               </View>
 
-              <TouchableOpacity style={styles.submitButton} onPress={handleSave}>
-                <Text style={styles.submitButtonText}>Guardar cambios</Text>
+              <TouchableOpacity 
+                style={[styles.submitButton, saving && { opacity: 0.7 }]} 
+                onPress={handleSave}
+                disabled={saving}
+              >
+                <Text style={styles.submitButtonText}>
+                  {saving ? "Guardando..." : "Guardar cambios"}
+                </Text>
               </TouchableOpacity>
             </ScrollView>
           </View>
@@ -247,6 +293,8 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 14, color: MB_COLORS.muted, marginTop: 4 },
   infoBox: { backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.3)', borderWidth: 1, padding: MB_SPACING.md, borderRadius: MB_RADIUS.md, marginBottom: MB_SPACING.xl },
   infoText: { color: '#60a5fa', fontSize: 12, lineHeight: 18 },
+  errorBox: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.3)', borderWidth: 1, padding: MB_SPACING.md, borderRadius: MB_RADIUS.md, marginBottom: MB_SPACING.xl },
+  errorText: { color: '#ef4444', fontSize: 12, flex: 1 },
   planCard: { backgroundColor: MB_COLORS.glassHeavy, padding: MB_SPACING.xl, borderRadius: MB_RADIUS.xl, marginBottom: MB_SPACING.xl, borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)', position: 'relative' },
   popularCard: { borderColor: 'rgba(192, 132, 252, 0.5)', backgroundColor: 'rgba(192, 132, 252, 0.05)' },
   popularBadge: { position: 'absolute', top: -12, alignSelf: 'center', backgroundColor: '#a855f7', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },

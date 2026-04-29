@@ -4,6 +4,8 @@ export type Restaurant = {
   slug: string;
   status: string;
   createdAt: string;
+  plan_id?: string | null;
+  plans?: { name: string } | null;
 };
 
 export type UserRecord = {
