@@ -1,18 +1,27 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@menu-bites/store";
 import { useKitchenOrders, updateOrderStatus, signOut } from "@menu-bites/auth";
 import { OrderTicket, cn, Button } from "@menu-bites/ui";
 import { ChefHat, Bell, Settings, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { MOCK_ORDERS, type MockOrder } from "../lib/mock-orders";
+
+const MOCK_MODE = process.env.NEXT_PUBLIC_MOCK_MODE === "true";
 
 export default function KitchenKDSPage() {
   const { user, logout: clearAuth } = useAuthStore();
-  const { orders, loading } = useKitchenOrders(user?.restaurantId);
+  const { orders: liveOrders, loading: liveLoading } = useKitchenOrders(
+    MOCK_MODE ? undefined : user?.restaurantId
+  );
+  const [mockOrders, setMockOrders] = useState<MockOrder[]>(MOCK_ORDERS);
   const prevOrdersCount = useRef(0);
   const [isSigningOut, setIsSigningOut] = React.useState(false);
   const router = useRouter();
+
+  const orders = MOCK_MODE ? mockOrders : liveOrders;
+  const loading = MOCK_MODE ? false : liveLoading;
 
   const handleSignOut = async () => {
     const loginUrl = process.env.NEXT_PUBLIC_AUTH_URL || "http://localhost:3000";
@@ -38,12 +47,18 @@ export default function KitchenKDSPage() {
   }, [orders.length]);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
+    if (MOCK_MODE) {
+      setMockOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, status: newStatus as MockOrder["status"] } : o))
+      );
+      return;
+    }
     await updateOrderStatus(orderId, newStatus);
   };
 
-  const pendingOrders = orders.filter(o => o.status === "PENDING");
-  const preparingOrders = orders.filter(o => o.status === "PREPARING");
-  const readyOrders = orders.filter(o => o.status === "READY");
+  const pendingOrders = orders.filter((o) => o.status === "PENDING");
+  const preparingOrders = orders.filter((o) => o.status === "PREPARING");
+  const readyOrders = orders.filter((o) => o.status === "READY");
 
   if (loading) {
     return (
@@ -66,7 +81,7 @@ export default function KitchenKDSPage() {
             <div className="flex items-center space-x-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
               <span className="text-emerald-500">● Online</span>
               <span>•</span>
-              <span>Estación Principal</span>
+              <span>{MOCK_MODE ? "Modo Demo" : "Estación Principal"}</span>
             </div>
           </div>
         </div>
@@ -80,11 +95,11 @@ export default function KitchenKDSPage() {
           <Button variant="outline" size="icon" className="rounded-xl">
             <Settings className="w-5 h-5 text-muted-foreground" />
           </Button>
-          <Button 
+          <Button
             variant="destructive"
             size="icon"
             onClick={handleSignOut}
-            disabled={isSigningOut}
+            disabled={isSigningOut || MOCK_MODE}
             className="rounded-xl"
           >
             <LogOut className="w-5 h-5" />
@@ -96,7 +111,7 @@ export default function KitchenKDSPage() {
       <main className="flex-1 p-6 grid grid-cols-3 gap-6 overflow-hidden">
         {/* Columna 1: NUEVOS (PENDING) */}
         <KDSColumn title="Nuevos Pedidos" count={pendingOrders.length} icon={<Bell className="w-4 h-4 text-slate-400" />}>
-          {pendingOrders.map(order => (
+          {pendingOrders.map((order) => (
             <OrderTicket
               key={order.id}
               id={order.id}
@@ -111,7 +126,7 @@ export default function KitchenKDSPage() {
 
         {/* Columna 2: EN PROCESO (PREPARING) */}
         <KDSColumn title="En Preparación" count={preparingOrders.length} icon={<ChefHat className="w-4 h-4 text-primary" />} active>
-          {preparingOrders.map(order => (
+          {preparingOrders.map((order) => (
             <OrderTicket
               key={order.id}
               id={order.id}
@@ -126,7 +141,7 @@ export default function KitchenKDSPage() {
 
         {/* Columna 3: LISTOS (READY) */}
         <KDSColumn title="Por Entregar" count={readyOrders.length} icon={<Bell className="w-4 h-4 text-emerald-500" />}>
-          {readyOrders.map(order => (
+          {readyOrders.map((order) => (
             <OrderTicket
               key={order.id}
               id={order.id}
@@ -143,7 +158,7 @@ export default function KitchenKDSPage() {
   );
 }
 
-function Stat({ label, value, color }: { label: string, value: number, color: string }) {
+function Stat({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <div className="text-center">
       <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">{label}</p>
@@ -152,7 +167,19 @@ function Stat({ label, value, color }: { label: string, value: number, color: st
   );
 }
 
-function KDSColumn({ title, count, icon, children, active }: { title: string, count: number, icon: React.ReactNode, children: React.ReactNode, active?: boolean }) {
+function KDSColumn({
+  title,
+  count,
+  icon,
+  children,
+  active,
+}: {
+  title: string;
+  count: number;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  active?: boolean;
+}) {
   return (
     <div className={cn("flex flex-col h-full bg-black/20 rounded-[2.5rem] border border-white/5 overflow-hidden", active && "bg-primary/5 border-primary/10")}>
       <div className="p-6 flex justify-between items-center border-b border-white/5">
@@ -166,7 +193,7 @@ function KDSColumn({ title, count, icon, children, active }: { title: string, co
         {children}
         {count === 0 && (
           <div className="h-full flex items-center justify-center opacity-20 italic text-sm">
-             Sin órdenes activas
+            Sin órdenes activas
           </div>
         )}
       </div>

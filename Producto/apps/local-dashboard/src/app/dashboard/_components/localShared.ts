@@ -1,9 +1,12 @@
+// Types reflect Supabase REST API column names.
+// Fields with @map() in Prisma are aliased to camelCase in the API routes.
+
 export type MenuItem = {
   id: string;
   name: string;
   description: string | null;
   price: number;
-  category_id: string | null;
+  categoryId: string | null;      // DB: category_id — aliased in GET /api/local/menu
   is_active: boolean;
   restaurant_id: string;
   categories?: { name: string } | null;
@@ -19,16 +22,17 @@ export type TableRecord = {
 
 export type OrderItem = {
   id: string;
-  menu_item_id: string;
-  unit_price: number;
+  menuItemId: string;             // DB: menu_item_id — aliased in GET /api/local/orders
+  unitPrice: number;              // DB: unit_price  — aliased in GET /api/local/orders
+  quantity: number;
   menu_items?: { name: string } | null;
 };
 
 export type Order = {
   id: string;
-  table_id: string | null;
+  tableId: string | null;         // DB: table_id — aliased in GET /api/local/orders
   status: string;
-  createdAt: string;
+  createdAt: string;              // DB: createdAt (no @map in Prisma — kept as-is)
   tables?: { number: number } | null;
   order_items?: OrderItem[];
 };
@@ -55,7 +59,8 @@ export type LocalUserRecord = {
   createdAt: string;
 };
 
-export const LOCAL_ROLES = ["ADMIN", "GARZON", "COCINA", "CAJERO"];
+// Matches Prisma Role enum (SUPER_ADMIN and CLIENTE are managed elsewhere)
+export const LOCAL_ROLES = ["ADMIN", "GARZON", "COCINA"];
 
 export const TABLE_STATUSES = ["FREE", "OCCUPIED", "RESERVED"];
 export const ORDER_STATUSES = ["PENDING", "VALIDATED", "PREPARING", "READY", "DELIVERED", "REJECTED"];
@@ -75,4 +80,13 @@ export function formatDate(value: string | undefined | null) {
 
 export function formatPrice(value: number) {
   return new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(value);
+}
+
+export function timeAgo(value: string): string {
+  const diff = Math.floor((Date.now() - new Date(value).getTime()) / 60000);
+  if (diff < 1) return "Hace un momento";
+  if (diff === 1) return "Hace 1 min";
+  if (diff < 60) return `Hace ${diff} min`;
+  const hrs = Math.floor(diff / 60);
+  return `Hace ${hrs}h ${diff % 60}min`;
 }

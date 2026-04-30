@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@menu
 import { TrendingUp, Wallet, ReceiptText, ClipboardList, UtensilsCrossed } from "lucide-react";
 import LocalShell from "./_components/LocalShell";
 import { formatPrice, formatDate, Order, StatsData, TableRecord } from "./_components/localShared";
-import { Badge } from "./_components/Badge";
+import { Badge } from "@menu-bites/ui";
 import { cn } from "@menu-bites/ui/lib/utils";
 
 function tableStatusVariant(status: string) {

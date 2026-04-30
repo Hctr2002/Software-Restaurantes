@@ -2,9 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import LocalShell from "../_components/LocalShell";
-import { Table, TableRow, TableCell } from "../_components/Table";
-import Modal from "../_components/Modal";
-import { Badge } from "../_components/Badge";
+import { Table, TableRow, TableCell, Modal, Badge } from "@menu-bites/ui";
 import { formatDate, LOCAL_ROLES, LocalUserRecord } from "../_components/localShared";
 import { Button, Input } from "@menu-bites/ui";
 import { Plus, Pencil, Trash2, Loader2, Eye, EyeOff } from "lucide-react";

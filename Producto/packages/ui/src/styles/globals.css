@@ -22,6 +22,7 @@
     --sage-dark: 145 25% 40%;
 
     --sand: 60 14% 97%;
+    --brand-accent: 35 90% 55%;
 
     /* Semantic Tokens */
     --background: var(--sand);
@@ -57,6 +58,7 @@
 
   /* Dark mode — waiter-terminal & kitchen-kds */
   .dark {
+    --brand-accent: 35 90% 60%;
     --background: var(--navy);
     --foreground: var(--sand);
 
@@ -279,3 +281,9 @@
 .input-organic::placeholder {
   color: hsl(var(--muted-foreground));
 }
+
+/* ============================================
+   SCROLLBAR UTILITIES
+   ============================================ */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

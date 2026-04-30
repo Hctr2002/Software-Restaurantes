@@ -1,12 +1,10 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import { supabase } from "@menu-bites/auth";
 import LocalShell from "../_components/LocalShell";
-import { Table, TableRow, TableCell } from "../_components/Table";
-import Modal from "../_components/Modal";
-import { Badge } from "../_components/Badge";
-import { formatDate, formatPrice, Order, ORDER_STATUSES } from "../_components/localShared";
-import { Button } from "@menu-bites/ui";
+import { Table, TableRow, TableCell, Modal, Badge, Button } from "@menu-bites/ui";
+import { formatDate, formatPrice, timeAgo, Order, ORDER_STATUSES } from "../_components/localShared";
 import { Loader2, RefreshCw } from "lucide-react";
 
 type BadgeVariant = "success" | "danger" | "warning" | "neutral" | "info";
@@ -21,18 +19,9 @@ function orderStatusVariant(status: string): BadgeVariant {
 
 function orderTotal(order: Order): number {
   return (order.order_items ?? []).reduce(
-    (sum, item) => sum + Number(item.unit_price ?? 0),
+    (sum, item) => sum + Number(item.unitPrice ?? 0),
     0
   );
-}
-
-function timeAgo(value: string): string {
-  const diff = Math.floor((Date.now() - new Date(value).getTime()) / 60000);
-  if (diff < 1) return "Hace un momento";
-  if (diff === 1) return "Hace 1 min";
-  if (diff < 60) return `Hace ${diff} min`;
-  const hrs = Math.floor(diff / 60);
-  return `Hace ${hrs}h ${diff % 60}min`;
 }
 
 const NEXT_STATUS: Record<string, string> = {
@@ -64,10 +53,20 @@ export default function OrdersPage() {
     }
   }, []);
 
+  // Carga inicial + Supabase Realtime (reemplaza el polling de 30 s)
   useEffect(() => {
     fetchOrders();
-    const interval = setInterval(fetchOrders, 30000);
-    return () => clearInterval(interval);
+
+    const channel = supabase
+      .channel("local-dashboard-orders")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders" },
+        () => { fetchOrders(); }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [fetchOrders]);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
@@ -80,7 +79,6 @@ export default function OrdersPage() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Error actualizando estado");
-      await fetchOrders();
       if (selectedOrder?.id === orderId) {
         setSelectedOrder((prev) => prev ? { ...prev, status: newStatus } : null);
       }
@@ -209,7 +207,7 @@ export default function OrdersPage() {
                     <div key={item.id} className="flex justify-between items-center py-2 border-b border-slate-800/50">
                       <span className="text-sm text-slate-300">{item.menu_items?.name ?? "Item"}</span>
                       <span className="text-sm font-mono text-slate-400">
-                        {formatPrice(Number(item.unit_price ?? 0))}
+                        {formatPrice(Number(item.unitPrice ?? 0))}
                       </span>
                     </div>
                   ))}

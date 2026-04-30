@@ -9,13 +9,24 @@ export async function GET(req: NextRequest) {
   if ("errorResponse" in auth) return auth.errorResponse;
   const { restaurantId } = auth;
 
+  const { searchParams } = new URL(req.url);
+  const fromParam = searchParams.get("from");
+  const statusParam = searchParams.get("status");
+
   const db = createServiceClient();
-  const { data, error } = await db
+  let query = db
     .from("orders")
-    .select("id, status, createdAt, table_id, tables(number), order_items(id, menu_item_id, unit_price, menu_items(name))")
+    .select(
+      "id, status, createdAt, table_id:tableId, tables(number), order_items(id, menu_item_id:menuItemId, unit_price:unitPrice, quantity, menu_items(name))"
+    )
     .eq("restaurant_id", restaurantId)
     .order("createdAt", { ascending: false })
     .limit(50);
+
+  if (fromParam) query = query.gte("createdAt", fromParam);
+  if (statusParam && statusParam !== "ALL") query = query.eq("status", statusParam);
+
+  const { data, error } = await query;
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ data });

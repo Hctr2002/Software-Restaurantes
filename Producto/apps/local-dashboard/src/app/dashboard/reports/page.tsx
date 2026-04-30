@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import LocalShell from "../_components/LocalShell";
-import { Table, TableRow, TableCell } from "../_components/Table";
+import { Table, TableRow, TableCell } from "@menu-bites/ui";
 import { formatPrice } from "../_components/localShared";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@menu-bites/ui";
 import { TrendingUp, UtensilsCrossed, TableProperties } from "lucide-react";
@@ -53,7 +53,7 @@ export default function ReportsPage() {
         const key = order.createdAt.slice(0, 10);
         if (!dayMap[key]) return;
         const total = (order.order_items ?? []).reduce(
-          (s: number, item: any) => s + (Number(item.unit_price ?? 0)), 0
+          (s: number, item: any) => s + (Number(item.unitPrice ?? 0)), 0
         );
         dayMap[key].orders++;
         dayMap[key].revenue += total;
@@ -75,7 +75,7 @@ export default function ReportsPage() {
           if (!name) return;
           if (!itemMap[name]) itemMap[name] = { name, category: "—", count: 0, revenue: 0 };
           itemMap[name].count++;
-          itemMap[name].revenue += Number(item.unit_price ?? 0);
+          itemMap[name].revenue += Number(item.unitPrice ?? 0);
         });
       });
       setTopItems(Object.values(itemMap).sort((a, b) => b.count - a.count).slice(0, 10));
@@ -87,7 +87,7 @@ export default function ReportsPage() {
         if (!num) return;
         if (!tblMap[num]) tblMap[num] = { orders: 0, revenue: 0 };
         const total = (order.order_items ?? []).reduce(
-          (s: number, item: any) => s + (Number(item.unit_price ?? 0)), 0
+          (s: number, item: any) => s + (Number(item.unitPrice ?? 0)), 0
         );
         tblMap[num].orders++;
         tblMap[num].revenue += total;

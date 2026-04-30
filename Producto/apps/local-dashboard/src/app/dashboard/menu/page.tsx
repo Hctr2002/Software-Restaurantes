@@ -2,14 +2,12 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import LocalShell from "../_components/LocalShell";
-import { Table, TableRow, TableCell } from "../_components/Table";
-import Modal from "../_components/Modal";
-import { Badge } from "../_components/Badge";
+import { Table, TableRow, TableCell, Modal, Badge } from "@menu-bites/ui";
 import { formatPrice, MenuItem, Category } from "../_components/localShared";
 import { Button, Input } from "@menu-bites/ui";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 
-const EMPTY_FORM = { name: "", description: "", price: "", is_active: true, category_id: "" };
+const EMPTY_FORM = { name: "", description: "", price: "", is_active: true, categoryId: "" };
 
 export default function MenuPage() {
   const [items, setItems] = useState<MenuItem[]>([]);
@@ -52,7 +50,7 @@ export default function MenuPage() {
 
   const openEdit = (item: MenuItem) => {
     setEditingItem(item);
-    setForm({ name: item.name, description: item.description || "", price: String(item.price), is_active: item.is_active, category_id: item.category_id || "" });
+    setForm({ name: item.name, description: item.description || "", price: String(item.price), is_active: item.is_active, categoryId: item.categoryId || "" });
     setIsModalOpen(true);
   };
 
@@ -65,7 +63,7 @@ export default function MenuPage() {
         description: form.description.trim() || null,
         price: parseFloat(form.price),
         is_active: form.is_active,
-        category_id: form.category_id || null,
+        category_id: form.categoryId || null,   // DB column name for INSERT/PUT
       };
 
       const res = editingItem
@@ -187,8 +185,8 @@ export default function MenuPage() {
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Categoría</label>
             <select
-              value={form.category_id}
-              onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+              value={form.categoryId}
+              onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
               className="w-full px-3 py-2 rounded-md bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
             >
               <option value="">Sin categoría</option>
