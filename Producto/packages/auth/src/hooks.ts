@@ -6,22 +6,27 @@ export function useTables(restaurantId: string | undefined) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!restaurantId) return;
+    if (!restaurantId) {
+      setLoading(false);
+      return;
+    }
 
     const fetchTables = async () => {
-      const { data, error } = await supabase
-        .from("tables")
-        .select("*")
-        .eq("restaurant_id", restaurantId)
-        .order("number", { ascending: true });
+      try {
+        const { data, error } = await supabase
+          .from("tables")
+          .select("*")
+          .eq("restaurant_id", restaurantId)
+          .order("number", { ascending: true });
 
-      if (!error) setTables(data);
-      setLoading(false);
+        if (!error && data) setTables(data);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchTables();
 
-    // Suscripción real-time para cambios en mesas
     const channel = supabase
       .channel("table_changes")
       .on(
@@ -37,9 +42,7 @@ export function useTables(restaurantId: string | undefined) {
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [restaurantId]);
 
   return { tables, loading };
@@ -51,17 +54,23 @@ export function useMenu(restaurantId: string | undefined) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!restaurantId) return;
+    if (!restaurantId) {
+      setLoading(false);
+      return;
+    }
 
     const fetchMenuData = async () => {
-      const [menuRes, catRes] = await Promise.all([
-        supabase.from("menu_items").select("*").eq("restaurant_id", restaurantId).eq("is_active", true),
-        supabase.from("categories").select("*").eq("restaurant_id", restaurantId).eq("is_active", true),
-      ]);
+      try {
+        const [menuRes, catRes] = await Promise.all([
+          supabase.from("menu_items").select("*").eq("restaurant_id", restaurantId).eq("is_active", true),
+          supabase.from("categories").select("*").eq("restaurant_id", restaurantId).eq("is_active", true),
+        ]);
 
-      if (!menuRes.error) setMenu(menuRes.data);
-      if (!catRes.error) setCategories(catRes.data);
-      setLoading(false);
+        if (!menuRes.error && menuRes.data) setMenu(menuRes.data);
+        if (!catRes.error && catRes.data) setCategories(catRes.data);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchMenuData();
@@ -75,26 +84,31 @@ export function useKitchenOrders(restaurantId: string | undefined) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!restaurantId) return;
+    if (!restaurantId) {
+      setLoading(false);
+      return;
+    }
 
     const fetchOrders = async () => {
-      // Traer órdenes que no estén DELIVERED
-      const { data, error } = await supabase
-        .from("orders")
-        .select(`
-          *,
-          table:tables(number),
-          items:order_items(
+      try {
+        const { data, error } = await supabase
+          .from("orders")
+          .select(`
             *,
-            menu_item:menu_items(name)
-          )
-        `)
-        .eq("restaurant_id", restaurantId)
-        .neq("status", "DELIVERED")
-        .order("created_at", { ascending: true });
+            table:tables(number),
+            items:order_items(
+              *,
+              menu_item:menu_items(name)
+            )
+          `)
+          .eq("restaurant_id", restaurantId)
+          .neq("status", "DELIVERED")
+          .order("createdAt", { ascending: true });
 
-      if (!error) setOrders(data);
-      setLoading(false);
+        if (!error && data) setOrders(data);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchOrders();
@@ -104,17 +118,58 @@ export function useKitchenOrders(restaurantId: string | undefined) {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "orders", filter: `restaurant_id=eq.${restaurantId}` },
-        (payload) => {
-          fetchOrders(); // Recargar todo para traer las relaciones (items/tables) simplifica la lógica
-          // Notificación sonora gestionada en el componente
-        }
+        () => { fetchOrders(); }
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [restaurantId]);
 
   return { orders, loading };
+}
+
+export function useWaiterOrders(restaurantId: string | undefined) {
+  const [pending, setPending] = useState<any[]>([]);
+  const [ready, setReady]     = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!restaurantId) return;
+
+    const fetchOrders = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("orders")
+          .select(`
+            id, status, created_at,
+            table:tables(number),
+            items:order_items(quantity, menu_item:menu_items(name))
+          `)
+          .eq("restaurant_id", restaurantId)
+          .in("status", ["PENDING", "READY"])
+          .order("createdAt", { ascending: true });
+
+        if (!error && data) {
+          setPending(data.filter((o: any) => o.status === "PENDING"));
+          setReady(data.filter((o: any)   => o.status === "READY"));
+        }
+      } catch (_) {
+        // silently ignore — secciones no renderizan si no hay datos
+      }
+    };
+
+    fetchOrders();
+
+    const channel = supabase
+      .channel("waiter_order_feed")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders", filter: `restaurant_id=eq.${restaurantId}` },
+        () => { fetchOrders(); }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [restaurantId]);
+
+  return { pending, ready };
 }

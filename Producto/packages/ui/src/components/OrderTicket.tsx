@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { cn } from "../lib/utils";
 import { Clock, CheckCircle2, PlayCircle, Utensils } from "lucide-react";
 
-export type OrderStatus = "PENDING" | "PREPARING" | "READY" | "DELIVERED";
+export type OrderStatus = "PENDING" | "VALIDATED" | "PREPARING" | "READY" | "DELIVERED";
 
 interface OrderItem {
   id: string;
@@ -39,10 +39,11 @@ export const OrderTicket = ({ id, tableNumber, status, createdAt, items, onStatu
   const isDelayed = elapsed >= 15;
 
   const statusConfigs = {
-    PENDING: { border: "border-navy/10", bg: "bg-navy/5", icon: Clock },
-    PREPARING: { border: "border-brand-accent/40", bg: "bg-brand-accent/5", icon: PlayCircle },
-    READY: { border: "border-sage/40", bg: "bg-sage/5", icon: CheckCircle2 },
-    DELIVERED: { border: "border-navy/50", bg: "bg-navy/10", icon: CheckCircle2 },
+    PENDING:   { border: "border-navy/10",          bg: "bg-navy/5",           icon: Clock },
+    VALIDATED: { border: "border-yellow-500/30",    bg: "bg-yellow-500/5",     icon: Clock },
+    PREPARING: { border: "border-brand-accent/40",  bg: "bg-brand-accent/5",   icon: PlayCircle },
+    READY:     { border: "border-sage/40",           bg: "bg-sage/5",           icon: CheckCircle2 },
+    DELIVERED: { border: "border-navy/50",           bg: "bg-navy/10",          icon: CheckCircle2 },
   };
 
   const config = statusConfigs[status];
@@ -85,8 +86,8 @@ export const OrderTicket = ({ id, tableNumber, status, createdAt, items, onStatu
       </div>
 
       <div className="flex space-x-3">
-        {status === "PENDING" && (
-          <button 
+        {(status === "PENDING" || status === "VALIDATED") && (
+          <button
             onClick={() => onStatusChange("PREPARING")}
             className="flex-1 py-3 bg-navy text-white rounded-2xl text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-navy/90 transition-all flex items-center justify-center space-x-2"
           >
@@ -95,7 +96,7 @@ export const OrderTicket = ({ id, tableNumber, status, createdAt, items, onStatu
           </button>
         )}
         {status === "PREPARING" && (
-          <button 
+          <button
             onClick={() => onStatusChange("READY")}
             className="flex-1 py-3 bg-sage text-white rounded-2xl text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-sage/90 transition-all flex items-center justify-center space-x-2"
           >

@@ -1,4 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr';
+import type { Session } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
@@ -12,8 +13,8 @@ export const getSession = async () => {
   return session;
 };
 
-export const getAppMetadata = (session: any) => {
-  return session?.user?.app_metadata || {};
+export const getAppMetadata = (session: Session | null) => {
+  return session?.user?.app_metadata ?? {};
 };
 
 export const signOut = async () => {
