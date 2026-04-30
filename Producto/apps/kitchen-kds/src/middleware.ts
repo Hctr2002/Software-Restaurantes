@@ -27,25 +27,10 @@ export async function middleware(req: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession();
 
   const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
-  const pathname = req.nextUrl.pathname;
   const role = session?.user?.app_metadata?.role;
-  const isAdmin = role === 'ADMIN';
 
-  // Sin sesión → login centralizado
-  if (!session) {
+  if (!session || role !== 'COCINA') {
     return NextResponse.redirect(authUrl);
-  }
-
-  // Sesión pero rol incorrecto → login centralizado
-  if (!isAdmin) {
-    return NextResponse.redirect(authUrl);
-  }
-
-  // ADMIN en raíz → dashboard
-  if (pathname === '/') {
-    const url = req.nextUrl.clone();
-    url.pathname = '/dashboard';
-    return NextResponse.redirect(url);
   }
 
   return response;

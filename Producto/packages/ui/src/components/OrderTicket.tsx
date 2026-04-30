@@ -49,10 +49,10 @@ export const OrderTicket = ({ id, tableNumber, status, createdAt, items, onStatu
 
   return (
     <div className={cn(
-      "relative flex flex-col p-6 rounded-[2rem] border glass transition-all duration-500 animate-in zoom-in-95",
+      "relative flex flex-col p-6 rounded-[2rem] border glass",
       config.border,
       config.bg,
-      isDelayed && status !== "READY" && "border-brand-accent/60 bg-brand-accent/10 shadow-lg shadow-brand-accent/20 animate-pulse"
+      isDelayed && status !== "READY" && "border-brand-accent/60 bg-brand-accent/10 shadow-lg shadow-brand-accent/20"
     )}>
       <div className="flex justify-between items-start mb-6">
         <div className="flex items-center space-x-4">
