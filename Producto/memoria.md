@@ -26,10 +26,12 @@ Estandarización del proyecto `Software-Restaurantes` de Héctor Robledo dentro 
 - **2026-04-29:** Corrección de aliases PostgREST invertidos en `local-dashboard` (rutas `/api/local/orders` y `/api/local/menu`). La sintaxis correcta es `alias:columna_real`; los campos afectados eran `menuItemId`, `unitPrice`, `tableId` y `categoryId`.
 - **2026-04-29:** Centralización de autenticación en `localhost:3000` (admin-dashboard). Se actualizó el middleware de `local-dashboard` para redirigir usuarios sin sesión o rol incorrecto a `NEXT_PUBLIC_AUTH_URL` en lugar de a su propio login. Se eliminó el formulario de login de `local-dashboard/page.tsx`. Se crearon middlewares reales (`middleware.ts`) para `kitchen-kds` (guard COCINA) y `waiter-terminal` (guard GARZON), reemplazando los archivos `proxy.ts` inactivos. Se añadió `@supabase/ssr` como dependencia directa en ambas apps.
 - **2026-04-29:** Implementación de panel de Configuración KDS en `kitchen-kds`. Nuevo `SettingsModal` con 5 secciones: (1) Umbrales de Alerta con color coding verde/amarillo/rojo configurable por minutos, (2) Tiempos de Preparación por Categoría, (3) Alertas Sonoras toggle por tipo (nuevo ticket / alerta crítica), (4) Auto-borrado de comandas listas tras N segundos, (5) Gestión "Sin Stock" (86 items) con toggle inmediato en Supabase. Settings persistidos en `localStorage` por dispositivo. Se extrajeron tipos y helpers a `src/lib/kdsSettings.ts`. Se eliminaron animaciones (`animate-in`, `animate-pulse`) del componente `OrderTicket` en `packages/ui`.
+- **2026-04-30:** Resolución de Incidente 404 en `kitchen-kds`. Se identificó que el acceso correcto es `http://localhost:3001` (root) y no `/kds`. Verificación de conectividad exitosa.
 
 ## 5. INCIDENTES REGISTRADOS
 
 - **Incidente 02:25:00:** `fatal: could not read Username for 'https://github.com'`. Bloqueo de Git Pull por autenticación en entorno no interactivo.
+- **Incidente 2026-04-30:** Error 404 al acceder a `localhost:3001/kds`. Causa: Desajuste entre URL solicitada y rutas configuradas en el App Router. Resolución: Uso de URL raíz.
 
 ## 6. FLIGHT LOG — ZENITH SESSIONS
 
@@ -39,8 +41,8 @@ Estandarización del proyecto `Software-Restaurantes` de Héctor Robledo dentro 
 | RUN-20260421-002 | 2026-04-21T20:23:45-04:00 | FLUJO-000 / /zenith | 00_Zenith | 🔴 BLOCKED — Auth Failure (Develop/Frontend) |
 | RUN-20260421-003 | 2026-04-21T21:06:00-04:00 | FLUJO-000 / /zenith | 00_Zenith | 🟢 COMPLETED — Rama feature/front_superadmin creada localmente |
 | RUN-20260428-004 | 2026-04-28T20:53:00-04:00 | FLUJO-000 / /zenith | 00_Zenith | 🟡 IN_PROGRESS — Actualización y Merge de develop |
-
-| RUN-20260429-005 | 2026-04-29T23:22:00-04:00 | FLUJO-000 / /zenith | 00_Zenith | 🟢 PRE-FLIGHT OK — Iniciando actualización de rama feature/front_kds |
+| RUN-20260429-005 | 2026-04-29T23:27:00-04:00 | FLUJO-000 / /zenith | 00_Zenith | 🟢 COMPLETED — Rama feature/front_kds publicada en GitHub |
+| RUN-20260430-006 | 2026-04-30T00:00:00-04:00 | FLUJO-000 / /zenith | 00_Zenith | 🟢 COMPLETED — Resolución 404 KDS y Generación de Reporte |
 
 ---
 Desarrollado por OLYMP-IA · Supremacía Digital
