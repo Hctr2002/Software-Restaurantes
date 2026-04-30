@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const db = createServiceClient();
   const { data, error } = await db
     .from("menu_items")
-    .select("id, name, description, price, category_id:categoryId, is_active, restaurant_id, categories(name)")
+    .select("id, name, description, price, categoryId:category_id, is_active, restaurant_id, categories(name)")
     .eq("restaurant_id", restaurantId)
     .order("name");
 

@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
   let query = db
     .from("orders")
     .select(
-      "id, status, createdAt, table_id:tableId, tables(number), order_items(id, menu_item_id:menuItemId, unit_price:unitPrice, quantity, menu_items(name))"
+      "id, status, createdAt, tableId:table_id, tables(number), order_items(id, menuItemId:menu_item_id, unitPrice:unit_price, quantity, menu_items(name))"
     )
     .eq("restaurant_id", restaurantId)
     .order("createdAt", { ascending: false })
