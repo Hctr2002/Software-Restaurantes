@@ -49,3 +49,6 @@ Entrega 1.pdf
 # macOS metadata files
 .DS_Store
 **/.DS_Store
+
+# Markdown folders
+markdown/

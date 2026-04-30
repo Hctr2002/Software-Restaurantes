@@ -3,16 +3,16 @@
 import React, { useState } from "react";
 import { useAuthStore } from "@menu-bites/store";
 import { supabase } from "@menu-bites/auth";
-import { User, Lock, ArrowRight, Loader2, Mail, Eye, EyeOff } from "lucide-react";
+import { Lock, ArrowRight, Loader2, Mail, Eye, EyeOff } from "lucide-react";
 import { cn, Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@menu-bites/ui";
 import Link from "next/link";
 
 const ROLE_URLS: Record<string, string> = {
-  SUPER_ADMIN: "/dashboard",
-  ADMIN:       process.env.NEXT_PUBLIC_LOCAL_DASHBOARD_URL  || "http://localhost:3003",
-  COCINA:      process.env.NEXT_PUBLIC_KITCHEN_URL          || "http://localhost:3001",
-  CAJERO:      process.env.NEXT_PUBLIC_CASHIER_URL          || "http://localhost:3004",
-  GARZON:      process.env.NEXT_PUBLIC_WAITER_URL           || "http://localhost:3002",
+  SUPER_ADMIN: process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_URL || "http://localhost:3000",
+  ADMIN:       "/dashboard",
+  COCINA:      process.env.NEXT_PUBLIC_KITCHEN_URL         || "http://localhost:3001",
+  CAJERO:      process.env.NEXT_PUBLIC_CASHIER_URL         || "http://localhost:3004",
+  GARZON:      process.env.NEXT_PUBLIC_WAITER_URL          || "http://localhost:3002",
 };
 
 export default function LoginPage() {
@@ -25,24 +25,17 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("LOGIN_DEBUG: Formulario enviado");
     setIsLoading(true);
     setError(null);
 
     try {
-      console.log("LOGIN_DEBUG: Intentando login con:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        password: password, // No trim para password
+        password,
       });
 
       if (error) {
-        console.log("LOGIN_DEBUG: Error de Supabase:", error);
-        if (error.status === 400) {
-          setError("Credenciales inválidas, intente nuevamente");
-        } else {
-          setError(error.message);
-        }
+        setError(error.status === 400 ? "Credenciales inválidas, intente nuevamente" : error.message);
         return;
       }
 
@@ -55,26 +48,22 @@ export default function LoginPage() {
           restaurantId: data.user.app_metadata.restaurant_id,
         });
 
-        const target = ROLE_URLS[role] ?? "/dashboard";
+        const target = ROLE_URLS[role] ?? "http://localhost:3000";
         window.location.replace(target);
       }
-    } catch (err) {
-      console.error("LOGIN_DEBUG: Error fatal en handleLogin:", err);
+    } catch {
       setError("Error de conexión, intente más tarde");
     } finally {
       setIsLoading(false);
-      console.log("LOGIN_DEBUG: Finalizado estado de carga");
     }
   };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-slate-950">
-      {/* Premium Background Layer */}
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 scale-105"
         style={{ backgroundImage: "url('/login_background.png')" }}
       />
-      
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-background" />
 
       <main className="relative z-10 w-full max-w-md">
@@ -83,9 +72,7 @@ export default function LoginPage() {
             <CardTitle className="text-4xl tracking-tighter">
               Menu <span className="text-primary">Bites</span>
             </CardTitle>
-            <CardDescription>
-              Enterprise Gastronomic Management
-            </CardDescription>
+            <CardDescription>Panel de Administración del Local</CardDescription>
           </CardHeader>
 
           <CardContent>
@@ -95,7 +82,7 @@ export default function LoginPage() {
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/50 z-10" />
                   <Input
                     type="email"
-                    placeholder="admin@menubites.com"
+                    placeholder="admin@mirestaurante.com"
                     required
                     className="pl-10"
                     value={email}
@@ -119,11 +106,7 @@ export default function LoginPage() {
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-white transition-colors z-10"
                     tabIndex={-1}
                   >
-                    {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
@@ -134,17 +117,12 @@ export default function LoginPage() {
                 </p>
               )}
 
-              <Button
-                type="submit"
-                disabled={isLoading}
-                variant="premium"
-                className="w-full"
-              >
+              <Button type="submit" disabled={isLoading} variant="premium" className="w-full">
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   <>
-                    Entrar al Sistema
+                    Entrar al Panel
                     <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
@@ -153,7 +131,7 @@ export default function LoginPage() {
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-4 pt-0">
-            <Link 
+            <Link
               href="/forgot-password"
               className="text-[10px] text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest font-black"
             >
