@@ -102,6 +102,12 @@ export default function KitchenKDSPage() {
         prev.map(o => o.id === orderId ? { ...o, status: newStatus as MockOrder["status"] } : o)
       );
     } else {
+      // State machine: PENDING → PREPARING is invalid — must go through VALIDATED first
+      const order = orders.find(o => o.id === orderId);
+      if (order?.status === "PENDING" && newStatus === "PREPARING") {
+        const { error } = await updateOrderStatus(orderId, "VALIDATED");
+        if (error) return;
+      }
       await updateOrderStatus(orderId, newStatus);
     }
 
@@ -119,7 +125,8 @@ export default function KitchenKDSPage() {
     setSettingsOpen(false);
   };
 
-  const pendingOrders   = orders.filter(o => o.status === "PENDING");
+  // PENDING = recién creado por el garzón; VALIDATED = ya confirmado, esperando inicio
+  const pendingOrders   = orders.filter(o => o.status === "PENDING" || o.status === "VALIDATED");
   const preparingOrders = orders.filter(o => o.status === "PREPARING");
   const readyOrders     = orders.filter(o => o.status === "READY");
 
