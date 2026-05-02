@@ -36,9 +36,10 @@ export async function POST(req: NextRequest) {
   }
 
   const db = createServiceClient();
+  const qrData = `restaurant_${restaurantId}_table_${number}`;
   const { data, error } = await db
     .from("tables")
-    .insert({ number, label: label ?? null, status: status ?? "AVAILABLE", restaurant_id: restaurantId })
+    .insert({ number, label: label ?? null, status: status ?? "FREE", restaurant_id: restaurantId, qr_data: qrData })
     .select()
     .single();
 

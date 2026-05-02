@@ -18,6 +18,9 @@ import {
   Tag,
   BarChart2,
   Users,
+  Menu,
+  X,
+  Package,
 } from "lucide-react";
 
 type LocalShellProps = {
@@ -31,6 +34,7 @@ export default function LocalShell({ title, subtitle, children }: LocalShellProp
   const router = useRouter();
   const { user, logout: clearAuth } = useAuthStore();
   const [isSigningOut, setIsSigningOut] = React.useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -46,17 +50,36 @@ export default function LocalShell({ title, subtitle, children }: LocalShellProp
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-300 font-sans flex">
+      {/* Mobile backdrop */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-64 bg-slate-900 border-r border-slate-800 z-50 hidden lg:flex flex-col">
+      <aside
+        className={`fixed left-0 top-0 h-full w-64 bg-slate-900 border-r border-slate-800 z-50 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
         {/* Brand */}
         <div className="h-16 flex items-center px-6 border-b border-slate-800">
-          <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center mr-3">
+          <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center mr-3 shrink-0">
             <Store className="w-5 h-5 text-white" />
           </div>
-          <div>
+          <div className="flex-1">
             <h2 className="text-sm font-bold text-slate-100 tracking-tight leading-tight">Menu Bites</h2>
             <p className="text-[10px] text-slate-400 font-medium">Panel Local</p>
           </div>
+          <button
+            className="lg:hidden p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+            onClick={() => setIsMobileMenuOpen(false)}
+            aria-label="Cerrar menú"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Navigation */}
@@ -64,32 +87,33 @@ export default function LocalShell({ title, subtitle, children }: LocalShellProp
           <div>
             <p className="px-3 text-xs font-bold text-slate-500 mb-2 tracking-wider">PANEL PRINCIPAL</p>
             <nav className="space-y-0.5">
-              <NavItem href="/dashboard" icon={<LayoutDashboard className="w-4 h-4" />} label="Resumen" active={pathname === "/dashboard"} />
+              <NavItem href="/dashboard" icon={<LayoutDashboard className="w-4 h-4" />} label="Resumen" active={pathname === "/dashboard"} onClick={() => setIsMobileMenuOpen(false)} />
             </nav>
           </div>
 
           <div>
             <p className="px-3 text-xs font-bold text-slate-500 mb-2 tracking-wider">GESTIÓN</p>
             <nav className="space-y-0.5">
-              <NavItem href="/dashboard/users" icon={<Users className="w-4 h-4" />} label="Usuarios" active={pathname.startsWith("/dashboard/users")} />
-              <NavItem href="/dashboard/menu" icon={<UtensilsCrossed className="w-4 h-4" />} label="Menú" active={pathname.startsWith("/dashboard/menu")} />
-              <NavItem href="/dashboard/categories" icon={<Tag className="w-4 h-4" />} label="Categorías" active={pathname.startsWith("/dashboard/categories")} />
-              <NavItem href="/dashboard/tables" icon={<TableProperties className="w-4 h-4" />} label="Mesas" active={pathname.startsWith("/dashboard/tables")} />
-              <NavItem href="/dashboard/orders" icon={<ClipboardList className="w-4 h-4" />} label="Pedidos" active={pathname.startsWith("/dashboard/orders")} />
+              <NavItem href="/dashboard/users" icon={<Users className="w-4 h-4" />} label="Usuarios" active={pathname.startsWith("/dashboard/users")} onClick={() => setIsMobileMenuOpen(false)} />
+              <NavItem href="/dashboard/menu" icon={<UtensilsCrossed className="w-4 h-4" />} label="Menú" active={pathname.startsWith("/dashboard/menu")} onClick={() => setIsMobileMenuOpen(false)} />
+              <NavItem href="/dashboard/categories" icon={<Tag className="w-4 h-4" />} label="Categorías" active={pathname.startsWith("/dashboard/categories")} onClick={() => setIsMobileMenuOpen(false)} />
+              <NavItem href="/dashboard/tables" icon={<TableProperties className="w-4 h-4" />} label="Mesas" active={pathname.startsWith("/dashboard/tables")} onClick={() => setIsMobileMenuOpen(false)} />
+              <NavItem href="/dashboard/orders" icon={<ClipboardList className="w-4 h-4" />} label="Pedidos" active={pathname.startsWith("/dashboard/orders")} onClick={() => setIsMobileMenuOpen(false)} />
+              <NavItem href="/dashboard/inventory" icon={<Package className="w-4 h-4" />} label="Inventario" active={pathname.startsWith("/dashboard/inventory")} onClick={() => setIsMobileMenuOpen(false)} />
             </nav>
           </div>
 
           <div>
             <p className="px-3 text-xs font-bold text-slate-500 mb-2 tracking-wider">REPORTES</p>
             <nav className="space-y-0.5">
-              <NavItem href="/dashboard/reports" icon={<BarChart2 className="w-4 h-4" />} label="Análisis de Ventas" active={pathname.startsWith("/dashboard/reports")} />
+              <NavItem href="/dashboard/reports" icon={<BarChart2 className="w-4 h-4" />} label="Análisis de Ventas" active={pathname.startsWith("/dashboard/reports")} onClick={() => setIsMobileMenuOpen(false)} />
             </nav>
           </div>
 
           <div>
             <p className="px-3 text-xs font-bold text-slate-500 mb-2 tracking-wider">CUENTA</p>
             <nav className="space-y-0.5">
-              <NavItem href="/dashboard/settings/profile" icon={<Settings className="w-4 h-4" />} label="Configuración" active={pathname.startsWith("/dashboard/settings")} />
+              <NavItem href="/dashboard/settings/profile" icon={<Settings className="w-4 h-4" />} label="Configuración" active={pathname.startsWith("/dashboard/settings")} onClick={() => setIsMobileMenuOpen(false)} />
             </nav>
           </div>
         </div>
@@ -120,7 +144,14 @@ export default function LocalShell({ title, subtitle, children }: LocalShellProp
       {/* Main Content Area */}
       <main className="lg:pl-64 flex-1 flex flex-col min-h-screen">
         {/* Header with Breadcrumbs */}
-        <header className="h-16 border-b border-slate-800 flex items-center px-8 bg-slate-950 sticky top-0 z-40">
+        <header className="h-16 border-b border-slate-800 flex items-center px-4 lg:px-8 bg-slate-950 sticky top-0 z-40">
+          <button
+            className="lg:hidden mr-3 p-2 rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+            onClick={() => setIsMobileMenuOpen(true)}
+            aria-label="Abrir menú"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
           <div className="flex items-center text-sm">
             <span className="text-slate-400 hover:text-slate-300 cursor-pointer transition-colors">{title}</span>
             <ChevronRight className="w-4 h-4 mx-2 text-slate-600" />
@@ -142,10 +173,11 @@ export default function LocalShell({ title, subtitle, children }: LocalShellProp
   );
 }
 
-function NavItem({ href, icon, label, active }: { href: string; icon: React.ReactNode; label: string; active: boolean }) {
+function NavItem({ href, icon, label, active, onClick }: { href: string; icon: React.ReactNode; label: string; active: boolean; onClick?: () => void }) {
   return (
     <Link
       href={href}
+      onClick={onClick}
       className={`w-full flex items-center space-x-3 px-3 py-2 rounded-md transition-colors ${
         active
           ? "bg-blue-900/30 text-blue-400 font-medium"

@@ -11,8 +11,8 @@ export async function GET(req: NextRequest) {
 
   const db = createServiceClient();
   const { data, error } = await db
-    .from("menu_items")
-    .select("id, name, description, price, categoryId:category_id, image_url, is_active, restaurant_id, categories(name)")
+    .from("inventories")
+    .select("*")
     .eq("restaurant_id", restaurantId)
     .order("name");
 
@@ -29,16 +29,16 @@ export async function POST(req: NextRequest) {
   const { restaurantId } = auth;
 
   const body = await req.json();
-  const { name, description, price, is_active, category_id, image_url } = body;
+  const { name, stock, unit } = body;
 
-  if (!name || price === undefined || !category_id) {
-    return NextResponse.json({ error: "Faltan campos requeridos: name, price, category_id" }, { status: 400 });
+  if (!name?.trim() || stock === undefined || !unit?.trim()) {
+    return NextResponse.json({ error: "Faltan campos requeridos: name, stock, unit" }, { status: 400 });
   }
 
   const db = createServiceClient();
   const { data, error } = await db
-    .from("menu_items")
-    .insert({ name, description: description ?? null, price, is_active: is_active ?? true, restaurant_id: restaurantId, category_id, image_url: image_url ?? null })
+    .from("inventories")
+    .insert({ name: name.trim(), stock: Number(stock), unit: unit.trim(), restaurant_id: restaurantId })
     .select()
     .single();
 

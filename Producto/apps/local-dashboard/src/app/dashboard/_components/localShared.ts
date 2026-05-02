@@ -7,6 +7,7 @@ export type MenuItem = {
   description: string | null;
   price: number;
   categoryId: string | null;      // DB: category_id — aliased in GET /api/local/menu
+  image_url: string | null;
   is_active: boolean;
   restaurant_id: string;
   categories?: { name: string } | null;
@@ -31,10 +32,22 @@ export type OrderItem = {
 export type Order = {
   id: string;
   tableId: string | null;         // DB: table_id — aliased in GET /api/local/orders
+  userId: string | null;          // DB: user_id — aliased in GET /api/local/orders
   status: string;
   createdAt: string;              // DB: createdAt (no @map in Prisma — kept as-is)
   tables?: { number: number } | null;
+  users?: { email: string } | null;
   order_items?: OrderItem[];
+};
+
+export type Inventory = {
+  id: string;
+  name: string;
+  stock: number;
+  unit: string;
+  restaurant_id: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type Category = {
