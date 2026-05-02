@@ -5,7 +5,7 @@ import { supabase } from "@menu-bites/auth";
 import LocalShell from "../_components/LocalShell";
 import { Table, TableRow, TableCell, Modal, Badge, Button } from "@menu-bites/ui";
 import { formatDate, formatPrice, timeAgo, Order, ORDER_STATUSES } from "../_components/localShared";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, User } from "lucide-react";
 
 type BadgeVariant = "success" | "danger" | "warning" | "neutral" | "info";
 
@@ -19,7 +19,7 @@ function orderStatusVariant(status: string): BadgeVariant {
 
 function orderTotal(order: Order): number {
   return (order.order_items ?? []).reduce(
-    (sum, item) => sum + Number(item.unitPrice ?? 0),
+    (sum, item) => sum + Number(item.unitPrice ?? 0) * (item.quantity ?? 1),
     0
   );
 }
@@ -30,6 +30,11 @@ const NEXT_STATUS: Record<string, string> = {
   PREPARING: "READY",
   READY: "DELIVERED",
 };
+
+function garzonLabel(order: Order): string {
+  if (!order.users?.email) return "—";
+  return order.users.email.split("@")[0];
+}
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -53,17 +58,14 @@ export default function OrdersPage() {
     }
   }, []);
 
-  // Carga inicial + Supabase Realtime (reemplaza el polling de 30 s)
   useEffect(() => {
     fetchOrders();
 
     const channel = supabase
       .channel("local-dashboard-orders")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "orders" },
-        () => { fetchOrders(); }
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => {
+        fetchOrders();
+      })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
@@ -101,7 +103,6 @@ export default function OrdersPage() {
         </div>
       )}
 
-      {/* Toolbar */}
       <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
         <select
           value={filterStatus}
@@ -126,10 +127,10 @@ export default function OrdersPage() {
       {loading ? (
         <p className="text-sm text-muted-foreground">Cargando pedidos...</p>
       ) : (
-        <Table headers={["Mesa", "Estado", "Items", "Total", "Fecha", ""]}>
+        <Table headers={["Mesa", "Garzón", "Estado", "Items", "Total", "Fecha", ""]}>
           {filtered.length === 0 && (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+              <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                 No hay pedidos registrados.
               </TableCell>
             </TableRow>
@@ -138,6 +139,12 @@ export default function OrdersPage() {
             <TableRow key={order.id}>
               <TableCell className="font-bold text-slate-200">
                 Mesa {order.tables?.number ?? "S/N"}
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-1.5 text-slate-400 text-xs">
+                  <User className="w-3.5 h-3.5 shrink-0" />
+                  {garzonLabel(order)}
+                </div>
               </TableCell>
               <TableCell>
                 <Badge variant={orderStatusVariant(order.status)}>{order.status}</Badge>
@@ -164,7 +171,6 @@ export default function OrdersPage() {
         </Table>
       )}
 
-      {/* Order Detail Modal */}
       <Modal
         isOpen={!!selectedOrder}
         onClose={() => setSelectedOrder(null)}
@@ -190,13 +196,21 @@ export default function OrdersPage() {
       >
         {selectedOrder && (
           <div className="space-y-6">
-            {/* Status + time */}
             <div className="flex items-center justify-between">
               <Badge variant={orderStatusVariant(selectedOrder.status)}>{selectedOrder.status}</Badge>
               <span className="text-xs text-slate-500">{timeAgo(selectedOrder.createdAt)}</span>
             </div>
 
-            {/* Items */}
+            {selectedOrder.users?.email && (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800/60 border border-slate-700">
+                <User className="w-4 h-4 text-slate-400 shrink-0" />
+                <div>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider">Garzón</p>
+                  <p className="text-sm text-slate-200 font-medium">{selectedOrder.users.email}</p>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Detalle del pedido</p>
               {(selectedOrder.order_items ?? []).length === 0 ? (
@@ -205,9 +219,12 @@ export default function OrdersPage() {
                 <div className="space-y-2">
                   {(selectedOrder.order_items ?? []).map((item) => (
                     <div key={item.id} className="flex justify-between items-center py-2 border-b border-slate-800/50">
-                      <span className="text-sm text-slate-300">{item.menu_items?.name ?? "Item"}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-500 font-mono">{item.quantity ?? 1}×</span>
+                        <span className="text-sm text-slate-300">{item.menu_items?.name ?? "Item"}</span>
+                      </div>
                       <span className="text-sm font-mono text-slate-400">
-                        {formatPrice(Number(item.unitPrice ?? 0))}
+                        {formatPrice(Number(item.unitPrice ?? 0) * (item.quantity ?? 1))}
                       </span>
                     </div>
                   ))}
@@ -215,7 +232,6 @@ export default function OrdersPage() {
               )}
             </div>
 
-            {/* Total */}
             <div className="flex justify-between items-center p-4 rounded-xl bg-slate-800/50 border border-slate-700">
               <span className="text-sm font-bold text-slate-300 uppercase tracking-wider">Total</span>
               <span className="text-xl font-black text-slate-100">{formatPrice(orderTotal(selectedOrder))}</span>

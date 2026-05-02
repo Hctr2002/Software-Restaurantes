@@ -1,47 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createServiceClient, ensureServiceConfig } from "@/lib/localApi";
 
-export async function GET(req: NextRequest) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const cfg = ensureServiceConfig();
   if (cfg) return cfg;
 
   const auth = await requireAdmin(req);
   if ("errorResponse" in auth) return auth.errorResponse;
   const { restaurantId } = auth;
-
-  const db = createServiceClient();
-  const { data, error } = await db
-    .from("menu_items")
-    .select("id, name, description, price, categoryId:category_id, image_url, is_active, restaurant_id, categories(name)")
-    .eq("restaurant_id", restaurantId)
-    .order("name");
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ data });
-}
-
-export async function POST(req: NextRequest) {
-  const cfg = ensureServiceConfig();
-  if (cfg) return cfg;
-
-  const auth = await requireAdmin(req);
-  if ("errorResponse" in auth) return auth.errorResponse;
-  const { restaurantId } = auth;
+  const { id } = await params;
 
   const body = await req.json();
-  const { name, description, price, is_active, category_id, image_url } = body;
-
-  if (!name || price === undefined || !category_id) {
-    return NextResponse.json({ error: "Faltan campos requeridos: name, price, category_id" }, { status: 400 });
-  }
+  const { name, stock, unit } = body;
 
   const db = createServiceClient();
   const { data, error } = await db
-    .from("menu_items")
-    .insert({ name, description: description ?? null, price, is_active: is_active ?? true, restaurant_id: restaurantId, category_id, image_url: image_url ?? null })
+    .from("inventories")
+    .update({ name, stock: Number(stock), unit })
+    .eq("id", id)
+    .eq("restaurant_id", restaurantId)
     .select()
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ data }, { status: 201 });
+  if (!data) return NextResponse.json({ error: "Item no encontrado" }, { status: 404 });
+  return NextResponse.json({ data });
+}
+
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const cfg = ensureServiceConfig();
+  if (cfg) return cfg;
+
+  const auth = await requireAdmin(req);
+  if ("errorResponse" in auth) return auth.errorResponse;
+  const { restaurantId } = auth;
+  const { id } = await params;
+
+  const db = createServiceClient();
+  const { error } = await db
+    .from("inventories")
+    .delete()
+    .eq("id", id)
+    .eq("restaurant_id", restaurantId);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true });
 }

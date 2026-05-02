@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import LocalShell from "../_components/LocalShell";
 import { Table, TableRow, TableCell, Modal, Badge } from "@menu-bites/ui";
 import { formatPrice, MenuItem, Category } from "../_components/localShared";
 import { Button, Input } from "@menu-bites/ui";
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, ImagePlus, X, Power } from "lucide-react";
+import { supabase, getSession, getAppMetadata } from "@menu-bites/auth";
 
 const EMPTY_FORM = { name: "", description: "", price: "", is_active: true, categoryId: "" };
 
@@ -19,6 +20,9 @@ export default function MenuPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
@@ -45,25 +49,67 @@ export default function MenuPage() {
   const openCreate = () => {
     setEditingItem(null);
     setForm(EMPTY_FORM);
+    setImageFile(null);
+    setImagePreview(null);
     setIsModalOpen(true);
   };
 
   const openEdit = (item: MenuItem) => {
     setEditingItem(item);
-    setForm({ name: item.name, description: item.description || "", price: String(item.price), is_active: item.is_active, categoryId: item.categoryId || "" });
+    setForm({
+      name: item.name,
+      description: item.description || "",
+      price: String(item.price),
+      is_active: item.is_active,
+      categoryId: item.categoryId || "",
+    });
+    setImageFile(null);
+    setImagePreview(item.image_url ?? null);
     setIsModalOpen(true);
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const clearImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const session = await getSession();
+    const { restaurant_id } = getAppMetadata(session);
+    const ext = file.name.split(".").pop() ?? "jpg";
+    const path = `${restaurant_id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("menu-images").upload(path, file, { upsert: true });
+    if (error) throw new Error(`Error subiendo imagen: ${error.message}`);
+    const { data: { publicUrl } } = supabase.storage.from("menu-images").getPublicUrl(path);
+    return publicUrl;
+  };
+
   const handleSave = async () => {
-    if (!form.name.trim() || !form.price) return;
+    if (!form.name.trim() || !form.price || !form.categoryId) return;
     setSaving(true);
     try {
+      let image_url: string | null = null;
+      if (imageFile) {
+        image_url = await uploadImage(imageFile);
+      } else {
+        image_url = imagePreview;
+      }
+
       const payload = {
         name: form.name.trim(),
         description: form.description.trim() || null,
         price: parseFloat(form.price),
         is_active: form.is_active,
-        category_id: form.categoryId || null,   // DB column name for INSERT/PUT
+        category_id: form.categoryId,
+        image_url,
       };
 
       const res = editingItem
@@ -78,6 +124,30 @@ export default function MenuPage() {
       setError(err instanceof Error ? err.message : "Error inesperado");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleToggleActive = async (item: MenuItem) => {
+    try {
+      const res = await fetch(`/api/local/menu/${item.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: item.name,
+          description: item.description,
+          price: item.price,
+          is_active: !item.is_active,
+          category_id: item.categoryId,
+          image_url: item.image_url,
+        }),
+      });
+      if (!res.ok) {
+        const json = await res.json();
+        throw new Error(json.error || "Error actualizando estado");
+      }
+      fetchItems();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error inesperado");
     }
   };
 
@@ -114,16 +184,25 @@ export default function MenuPage() {
       {loading ? (
         <p className="text-sm text-muted-foreground">Cargando menú...</p>
       ) : (
-        <Table headers={["Nombre", "Categoría", "Precio", "Estado", "Acciones"]}>
+        <Table headers={["", "Nombre", "Categoría", "Precio", "Estado", "Acciones"]}>
           {items.length === 0 && (
             <TableRow>
-              <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+              <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                 No hay items en el menú. Crea el primero.
               </TableCell>
             </TableRow>
           )}
           {items.map((item) => (
             <TableRow key={item.id}>
+              <TableCell>
+                {item.image_url ? (
+                  <img src={item.image_url} alt={item.name} className="w-10 h-10 rounded-lg object-cover" />
+                ) : (
+                  <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center">
+                    <ImagePlus className="w-4 h-4 text-slate-600" />
+                  </div>
+                )}
+              </TableCell>
               <TableCell>
                 <p className="font-medium text-slate-200">{item.name}</p>
                 {item.description && <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>}
@@ -139,6 +218,13 @@ export default function MenuPage() {
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleToggleActive(item)}
+                    title={item.is_active ? "Deshabilitar plato" : "Habilitar plato"}
+                    className={`p-1.5 rounded transition-colors ${item.is_active ? "text-green-500 hover:bg-red-900/20 hover:text-red-400" : "text-slate-600 hover:bg-green-900/20 hover:text-green-400"}`}
+                  >
+                    <Power className="w-4 h-4" />
+                  </button>
                   <button onClick={() => openEdit(item)} className="p-1.5 rounded hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
                     <Pencil className="w-4 h-4" />
                   </button>
@@ -171,6 +257,39 @@ export default function MenuPage() {
       >
         <div className="space-y-5">
           <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Imagen</label>
+            {imagePreview ? (
+              <div className="relative w-full h-40 rounded-xl overflow-hidden border border-slate-700">
+                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={clearImage}
+                  className="absolute top-2 right-2 p-1 rounded-full bg-black/60 text-white hover:bg-red-600 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full h-32 rounded-xl border-2 border-dashed border-slate-700 flex flex-col items-center justify-center gap-2 text-slate-500 hover:border-blue-600 hover:text-blue-400 transition-colors"
+              >
+                <ImagePlus className="w-6 h-6" />
+                <span className="text-xs">Haz clic para subir una imagen</span>
+                <span className="text-xs text-slate-600">JPG, PNG, WebP — máx. 5MB</span>
+              </button>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              onChange={handleImageChange}
+              className="hidden"
+            />
+          </div>
+
+          <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nombre *</label>
             <Input placeholder="Ej. Lomo a la plancha" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </div>
@@ -183,13 +302,13 @@ export default function MenuPage() {
             <Input type="number" min="0" step="1" placeholder="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Categoría</label>
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Categoría *</label>
             <select
               value={form.categoryId}
               onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
               className="w-full px-3 py-2 rounded-md bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
             >
-              <option value="">Sin categoría</option>
+              <option value="">Selecciona una categoría</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
