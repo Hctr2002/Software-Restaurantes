@@ -29,7 +29,7 @@ export default function KitchenKDSPage() {
   const loading = MOCK_MODE ? false : liveLoading;
 
   const handleSignOut = async () => {
-    const loginUrl = process.env.NEXT_PUBLIC_AUTH_URL || "http://localhost:3000";
+    const loginUrl = process.env.NEXT_PUBLIC_AUTH_URL;
     setIsSigningOut(true);
     try {
       await signOut();

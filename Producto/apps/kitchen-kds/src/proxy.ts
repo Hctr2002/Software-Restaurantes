@@ -12,7 +12,7 @@ export async function proxy(req: NextRequest) {
 
   // URL de la pasarela de login centralizada (Admin Dashboard)
   // En producción, esto debería ser una variable de entorno
-  const loginUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
+  const loginUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
   if (!session && !req.nextUrl.pathname.startsWith('/login')) {
     return NextResponse.redirect(loginUrl);

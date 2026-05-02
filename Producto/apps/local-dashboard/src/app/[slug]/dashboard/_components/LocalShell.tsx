@@ -45,7 +45,7 @@ export default function LocalShell({ title, subtitle, children }: LocalShellProp
       await signOut();
     } finally {
       clearAuth();
-      window.location.href = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
+      window.location.href = process.env.NEXT_PUBLIC_AUTH_URL ?? '/';
     }
   };
 

@@ -11,7 +11,7 @@ export async function proxy(req: NextRequest) {
   } = await supabase.auth.getSession();
 
   // URL de la pasarela de login centralizada (Admin Dashboard)
-  const loginUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
+  const loginUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
   if (!session && !req.nextUrl.pathname.startsWith('/login')) {
     return NextResponse.redirect(loginUrl);

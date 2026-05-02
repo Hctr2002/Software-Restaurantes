@@ -23,7 +23,7 @@ export async function middleware(req: NextRequest) {
   );
 
   const { data: { session } } = await supabase.auth.getSession();
-  const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
+  const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
   const role = session?.user?.app_metadata?.role;
 
   // Sin sesión → central login
