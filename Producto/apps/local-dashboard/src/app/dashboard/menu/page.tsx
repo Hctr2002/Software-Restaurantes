@@ -55,7 +55,10 @@ export default function MenuPage() {
   };
 
   const handleSave = async () => {
-    if (!form.name.trim() || !form.price) return;
+    if (!form.name.trim() || !form.price || !form.categoryId) {
+      setError("Por favor completa todos los campos requeridos (Nombre, Precio y Categoría)");
+      return;
+    }
     setSaving(true);
     try {
       const payload = {

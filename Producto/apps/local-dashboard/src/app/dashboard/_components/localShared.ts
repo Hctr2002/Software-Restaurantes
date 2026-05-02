@@ -17,6 +17,7 @@ export type TableRecord = {
   number: number;
   label: string | null;
   status: string;
+  qrData: string | null;
   restaurant_id: string;
 };
 
