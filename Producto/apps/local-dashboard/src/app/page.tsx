@@ -9,7 +9,6 @@ import Link from "next/link";
 
 const ROLE_URLS: Record<string, string> = {
   SUPER_ADMIN: process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_URL || "http://localhost:3000",
-  ADMIN:       "/dashboard",
   COCINA:      process.env.NEXT_PUBLIC_KITCHEN_URL         || "http://localhost:3001",
   CAJERO:      process.env.NEXT_PUBLIC_CASHIER_URL         || "http://localhost:3004",
   GARZON:      process.env.NEXT_PUBLIC_WAITER_URL          || "http://localhost:3002",
@@ -40,16 +39,26 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        const role = data.user.app_metadata.role as string;
+        const role         = data.user.app_metadata.role as string;
+        const restaurantId = data.user.app_metadata.restaurant_id as string;
         setUser({
           id: data.user.id,
           email: data.user.email!,
           role: data.user.app_metadata.role,
-          restaurantId: data.user.app_metadata.restaurant_id,
+          restaurantId,
         });
 
-        const target = ROLE_URLS[role] ?? "http://localhost:3000";
-        window.location.replace(target);
+        if (role === 'ADMIN') {
+          const { data: rest } = await supabase
+            .from('restaurants')
+            .select('slug')
+            .eq('id', restaurantId)
+            .single();
+          window.location.replace(rest?.slug ? `/${rest.slug}/dashboard` : '/');
+        } else {
+          const target = ROLE_URLS[role] ?? "http://localhost:3000";
+          window.location.replace(target);
+        }
       }
     } catch {
       setError("Error de conexión, intente más tarde");

@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useAuthStore } from "@menu-bites/store";
 import { signOut } from "@menu-bites/auth";
 import { Button } from "@menu-bites/ui";
@@ -16,7 +16,6 @@ type DashboardShellProps = {
 
 export default function DashboardShell({ title, subtitle, children }: DashboardShellProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const { user, logout: clearAuth } = useAuthStore();
   const [isSigningOut, setIsSigningOut] = React.useState(false);
 
@@ -26,9 +25,7 @@ export default function DashboardShell({ title, subtitle, children }: DashboardS
       await signOut();
     } finally {
       clearAuth();
-      router.replace("/");
-      router.refresh();
-      setIsSigningOut(false);
+      window.location.href = '/';
     }
   };
 

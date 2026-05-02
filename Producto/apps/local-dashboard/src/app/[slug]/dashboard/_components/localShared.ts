@@ -1,4 +1,23 @@
 // Types reflect Supabase REST API column names.
+export type AlertType = 'TABLE_ISSUE' | 'BILL_REQUEST' | 'STOCK_SHORTAGE' | 'HELP_REQUEST' | 'GENERAL';
+
+export type Alert = {
+  id: string;
+  restaurant_id: string;
+  user_id: string | null;
+  user_email: string | null;
+  type: AlertType;
+  message: string;
+  table_number: number | null;
+  menu_item_id: string | null;
+  menu_item_name: string | null;
+  status: 'PENDING' | 'RESOLVED';
+  created_at: string;
+  resolved_at: string | null;
+  resolved_by_email: string | null;
+};
+
+
 // Fields with @map() in Prisma are aliased to camelCase in the API routes.
 
 export type MenuItem = {

@@ -2,7 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useParams } from "next/navigation";
+import AlertsPanel from "./AlertsPanel";
 import { useAuthStore } from "@menu-bites/store";
 import { signOut } from "@menu-bites/auth";
 import { Button } from "@menu-bites/ui";
@@ -31,7 +32,9 @@ type LocalShellProps = {
 
 export default function LocalShell({ title, subtitle, children }: LocalShellProps) {
   const pathname = usePathname();
-  const router = useRouter();
+  const params  = useParams();
+  const slug    = (params?.slug as string) || '';
+  const base    = `/${slug}/dashboard`;
   const { user, logout: clearAuth } = useAuthStore();
   const [isSigningOut, setIsSigningOut] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -42,9 +45,7 @@ export default function LocalShell({ title, subtitle, children }: LocalShellProp
       await signOut();
     } finally {
       clearAuth();
-      router.replace("/");
-      router.refresh();
-      setIsSigningOut(false);
+      window.location.href = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
     }
   };
 
@@ -87,33 +88,33 @@ export default function LocalShell({ title, subtitle, children }: LocalShellProp
           <div>
             <p className="px-3 text-xs font-bold text-slate-500 mb-2 tracking-wider">PANEL PRINCIPAL</p>
             <nav className="space-y-0.5">
-              <NavItem href="/dashboard" icon={<LayoutDashboard className="w-4 h-4" />} label="Resumen" active={pathname === "/dashboard"} onClick={() => setIsMobileMenuOpen(false)} />
+              <NavItem href={base} icon={<LayoutDashboard className="w-4 h-4" />} label="Resumen" active={pathname === base} onClick={() => setIsMobileMenuOpen(false)} />
             </nav>
           </div>
 
           <div>
             <p className="px-3 text-xs font-bold text-slate-500 mb-2 tracking-wider">GESTIÓN</p>
             <nav className="space-y-0.5">
-              <NavItem href="/dashboard/users" icon={<Users className="w-4 h-4" />} label="Usuarios" active={pathname.startsWith("/dashboard/users")} onClick={() => setIsMobileMenuOpen(false)} />
-              <NavItem href="/dashboard/menu" icon={<UtensilsCrossed className="w-4 h-4" />} label="Menú" active={pathname.startsWith("/dashboard/menu")} onClick={() => setIsMobileMenuOpen(false)} />
-              <NavItem href="/dashboard/categories" icon={<Tag className="w-4 h-4" />} label="Categorías" active={pathname.startsWith("/dashboard/categories")} onClick={() => setIsMobileMenuOpen(false)} />
-              <NavItem href="/dashboard/tables" icon={<TableProperties className="w-4 h-4" />} label="Mesas" active={pathname.startsWith("/dashboard/tables")} onClick={() => setIsMobileMenuOpen(false)} />
-              <NavItem href="/dashboard/orders" icon={<ClipboardList className="w-4 h-4" />} label="Pedidos" active={pathname.startsWith("/dashboard/orders")} onClick={() => setIsMobileMenuOpen(false)} />
-              <NavItem href="/dashboard/inventory" icon={<Package className="w-4 h-4" />} label="Inventario" active={pathname.startsWith("/dashboard/inventory")} onClick={() => setIsMobileMenuOpen(false)} />
+              <NavItem href={`${base}/users`}      icon={<Users className="w-4 h-4" />}           label="Usuarios"   active={pathname.startsWith(`${base}/users`)}      onClick={() => setIsMobileMenuOpen(false)} />
+              <NavItem href={`${base}/menu`}       icon={<UtensilsCrossed className="w-4 h-4" />} label="Menú"       active={pathname.startsWith(`${base}/menu`)}       onClick={() => setIsMobileMenuOpen(false)} />
+              <NavItem href={`${base}/categories`} icon={<Tag className="w-4 h-4" />}             label="Categorías" active={pathname.startsWith(`${base}/categories`)} onClick={() => setIsMobileMenuOpen(false)} />
+              <NavItem href={`${base}/tables`}     icon={<TableProperties className="w-4 h-4" />} label="Mesas"      active={pathname.startsWith(`${base}/tables`)}     onClick={() => setIsMobileMenuOpen(false)} />
+              <NavItem href={`${base}/orders`}     icon={<ClipboardList className="w-4 h-4" />}   label="Pedidos"    active={pathname.startsWith(`${base}/orders`)}     onClick={() => setIsMobileMenuOpen(false)} />
+              <NavItem href={`${base}/inventory`}  icon={<Package className="w-4 h-4" />}         label="Inventario" active={pathname.startsWith(`${base}/inventory`)}  onClick={() => setIsMobileMenuOpen(false)} />
             </nav>
           </div>
 
           <div>
             <p className="px-3 text-xs font-bold text-slate-500 mb-2 tracking-wider">REPORTES</p>
             <nav className="space-y-0.5">
-              <NavItem href="/dashboard/reports" icon={<BarChart2 className="w-4 h-4" />} label="Análisis de Ventas" active={pathname.startsWith("/dashboard/reports")} onClick={() => setIsMobileMenuOpen(false)} />
+              <NavItem href={`${base}/reports`} icon={<BarChart2 className="w-4 h-4" />} label="Análisis de Ventas" active={pathname.startsWith(`${base}/reports`)} onClick={() => setIsMobileMenuOpen(false)} />
             </nav>
           </div>
 
           <div>
             <p className="px-3 text-xs font-bold text-slate-500 mb-2 tracking-wider">CUENTA</p>
             <nav className="space-y-0.5">
-              <NavItem href="/dashboard/settings/profile" icon={<Settings className="w-4 h-4" />} label="Configuración" active={pathname.startsWith("/dashboard/settings")} onClick={() => setIsMobileMenuOpen(false)} />
+              <NavItem href={`${base}/settings/profile`} icon={<Settings className="w-4 h-4" />} label="Configuración" active={pathname.startsWith(`${base}/settings`)} onClick={() => setIsMobileMenuOpen(false)} />
             </nav>
           </div>
         </div>
@@ -156,6 +157,9 @@ export default function LocalShell({ title, subtitle, children }: LocalShellProp
             <span className="text-slate-400 hover:text-slate-300 cursor-pointer transition-colors">{title}</span>
             <ChevronRight className="w-4 h-4 mx-2 text-slate-600" />
             <span className="text-slate-200 font-medium">{subtitle}</span>
+          </div>
+          <div className="ml-auto">
+            <AlertsPanel />
           </div>
         </header>
 

@@ -27,33 +27,65 @@ export async function middleware(req: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession();
 
   const pathname = req.nextUrl.pathname;
+  const authUrl  = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
+
   const isPublicRoute =
     pathname === '/' ||
     pathname.startsWith('/forgot-password') ||
     pathname.startsWith('/reset-password');
 
-  const role = session?.user?.app_metadata?.role;
-  const isAdmin = role === 'ADMIN';
+  // Extraer slug de /{slug}/dashboard/...
+  const slugMatch = pathname.match(/^\/([^/]+)\/dashboard/);
+  const urlSlug   = slugMatch?.[1];
 
-  // Sin sesión y ruta protegida → login
+  const role         = session?.user?.app_metadata?.role;
+  const restaurantId = session?.user?.app_metadata?.restaurant_id;
+  const isAdmin      = role === 'ADMIN';
+
+  // Sin sesión y ruta protegida → central login
   if (!session && !isPublicRoute) {
-    const url = req.nextUrl.clone();
-    url.pathname = '/';
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(new URL(authUrl));
   }
 
-  // Sesión de otro rol en ruta protegida → login
+  // Sesión de otro rol en ruta protegida → central login
   if (session && !isPublicRoute && !isAdmin) {
-    const url = req.nextUrl.clone();
-    url.pathname = '/';
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(new URL(authUrl));
   }
 
-  // Sesión ADMIN en login → dashboard
+  // Sesión ADMIN en login → obtener slug y redirigir
   if (session && isAdmin && pathname === '/') {
-    const url = req.nextUrl.clone();
-    url.pathname = '/dashboard';
-    return NextResponse.redirect(url);
+    const { data } = await supabase
+      .from('restaurants')
+      .select('slug')
+      .eq('id', restaurantId)
+      .single();
+
+    if (data?.slug) {
+      const url = req.nextUrl.clone();
+      url.pathname = `/${data.slug}/dashboard`;
+      return NextResponse.redirect(url);
+    }
+    // Si no tiene restaurante asignado → central login
+    return NextResponse.redirect(new URL(authUrl));
+  }
+
+  // ADMIN en ruta con slug → verificar que el slug coincida con su restaurante
+  if (session && isAdmin && urlSlug) {
+    const { data } = await supabase
+      .from('restaurants')
+      .select('slug')
+      .eq('id', restaurantId)
+      .single();
+
+    if (data?.slug && data.slug !== urlSlug) {
+      // Corregir slug en la URL y redirigir
+      const url = req.nextUrl.clone();
+      url.pathname = pathname.replace(
+        `/${urlSlug}/dashboard`,
+        `/${data.slug}/dashboard`
+      );
+      return NextResponse.redirect(url);
+    }
   }
 
   return response;
