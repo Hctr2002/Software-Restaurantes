@@ -43,4 +43,29 @@ export const updateUserPassword = async (password: string) => {
   return { data, error };
 };
 
+export type AlertType = 'TABLE_ISSUE' | 'BILL_REQUEST' | 'STOCK_SHORTAGE' | 'HELP_REQUEST' | 'GENERAL';
+
+export const sendAlert = async (params: {
+  restaurantId: string;
+  userId?: string;
+  userEmail?: string;
+  type: AlertType;
+  message: string;
+  tableNumber?: number;
+  menuItemId?: string;
+  menuItemName?: string;
+}) => {
+  const { error } = await supabase.from('alerts').insert({
+    restaurant_id:  params.restaurantId,
+    user_id:        params.userId        ?? null,
+    user_email:     params.userEmail     ?? null,
+    type:           params.type,
+    message:        params.message,
+    table_number:   params.tableNumber   ?? null,
+    menu_item_id:   params.menuItemId    ?? null,
+    menu_item_name: params.menuItemName  ?? null,
+  });
+  return { error };
+};
+
 export * from "./hooks";

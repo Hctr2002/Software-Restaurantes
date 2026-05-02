@@ -9,10 +9,9 @@ import Link from "next/link";
 
 const ROLE_URLS: Record<string, string> = {
   SUPER_ADMIN: "/dashboard",
-  ADMIN:       process.env.NEXT_PUBLIC_LOCAL_DASHBOARD_URL  || "http://localhost:3003",
-  COCINA:      process.env.NEXT_PUBLIC_KITCHEN_URL          || "http://localhost:3001",
-  CAJERO:      process.env.NEXT_PUBLIC_CASHIER_URL          || "http://localhost:3004",
-  GARZON:      process.env.NEXT_PUBLIC_WAITER_URL           || "http://localhost:3002",
+  COCINA:      process.env.NEXT_PUBLIC_KITCHEN_URL  || "http://localhost:3001",
+  CAJERO:      process.env.NEXT_PUBLIC_CASHIER_URL  || "http://localhost:3004",
+  GARZON:      process.env.NEXT_PUBLIC_WAITER_URL   || "http://localhost:3002",
 };
 
 export default function LoginPage() {
@@ -47,16 +46,27 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        const role = data.user.app_metadata.role as string;
+        const role         = data.user.app_metadata.role as string;
+        const restaurantId = data.user.app_metadata.restaurant_id as string;
         setUser({
           id: data.user.id,
           email: data.user.email!,
           role: data.user.app_metadata.role,
-          restaurantId: data.user.app_metadata.restaurant_id,
+          restaurantId,
         });
 
-        const target = ROLE_URLS[role] ?? "/dashboard";
-        window.location.replace(target);
+        if (role === 'ADMIN') {
+          const { data: rest } = await supabase
+            .from('restaurants')
+            .select('slug')
+            .eq('id', restaurantId)
+            .single();
+          const localUrl = process.env.NEXT_PUBLIC_LOCAL_DASHBOARD_URL || 'http://localhost:3003';
+          window.location.replace(rest?.slug ? `${localUrl}/${rest.slug}/dashboard` : localUrl);
+        } else {
+          const target = ROLE_URLS[role] ?? "/dashboard";
+          window.location.replace(target);
+        }
       }
     } catch (err) {
       console.error("LOGIN_DEBUG: Error fatal en handleLogin:", err);
