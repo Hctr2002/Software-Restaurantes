@@ -55,3 +55,8 @@ CLAUDE.md
 # Markdown folders
 markdown/
 
+.gitnexus
+
+# OLYMP-IA agents & tooling
+Producto/scripts/
+AGENTS.md

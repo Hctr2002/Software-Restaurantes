@@ -24,15 +24,9 @@ export async function proxy(req: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession();
   const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
-  const role = session?.user?.app_metadata?.role;
+  const role    = session?.user?.app_metadata?.role;
 
-  // Sin sesión → central login
-  if (!session) {
-    return NextResponse.redirect(new URL(authUrl));
-  }
-
-  // Rol incorrecto → central login
-  if (role !== 'COCINA') {
+  if (!session || role !== 'CAJERO') {
     return NextResponse.redirect(new URL(authUrl));
   }
 
@@ -40,7 +34,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)',
-  ],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)'],
 };

@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(req: NextRequest) {
+  if (req.nextUrl.pathname === '/login') return NextResponse.next();
+
   let response = NextResponse.next({ request: { headers: req.headers } });
 
   const supabase = createServerClient(
@@ -23,24 +25,15 @@ export async function middleware(req: NextRequest) {
   );
 
   const { data: { session } } = await supabase.auth.getSession();
-  const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
   const role = session?.user?.app_metadata?.role;
 
-  // Sin sesión → central login
-  if (!session) {
-    return NextResponse.redirect(new URL(authUrl));
-  }
-
-  // Rol incorrecto → central login
-  if (role !== 'COCINA') {
-    return NextResponse.redirect(new URL(authUrl));
+  if (!session || role !== 'COCINA') {
+    return NextResponse.redirect(new URL('/login', req.url));
   }
 
   return response;
 }
 
 export const config = {
-  matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)',
-  ],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)'],
 };

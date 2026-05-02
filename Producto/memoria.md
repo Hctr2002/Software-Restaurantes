@@ -49,7 +49,22 @@ Estandarización del proyecto `Software-Restaurantes` de Héctor Robledo dentro 
 
 - **Incidente 02:25:00:** `fatal: could not read Username for 'https://github.com'`. Bloqueo de Git Pull por autenticación en entorno no interactivo.
 
-## 6. FLIGHT LOG — ZENITH SESSIONS
+- **2026-05-02 — Merge `feature/customer-portal-setup` → `feature/front_admin_local`:**
+  - Incorporación de `apps/customer-portal`: portal QR multi-tenant para comensales.
+  - Rutas dinámicas `[restaurantSlug]/[tableNumber]`, API de órdenes, TenantContext, cliente Supabase.
+  - 25 archivos nuevos, +1,672 líneas. Merge sin conflictos (estrategia `ort`).
+
+## 6. VAULT SYNC LOG — FLUJO-059 / FLUJO-076
+
+| RunID | Timestamp ISO-8601 | Archivos Sincronizados | Estado |
+| --- | --- | --- | --- |
+| RUN-20260502-007 | 2026-05-02T01:21:00-04:00 | 4 (PR_ADMIN_LOCAL, PR_DETALLE_KDS, PR_TEXTO_GITHUB, REPORTE_2026-04-29) + 1 nota de merge | ✅ COMPLETED |
+
+```json
+{"timestamp":"2026-05-02T01:21:00-04:00","event":"vault_sync_completed","data":{"files_synced":5,"canvas_updated":false,"vault_path":"/home/alejandro/Olymp-ia/projects/PROJ-Software-restaurante-Duoc/Software-Restaurantes/markdown","run_id":"RUN-20260502-007","ecosystem_version":"2.7.2"}}
+```
+
+## 7. FLIGHT LOG — ZENITH SESSIONS
 
 | RunID | Timestamp ISO-8601 | WorkflowID | Agente | Estado |
 | --- | --- | --- | --- | --- |
@@ -59,6 +74,8 @@ Estandarización del proyecto `Software-Restaurantes` de Héctor Robledo dentro 
 | RUN-20260428-004 | 2026-04-28T20:53:00-04:00 | FLUJO-000 / /zenith | 00_Zenith | 🟡 IN_PROGRESS — Actualización y Merge de develop |
 | RUN-20260501-005 | 2026-05-01T00:00:00-04:00 | feature/front_admin_local | 03_Ejecutor | ✅ COMPLETED — Bug fixes BD + expansión funcional local-dashboard |
 | RUN-20260502-006 | 2026-05-02T00:00:00-04:00 | feature/front_admin_local | 03_Ejecutor | ✅ COMPLETED — Slug dinámico, middlewares de seguridad, sistema de alertas Realtime, cashier-dashboard |
+| RUN-20260502-007 | 2026-05-02T01:21:00-04:00 | FLUJO-059 + FLUJO-076 | 00_Zenith | ✅ COMPLETED — Merge customer-portal-setup + Vault Sync (5 archivos) |
+| RUN-20260502-008 | 2026-05-02T02:03:10-04:00 | feature/customer-portal-setup | 03_Ejecutor | ✅ COMPLETED — Merge actualización: slug-routing centralizado + limpieza hardcodes (19 archivos) |
 
 ---
 Desarrollado por OLYMP-IA · Supremacía Digital
