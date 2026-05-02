@@ -27,7 +27,7 @@ export async function middleware(req: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession();
 
   const pathname = req.nextUrl.pathname;
-  const authUrl  = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
+  const authUrl  = process.env.NEXT_PUBLIC_AUTH_URL;
 
   const isPublicRoute =
     pathname === '/' ||

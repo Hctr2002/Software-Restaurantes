@@ -2,11 +2,11 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const ROLE_URLS: Record<string, string> = {
-  ADMIN:   process.env.NEXT_PUBLIC_LOCAL_DASHBOARD_URL  || 'http://localhost:3003',
-  COCINA:  process.env.NEXT_PUBLIC_KITCHEN_URL          || 'http://localhost:3001',
-  GARZON:  process.env.NEXT_PUBLIC_WAITER_URL           || 'http://localhost:3002',
-  CAJERO:  process.env.NEXT_PUBLIC_CASHIER_URL          || 'http://localhost:3004',
+const ROLE_URLS: Record<string, string | undefined> = {
+  ADMIN:   process.env.NEXT_PUBLIC_LOCAL_DASHBOARD_URL,
+  COCINA:  process.env.NEXT_PUBLIC_KITCHEN_URL,
+  GARZON:  process.env.NEXT_PUBLIC_WAITER_URL,
+  CAJERO:  process.env.NEXT_PUBLIC_CASHIER_URL,
 };
 
 export async function middleware(req: NextRequest) {
