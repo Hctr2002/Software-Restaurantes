@@ -11,9 +11,19 @@ export const tableService = {
       .order("number");
   },
 
-  async create(restaurantId: string, data: TableInput, origin: string) {
+  async create(restaurantId: string, data: TableInput) {
     const db = createServiceClient();
-    const qr_data = `${origin}/order/${restaurantId}/${data.number}`;
+    
+    // Obtener el slug del restaurante para la URL del QR
+    const { data: rest } = await db
+      .from("restaurants")
+      .select("slug")
+      .eq("id", restaurantId)
+      .single();
+    
+    const slug = rest?.slug || restaurantId;
+    const portalUrl = process.env.NEXT_PUBLIC_CUSTOMER_PORTAL_URL || "http://localhost:3005";
+    const qr_data = `${portalUrl}/${slug}/${data.number}`;
 
     return await db
       .from("tables")
@@ -26,6 +36,7 @@ export const tableService = {
       .select("id, number, label, status, qrData:qr_data, restaurant_id")
       .single();
   },
+
 
   async update(restaurantId: string, id: string, data: TableInput) {
     const db = createServiceClient();
