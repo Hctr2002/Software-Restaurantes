@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   let response = NextResponse.next({ request: { headers: req.headers } });
 
   if (req.nextUrl.pathname.startsWith('/auth/callback')) return response;
@@ -26,17 +26,17 @@ export async function middleware(req: NextRequest) {
   );
 
   const { data: { session } } = await supabase.auth.getSession();
-  const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
+  const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
   const role = session?.user?.app_metadata?.role;
 
   // Sin sesión → central login
   if (!session) {
-    return NextResponse.redirect(new URL(authUrl));
+    return NextResponse.redirect(new URL(authUrl, req.url));
   }
 
   // Rol incorrecto → central login
   if (role !== 'GARZON') {
-    return NextResponse.redirect(new URL(authUrl));
+    return NextResponse.redirect(new URL(authUrl, req.url));
   }
 
   return response;

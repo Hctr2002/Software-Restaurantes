@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   let response = NextResponse.next({ request: { headers: req.headers } });
 
   if (req.nextUrl.pathname.startsWith('/auth/callback')) return response;
@@ -30,7 +30,7 @@ export async function middleware(req: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession();
 
   const pathname = req.nextUrl.pathname;
-  const authUrl  = process.env.NEXT_PUBLIC_AUTH_URL;
+  const authUrl  = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
 
   const isPublicRoute =
     pathname === '/' ||
@@ -47,12 +47,12 @@ export async function middleware(req: NextRequest) {
 
   // Sin sesión y ruta protegida → central login
   if (!session && !isPublicRoute) {
-    return NextResponse.redirect(new URL(authUrl));
+    return NextResponse.redirect(new URL(authUrl, req.url));
   }
 
   // Sesión de otro rol en ruta protegida → central login
   if (session && !isPublicRoute && !isAdmin) {
-    return NextResponse.redirect(new URL(authUrl));
+    return NextResponse.redirect(new URL(authUrl, req.url));
   }
 
   // Sesión ADMIN en login → obtener slug y redirigir
@@ -69,7 +69,7 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(url);
     }
     // Si no tiene restaurante asignado → central login
-    return NextResponse.redirect(new URL(authUrl));
+    return NextResponse.redirect(new URL(authUrl, req.url));
   }
 
   // ADMIN en ruta con slug → verificar que el slug coincida con su restaurante
