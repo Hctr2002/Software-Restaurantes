@@ -400,9 +400,15 @@ export default function ReportsPage() {
                     <TableCell className={`font-black text-[11px] uppercase tracking-tight italic ${row.orders === 0 ? "text-foreground/20" : "text-foreground"}`}>
                       {formatShortDate(row.date)}
                     </TableCell>
-                    <TableCell className="text-foreground/40 font-bold text-xs" style={{ fontFamily: 'var(--font-accent)' }}>{row.orders || "—"}</TableCell>
-                    <TableCell className={`font-black text-sm italic ${row.orders > 0 ? 'text-primary' : 'text-foreground/20'}`} style={{ fontFamily: 'var(--font-accent)' }}>{row.orders ? formatPrice(row.revenue) : "—"}</TableCell>
-                    <TableCell className="font-bold text-foreground/30 text-[11px]" style={{ fontFamily: 'var(--font-accent)' }}>{row.orders ? formatPrice(row.avg) : "—"}</TableCell>
+                    <TableCell className="text-foreground/40 font-bold text-xs">
+                      <span style={{ fontFamily: 'var(--font-accent)' }}>{row.orders || "—"}</span>
+                    </TableCell>
+                    <TableCell className={`font-black text-sm italic ${row.orders > 0 ? 'text-primary' : 'text-foreground/20'}`}>
+                      <span style={{ fontFamily: 'var(--font-accent)' }}>{row.orders ? formatPrice(row.revenue) : "—"}</span>
+                    </TableCell>
+                    <TableCell className="font-bold text-foreground/30 text-[11px]">
+                      <span style={{ fontFamily: 'var(--font-accent)' }}>{row.orders ? formatPrice(row.avg) : "—"}</span>
+                    </TableCell>
                   </TableRow>
                 ))}
               </Table>
@@ -439,8 +445,12 @@ export default function ReportsPage() {
                     <TableCell className="font-black text-foreground text-xs uppercase italic tracking-tight">
                       {row.email.split("@")[0]}
                     </TableCell>
-                    <TableCell className="text-foreground/40 font-bold text-xs" style={{ fontFamily: 'var(--font-accent)' }}>{row.orders}</TableCell>
-                    <TableCell className="font-black text-emerald-500 text-sm italic" style={{ fontFamily: 'var(--font-accent)' }}>{formatPrice(row.revenue)}</TableCell>
+                    <TableCell className="text-foreground/40 font-bold text-xs">
+                      <span style={{ fontFamily: 'var(--font-accent)' }}>{row.orders}</span>
+                    </TableCell>
+                    <TableCell className="font-black text-emerald-500 text-sm italic">
+                      <span style={{ fontFamily: 'var(--font-accent)' }}>{formatPrice(row.revenue)}</span>
+                    </TableCell>
                   </TableRow>
                 ))}
               </Table>

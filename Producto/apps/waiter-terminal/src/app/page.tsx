@@ -51,7 +51,7 @@ export default function WaiterDashboard() {
   }, [user?.restaurantId]);
 
   const handleSignOut = async () => {
-    const loginUrl = process.env.NEXT_PUBLIC_AUTH_URL;
+    const loginUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
     setIsSigningOut(true);
     try {
       await signOut();

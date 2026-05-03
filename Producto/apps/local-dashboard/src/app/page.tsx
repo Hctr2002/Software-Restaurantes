@@ -40,7 +40,7 @@ export default function LoginPage() {
 
       if (data.user) {
         const rawRole = data.user.app_metadata?.role;
-        const role = (Array.isArray(rawRole) ? rawRole[0] : rawRole) as string;
+        const role = (Array.isArray(rawRole) ? rawRole[0] : rawRole) as "ADMIN" | "GARZON" | "COCINA" | "CAJERO" | "SUPER_ADMIN" | "CLIENTE";
         const restaurantId = data.user.app_metadata?.restaurant_id as string;
         
         setUser({
