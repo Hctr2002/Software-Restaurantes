@@ -5,7 +5,8 @@ import LocalShell from "../_components/LocalShell";
 import { Table, TableRow, TableCell, Modal, Badge } from "@menu-bites/ui";
 import { TABLE_STATUSES, TableRecord } from "../_components/localShared";
 import { Button, Input } from "@menu-bites/ui";
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Download } from "lucide-react";
+import { QRCodeCanvas } from "qrcode.react";
 
 const EMPTY_FORM = { number: "", label: "", status: "FREE" };
 
@@ -177,6 +178,41 @@ export default function TablesPage() {
               ))}
             </select>
           </div>
+
+          {editingTable && editingTable.qrData && (
+            <div className="pt-6 border-t border-slate-800 flex flex-col items-center gap-4">
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider self-start">Código QR de la Mesa</label>
+              <div className="p-4 bg-white rounded-xl shadow-lg shadow-black/50">
+                <QRCodeCanvas
+                  id={`qr-table-${editingTable.number}`}
+                  value={editingTable.qrData}
+                  size={160}
+                  level="H"
+                  includeMargin={false}
+                />
+              </div>
+              <p className="text-[10px] text-slate-500 font-mono break-all text-center max-w-[200px]">
+                {editingTable.qrData}
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full border-slate-700 hover:bg-slate-800 text-slate-300"
+                onClick={() => {
+                  const canvas = document.getElementById(`qr-table-${editingTable.number}`) as HTMLCanvasElement;
+                  if (canvas) {
+                    const url = canvas.toDataURL("image/png");
+                    const link = document.createElement("a");
+                    link.download = `QR_Mesa_${editingTable.number}.png`;
+                    link.href = url;
+                    link.click();
+                  }
+                }}
+              >
+                <Download className="w-4 h-4 mr-2" /> Descargar QR
+              </Button>
+            </div>
+          )}
         </div>
       </Modal>
     </LocalShell>
