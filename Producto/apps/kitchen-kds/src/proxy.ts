@@ -27,7 +27,9 @@ export async function proxy(req: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession();
   const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
-  const role = session?.user?.app_metadata?.role;
+  const rawRole = session?.user?.app_metadata?.role;
+  const role = Array.isArray(rawRole) ? rawRole[0] : rawRole;
+  const isKitchen = String(role).toUpperCase() === 'COCINA';
 
   // Sin sesión → central login
   if (!session) {
@@ -35,7 +37,7 @@ export async function proxy(req: NextRequest) {
   }
 
   // Rol incorrecto → central login
-  if (role !== 'COCINA') {
+  if (!isKitchen) {
     return NextResponse.redirect(new URL(authUrl, req.url));
   }
 

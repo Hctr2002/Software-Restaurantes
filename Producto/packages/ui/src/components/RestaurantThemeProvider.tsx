@@ -11,6 +11,7 @@ export interface RestaurantTheme {
   cardBackground: string;
   fontTitle?: string;
   fontBody?: string;
+  fontAccent?: string;
   logoUrl?: string | null;
 }
 
@@ -115,6 +116,10 @@ export const RestaurantThemeProvider = ({ theme, children, isGlobal = false }: P
         const bodyStack = `"${theme.fontBody}", sans-serif`;
         target.style.setProperty("--font-inter", bodyStack);
         target.style.setProperty("--font-body", bodyStack);
+      }
+      if (theme.fontAccent) {
+        const accentStack = `"${theme.fontAccent}", sans-serif`;
+        target.style.setProperty("--font-accent", accentStack);
       }
     } catch (e) {
       console.error("Error setting theme properties:", e);

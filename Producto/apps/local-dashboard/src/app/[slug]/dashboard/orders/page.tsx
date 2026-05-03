@@ -5,7 +5,8 @@ import { supabase } from "@menu-bites/auth";
 import LocalShell from "../_components/LocalShell";
 import { Table, TableRow, TableCell, Modal, Badge, Button } from "@menu-bites/ui";
 import { formatDate, formatPrice, timeAgo, Order, ORDER_STATUSES } from "../_components/localShared";
-import { Loader2, RefreshCw, User } from "lucide-react";
+import { Loader2, RefreshCw, User, ShoppingBag, Clock } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 type BadgeVariant = "success" | "danger" | "warning" | "neutral" | "info";
 
@@ -32,7 +33,7 @@ const NEXT_STATUS: Record<string, string> = {
 };
 
 function garzonLabel(order: Order): string {
-  if (!order.users?.email) return "—";
+  if (!order.users?.email) return "S/A";
   return order.users.email.split("@")[0];
 }
 
@@ -98,91 +99,145 @@ export default function OrdersPage() {
   return (
     <LocalShell title="Gestión" subtitle="Pedidos">
       {error && (
-        <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/10 text-sm text-destructive font-bold">
+        <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/10 text-sm text-destructive font-bold mb-6">
           {error}
         </div>
       )}
 
-      <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-8">
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="px-3 py-2 rounded-md bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+          className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-foreground font-bold focus:outline-none focus:ring-2 focus:ring-primary appearance-none cursor-pointer sm:w-64"
         >
-          <option value="ALL">Todos los estados</option>
+          <option value="ALL" className="bg-background">Todos los estados</option>
           {ORDER_STATUSES.map((s) => (
-            <option key={s} value={s}>{s}</option>
+            <option key={s} value={s} className="bg-background">{s}</option>
           ))}
         </select>
 
-        <button
+        <Button
+          variant="ghost"
           onClick={fetchOrders}
-          className="flex items-center gap-2 px-3 py-2 text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-md transition-colors"
+          className="h-11 px-6 rounded-2xl bg-white/5 border border-white/5 hover:bg-primary/10 hover:text-primary transition-all group font-bold uppercase tracking-widest text-[10px]"
         >
-          <RefreshCw className="w-3.5 h-3.5" />
-          Actualizar
-        </button>
+          <RefreshCw className="w-4 h-4 mr-2 group-hover:rotate-180 transition-transform duration-500" />
+          Actualizar Lista
+        </Button>
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Cargando pedidos...</p>
+        <div className="py-20 text-center">
+          <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm text-foreground/40 font-bold uppercase tracking-widest">Sincronizando comandas...</p>
+        </div>
       ) : (
-        <Table headers={["Mesa", "Garzón", "Estado", "Items", "Total", "Fecha", ""]}>
-          {filtered.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                No hay pedidos registrados.
-              </TableCell>
-            </TableRow>
-          )}
-          {filtered.map((order) => (
-            <TableRow key={order.id}>
-              <TableCell className="font-bold text-slate-200">
-                Mesa {order.tables?.number ?? "S/N"}
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-1.5 text-slate-400 text-xs">
-                  <User className="w-3.5 h-3.5 shrink-0" />
-                  {garzonLabel(order)}
+        <>
+          {/* Mobile View */}
+          <div className="grid grid-cols-1 gap-4 lg:hidden">
+            {filtered.length === 0 && (
+              <div className="py-12 text-center glass rounded-[2.5rem] border-white/5">
+                <p className="text-foreground/40 font-bold uppercase tracking-widest text-[10px]">No se encontraron pedidos.</p>
+              </div>
+            )}
+            {filtered.map((order) => (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                key={order.id}
+                className="glass p-6 rounded-[2rem] border-white/5 space-y-4 relative overflow-hidden"
+                onClick={() => setSelectedOrder(order)}
+              >
+                <div className="flex justify-between items-start relative z-10">
+                  <div>
+                    <h3 className="font-black text-foreground text-lg tracking-tight uppercase italic leading-none mb-1">Mesa {order.tables?.number ?? "S/N"}</h3>
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-foreground/30 uppercase tracking-widest">
+                      <User className="w-3 h-3" />
+                      <span>{garzonLabel(order)}</span>
+                      <span className="text-foreground/10">•</span>
+                      <Clock className="w-3 h-3" />
+                      <span>{timeAgo(order.createdAt)}</span>
+                    </div>
+                  </div>
+                  <Badge variant={orderStatusVariant(order.status)} className="px-3 py-1 text-[9px] font-black uppercase tracking-widest">
+                    {order.status}
+                  </Badge>
                 </div>
-              </TableCell>
-              <TableCell>
-                <Badge variant={orderStatusVariant(order.status)}>{order.status}</Badge>
-              </TableCell>
-              <TableCell className="text-slate-400">
-                {order.order_items?.length ?? 0} item(s)
-              </TableCell>
-              <TableCell className="font-mono text-slate-300">
-                {formatPrice(orderTotal(order))}
-              </TableCell>
-              <TableCell className="text-slate-400 text-xs">
-                {formatDate(order.createdAt)}
-              </TableCell>
-              <TableCell>
-                <button
-                  onClick={() => setSelectedOrder(order)}
-                  className="text-xs text-blue-400 hover:text-blue-300 font-semibold transition-colors"
-                >
-                  Ver detalle
-                </button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </Table>
+
+                <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                  <div className="flex items-center gap-2">
+                    <ShoppingBag className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-[10px] font-black text-foreground/60 uppercase tracking-widest">{order.order_items?.length ?? 0} Items</span>
+                  </div>
+                  <span className="text-lg font-black text-primary">{formatPrice(orderTotal(order))}</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Desktop View */}
+          <div className="hidden lg:block">
+            <Table headers={["Mesa", "Garzón", "Estado", "Items", "Total", "Fecha", ""]}>
+              {filtered.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-foreground/40 py-12 font-bold uppercase tracking-widest text-xs">
+                    No hay pedidos registrados.
+                  </TableCell>
+                </TableRow>
+              )}
+              {filtered.map((order) => (
+                <TableRow key={order.id}>
+                  <TableCell className="font-black text-foreground text-sm italic uppercase tracking-tight">
+                    Mesa {order.tables?.number ?? "S/N"}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2 text-foreground/60 text-[11px] font-bold uppercase tracking-widest">
+                      <User className="w-3.5 h-3.5 text-primary/40" />
+                      {garzonLabel(order)}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={orderStatusVariant(order.status)} className="px-4 py-1 text-[10px] font-black uppercase tracking-widest">
+                      {order.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-foreground/40 text-[11px] font-bold">
+                    {order.order_items?.length ?? 0} item(s)
+                  </TableCell>
+                  <TableCell className="font-black text-primary text-sm">
+                    {formatPrice(orderTotal(order))}
+                  </TableCell>
+                  <TableCell className="text-foreground/30 text-[10px] font-bold uppercase tracking-widest">
+                    {formatDate(order.createdAt)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      onClick={() => setSelectedOrder(order)}
+                      className="text-[10px] font-black text-primary uppercase tracking-widest hover:bg-primary/10 rounded-xl"
+                    >
+                      Ver detalle
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </Table>
+          </div>
+        </>
       )}
 
       <Modal
         isOpen={!!selectedOrder}
         onClose={() => setSelectedOrder(null)}
-        title={`Pedido — Mesa ${selectedOrder?.tables?.number ?? "S/N"}`}
+        title={`Detalle — Mesa ${selectedOrder?.tables?.number ?? "S/N"}`}
         footer={
           selectedOrder && NEXT_STATUS[selectedOrder.status] ? (
             <>
-              <Button variant="outline" onClick={() => setSelectedOrder(null)}>Cerrar</Button>
+              <Button variant="ghost" onClick={() => setSelectedOrder(null)} className="text-foreground/50 hover:bg-white/5 hover:text-foreground rounded-xl font-bold uppercase tracking-widest text-[10px]">Cerrar</Button>
               <Button
                 onClick={() => handleStatusChange(selectedOrder.id, NEXT_STATUS[selectedOrder.status])}
                 disabled={updatingStatus}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-primary hover:bg-primary/80 text-primary-foreground rounded-xl font-bold uppercase tracking-widest text-[10px] px-6 shadow-lg shadow-primary/20 transition-all"
               >
                 {updatingStatus
                   ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -190,54 +245,47 @@ export default function OrdersPage() {
               </Button>
             </>
           ) : (
-            <Button variant="outline" onClick={() => setSelectedOrder(null)}>Cerrar</Button>
+            <Button variant="ghost" onClick={() => setSelectedOrder(null)} className="text-foreground/50 hover:bg-white/5 hover:text-foreground rounded-xl font-bold uppercase tracking-widest text-[10px]">Cerrar</Button>
           )
         }
       >
         {selectedOrder && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <Badge variant={orderStatusVariant(selectedOrder.status)}>{selectedOrder.status}</Badge>
-              <span className="text-xs text-slate-500">{timeAgo(selectedOrder.createdAt)}</span>
-            </div>
-
-            {selectedOrder.users?.email && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800/60 border border-slate-700">
-                <User className="w-4 h-4 text-slate-400 shrink-0" />
-                <div>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider">Garzón</p>
-                  <p className="text-sm text-slate-200 font-medium">{selectedOrder.users.email}</p>
-                </div>
+          <div className="space-y-8 py-4">
+            <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5">
+              <Badge variant={orderStatusVariant(selectedOrder.status)} className="px-4 py-1 text-[10px] font-black uppercase tracking-widest">{selectedOrder.status}</Badge>
+              <div className="flex items-center gap-2 text-[10px] font-bold text-foreground/30 uppercase tracking-widest">
+                <Clock className="w-3.5 h-3.5" />
+                {timeAgo(selectedOrder.createdAt)}
               </div>
-            )}
+            </div>
 
-            <div className="space-y-2">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Detalle del pedido</p>
-              {(selectedOrder.order_items ?? []).length === 0 ? (
-                <p className="text-sm text-slate-500">Sin items registrados.</p>
-              ) : (
-                <div className="space-y-2">
-                  {(selectedOrder.order_items ?? []).map((item) => (
-                    <div key={item.id} className="flex justify-between items-center py-2 border-b border-slate-800/50">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-slate-500 font-mono">{item.quantity ?? 1}×</span>
-                        <span className="text-sm text-slate-300">{item.menu_items?.name ?? "Item"}</span>
+            <div className="space-y-4">
+              <p className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] px-1">Items de la Orden</p>
+              <div className="space-y-2">
+                {(selectedOrder.order_items ?? []).map((item) => (
+                  <div key={item.id} className="flex justify-between items-center p-4 rounded-2xl bg-white/5 border border-white/5 group hover:border-primary/20 transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black text-xs italic">
+                        {item.quantity ?? 1}x
                       </div>
-                      <span className="text-sm font-mono text-slate-400">
-                        {formatPrice(Number(item.unitPrice ?? 0) * (item.quantity ?? 1))}
-                      </span>
+                      <span className="text-sm font-bold text-foreground uppercase italic tracking-tight">{item.menu_items?.name ?? "Item"}</span>
                     </div>
-                  ))}
-                </div>
-              )}
+                    <span className="text-sm font-black text-foreground/60">
+                      {formatPrice(Number(item.unitPrice ?? 0) * (item.quantity ?? 1))}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="flex justify-between items-center p-4 rounded-xl bg-slate-800/50 border border-slate-700">
-              <span className="text-sm font-bold text-slate-300 uppercase tracking-wider">Total</span>
-              <span className="text-xl font-black text-slate-100">{formatPrice(orderTotal(selectedOrder))}</span>
+            <div className="p-6 rounded-[2rem] bg-primary/10 border border-primary/20 flex justify-between items-center shadow-xl shadow-primary/5">
+              <span className="text-[11px] font-black text-primary uppercase tracking-[0.3em]">Total del Pedido</span>
+              <span className="text-3xl font-black text-primary italic leading-none">{formatPrice(orderTotal(selectedOrder))}</span>
             </div>
 
-            <p className="text-[11px] text-slate-500">{formatDate(selectedOrder.createdAt)}</p>
+            <div className="text-center">
+               <p className="text-[9px] font-bold text-foreground/20 uppercase tracking-widest">Registrado el {formatDate(selectedOrder.createdAt)}</p>
+            </div>
           </div>
         )}
       </Modal>

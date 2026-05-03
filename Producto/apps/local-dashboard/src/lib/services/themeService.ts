@@ -40,6 +40,7 @@ export const themeService = {
         card_background: data.cardBackground,
         font_title: data.fontTitle,
         font_body: data.fontBody,
+        font_accent: data.fontAccent,
         logo_url: data.logoUrl || null,
         restaurant_id: restaurantId,
       })

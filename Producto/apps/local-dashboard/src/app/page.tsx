@@ -39,16 +39,18 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        const role         = data.user.app_metadata.role as string;
-        const restaurantId = data.user.app_metadata.restaurant_id as string;
+        const rawRole = data.user.app_metadata?.role;
+        const role = (Array.isArray(rawRole) ? rawRole[0] : rawRole) as string;
+        const restaurantId = data.user.app_metadata?.restaurant_id as string;
+        
         setUser({
           id: data.user.id,
           email: data.user.email!,
-          role: data.user.app_metadata.role,
+          role,
           restaurantId,
         });
 
-        if (role === 'ADMIN') {
+        if (String(role).toUpperCase() === 'ADMIN') {
           const { data: rest } = await supabase
             .from('restaurants')
             .select('slug')

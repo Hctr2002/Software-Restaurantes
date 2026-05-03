@@ -97,33 +97,35 @@ export default function AlertsPanel() {
       {/* Slide-over panel */}
       {open && (
         <>
-          <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setOpen(false)} />
-          <aside className="fixed right-0 top-0 h-full w-full max-w-sm bg-slate-900 border-l border-slate-800 z-50 flex flex-col shadow-2xl">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60]" onClick={() => setOpen(false)} />
+          <aside className="fixed right-0 top-0 h-full w-full max-w-sm bg-background/95 backdrop-blur-2xl border-l border-white/10 z-[70] flex flex-col shadow-2xl transform transition-transform duration-500 animate-in slide-in-from-right">
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <Bell className="w-4 h-4 text-slate-400" />
-                <h2 className="text-sm font-bold text-slate-100">Alertas</h2>
+            <div className="flex items-center justify-between px-8 py-6 border-b border-white/5 bg-white/5">
+              <div className="flex items-center gap-3">
+                <Bell className="w-5 h-5 text-primary" />
+                <h2 className="text-xl font-black text-foreground tracking-tighter uppercase italic">Alertas</h2>
                 {pendingCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-xs font-bold">
-                    {pendingCount} pendiente{pendingCount !== 1 ? "s" : ""}
+                  <span className="px-3 py-1 rounded-full bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-widest animate-pulse">
+                    {pendingCount}
                   </span>
                 )}
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                className="p-2 rounded-2xl text-foreground/40 hover:text-foreground hover:bg-white/10 transition-all"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Alert list */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
               {alerts.length === 0 && (
-                <div className="flex flex-col items-center justify-center h-48 text-slate-600 gap-2">
-                  <CheckCircle className="w-8 h-8" />
-                  <p className="text-sm">Sin alertas pendientes</p>
+                <div className="flex flex-col items-center justify-center h-64 text-foreground/20 gap-4">
+                  <div className="w-16 h-16 rounded-[2rem] bg-white/5 flex items-center justify-center">
+                    <CheckCircle className="w-8 h-8" />
+                  </div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em]">Todo bajo control</p>
                 </div>
               )}
 
@@ -134,62 +136,62 @@ export default function AlertsPanel() {
                 return (
                   <div
                     key={alert.id}
-                    className="p-4 rounded-xl border border-slate-800 bg-slate-800/40 space-y-3"
+                    className="p-6 rounded-[2.5rem] border border-white/5 bg-white/5 space-y-4 group hover:border-primary/20 transition-all"
                   >
                     {/* Header de la alerta */}
-                    <div className="flex items-start justify-between gap-2">
-                      <Badge variant={cfg.variant}>{cfg.label}</Badge>
-                      <span className="text-[10px] text-slate-500 shrink-0">{timeAgo(alert.created_at)}</span>
-                    </div>
-
-                    {/* Remitente */}
-                    <div className="text-xs text-slate-400">
-                      <span className="font-semibold text-slate-300">{senderLabel(alert)}</span>
-                      {alert.table_number && (
-                        <span className="ml-1">· Mesa {alert.table_number}</span>
-                      )}
-                      {alert.menu_item_name && (
-                        <span className="ml-1 text-yellow-400">· {alert.menu_item_name}</span>
-                      )}
+                    <div className="flex items-start justify-between gap-4">
+                      <Badge variant={cfg.variant} className="px-3 py-1 text-[9px] font-black uppercase tracking-widest">{cfg.label}</Badge>
+                      <span className="text-[9px] font-bold text-foreground/20 uppercase tracking-widest shrink-0">{timeAgo(alert.created_at)}</span>
                     </div>
 
                     {/* Mensaje */}
-                    <p className="text-sm text-slate-200">{alert.message}</p>
+                    <div>
+                      <p className="text-sm font-bold text-foreground uppercase italic tracking-tight">{alert.message}</p>
+                      <div className="flex items-center gap-2 mt-2 text-[10px] font-black text-foreground/30 uppercase tracking-widest">
+                        <span className="text-primary">{senderLabel(alert)}</span>
+                        {alert.table_number && (
+                          <>
+                            <span className="opacity-20">•</span>
+                            <span>Mesa {alert.table_number}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
 
                     {/* Acciones */}
-                    <div className="flex flex-wrap gap-2 pt-1">
+                    <div className="flex flex-wrap gap-2 pt-2">
                       {alert.type === "STOCK_SHORTAGE" && alert.menu_item_id && (
                         <button
                           disabled={loading}
                           onClick={() => resolve(alert.id, "disable_item", alert.menu_item_id)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-900/30 border border-red-800/40 text-red-400 text-xs font-semibold hover:bg-red-900/50 transition-colors disabled:opacity-50"
+                          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all disabled:opacity-50"
                         >
-                          <PowerOff className="w-3.5 h-3.5" /> Deshabilitar plato
+                          <PowerOff className="w-3.5 h-3.5" /> Deshabilitar
                         </button>
                       )}
 
                       {(alert.type === "STOCK_SHORTAGE") && (
                         <button
                           onClick={() => { setOpen(false); router.push(`${base}/inventory`); }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-700/50 border border-slate-700 text-slate-300 text-xs font-semibold hover:bg-slate-700 transition-colors"
+                          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-foreground/60 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:text-foreground transition-all"
                         >
-                          <Package className="w-3.5 h-3.5" /> Ver inventario
+                          <Package className="w-3.5 h-3.5" /> Inventario
                         </button>
                       )}
 
                       {(alert.type === "TABLE_ISSUE" || alert.type === "BILL_REQUEST") && (
                         <button
                           onClick={() => { setOpen(false); router.push(`${base}/orders`); }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-700/50 border border-slate-700 text-slate-300 text-xs font-semibold hover:bg-slate-700 transition-colors"
+                          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-foreground/60 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:text-foreground transition-all"
                         >
-                          <ClipboardList className="w-3.5 h-3.5" /> Ver pedidos
+                          <ClipboardList className="w-3.5 h-3.5" /> Pedidos
                         </button>
                       )}
 
                       <button
                         disabled={loading}
                         onClick={() => resolve(alert.id)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-700/50 border border-slate-700 text-slate-400 text-xs font-semibold hover:bg-slate-700 hover:text-slate-200 transition-colors disabled:opacity-50 ml-auto"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest hover:bg-primary/80 transition-all disabled:opacity-50 ml-auto shadow-lg shadow-primary/20"
                       >
                         {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
                         Resolver

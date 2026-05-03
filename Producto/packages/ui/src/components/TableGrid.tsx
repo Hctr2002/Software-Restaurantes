@@ -17,7 +17,7 @@ export const TableCard = ({ number, status, label, onClick }: TableCardProps) =>
   const statusConfig = {
     FREE: "border-emerald-500/20 bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/10",
     OCCUPIED: "border-orange-500/20 bg-orange-500/5 text-orange-400 cursor-not-allowed opacity-80",
-    RESERVED: "border-blue-500/20 bg-blue-500/5 text-blue-400",
+    RESERVED: "border-amber-500/20 bg-amber-500/5 text-amber-500",
   };
 
   return (
@@ -37,7 +37,7 @@ export const TableCard = ({ number, status, label, onClick }: TableCardProps) =>
       {label && <span className="text-xs opacity-60 font-medium truncate w-full px-2">{label}</span>}
       <div className="mt-2 flex items-center space-x-1">
         <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", 
-          status === "FREE" ? "bg-emerald-500" : status === "OCCUPIED" ? "bg-orange-500" : "bg-blue-500")} 
+          status === "FREE" ? "bg-emerald-500" : status === "OCCUPIED" ? "bg-orange-500" : "bg-amber-500")} 
         />
         <span className="text-[10px] uppercase tracking-widest font-bold">
           {status === "FREE" ? "Libre" : status === "OCCUPIED" ? "Ocupada" : "Reservada"}

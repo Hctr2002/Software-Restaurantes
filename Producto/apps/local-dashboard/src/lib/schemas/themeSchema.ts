@@ -13,6 +13,7 @@ export const themeSchema = z.object({
   cardBackground: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Color inválido"),
   fontTitle: z.string().default("Outfit"),
   fontBody: z.string().default("Inter"),
+  fontAccent: z.string().default("Outfit"),
   logoUrl: z.string().url().nullable().optional(),
 });
 
