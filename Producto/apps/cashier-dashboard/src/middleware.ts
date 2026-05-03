@@ -3,8 +3,6 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(req: NextRequest) {
-  if (req.nextUrl.pathname === '/login') return NextResponse.next();
-
   let response = NextResponse.next({ request: { headers: req.headers } });
 
   const supabase = createServerClient(
@@ -25,10 +23,11 @@ export async function middleware(req: NextRequest) {
   );
 
   const { data: { session } } = await supabase.auth.getSession();
-  const role = session?.user?.app_metadata?.role;
+  const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
+  const role    = session?.user?.app_metadata?.role;
 
   if (!session || role !== 'CAJERO') {
-    return NextResponse.redirect(new URL('/login', req.url));
+    return NextResponse.redirect(new URL(authUrl));
   }
 
   return response;
