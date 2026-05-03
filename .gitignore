@@ -112,3 +112,14 @@ Producto/.zencoder/
 
 # Skill locks
 Producto/skills-lock.json
+
+# Test results (auto-generados por workflows de testing)
+tests/results/**
+!tests/results/.gitkeep
+docs/auditorias/**
+!docs/auditorias/.gitkeep
+audit/**
+!audit/
+!audit/.gitkeep
+!audit/screenshots/
+!audit/screenshots/.gitkeep
