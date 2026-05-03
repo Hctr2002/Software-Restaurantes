@@ -199,15 +199,23 @@ export default function TablesPage() {
           {editingTable && editingTable.qrData && (
             <div className="pt-8 mt-4 border-t border-white/5 flex flex-col items-center gap-6">
               <label className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] self-start px-1">Código QR de la Mesa</label>
-              <div className="p-6 bg-white rounded-[2rem] shadow-2xl shadow-black/50 group relative">
-                <QRCodeCanvas
-                  id={`qr-table-${editingTable.number}`}
-                  value={editingTable.qrData}
-                  size={180}
-                  level="H"
-                  includeMargin={false}
-                />
+              <div className="flex flex-col items-center gap-4">
+                <div className="p-6 bg-white rounded-[2rem] shadow-2xl shadow-black/50 group relative">
+                  <QRCodeCanvas
+                    id={`qr-table-${editingTable.number}`}
+                    value={editingTable.qrData}
+                    size={180}
+                    level="H"
+                    includeMargin={false}
+                  />
+                </div>
+                <div className="w-full bg-black/20 p-3 rounded-xl border border-white/5 overflow-hidden">
+                  <p className="text-[9px] font-mono text-primary/70 break-all text-center">
+                    {editingTable.qrData}
+                  </p>
+                </div>
               </div>
+
               <Button
                 variant="outline"
                 className="w-full h-12 border-white/10 bg-white/5 hover:bg-primary/10 hover:text-primary hover:border-primary/20 rounded-2xl transition-all group"
