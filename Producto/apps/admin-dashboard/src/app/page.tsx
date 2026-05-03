@@ -34,55 +34,68 @@ export default function LoginPage() {
 
       if (!data.user) return;
 
-      const role         = data.user.app_metadata.role as string;
-      const restaurantId = data.user.app_metadata.restaurant_id as string | undefined;
+      const appRole  = data.user.app_metadata?.role;
+      const userRole = data.user.user_metadata?.role;
+      const rawRole  = appRole || userRole;
+      const role     = (Array.isArray(rawRole) ? rawRole[0] : rawRole) as string;
+      const restaurantId = data.user.app_metadata?.restaurant_id as string | undefined;
 
       setUser({
         id:           data.user.id,
         email:        data.user.email!,
-        role,
+        role:         (role as any) || 'CLIENTE',
         restaurantId: restaurantId ?? '',
+        user_metadata: data.user.user_metadata
       });
 
-      // SUPER_ADMIN: sin slug, panel global
-      if (role === 'SUPER_ADMIN') {
-        window.location.replace('/dashboard');
-        return;
+      const roleUpper = String(role || '').toUpperCase();
+      const hasRestaurant = restaurantId && String(restaurantId).trim() !== "" && String(restaurantId) !== "null" && String(restaurantId) !== "undefined";
+
+      // 1. ROLES OPERATIVOS: Siempre redirigen a sus apps
+      if (['COCINA', 'GARZON', 'CAJERO'].includes(roleUpper)) {
+        const callbackBases: Record<string, string | undefined> = {
+          COCINA: process.env.NEXT_PUBLIC_KITCHEN_URL,
+          GARZON: process.env.NEXT_PUBLIC_WAITER_URL,
+          CAJERO: process.env.NEXT_PUBLIC_CASHIER_URL,
+        };
+        const callbackBase = callbackBases[roleUpper];
+        if (callbackBase) {
+          let slug: string | null = null;
+          if (hasRestaurant) {
+            const { data: rest } = await supabase.from('restaurants').select('slug').eq('id', restaurantId).single();
+            slug = rest?.slug ?? null;
+          }
+          const nextPath = roleUpper === 'CAJERO' ? '/' : (slug ? `/${slug}` : '/');
+          const hash = new URLSearchParams({
+            access_token:  data.session!.access_token,
+            refresh_token: data.session!.refresh_token,
+            next:          nextPath,
+          }).toString();
+          window.location.replace(`${callbackBase}/auth/callback#${hash}`);
+          return;
+        }
       }
 
-      // Todos los demás roles requieren el slug de la organización
-      let slug: string | null = null;
-      if (restaurantId) {
-        const { data: rest } = await supabase
-          .from('restaurants')
-          .select('slug')
-          .eq('id', restaurantId)
-          .single();
-        slug = rest?.slug ?? null;
+      // 2. ROL ADMIN: Redirigir a 3003 SOLO si tiene un restaurante asignado
+      if (roleUpper === 'ADMIN' && hasRestaurant) {
+        const localUrl = process.env.NEXT_PUBLIC_LOCAL_DASHBOARD_URL;
+        const { data: rest } = await supabase.from('restaurants').select('slug').eq('id', restaurantId).single();
+        const slug = rest?.slug ?? null;
+        
+        if (localUrl) {
+          const nextPath = slug ? `/${slug}/dashboard` : '/dashboard';
+          const hash = new URLSearchParams({
+            access_token:  data.session!.access_token,
+            refresh_token: data.session!.refresh_token,
+            next:          nextPath,
+          }).toString();
+          window.location.replace(`${localUrl}/auth/callback#${hash}`);
+          return;
+        }
       }
 
-      const localUrl   = process.env.NEXT_PUBLIC_LOCAL_DASHBOARD_URL;
-      const kitchenUrl = process.env.NEXT_PUBLIC_KITCHEN_URL;
-      const waiterUrl  = process.env.NEXT_PUBLIC_WAITER_URL;
-      const cashierUrl = process.env.NEXT_PUBLIC_CASHIER_URL;
-
-      // Helper: añade /{slug}/subPath si slug existe
-      const withSlug = (base: string, subPath: string) =>
-        slug ? `${base}/${slug}${subPath}` : base;
-
-      const roleRedirects: Record<string, string> = {
-        ADMIN:  withSlug(localUrl,   '/dashboard'),
-        COCINA: withSlug(kitchenUrl, ''),
-        GARZON: withSlug(waiterUrl,  ''),
-        CAJERO: withSlug(cashierUrl, ''),
-      };
-
-      const target = roleRedirects[role];
-      if (target) {
-        window.location.replace(target);
-      } else {
-        setError(`Rol no reconocido: ${role}`);
-      }
+      // 3. TODO LO DEMÁS (SUPER_ADMIN o ADMIN sin restaurante): Se queda en el panel multitenant
+      window.location.replace('/dashboard');
     } catch {
       setError("Error de conexión, intente más tarde");
     } finally {
@@ -115,10 +128,13 @@ export default function LoginPage() {
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-4">
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/50 z-10" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/50 z-10" aria-hidden="true" />
                   <Input
                     type="email"
+                    name="email"
+                    autoComplete="username"
                     placeholder="admin@menubites.com"
+                    aria-label="Correo electrónico"
                     required
                     className="pl-10"
                     value={email}
@@ -127,10 +143,13 @@ export default function LoginPage() {
                 </div>
 
                 <div className="relative group">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/50 z-10 transition-colors group-focus-within:text-primary" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/50 z-10 transition-colors group-focus-within:text-primary" aria-hidden="true" />
                   <Input
                     type={showPassword ? "text" : "password"}
+                    name="password"
+                    autoComplete="current-password"
                     placeholder="••••••••"
+                    aria-label="Contraseña"
                     required
                     className="pl-10 pr-10"
                     value={password}
@@ -139,13 +158,14 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-white transition-colors z-10"
                     tabIndex={-1}
                   >
                     {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
+                      <EyeOff className="w-5 h-5" aria-hidden="true" />
                     ) : (
-                      <Eye className="w-5 h-5" />
+                      <Eye className="w-5 h-5" aria-hidden="true" />
                     )}
                   </button>
                 </div>
@@ -168,7 +188,7 @@ export default function LoginPage() {
                 ) : (
                   <>
                     Entrar al Sistema
-                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
                   </>
                 )}
               </Button>

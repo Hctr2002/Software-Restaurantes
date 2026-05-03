@@ -1,28 +1,51 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function proxy(req: NextRequest) {
-  const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req, res });
+  let response = NextResponse.next({ request: { headers: req.headers } });
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  if (req.nextUrl.pathname.startsWith('/auth/callback')) return response;
 
-  // URL de la pasarela de login centralizada (Admin Dashboard)
-  // En producción, esto debería ser una variable de entorno
-  const loginUrl = process.env.NEXT_PUBLIC_AUTH_URL;
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return req.cookies.getAll(); },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value));
+          response = NextResponse.next({ request: { headers: req.headers } });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+      cookieOptions: { name: 'sb-kds-session' },
+    }
+  );
 
-  if (!session && !req.nextUrl.pathname.startsWith('/login')) {
-    return NextResponse.redirect(loginUrl);
+  const { data: { session } } = await supabase.auth.getSession();
+  const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
+  const rawRole = session?.user?.app_metadata?.role;
+  const role = Array.isArray(rawRole) ? rawRole[0] : rawRole;
+  const isKitchen = String(role).toUpperCase() === 'COCINA';
+
+  // Sin sesión → central login
+  if (!session) {
+    return NextResponse.redirect(new URL(authUrl, req.url));
   }
 
-  return res;
+  // Rol incorrecto → central login
+  if (!isKitchen) {
+    return NextResponse.redirect(new URL(authUrl, req.url));
+  }
+
+  return response;
 }
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)',
   ],
 };

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin, createServiceClient, ensureServiceConfig } from "@/lib/localApi";
+import { requireAdmin, ensureServiceConfig } from "@/lib/localApi";
+import { menuService } from "@/lib/services/menuService";
+import { menuSchema } from "@/lib/schemas/menuSchema";
+import { ZodError } from "zod";
 
 export async function GET(req: NextRequest) {
   const cfg = ensureServiceConfig();
@@ -9,12 +12,7 @@ export async function GET(req: NextRequest) {
   if ("errorResponse" in auth) return auth.errorResponse;
   const { restaurantId } = auth;
 
-  const db = createServiceClient();
-  const { data, error } = await db
-    .from("menu_items")
-    .select("id, name, description, price, categoryId:category_id, image_url, is_active, restaurant_id, categories(name)")
-    .eq("restaurant_id", restaurantId)
-    .order("name");
+  const { data, error } = await menuService.getByRestaurant(restaurantId);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ data });
@@ -28,20 +26,19 @@ export async function POST(req: NextRequest) {
   if ("errorResponse" in auth) return auth.errorResponse;
   const { restaurantId } = auth;
 
-  const body = await req.json();
-  const { name, description, price, is_active, category_id, image_url } = body;
+  try {
+    const body = await req.json();
+    const validatedData = menuSchema.parse(body);
+    
+    const { data, error } = await menuService.create(restaurantId, validatedData);
 
-  if (!name || price === undefined || !category_id) {
-    return NextResponse.json({ error: "Faltan campos requeridos: name, price, category_id" }, { status: 400 });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ data }, { status: 201 });
+  } catch (err) {
+    if (err instanceof ZodError) {
+      return NextResponse.json({ error: "Datos inválidos", details: err.issues }, { status: 400 });
+    }
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
-
-  const db = createServiceClient();
-  const { data, error } = await db
-    .from("menu_items")
-    .insert({ name, description: description ?? null, price, is_active: is_active ?? true, restaurant_id: restaurantId, category_id, image_url: image_url ?? null })
-    .select()
-    .single();
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ data }, { status: 201 });
 }
+

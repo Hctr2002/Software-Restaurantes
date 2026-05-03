@@ -2,8 +2,10 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   let response = NextResponse.next({ request: { headers: req.headers } });
+
+  if (req.nextUrl.pathname.startsWith('/auth/callback')) return response;
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,13 +23,16 @@ export async function middleware(req: NextRequest) {
           );
         },
       },
+      cookieOptions: { name: 'sb-local-session' },
     }
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  // Using getUser() instead of getSession() for better security and token refresh.
+  const { data: { user } } = await supabase.auth.getUser();
+  const sessionExists = !!user;
 
   const pathname = req.nextUrl.pathname;
-  const authUrl  = process.env.NEXT_PUBLIC_AUTH_URL;
+  const authUrl  = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
 
   const isPublicRoute =
     pathname === '/' ||
@@ -38,22 +43,23 @@ export async function middleware(req: NextRequest) {
   const slugMatch = pathname.match(/^\/([^/]+)\/dashboard/);
   const urlSlug   = slugMatch?.[1];
 
-  const role         = session?.user?.app_metadata?.role;
-  const restaurantId = session?.user?.app_metadata?.restaurant_id;
-  const isAdmin      = role === 'ADMIN';
+  const rawRole = user?.app_metadata?.role;
+  const role = Array.isArray(rawRole) ? rawRole[0] : rawRole;
+  const restaurantId = user?.app_metadata?.restaurant_id;
+  const isAdmin = String(role).toUpperCase() === 'ADMIN';
 
   // Sin sesión y ruta protegida → central login
-  if (!session && !isPublicRoute) {
-    return NextResponse.redirect(new URL(authUrl));
+  if (!sessionExists && !isPublicRoute) {
+    return NextResponse.redirect(new URL(authUrl, req.url));
   }
 
   // Sesión de otro rol en ruta protegida → central login
-  if (session && !isPublicRoute && !isAdmin) {
-    return NextResponse.redirect(new URL(authUrl));
+  if (sessionExists && !isPublicRoute && !isAdmin) {
+    return NextResponse.redirect(new URL(authUrl, req.url));
   }
 
   // Sesión ADMIN en login → obtener slug y redirigir
-  if (session && isAdmin && pathname === '/') {
+  if (sessionExists && isAdmin && pathname === '/') {
     const { data } = await supabase
       .from('restaurants')
       .select('slug')
@@ -66,11 +72,11 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(url);
     }
     // Si no tiene restaurante asignado → central login
-    return NextResponse.redirect(new URL(authUrl));
+    return NextResponse.redirect(new URL(authUrl, req.url));
   }
 
   // ADMIN en ruta con slug → verificar que el slug coincida con su restaurante
-  if (session && isAdmin && urlSlug) {
+  if (sessionExists && isAdmin && urlSlug) {
     const { data } = await supabase
       .from('restaurants')
       .select('slug')

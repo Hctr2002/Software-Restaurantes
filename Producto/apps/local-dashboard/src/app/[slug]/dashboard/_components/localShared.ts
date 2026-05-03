@@ -37,6 +37,7 @@ export type TableRecord = {
   number: number;
   label: string | null;
   status: string;
+  qrData: string | null;
   restaurant_id: string;
 };
 
@@ -91,8 +92,8 @@ export type LocalUserRecord = {
   createdAt: string;
 };
 
-// Matches Prisma Role enum (SUPER_ADMIN and CLIENTE are managed elsewhere)
-export const LOCAL_ROLES = ["ADMIN", "GARZON", "COCINA"];
+// Matches Prisma Role enum (SUPER_ADMIN y CLIENTE se gestionan desde otros paneles)
+export const LOCAL_ROLES = ["ADMIN", "GARZON", "COCINA", "CAJERO"];
 
 export const TABLE_STATUSES = ["FREE", "OCCUPIED", "RESERVED"];
 export const ORDER_STATUSES = ["PENDING", "VALIDATED", "PREPARING", "READY", "DELIVERED", "REJECTED"];

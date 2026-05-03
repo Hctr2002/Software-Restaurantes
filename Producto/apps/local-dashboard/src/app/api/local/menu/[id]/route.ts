@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin, createServiceClient, ensureServiceConfig } from "@/lib/localApi";
+import { requireAdmin, ensureServiceConfig } from "@/lib/localApi";
+import { menuService } from "@/lib/services/menuService";
+import { menuSchema } from "@/lib/schemas/menuSchema";
+import { ZodError } from "zod";
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const cfg = ensureServiceConfig();
@@ -10,21 +13,23 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { restaurantId } = auth;
 
   const { id } = await params;
-  const body = await req.json();
-  const { name, description, price, is_active, category_id, image_url } = body;
 
-  const db = createServiceClient();
-  const { data, error } = await db
-    .from("menu_items")
-    .update({ name, description: description ?? null, price, is_active, category_id, image_url: image_url ?? null })
-    .eq("id", id)
-    .eq("restaurant_id", restaurantId)
-    .select()
-    .single();
+  try {
+    const body = await req.json();
+    const validatedData = menuSchema.parse(body);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  if (!data) return NextResponse.json({ error: "Item no encontrado" }, { status: 404 });
-  return NextResponse.json({ data });
+
+    const { data, error } = await menuService.update(restaurantId, id, validatedData);
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!data) return NextResponse.json({ error: "Item no encontrado" }, { status: 404 });
+    return NextResponse.json({ data });
+  } catch (err) {
+    if (err instanceof ZodError) {
+      return NextResponse.json({ error: "Datos inválidos", details: err.issues }, { status: 400 });
+    }
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+  }
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -36,12 +41,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   const { restaurantId } = auth;
   const { id } = await params;
 
-  const db = createServiceClient();
-  const { error } = await db
-    .from("menu_items")
-    .delete()
-    .eq("id", id)
-    .eq("restaurant_id", restaurantId);
+  const { error } = await menuService.delete(restaurantId, id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });

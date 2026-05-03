@@ -9,7 +9,7 @@ export default function Home() {
   useEffect(() => {
     // Simulate a redirect as if a QR was scanned: restaurant 'demo-bistro' table '12'
     const timer = setTimeout(() => {
-      router.push("/demo-bistro/12");
+      router.push("/mari-sopa/1");
     }, 1500);
     return () => clearTimeout(timer);
   }, [router]);
