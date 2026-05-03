@@ -40,14 +40,18 @@ export async function middleware(req: NextRequest) {
   const role = session?.user?.app_metadata?.role;
   const isSuperAdmin = role === 'SUPER_ADMIN';
 
-  // Sin sesión y ruta protegida → login (se queda en puerto 3000)
+  // La ruta de login (/) siempre es accesible para permitir múltiples sesiones
+  // desde el mismo navegador sin que una sesión previa bloquee el acceso.
+  if (pathname === '/') return response;
+
+  // Sin sesión en ruta protegida → login
   if (!session && !isPublicRoute) {
     const url = req.nextUrl.clone();
     url.pathname = '/';
     return NextResponse.redirect(url);
   }
 
-  // Sesión de otro rol en ruta protegida → redirigir a su app correspondiente
+  // Sesión de rol operacional en ruta protegida → su app
   if (session && !isPublicRoute && !isSuperAdmin) {
     const target = ROLE_URLS[role ?? ''];
     if (target) return NextResponse.redirect(new URL(target));
@@ -56,18 +60,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Sesión SUPER_ADMIN en login → dashboard
-  if (session && isSuperAdmin && pathname === '/') {
-    const url = req.nextUrl.clone();
-    url.pathname = '/dashboard';
-    return NextResponse.redirect(url);
-  }
-
-  // Sesión de otro rol en login → redirigir a su app
-  if (session && !isSuperAdmin && pathname === '/') {
-    const target = ROLE_URLS[role ?? ''];
-    if (target) return NextResponse.redirect(new URL(target));
-  }
+  // SUPER_ADMIN sin sesión activa en /dashboard → dejar pasar normalmente
+  if (session && isSuperAdmin) return response;
 
   return response;
 }

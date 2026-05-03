@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { useAuthStore } from "@menu-bites/store";
-import { useTables, signOut, sendAlert, AlertType } from "@menu-bites/auth";
-import { TableGrid, TableCard, Button } from "@menu-bites/ui";
+import { supabase, useTables, signOut, sendAlert, AlertType, getRestaurantTheme } from "@menu-bites/auth";
+import { TableGrid, TableCard, Button, RestaurantThemeProvider } from "@menu-bites/ui";
 import { useRouter } from "next/navigation";
 import { LayoutDashboard, LogOut, User, AlertTriangle, X, Loader2 } from "lucide-react";
 
@@ -24,7 +24,31 @@ export default function WaiterDashboard() {
   const [tableNum, setTableNum]         = useState("");
   const [sendingAlert, setSendingAlert] = useState(false);
   const [alertSent, setAlertSent]       = useState(false);
+  const [theme, setTheme]               = useState<any>(null);
   const router = useRouter();
+
+  React.useEffect(() => {
+    if (!user?.restaurantId) return;
+    const restaurantId = user.restaurantId;
+
+    getRestaurantTheme(restaurantId).then(setTheme);
+
+    const channel = supabase
+      .channel(`waiter-theme-${restaurantId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "restaurant_themes", filter: `restaurant_id=eq.${restaurantId}` },
+        async (payload) => {
+          if (payload.new.is_active) {
+            const updated = await getRestaurantTheme(restaurantId);
+            setTheme(updated);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.restaurantId]);
 
   const handleSignOut = async () => {
     const loginUrl = process.env.NEXT_PUBLIC_AUTH_URL;
@@ -71,11 +95,12 @@ export default function WaiterDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white pb-20">
+    <RestaurantThemeProvider theme={theme} isGlobal={true}>
+      <div className="min-h-screen bg-background text-foreground pb-20">
       <header className="glass sticky top-0 z-50 p-4 flex justify-between items-center border-b border-white/5">
         <div className="flex items-center space-x-3">
           <div className="bg-primary/20 p-2 rounded-xl">
-            <LayoutDashboard className="w-5 h-5 text-primary" />
+            <LayoutDashboard className="w-5 h-5 text-primary" aria-hidden="true" />
           </div>
           <div>
             <h1 className="text-lg font-bold leading-none">Terminal de Garzón</h1>
@@ -96,20 +121,22 @@ export default function WaiterDashboard() {
             variant="outline"
             size="icon"
             onClick={() => setAlertModal(true)}
+            aria-label="Enviar alerta al administrador"
             className="rounded-xl bg-yellow-500/10 border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/20"
             title="Enviar alerta al administrador"
           >
-            <AlertTriangle className="w-5 h-5" />
+            <AlertTriangle className="w-5 h-5" aria-hidden="true" />
           </Button>
 
           <Button
             variant="outline"
             size="icon"
             onClick={handleSignOut}
+            aria-label="Cerrar sesión de terminal"
             disabled={isSigningOut}
             className="rounded-xl bg-white/5 border-white/5 hover:bg-destructive/20 hover:text-destructive hover:border-destructive/20 transition-all"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-5 h-5" aria-hidden="true" />
           </Button>
         </div>
       </header>
@@ -136,7 +163,7 @@ export default function WaiterDashboard() {
 
         {tables.length === 0 && !loading && (
           <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10">
-            <User className="w-12 h-12 mx-auto text-muted-foreground opacity-20 mb-4" />
+            <User className="w-12 h-12 mx-auto text-muted-foreground opacity-20 mb-4" aria-hidden="true" />
             <p className="text-muted-foreground font-medium">No hay mesas configuradas aún.</p>
           </div>
         )}
@@ -154,10 +181,10 @@ export default function WaiterDashboard() {
           <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold text-slate-100 flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-yellow-400" /> Enviar Alerta
+                <AlertTriangle className="w-5 h-5 text-yellow-400" aria-hidden="true" /> Enviar Alerta
               </h2>
-              <button onClick={() => setAlertModal(false)} className="p-1 rounded text-slate-400 hover:text-white">
-                <X className="w-4 h-4" />
+              <button onClick={() => setAlertModal(false)} aria-label="Cerrar modal" className="p-1 rounded text-slate-400 hover:text-white">
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 
@@ -167,6 +194,7 @@ export default function WaiterDashboard() {
                 <button
                   key={opt.type}
                   onClick={() => setAlertType(opt.type)}
+                  aria-pressed={alertType === opt.type}
                   className={`px-3 py-2 rounded-lg border text-xs font-semibold transition-colors ${opt.color} ${alertType === opt.type ? "ring-2 ring-current" : ""}`}
                 >
                   {opt.label}
@@ -176,8 +204,9 @@ export default function WaiterDashboard() {
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">N° de Mesa (opcional)</label>
+                <label htmlFor="table_num" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">N° de Mesa (opcional)</label>
                 <input
+                  id="table_num"
                   type="number"
                   min={1}
                   placeholder="Ej. 5"
@@ -187,10 +216,11 @@ export default function WaiterDashboard() {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mensaje *</label>
+                <label htmlFor="alert_msg" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mensaje *</label>
                 <textarea
+                  id="alert_msg"
                   rows={3}
-                  placeholder="Describe la situación..."
+                  placeholder="Describe la situación…"
                   value={alertMsg}
                   onChange={(e) => setAlertMsg(e.target.value)}
                   className="mt-1 w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 resize-none"
@@ -205,12 +235,13 @@ export default function WaiterDashboard() {
                 disabled={!alertMsg.trim() || sendingAlert || alertSent}
                 className="flex-1 bg-yellow-600 hover:bg-yellow-500 text-black font-bold gap-2"
               >
-                {alertSent ? "✓ Enviado" : sendingAlert ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enviar"}
+                {alertSent ? "✓ Enviado" : sendingAlert ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : "Enviar"}
               </Button>
             </div>
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </RestaurantThemeProvider>
   );
 }

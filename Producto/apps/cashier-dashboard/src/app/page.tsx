@@ -2,8 +2,8 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuthStore } from "@menu-bites/store";
-import { supabase, signOut, sendAlert } from "@menu-bites/auth";
-import { Badge, Button } from "@menu-bites/ui";
+import { supabase, signOut, sendAlert, getRestaurantTheme } from "@menu-bites/auth";
+import { Badge, Button, RestaurantThemeProvider } from "@menu-bites/ui";
 import {
   Receipt, LogOut, CheckCircle, Loader2, AlertTriangle, X, RefreshCw, User,
 } from "lucide-react";
@@ -46,6 +46,7 @@ export default function CashierPage() {
   const [sendingAlert, setSendingAlert] = useState(false);
   const [alertSent, setAlertSent] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [theme, setTheme] = useState<any>(null);
 
   const fetchOrders = useCallback(async () => {
     if (!user?.restaurantId) return;
@@ -70,6 +71,29 @@ export default function CashierPage() {
 
     return () => { supabase.removeChannel(channel); };
   }, [fetchOrders]);
+
+  useEffect(() => {
+    if (!user?.restaurantId) return;
+    const restaurantId = user.restaurantId;
+
+    getRestaurantTheme(restaurantId).then(setTheme);
+
+    const channel = supabase
+      .channel(`cashier-theme-${restaurantId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "restaurant_themes", filter: `restaurant_id=eq.${restaurantId}` },
+        async (payload) => {
+          if (payload.new.is_active) {
+            const updated = await getRestaurantTheme(restaurantId);
+            setTheme(updated);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.restaurantId]);
 
   const markDelivered = async (orderId: string) => {
     setProcessing(orderId);
@@ -111,12 +135,13 @@ export default function CashierPage() {
   const totalPending = orders.reduce((s, o) => s + orderTotal(o), 0);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col">
+    <RestaurantThemeProvider theme={theme} isGlobal={true}>
+      <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Header */}
-      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between bg-slate-900">
+      <header className="border-b border-white/5 px-6 py-4 flex items-center justify-between bg-card">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center">
-            <Receipt className="w-5 h-5 text-white" />
+            <Receipt className="w-5 h-5 text-white" aria-hidden="true" />
           </div>
           <div>
             <h1 className="text-base font-bold text-slate-100">Terminal de Caja</h1>
@@ -132,43 +157,46 @@ export default function CashierPage() {
 
           <button
             onClick={fetchOrders}
+            aria-label="Actualizar lista de pedidos"
             className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
             title="Actualizar"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-4 h-4" aria-hidden="true" />
           </button>
 
           <Button
             variant="outline"
             size="icon"
             onClick={() => setAlertModal(true)}
+            aria-label="Enviar alerta al administrador"
             className="rounded-xl border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10"
             title="Enviar alerta al administrador"
           >
-            <AlertTriangle className="w-4 h-4" />
+            <AlertTriangle className="w-4 h-4" aria-hidden="true" />
           </Button>
 
           <Button
             variant="outline"
             size="icon"
             onClick={handleSignOut}
+            aria-label="Cerrar sesión de caja"
             disabled={isSigningOut}
             className="rounded-xl"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4" aria-hidden="true" />
           </Button>
         </div>
       </header>
 
       {/* KPI bar */}
-      <div className="border-b border-slate-800 px-6 py-3 flex items-center gap-6 bg-slate-900/50">
+      <div className="border-b border-white/5 px-6 py-3 flex items-center gap-6 bg-card/50">
         <div className="text-sm">
-          <span className="text-slate-400">Por cobrar: </span>
+          <span className="text-muted-foreground">Por cobrar: </span>
           <span className="font-bold text-emerald-400">{orders.length} pedido{orders.length !== 1 ? "s" : ""}</span>
         </div>
         <div className="text-sm">
-          <span className="text-slate-400">Total pendiente: </span>
-          <span className="font-bold text-slate-100">{formatCLP(totalPending)}</span>
+          <span className="text-muted-foreground">Total pendiente: </span>
+          <span className="font-bold text-foreground">{formatCLP(totalPending)}</span>
         </div>
       </div>
 
@@ -176,11 +204,11 @@ export default function CashierPage() {
       <main className="flex-1 p-6">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+            <Loader2 className="w-8 h-8 animate-spin text-slate-400" aria-hidden="true" />
           </div>
         ) : orders.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-600">
-            <CheckCircle className="w-12 h-12" />
+            <CheckCircle className="w-12 h-12" aria-hidden="true" />
             <p className="text-sm font-medium">Sin pedidos listos por cobrar</p>
           </div>
         ) : (
@@ -189,7 +217,7 @@ export default function CashierPage() {
               const total   = orderTotal(order);
               const isProc  = processing === order.id;
               return (
-                <div key={order.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 flex flex-col">
+                <div key={order.id} className="bg-card border border-white/5 rounded-2xl p-5 space-y-4 flex flex-col">
                   {/* Mesa + tiempo */}
                   <div className="flex items-center justify-between">
                     <div>
@@ -198,7 +226,7 @@ export default function CashierPage() {
                       </p>
                       {order.users?.email && (
                         <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                          <User className="w-3 h-3" />
+                          <User className="w-3 h-3" aria-hidden="true" />
                           {order.users.email.split("@")[0]}
                         </p>
                       )}
@@ -225,9 +253,9 @@ export default function CashierPage() {
                   </div>
 
                   {/* Total + cobrar */}
-                  <div className="border-t border-slate-800 pt-3 space-y-3">
+                  <div className="border-t border-white/5 pt-3 space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total</span>
+                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Total</span>
                       <span className="text-xl font-black text-emerald-400">{formatCLP(total)}</span>
                     </div>
                     <Button
@@ -235,7 +263,7 @@ export default function CashierPage() {
                       disabled={isProc}
                       className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold gap-2"
                     >
-                      {isProc ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                      {isProc ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <CheckCircle className="w-4 h-4" aria-hidden="true" />}
                       Cobrado — Marcar entregado
                     </Button>
                   </div>
@@ -252,17 +280,18 @@ export default function CashierPage() {
           <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold text-slate-100 flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-yellow-400" /> Enviar Alerta al Admin
+                <AlertTriangle className="w-5 h-5 text-yellow-400" aria-hidden="true" /> Enviar Alerta al Admin
               </h2>
-              <button onClick={() => setAlertModal(false)} className="p-1 rounded text-slate-400 hover:text-white">
-                <X className="w-4 h-4" />
+              <button onClick={() => setAlertModal(false)} aria-label="Cerrar modal" className="p-1 rounded text-slate-400 hover:text-white">
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">N° de Mesa (opcional)</label>
+                <label htmlFor="cashier_table_num" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">N° de Mesa (opcional)</label>
                 <input
+                  id="cashier_table_num"
                   type="number"
                   min={1}
                   placeholder="Ej. 3"
@@ -272,10 +301,11 @@ export default function CashierPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mensaje *</label>
+                <label htmlFor="cashier_alert_msg" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mensaje *</label>
                 <textarea
+                  id="cashier_alert_msg"
                   rows={3}
-                  placeholder="Ej. Mesa 3 no quiere pagar, hay discrepancia en la cuenta..."
+                  placeholder="Ej. Mesa 3 no quiere pagar, hay discrepancia en la cuenta…"
                   value={alertMsg}
                   onChange={(e) => setAlertMsg(e.target.value)}
                   className="mt-1 w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 resize-none"
@@ -290,12 +320,13 @@ export default function CashierPage() {
                 disabled={!alertMsg.trim() || sendingAlert || alertSent}
                 className="flex-1 bg-yellow-600 hover:bg-yellow-500 text-black font-bold"
               >
-                {alertSent ? "✓ Enviado" : sendingAlert ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enviar Alerta"}
+                {alertSent ? "✓ Enviado" : sendingAlert ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : "Enviar Alerta"}
               </Button>
             </div>
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </RestaurantThemeProvider>
   );
 }

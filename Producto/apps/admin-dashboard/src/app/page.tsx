@@ -66,20 +66,30 @@ export default function LoginPage() {
       const waiterUrl  = process.env.NEXT_PUBLIC_WAITER_URL;
       const cashierUrl = process.env.NEXT_PUBLIC_CASHIER_URL;
 
-      // Helper: añade /{slug}/subPath si slug existe
-      const withSlug = (base: string, subPath: string) =>
-        slug ? `${base}/${slug}${subPath}` : base;
-
-      const roleRedirects: Record<string, string> = {
-        ADMIN:  withSlug(localUrl,   '/dashboard'),
-        COCINA: withSlug(kitchenUrl, ''),
-        GARZON: withSlug(waiterUrl,  ''),
-        CAJERO: withSlug(cashierUrl, ''),
+      const callbackBases: Record<string, string | undefined> = {
+        ADMIN:  localUrl,
+        COCINA: kitchenUrl,
+        GARZON: waiterUrl,
+        CAJERO: cashierUrl,
       };
 
-      const target = roleRedirects[role];
-      if (target) {
-        window.location.replace(target);
+      const nextPaths: Record<string, string> = {
+        ADMIN:  slug ? `/${slug}/dashboard` : '/dashboard',
+        COCINA: slug ? `/${slug}` : '/',
+        GARZON: slug ? `/${slug}` : '/',
+        CAJERO: '/',
+      };
+
+      const callbackBase = callbackBases[role];
+      const nextPath     = nextPaths[role];
+
+      if (callbackBase && nextPath !== undefined) {
+        const hash = new URLSearchParams({
+          access_token:  data.session!.access_token,
+          refresh_token: data.session!.refresh_token,
+          next:          nextPath,
+        }).toString();
+        window.location.replace(`${callbackBase}/auth/callback#${hash}`);
       } else {
         setError(`Rol no reconocido: ${role}`);
       }
@@ -115,10 +125,13 @@ export default function LoginPage() {
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-4">
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/50 z-10" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/50 z-10" aria-hidden="true" />
                   <Input
                     type="email"
+                    name="email"
+                    autoComplete="username"
                     placeholder="admin@menubites.com"
+                    aria-label="Correo electrónico"
                     required
                     className="pl-10"
                     value={email}
@@ -127,10 +140,13 @@ export default function LoginPage() {
                 </div>
 
                 <div className="relative group">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/50 z-10 transition-colors group-focus-within:text-primary" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/50 z-10 transition-colors group-focus-within:text-primary" aria-hidden="true" />
                   <Input
                     type={showPassword ? "text" : "password"}
+                    name="password"
+                    autoComplete="current-password"
                     placeholder="••••••••"
+                    aria-label="Contraseña"
                     required
                     className="pl-10 pr-10"
                     value={password}
@@ -139,13 +155,14 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-white transition-colors z-10"
                     tabIndex={-1}
                   >
                     {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
+                      <EyeOff className="w-5 h-5" aria-hidden="true" />
                     ) : (
-                      <Eye className="w-5 h-5" />
+                      <Eye className="w-5 h-5" aria-hidden="true" />
                     )}
                   </button>
                 </div>
@@ -168,7 +185,7 @@ export default function LoginPage() {
                 ) : (
                   <>
                     Entrar al Sistema
-                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
                   </>
                 )}
               </Button>

@@ -76,25 +76,25 @@ export default function DashboardPage() {
       {/* KPIs financieros */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <KpiCard
-          icon={<Wallet className="w-5 h-5 text-emerald-400" />}
+          icon={<Wallet className="w-5 h-5 text-emerald-400" aria-hidden="true" />}
           label="Ingresos del Día"
           value={formatPrice(stats?.ingresos_dia ?? 0)}
           detail={`${pedidosDia} pedido${pedidosDia !== 1 ? "s" : ""} entregado${pedidosDia !== 1 ? "s" : ""}`}
         />
         <KpiCard
-          icon={<TrendingUp className="w-5 h-5 text-blue-400" />}
+          icon={<TrendingUp className="w-5 h-5 text-blue-400" aria-hidden="true" />}
           label="Ingresos del Mes"
           value={formatPrice(stats?.ingresos_mes ?? 0)}
           detail="Pedidos entregados este mes"
         />
         <KpiCard
-          icon={<ReceiptText className="w-5 h-5 text-amber-400" />}
+          icon={<ReceiptText className="w-5 h-5 text-amber-400" aria-hidden="true" />}
           label="Ticket Promedio"
           value={formatPrice(stats?.ticket_promedio ?? 0)}
           detail="Por pedido entregado hoy"
         />
         <KpiCard
-          icon={<ClipboardList className="w-5 h-5 text-rose-400" />}
+          icon={<ClipboardList className="w-5 h-5 text-rose-400" aria-hidden="true" />}
           label="Pedidos Activos"
           value={String(pendingOrders.length)}
           detail="Pendiente o en preparación"
@@ -106,7 +106,7 @@ export default function DashboardPage() {
         <Card className="border-white/5 bg-white/5 backdrop-blur-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <UtensilsCrossed className="w-4 h-4" /> Top items hoy
+              <UtensilsCrossed className="w-4 h-4" aria-hidden="true" /> Top items hoy
             </CardTitle>
             <CardDescription>Los más pedidos del día</CardDescription>
           </CardHeader>
@@ -133,7 +133,7 @@ export default function DashboardPage() {
         <Card className="border-white/5 bg-white/5 backdrop-blur-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <ClipboardList className="w-4 h-4" /> Últimos pedidos
+              <ClipboardList className="w-4 h-4" aria-hidden="true" /> Últimos pedidos
             </CardTitle>
             <CardDescription>Los 8 más recientes</CardDescription>
           </CardHeader>
@@ -202,7 +202,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {loading && <p className="text-sm text-muted-foreground">Cargando datos del local...</p>}
+      {loading && <p className="text-sm text-muted-foreground">Cargando datos del local…</p>}
     </LocalShell>
   );
 }

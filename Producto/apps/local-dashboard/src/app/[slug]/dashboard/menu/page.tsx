@@ -185,7 +185,7 @@ export default function MenuPage() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Cargando menú...</p>
+        <p className="text-sm text-muted-foreground">Cargando menú…</p>
       ) : (
         <Table headers={["", "Nombre", "Categoría", "Precio", "Estado", "Acciones"]}>
           {items.length === 0 && (
@@ -199,9 +199,9 @@ export default function MenuPage() {
             <TableRow key={item.id}>
               <TableCell>
                 {item.image_url ? (
-                  <img src={item.image_url} alt={item.name} className="w-10 h-10 rounded-lg object-cover" />
+                  <img src={item.image_url} alt={item.name} width={40} height={40} className="w-10 h-10 rounded-lg object-cover" />
                 ) : (
-                  <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center" aria-hidden="true">
                     <ImagePlus className="w-4 h-4 text-slate-600" />
                   </div>
                 )}
@@ -223,20 +223,30 @@ export default function MenuPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleToggleActive(item)}
+                    aria-label={item.is_active ? `Deshabilitar ${item.name}` : `Habilitar ${item.name}`}
                     title={item.is_active ? "Deshabilitar plato" : "Habilitar plato"}
                     className={`p-1.5 rounded transition-colors ${item.is_active ? "text-green-500 hover:bg-red-900/20 hover:text-red-400" : "text-slate-600 hover:bg-green-900/20 hover:text-green-400"}`}
                   >
-                    <Power className="w-4 h-4" />
+                    <Power className="w-4 h-4" aria-hidden="true" />
                   </button>
-                  <button onClick={() => openEdit(item)} className="p-1.5 rounded hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
-                    <Pencil className="w-4 h-4" />
+                  <button 
+                    onClick={() => openEdit(item)} 
+                    aria-label={`Editar ${item.name}`}
+                    className="p-1.5 rounded hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+                  >
+                    <Pencil className="w-4 h-4" aria-hidden="true" />
                   </button>
                   <button
                     onClick={() => handleDelete(item.id)}
+                    aria-label={`Eliminar ${item.name}`}
                     disabled={deleteId === item.id}
                     className="p-1.5 rounded hover:bg-red-900/30 text-slate-400 hover:text-red-400 transition-colors"
                   >
-                    {deleteId === item.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                    {deleteId === item.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" aria-hidden="true" />
+                    )}
                   </button>
                 </div>
               </TableCell>
@@ -253,7 +263,7 @@ export default function MenuPage() {
           <>
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
             <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-700 text-white">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Guardar"}
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : "Guardar"}
             </Button>
           </>
         }
@@ -267,9 +277,10 @@ export default function MenuPage() {
                 <button
                   type="button"
                   onClick={clearImage}
+                  aria-label="Eliminar imagen"
                   className="absolute top-2 right-2 p-1 rounded-full bg-black/60 text-white hover:bg-red-600 transition-colors"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4" aria-hidden="true" />
                 </button>
               </div>
             ) : (
@@ -278,8 +289,8 @@ export default function MenuPage() {
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full h-32 rounded-xl border-2 border-dashed border-slate-700 flex flex-col items-center justify-center gap-2 text-slate-500 hover:border-blue-600 hover:text-blue-400 transition-colors"
               >
-                <ImagePlus className="w-6 h-6" />
-                <span className="text-xs">Haz clic para subir una imagen</span>
+                <ImagePlus className="w-6 h-6" aria-hidden="true" />
+                <span className="text-xs">Haz Clic para Subir una Imagen</span>
                 <span className="text-xs text-slate-600">JPG, PNG, WebP — máx. 5MB</span>
               </button>
             )}

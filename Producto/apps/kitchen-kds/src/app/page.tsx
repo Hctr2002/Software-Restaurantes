@@ -2,8 +2,8 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@menu-bites/store";
-import { useKitchenOrders, updateOrderStatus, signOut, sendAlert } from "@menu-bites/auth";
-import { OrderTicket, cn, Button } from "@menu-bites/ui";
+import { supabase, useKitchenOrders, updateOrderStatus, signOut, sendAlert, getRestaurantTheme } from "@menu-bites/auth";
+import { OrderTicket, cn, Button, RestaurantThemeProvider } from "@menu-bites/ui";
 import { ChefHat, Bell, Settings, LogOut, AlertTriangle, X, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { MOCK_ORDERS, type MockOrder } from "../lib/mock-orders";
@@ -23,6 +23,7 @@ export default function KitchenKDSPage() {
   const [alertItem, setAlertItem] = useState("");
   const [sendingAlert, setSendingAlert] = useState(false);
   const [alertSent, setAlertSent] = useState(false);
+  const [theme, setTheme] = useState<any>(null);
   const router = useRouter();
 
   const orders = MOCK_MODE ? mockOrders : liveOrders;
@@ -39,6 +40,29 @@ export default function KitchenKDSPage() {
       window.location.href = loginUrl;
     }
   };
+
+  useEffect(() => {
+    if (!user?.restaurantId) return;
+    const restaurantId = user.restaurantId;
+
+    getRestaurantTheme(restaurantId).then(setTheme);
+
+    const channel = supabase
+      .channel(`kds-theme-${restaurantId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "restaurant_themes", filter: `restaurant_id=eq.${restaurantId}` },
+        async (payload) => {
+          if (payload.new.is_active) {
+            const updated = await getRestaurantTheme(restaurantId);
+            setTheme(updated);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.restaurantId]);
 
   useEffect(() => {
     if (orders.length > prevOrdersCount.current) {
@@ -94,11 +118,12 @@ export default function KitchenKDSPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white overflow-hidden flex flex-col">
+    <RestaurantThemeProvider theme={theme} isGlobal={true}>
+      <div className="min-h-screen bg-background text-foreground overflow-hidden flex flex-col">
       <header className="bg-black/40 backdrop-blur-xl border-b border-white/5 p-6 flex justify-between items-center">
         <div className="flex items-center space-x-4">
           <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
-            <ChefHat className="text-primary-foreground w-7 h-7" />
+            <ChefHat className="text-primary-foreground w-7 h-7" aria-hidden="true" />
           </div>
           <div>
             <h1 className="text-2xl font-black tracking-tighter uppercase italic">Kitchen <span className="text-primary">Monitor</span></h1>
@@ -124,12 +149,12 @@ export default function KitchenKDSPage() {
             disabled={MOCK_MODE}
             className="rounded-xl border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/10 gap-2"
           >
-            <AlertTriangle className="w-4 h-4" />
+            <AlertTriangle className="w-4 h-4" aria-hidden="true" />
             Alerta Stock
           </Button>
 
-          <Button variant="destructive" size="icon" onClick={handleSignOut} disabled={isSigningOut || MOCK_MODE} className="rounded-xl">
-            <LogOut className="w-5 h-5" />
+          <Button variant="destructive" size="icon" onClick={handleSignOut} aria-label="Cerrar sesión de cocina" disabled={isSigningOut || MOCK_MODE} className="rounded-xl">
+            <LogOut className="w-5 h-5" aria-hidden="true" />
           </Button>
         </div>
       </header>
@@ -137,17 +162,17 @@ export default function KitchenKDSPage() {
       <main className="flex-1 p-6 grid grid-cols-3 gap-6 overflow-hidden">
         <KDSColumn title="Nuevos Pedidos"  count={pendingOrders.length}   icon={<Bell className="w-4 h-4 text-slate-400" />}>
           {pendingOrders.map((order) => (
-            <OrderTicket key={order.id} id={order.id} tableNumber={order.table.number} status={order.status} createdAt={order.created_at} items={order.items} onStatusChange={(s) => handleStatusChange(order.id, s)} />
+            <OrderTicket key={order.id} id={order.id} tableNumber={order.table.number} status={order.status} createdAt={order.created_at} items={order.items} onStatusChange={(s) => handleStatusChange(order.id, s)} aria-label={`Pedido de mesa ${order.table.number}`} />
           ))}
         </KDSColumn>
         <KDSColumn title="En Preparación" count={preparingOrders.length} icon={<ChefHat className="w-4 h-4 text-primary" />} active>
           {preparingOrders.map((order) => (
-            <OrderTicket key={order.id} id={order.id} tableNumber={order.table.number} status={order.status} createdAt={order.created_at} items={order.items} onStatusChange={(s) => handleStatusChange(order.id, s)} />
+            <OrderTicket key={order.id} id={order.id} tableNumber={order.table.number} status={order.status} createdAt={order.created_at} items={order.items} onStatusChange={(s) => handleStatusChange(order.id, s)} aria-label={`Pedido en preparación de mesa ${order.table.number}`} />
           ))}
         </KDSColumn>
         <KDSColumn title="Por Entregar"   count={readyOrders.length}     icon={<Bell className="w-4 h-4 text-emerald-500" />}>
           {readyOrders.map((order) => (
-            <OrderTicket key={order.id} id={order.id} tableNumber={order.table.number} status={order.status} createdAt={order.created_at} items={order.items} onStatusChange={(s) => handleStatusChange(order.id, s)} />
+            <OrderTicket key={order.id} id={order.id} tableNumber={order.table.number} status={order.status} createdAt={order.created_at} items={order.items} onStatusChange={(s) => handleStatusChange(order.id, s)} aria-label={`Pedido listo para mesa ${order.table.number}`} />
           ))}
         </KDSColumn>
       </main>
@@ -158,29 +183,31 @@ export default function KitchenKDSPage() {
           <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold text-slate-100 flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-yellow-400" /> Alerta de Quiebre de Stock
+                <AlertTriangle className="w-5 h-5 text-yellow-400" aria-hidden="true" /> Alerta de Quiebre de Stock
               </h2>
-              <button onClick={() => setAlertModal(false)} className="p-1 rounded text-slate-400 hover:text-white">
-                <X className="w-4 h-4" />
+              <button onClick={() => setAlertModal(false)} aria-label="Cerrar modal" className="p-1 rounded text-slate-400 hover:text-white">
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Plato / Ingrediente afectado</label>
+                <label htmlFor="alert_item" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Plato / Ingrediente afectado</label>
                 <input
+                  id="alert_item"
                   type="text"
-                  placeholder="Ej. Tomate, Lomo a la plancha..."
+                  placeholder="Ej. Tomate, Lomo a la plancha…"
                   value={alertItem}
                   onChange={(e) => setAlertItem(e.target.value)}
                   className="mt-1 w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mensaje *</label>
+                <label htmlFor="alert_msg" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mensaje *</label>
                 <textarea
+                  id="alert_msg"
                   rows={3}
-                  placeholder="Describe el problema de stock..."
+                  placeholder="Describe el problema de stock…"
                   value={alertMsg}
                   onChange={(e) => setAlertMsg(e.target.value)}
                   className="mt-1 w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 resize-none"
@@ -201,7 +228,8 @@ export default function KitchenKDSPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </RestaurantThemeProvider>
   );
 }
 

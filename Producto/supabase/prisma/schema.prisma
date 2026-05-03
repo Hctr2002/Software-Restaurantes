@@ -62,6 +62,7 @@ model Restaurant {
   inventories         Inventory[]
   orderItems          OrderItem[]
   orderItemExtras     OrderItemExtra[]
+  themes              Theme[]
 
   @@map("restaurants")
 }
@@ -267,4 +268,29 @@ model Plan {
   restaurants Restaurant[]
 
   @@map("plans")
+}
+
+model Theme {
+  id              String   @id @default(uuid())
+  restaurantId    String   @map("restaurant_id")
+  name            String
+  paletteName     String?  @map("palette_name")
+  isCustom        Boolean  @default(false) @map("is_custom")
+  isActive        Boolean  @default(false) @map("is_active")
+  primaryColor    String   @map("primary_color")
+  secondaryColor  String   @map("secondary_color")
+  backgroundColor String   @map("background_color")
+  accentColor     String   @map("accent_color")
+  textColor       String   @map("text_color")
+  cardBackground  String   @map("card_background")
+  fontTitle       String   @default("Outfit") @map("font_title")
+  fontBody        String   @default("Inter") @map("font_body")
+  logoUrl         String?  @map("logo_url")
+  
+  restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@map("restaurant_themes")
+  @@index([restaurantId])
 }
