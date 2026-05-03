@@ -13,6 +13,7 @@ export function createSessionClient(req: NextRequest) {
         },
         setAll() {},
       },
+      cookieOptions: { name: 'sb-local-session' },
     }
   );
 }
@@ -27,6 +28,7 @@ export function createServiceClient() {
 
 export async function requireAdmin(req: NextRequest) {
   const sessionClient = createSessionClient(req);
+  // Using getUser() instead of getSession() for better security and token refresh.
   const { data: { user }, error } = await sessionClient.auth.getUser();
 
   if (error || !user) {

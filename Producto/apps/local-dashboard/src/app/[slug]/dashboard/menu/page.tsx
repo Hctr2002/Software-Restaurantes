@@ -2,11 +2,12 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import LocalShell from "../_components/LocalShell";
-import { Table, TableRow, TableCell, Modal, Badge } from "@menu-bites/ui";
+import { Modal, Badge } from "@menu-bites/ui";
 import { formatPrice, MenuItem, Category } from "../_components/localShared";
 import { Button, Input } from "@menu-bites/ui";
 import { Plus, Pencil, Trash2, Loader2, ImagePlus, X, Power } from "lucide-react";
 import { supabase, getSession, getAppMetadata } from "@menu-bites/auth";
+import { motion, AnimatePresence } from "framer-motion";
 
 const EMPTY_FORM = { name: "", description: "", price: "", is_active: true, categoryId: "" };
 
@@ -155,6 +156,7 @@ export default function MenuPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!window.confirm("¿Eliminar este item del menú?")) return;
     setDeleteId(id);
     try {
       const res = await fetch(`/api/local/menu/${id}`, { method: "DELETE" });
@@ -173,76 +175,91 @@ export default function MenuPage() {
   return (
     <LocalShell title="Gestión" subtitle="Menú">
       {error && (
-        <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/10 text-sm text-destructive font-bold">
+        <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/10 text-sm text-destructive font-bold mb-6">
           {error}
         </div>
       )}
 
-      <div className="flex justify-end mb-4">
-        <Button onClick={openCreate} className="bg-blue-600 hover:bg-blue-700 text-white">
+      <div className="flex justify-end mb-8">
+        <Button onClick={openCreate} className="bg-primary hover:bg-primary/80 text-primary-foreground font-bold h-11 px-6 rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-95">
           <Plus className="w-4 h-4 mr-2" /> Nuevo Item
         </Button>
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Cargando menú...</p>
+        <div className="py-20 text-center">
+          <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm text-foreground/40 font-bold uppercase tracking-widest">Cocinando tu menú...</p>
+        </div>
       ) : (
-        <Table headers={["", "Nombre", "Categoría", "Precio", "Estado", "Acciones"]}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {items.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                No hay items en el menú. Crea el primero.
-              </TableCell>
-            </TableRow>
+            <div className="col-span-full py-20 text-center glass rounded-[2.5rem] border-white/5">
+              <p className="text-foreground/40 font-bold uppercase tracking-widest text-xs">No hay platos registrados todavía.</p>
+            </div>
           )}
           {items.map((item) => (
-            <TableRow key={item.id}>
-              <TableCell>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              key={item.id}
+              className={`glass rounded-[2rem] border-white/5 overflow-hidden flex flex-col group transition-all duration-300 ${!item.is_active && 'opacity-60 grayscale-[0.5]'}`}
+            >
+              {/* Image Header */}
+              <div className="relative h-48 overflow-hidden">
                 {item.image_url ? (
-                  <img src={item.image_url} alt={item.name} className="w-10 h-10 rounded-lg object-cover" />
+                  <img src={item.image_url} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 ) : (
-                  <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center">
-                    <ImagePlus className="w-4 h-4 text-slate-600" />
+                  <div className="w-full h-full bg-white/5 flex items-center justify-center">
+                    <ImagePlus className="w-8 h-8 text-foreground/10" />
                   </div>
                 )}
-              </TableCell>
-              <TableCell>
-                <p className="font-medium text-slate-200">{item.name}</p>
-                {item.description && <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>}
-              </TableCell>
-              <TableCell className="text-slate-400 text-xs">
-                {item.categories?.name ?? <span className="text-slate-600">—</span>}
-              </TableCell>
-              <TableCell className="font-mono">{formatPrice(item.price)}</TableCell>
-              <TableCell>
-                <Badge variant={item.is_active ? "success" : "neutral"}>
-                  {item.is_active ? "Activo" : "Inactivo"}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2">
+                <div className="absolute top-4 left-4">
+                  <Badge variant={item.is_active ? "success" : "neutral"} className="px-3 py-1 text-[9px] font-black uppercase tracking-widest bg-background/80 backdrop-blur-md border-white/10">
+                    {item.is_active ? "En Venta" : "Pausado"}
+                  </Badge>
+                </div>
+                <div className="absolute top-4 right-4 flex gap-2">
                   <button
                     onClick={() => handleToggleActive(item)}
-                    title={item.is_active ? "Deshabilitar plato" : "Habilitar plato"}
-                    className={`p-1.5 rounded transition-colors ${item.is_active ? "text-green-500 hover:bg-red-900/20 hover:text-red-400" : "text-slate-600 hover:bg-green-900/20 hover:text-green-400"}`}
+                    className={`h-9 w-9 rounded-xl flex items-center justify-center transition-all ${item.is_active ? "bg-primary/20 text-primary hover:bg-primary hover:text-white" : "bg-white/10 text-white hover:bg-primary"}`}
                   >
                     <Power className="w-4 h-4" />
                   </button>
-                  <button onClick={() => openEdit(item)} className="p-1.5 rounded hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                  <button
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 flex-1 flex flex-col">
+                <div className="flex-1 space-y-2">
+                  <div className="flex justify-between items-start gap-2">
+                    <h3 className="font-black text-foreground text-lg tracking-tight leading-tight uppercase italic">{item.name}</h3>
+                    <span className="font-black text-primary text-base shrink-0">{formatPrice(item.price)}</span>
+                  </div>
+                  <p className="text-[10px] font-bold text-primary/60 uppercase tracking-widest">{item.categories?.name || 'General'}</p>
+                  {item.description && <p className="text-xs text-foreground/40 font-medium line-clamp-2 leading-relaxed">{item.description}</p>}
+                </div>
+
+                <div className="pt-6 mt-auto border-t border-white/5 flex gap-2">
+                  <Button 
+                    className="flex-1 bg-white/5 hover:bg-primary/10 hover:text-primary border-white/5 rounded-xl h-10 text-[10px] font-black uppercase tracking-widest transition-all"
+                    onClick={() => openEdit(item)}
+                  >
+                    <Pencil className="w-3.5 h-3.5 mr-2" /> Editar
+                  </Button>
+                  <Button 
+                    variant="ghost"
+                    className="aspect-square p-0 bg-white/5 hover:bg-destructive/10 hover:text-destructive border-white/5 rounded-xl h-10 w-10 transition-all"
                     onClick={() => handleDelete(item.id)}
                     disabled={deleteId === item.id}
-                    className="p-1.5 rounded hover:bg-red-900/30 text-slate-400 hover:text-red-400 transition-colors"
                   >
                     {deleteId === item.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                  </button>
+                  </Button>
                 </div>
-              </TableCell>
-            </TableRow>
+              </div>
+            </motion.div>
           ))}
-        </Table>
+        </div>
       )}
 
       <Modal
@@ -251,36 +268,44 @@ export default function MenuPage() {
         title={editingItem ? "Editar Item" : "Nuevo Item"}
         footer={
           <>
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-700 text-white">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Guardar"}
+            <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="text-foreground/50 hover:bg-white/5 hover:text-foreground rounded-xl font-bold uppercase tracking-widest text-[10px]">
+              Cancelar
+            </Button>
+            <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-primary/80 text-primary-foreground rounded-xl font-bold uppercase tracking-widest text-[10px] px-6 shadow-lg shadow-primary/20 transition-all">
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Guardar Plato"}
             </Button>
           </>
         }
       >
-        <div className="space-y-5">
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Imagen</label>
+        <div className="space-y-6 py-4">
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] px-1">Imagen del Plato</label>
             {imagePreview ? (
-              <div className="relative w-full h-40 rounded-xl overflow-hidden border border-slate-700">
+              <div className="relative w-full h-48 rounded-[2rem] overflow-hidden border border-white/10 group">
                 <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                <button
-                  type="button"
-                  onClick={clearImage}
-                  className="absolute top-2 right-2 p-1 rounded-full bg-black/60 text-white hover:bg-red-600 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <button
+                    type="button"
+                    onClick={clearImage}
+                    className="p-3 rounded-full bg-destructive text-white hover:scale-110 transition-transform"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             ) : (
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full h-32 rounded-xl border-2 border-dashed border-slate-700 flex flex-col items-center justify-center gap-2 text-slate-500 hover:border-blue-600 hover:text-blue-400 transition-colors"
+                className="w-full h-40 rounded-[2rem] border-2 border-dashed border-white/10 bg-white/5 flex flex-col items-center justify-center gap-3 text-foreground/20 hover:border-primary/50 hover:text-primary transition-all group"
               >
-                <ImagePlus className="w-6 h-6" />
-                <span className="text-xs">Haz clic para subir una imagen</span>
-                <span className="text-xs text-slate-600">JPG, PNG, WebP — máx. 5MB</span>
+                <div className="p-4 rounded-2xl bg-white/5 group-hover:scale-110 transition-transform">
+                  <ImagePlus className="w-6 h-6" />
+                </div>
+                <div className="text-center">
+                  <span className="block text-[10px] font-black uppercase tracking-widest">Subir Imagen</span>
+                  <span className="text-[9px] font-bold text-foreground/10 uppercase tracking-widest">JPG, PNG, WebP — máx. 5MB</span>
+                </div>
               </button>
             )}
             <input
@@ -292,40 +317,45 @@ export default function MenuPage() {
             />
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nombre *</label>
-            <Input placeholder="Ej. Lomo a la plancha" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] px-1">Nombre del Plato *</label>
+            <Input placeholder="Ej. Lomo a la plancha" className="bg-white/5 border-white/10 h-12 rounded-2xl focus-visible:ring-primary text-foreground font-medium" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Descripción</label>
-            <Input placeholder="Descripción opcional" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] px-1">Descripción Corta</label>
+            <Input placeholder="Descripción para el cliente" className="bg-white/5 border-white/10 h-12 rounded-2xl focus-visible:ring-primary text-foreground font-medium" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
           </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Precio (CLP) *</label>
-            <Input type="number" min="0" step="1" placeholder="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] px-1">Precio *</label>
+              <Input type="number" min="0" placeholder="0" className="bg-white/5 border-white/10 h-12 rounded-2xl focus-visible:ring-primary text-foreground font-black" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+            </div>
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] px-1">Categoría *</label>
+              <select
+                value={form.categoryId}
+                onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+                className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-foreground font-bold focus:outline-none focus:ring-2 focus:ring-primary appearance-none cursor-pointer"
+              >
+                <option value="" className="bg-background">Categoría...</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id} className="bg-background">{cat.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Categoría *</label>
-            <select
-              value={form.categoryId}
-              onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-              className="w-full px-3 py-2 rounded-md bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
-            >
-              <option value="">Selecciona una categoría</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex items-center gap-3">
+
+          <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5">
             <input
               type="checkbox"
               id="is_active"
               checked={form.is_active}
               onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-              className="w-4 h-4 rounded accent-blue-600"
+              className="w-5 h-5 rounded-lg accent-primary border-white/10 bg-white/5 cursor-pointer"
             />
-            <label htmlFor="is_active" className="text-sm text-slate-300">Item activo (visible en el menú)</label>
+            <label htmlFor="is_active" className="text-[10px] font-black text-foreground uppercase tracking-widest cursor-pointer select-none">Item activo (visible en el menú)</label>
           </div>
         </div>
       </Modal>

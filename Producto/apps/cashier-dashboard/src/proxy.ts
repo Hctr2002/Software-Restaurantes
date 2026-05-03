@@ -5,6 +5,8 @@ import type { NextRequest } from 'next/server';
 export async function proxy(req: NextRequest) {
   let response = NextResponse.next({ request: { headers: req.headers } });
 
+  if (req.nextUrl.pathname.startsWith('/auth/callback')) return response;
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -19,14 +21,17 @@ export async function proxy(req: NextRequest) {
           );
         },
       },
+      cookieOptions: { name: 'sb-cashier-session' },
     }
   );
 
   const { data: { session } } = await supabase.auth.getSession();
   const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
-  const role    = session?.user?.app_metadata?.role;
+  const rawRole = session?.user?.app_metadata?.role;
+  const role = Array.isArray(rawRole) ? rawRole[0] : rawRole;
+  const isCashier = String(role).toUpperCase() === 'CAJERO';
 
-  if (!session || role !== 'CAJERO') {
+  if (!session || !isCashier) {
     return NextResponse.redirect(new URL(authUrl, req.url));
   }
 

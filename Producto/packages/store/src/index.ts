@@ -8,6 +8,7 @@ export interface UserIdentity {
   role: 'SUPER_ADMIN' | 'ADMIN' | 'GARZON' | 'COCINA' | 'CAJERO' | 'CLIENTE';
   restaurantId?: string;
   pushToken?: string;
+  user_metadata?: any;
 }
 
 interface AuthState {

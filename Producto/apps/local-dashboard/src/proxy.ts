@@ -5,6 +5,8 @@ import type { NextRequest } from 'next/server';
 export async function proxy(req: NextRequest) {
   let response = NextResponse.next({ request: { headers: req.headers } });
 
+  if (req.nextUrl.pathname.startsWith('/auth/callback')) return response;
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -21,10 +23,13 @@ export async function proxy(req: NextRequest) {
           );
         },
       },
+      cookieOptions: { name: 'sb-local-session' },
     }
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  // Using getUser() instead of getSession() for better security and token refresh.
+  const { data: { user } } = await supabase.auth.getUser();
+  const sessionExists = !!user;
 
   const pathname = req.nextUrl.pathname;
   const authUrl  = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
@@ -38,22 +43,23 @@ export async function proxy(req: NextRequest) {
   const slugMatch = pathname.match(/^\/([^/]+)\/dashboard/);
   const urlSlug   = slugMatch?.[1];
 
-  const role         = session?.user?.app_metadata?.role;
-  const restaurantId = session?.user?.app_metadata?.restaurant_id;
-  const isAdmin      = role === 'ADMIN';
+  const rawRole = user?.app_metadata?.role;
+  const role = Array.isArray(rawRole) ? rawRole[0] : rawRole;
+  const restaurantId = user?.app_metadata?.restaurant_id;
+  const isAdmin = String(role).toUpperCase() === 'ADMIN';
 
   // Sin sesión y ruta protegida → central login
-  if (!session && !isPublicRoute) {
+  if (!sessionExists && !isPublicRoute) {
     return NextResponse.redirect(new URL(authUrl, req.url));
   }
 
   // Sesión de otro rol en ruta protegida → central login
-  if (session && !isPublicRoute && !isAdmin) {
+  if (sessionExists && !isPublicRoute && !isAdmin) {
     return NextResponse.redirect(new URL(authUrl, req.url));
   }
 
   // Sesión ADMIN en login → obtener slug y redirigir
-  if (session && isAdmin && pathname === '/') {
+  if (sessionExists && isAdmin && pathname === '/') {
     const { data } = await supabase
       .from('restaurants')
       .select('slug')
@@ -70,7 +76,7 @@ export async function proxy(req: NextRequest) {
   }
 
   // ADMIN en ruta con slug → verificar que el slug coincida con su restaurante
-  if (session && isAdmin && urlSlug) {
+  if (sessionExists && isAdmin && urlSlug) {
     const { data } = await supabase
       .from('restaurants')
       .select('slug')

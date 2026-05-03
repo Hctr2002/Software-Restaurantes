@@ -25,6 +25,24 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@menu-bites/ui": [
+        "../../packages/ui/src/index.ts"
+      ],
+      "@menu-bites/ui/*": [
+        "../../packages/ui/src/*"
+      ],
+      "@menu-bites/auth": [
+        "../../packages/auth/src/index.ts"
+      ],
+      "@menu-bites/auth/*": [
+        "../../packages/auth/src/*"
+      ],
+      "@menu-bites/store": [
+        "../../packages/store/src/index.ts"
+      ],
+      "@menu-bites/store/*": [
+        "../../packages/store/src/*"
       ]
     }
   },

@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import LocalShell from "../../_components/LocalShell";
 import { Button, Input } from "@menu-bites/ui";
-import { Save, User, KeyRound } from "lucide-react";
+import { Save, User, KeyRound, Loader2, ShieldCheck } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function ProfileSettingsPage() {
   const [name, setName] = useState("");
@@ -46,54 +47,66 @@ export default function ProfileSettingsPage() {
 
   return (
     <LocalShell title="Cuenta" subtitle="Configuración de Perfil">
-      <div className="max-w-2xl">
+      <div className="max-w-2xl mx-auto lg:mx-0">
         {message && (
-          <div className={`p-4 rounded-md border text-sm font-medium mb-6 ${
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`p-5 rounded-[1.5rem] border text-[10px] font-black uppercase tracking-widest mb-8 ${
             message.type === "error"
-              ? "border-red-500/30 bg-red-500/10 text-red-500"
-              : "border-green-500/30 bg-green-500/10 text-green-500"
+              ? "border-destructive/30 bg-destructive/10 text-destructive"
+              : "border-primary/30 bg-primary/10 text-primary"
           }`}>
             {message.text}
-          </div>
+          </motion.div>
         )}
 
-        <div className="bg-slate-900/30 border border-slate-800 rounded-lg overflow-hidden">
-          <div className="p-6 border-b border-slate-800">
-            <h2 className="text-lg font-semibold text-slate-200">Información Personal</h2>
-            <p className="text-sm text-slate-500 mt-1">Actualiza tus datos personales y asegura tu cuenta.</p>
+        <div className="glass rounded-[2.5rem] border-white/5 overflow-hidden">
+          <div className="p-8 border-b border-white/5 flex items-center gap-4 bg-white/5">
+            <div className="p-3 rounded-2xl bg-primary/10 text-primary">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-foreground uppercase italic tracking-tight leading-none">Seguridad del Usuario</h2>
+              <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest mt-1">Gestiona tu identidad y acceso al panel.</p>
+            </div>
           </div>
 
-          <form onSubmit={handleSave} className="p-6 space-y-6">
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                <User className="w-3.5 h-3.5" /> Nombre a Mostrar
+          <form onSubmit={handleSave} className="p-8 space-y-8">
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] px-1 flex items-center gap-2">
+                <User className="w-3.5 h-3.5 text-primary" /> Nombre a Mostrar
               </label>
               <Input
                 placeholder="Ej. Juan (Admin Local)"
-                className="bg-slate-950 border-slate-800"
+                className="bg-white/5 border-white/10 h-12 rounded-2xl focus-visible:ring-primary text-foreground font-medium"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
-              <p className="text-[11px] text-slate-500">Tu nombre a mostrar en el panel.</p>
+              <p className="text-[9px] font-bold text-foreground/20 uppercase tracking-widest px-1">Tu nombre a mostrar en el panel administrativo.</p>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                <KeyRound className="w-3.5 h-3.5" /> Nueva Contraseña
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] px-1 flex items-center gap-2">
+                <KeyRound className="w-3.5 h-3.5 text-primary" /> Nueva Contraseña
               </label>
               <Input
                 type="password"
                 placeholder="••••••••"
-                className="bg-slate-950 border-slate-800"
+                className="bg-white/5 border-white/10 h-12 rounded-2xl focus-visible:ring-primary text-foreground font-medium"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <p className="text-[11px] text-slate-500">Déjalo en blanco si no deseas cambiar tu contraseña.</p>
+              <p className="text-[9px] font-bold text-foreground/20 uppercase tracking-widest px-1">Déjalo en blanco si no deseas cambiar tu contraseña actual.</p>
             </div>
 
             <div className="pt-4 flex justify-end">
-              <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white min-w-[120px]">
-                {loading ? "Guardando..." : <><Save className="w-4 h-4 mr-2" /> Guardar Cambios</>}
+              <Button 
+                type="submit" 
+                disabled={loading} 
+                className="bg-primary hover:bg-primary/80 text-primary-foreground font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-95"
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4 mr-2" /> Guardar Cambios</>}
               </Button>
             </div>
           </form>

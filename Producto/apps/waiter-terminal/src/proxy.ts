@@ -5,6 +5,8 @@ import type { NextRequest } from 'next/server';
 export async function proxy(req: NextRequest) {
   let response = NextResponse.next({ request: { headers: req.headers } });
 
+  if (req.nextUrl.pathname.startsWith('/auth/callback')) return response;
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -19,12 +21,15 @@ export async function proxy(req: NextRequest) {
           );
         },
       },
+      cookieOptions: { name: 'sb-waiter-session' },
     }
   );
 
   const { data: { session } } = await supabase.auth.getSession();
   const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
-  const role = session?.user?.app_metadata?.role;
+  const rawRole = session?.user?.app_metadata?.role;
+  const role = Array.isArray(rawRole) ? rawRole[0] : rawRole;
+  const isWaiter = String(role).toUpperCase() === 'GARZON';
 
   // Sin sesión → central login
   if (!session) {
@@ -32,7 +37,7 @@ export async function proxy(req: NextRequest) {
   }
 
   // Rol incorrecto → central login
-  if (role !== 'GARZON') {
+  if (!isWaiter) {
     return NextResponse.redirect(new URL(authUrl, req.url));
   }
 

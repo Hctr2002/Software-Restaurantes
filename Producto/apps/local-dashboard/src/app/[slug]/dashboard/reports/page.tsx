@@ -5,8 +5,9 @@ import LocalShell from "../_components/LocalShell";
 import { Table, TableRow, TableCell } from "@menu-bites/ui";
 import { formatPrice } from "../_components/localShared";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@menu-bites/ui";
-import { TrendingUp, UtensilsCrossed, TableProperties, Award, Download, Calendar } from "lucide-react";
+import { TrendingUp, UtensilsCrossed, TableProperties, Award, Download, Calendar, Filter } from "lucide-react";
 import { Button } from "@menu-bites/ui";
+import { motion } from "framer-motion";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type DayReport    = { date: string; orders: number; revenue: number; avg: number };
@@ -16,11 +17,11 @@ type GarzonReport = { email: string; orders: number; revenue: number };
 
 // ─── Period presets ───────────────────────────────────────────────────────────
 const PRESETS = [
-  { label: "7 días",   days: 7 },
-  { label: "14 días",  days: 14 },
-  { label: "30 días",  days: 30 },
-  { label: "90 días",  days: 90 },
-  { label: "Personalizado", days: 0 },
+  { label: "7D",   days: 7 },
+  { label: "14D",  days: 14 },
+  { label: "30D",  days: 30 },
+  { label: "90D",  days: 90 },
+  { label: "CUSTOM", days: 0 },
 ] as const;
 
 function todayISO() {
@@ -44,7 +45,7 @@ function medalColor(i: number) {
   if (i === 0) return "text-yellow-400";
   if (i === 1) return "text-slate-300";
   if (i === 2) return "text-amber-600";
-  return "text-slate-600";
+  return "text-foreground/40";
 }
 
 function orderItemTotal(it: any): number {
@@ -97,7 +98,7 @@ function buildSpreadsheetML(
   <Styles>
     <Style ss:ID="header">
       <Font ss:Bold="1"/>
-      <Interior ss:Color="#1E3A5F" ss:Pattern="Solid"/>
+      <Interior ss:Color="#111111" ss:Pattern="Solid"/>
       <Font ss:Color="#FFFFFF" ss:Bold="1"/>
     </Style>
   </Styles>`;
@@ -171,7 +172,6 @@ export default function ReportsPage() {
 
       const orders: any[] = (json.data || []).filter((o: any) => o.status === "DELIVERED");
 
-      // Ventas diarias — construir mapa dinámico según rango
       const dayMap: Record<string, { orders: number; revenue: number }> = {};
       const cursor = new Date(from + "T12:00:00");
       const toDate = new Date(to   + "T12:00:00");
@@ -195,7 +195,6 @@ export default function ReportsPage() {
         }))
       );
 
-      // Top items
       const itemMap: Record<string, { count: number; revenue: number }> = {};
       orders.forEach((order: any) => {
         (order.order_items ?? []).forEach((it: any) => {
@@ -213,7 +212,6 @@ export default function ReportsPage() {
           .slice(0, 10)
       );
 
-      // Ingresos por mesa
       const tblMap: Record<number, { orders: number; revenue: number }> = {};
       orders.forEach((order: any) => {
         const num = order.tables?.number;
@@ -229,7 +227,6 @@ export default function ReportsPage() {
           .sort((a, b) => b.revenue - a.revenue)
       );
 
-      // Ranking garzones
       const garzonMap: Record<string, { orders: number; revenue: number }> = {};
       orders.forEach((order: any) => {
         const email = order.users?.email;
@@ -251,7 +248,6 @@ export default function ReportsPage() {
     }
   }, []);
 
-  // Trigger on preset/custom range apply
   useEffect(() => {
     if (!isCustom) fetchReports(dateFrom, dateTo, preset);
   }, [preset, isCustom]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -295,28 +291,28 @@ export default function ReportsPage() {
     : `Últimos ${preset} días`;
 
   return (
-    <LocalShell title="Reportes" subtitle="Análisis de Ventas">
+    <LocalShell title="Analítica" subtitle="Reportes de Venta">
       {error && (
-        <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/10 text-sm text-destructive font-bold">
+        <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/10 text-sm text-destructive font-bold mb-6">
           {error}
         </div>
       )}
 
       {/* ── Toolbar ── */}
-      <div className="flex flex-wrap items-end gap-3 mb-6 p-4 rounded-xl bg-slate-900 border border-slate-800">
-        <div className="space-y-1.5">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5" /> Período
+      <div className="glass p-6 rounded-[2.5rem] border-white/5 mb-8 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6">
+        <div className="flex flex-col gap-3">
+          <p className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] px-1 flex items-center gap-2">
+            <Filter className="w-3 h-3" /> Filtrar Período
           </p>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {PRESETS.map((p) => (
               <button
                 key={p.days}
                 onClick={() => applyPreset(p.days)}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                   (p.days === 0 ? isCustom : !isCustom && preset === p.days)
-                    ? "bg-blue-600 text-white"
-                    : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                    : "bg-white/5 text-foreground/40 hover:bg-white/10 hover:text-foreground"
                 }`}
               >
                 {p.label}
@@ -326,79 +322,93 @@ export default function ReportsPage() {
         </div>
 
         {isCustom && (
-          <div className="flex items-end gap-2 flex-wrap">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-wrap items-end gap-3 glass p-4 rounded-2xl border-white/5">
             <div className="space-y-1">
-              <label className="text-xs text-slate-500">Desde</label>
+              <label className="text-[9px] font-black text-foreground/30 uppercase tracking-widest px-1">Desde</label>
               <input
                 type="date"
                 value={dateFrom}
                 max={dateTo || todayISO()}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className="px-3 py-1.5 rounded-md bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-foreground text-xs font-bold focus:ring-1 focus:ring-primary outline-none"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs text-slate-500">Hasta</label>
+              <label className="text-[9px] font-black text-foreground/30 uppercase tracking-widest px-1">Hasta</label>
               <input
                 type="date"
                 value={dateTo}
                 min={dateFrom}
                 max={todayISO()}
                 onChange={(e) => setDateTo(e.target.value)}
-                className="px-3 py-1.5 rounded-md bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-foreground text-xs font-bold focus:ring-1 focus:ring-primary outline-none"
               />
             </div>
             <Button
               onClick={applyCustomRange}
               disabled={!dateFrom || !dateTo || dateFrom > dateTo}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-[34px]"
+              className="bg-primary hover:bg-primary/80 text-primary-foreground h-10 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest"
             >
               Aplicar
             </Button>
-          </div>
+          </motion.div>
         )}
 
-        <div className="ml-auto">
+        <div className="flex justify-end">
           <Button
             onClick={handleExport}
             disabled={loading}
-            variant="outline"
-            className="flex items-center gap-2 text-xs border-slate-700 text-slate-300 hover:text-white hover:border-slate-500"
+            variant="ghost"
+            className="h-11 px-6 rounded-2xl bg-white/5 border border-white/5 hover:bg-primary/10 hover:text-primary transition-all group font-bold uppercase tracking-widest text-[10px]"
           >
-            <Download className="w-3.5 h-3.5" />
-            Exportar XML
+            <Download className="w-4 h-4 mr-2 group-hover:-translate-y-0.5 transition-transform" />
+            Descargar Excel
           </Button>
         </div>
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Cargando reportes...</p>
+        <div className="py-20 text-center">
+          <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm text-foreground/40 font-bold uppercase tracking-widest">Calculando métricas...</p>
+        </div>
       ) : (
-        <div className="space-y-8">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
 
           {/* Ventas por día */}
-          <Card className="border-white/5 bg-white/5 backdrop-blur-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" /> Ventas por día
-              </CardTitle>
-              <CardDescription>{periodDescription} — pedidos entregados</CardDescription>
+          <Card className="glass rounded-[2.5rem] border-white/5 overflow-hidden">
+            <CardHeader className="p-8 pb-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+                <div>
+                   <CardTitle className="text-lg font-black text-foreground uppercase italic tracking-tight">Rendimiento Diario</CardTitle>
+                   <CardDescription className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">{periodDescription}</CardDescription>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
-              <Table headers={["Fecha", "Pedidos", "Ingresos", "Ticket Promedio"]}>
+            <CardContent className="p-0">
+              <Table headers={["Fecha", "Pedidos", "Ingresos", "Avg"]}>
                 {dailyReports.every((r) => r.orders === 0) && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-6">Sin ventas en este período.</TableCell>
+                    <TableCell colSpan={4} className="text-center text-foreground/40 py-12 font-bold uppercase tracking-widest text-xs">Sin ventas en este período.</TableCell>
                   </TableRow>
                 )}
                 {dailyReports.map((row) => (
                   <TableRow key={row.date}>
-                    <TableCell className={`font-medium ${row.orders === 0 ? "text-slate-600" : "text-slate-200"}`}>
+                    <TableCell className={`font-black text-[11px] uppercase tracking-tight italic ${row.orders === 0 ? "text-foreground/20" : "text-foreground"}`}>
                       {formatShortDate(row.date)}
                     </TableCell>
-                    <TableCell className="text-slate-400">{row.orders || "—"}</TableCell>
-                    <TableCell className="font-mono text-slate-300">{row.orders ? formatPrice(row.revenue) : "—"}</TableCell>
-                    <TableCell className="font-mono text-slate-400">{row.orders ? formatPrice(row.avg) : "—"}</TableCell>
+                    <TableCell className="text-foreground/40 font-bold text-xs">
+                      <span style={{ fontFamily: 'var(--font-accent)' }}>{row.orders || "—"}</span>
+                    </TableCell>
+                    <TableCell className={`font-black text-sm italic ${row.orders > 0 ? 'text-primary' : 'text-foreground/20'}`}>
+                      <span style={{ fontFamily: 'var(--font-accent)' }}>{row.orders ? formatPrice(row.revenue) : "—"}</span>
+                    </TableCell>
+                    <TableCell className="font-bold text-foreground/30 text-[11px]">
+                      <span style={{ fontFamily: 'var(--font-accent)' }}>{row.orders ? formatPrice(row.avg) : "—"}</span>
+                    </TableCell>
                   </TableRow>
                 ))}
               </Table>
@@ -406,33 +416,41 @@ export default function ReportsPage() {
           </Card>
 
           {/* Ranking garzones */}
-          <Card className="border-white/5 bg-white/5 backdrop-blur-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="w-5 h-5" /> Ranking de garzones
-              </CardTitle>
-              <CardDescription>{periodDescription} — ordenado por ingresos generados</CardDescription>
+          <Card className="glass rounded-[2.5rem] border-white/5 overflow-hidden">
+            <CardHeader className="p-8 pb-4">
+               <div className="flex items-center gap-3 mb-2">
+                <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-500">
+                  <Award className="w-5 h-5" />
+                </div>
+                <div>
+                   <CardTitle className="text-lg font-black text-foreground uppercase italic tracking-tight">Ranking de Equipo</CardTitle>
+                   <CardDescription className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">Top rendimiento por garzón</CardDescription>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
-              <Table headers={["#", "Garzón", "Pedidos atendidos", "Ingresos generados"]}>
+            <CardContent className="p-0">
+              <Table headers={["#", "Garzón", "Pedidos", "Ingresos"]}>
                 {garzonReports.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
-                      Sin datos. Los pedidos deben tener un garzón asignado.
+                    <TableCell colSpan={4} className="text-center text-foreground/40 py-12 font-bold uppercase tracking-widest text-xs">
+                      Sin datos registrados.
                     </TableCell>
                   </TableRow>
                 )}
                 {garzonReports.map((row, i) => (
                   <TableRow key={row.email}>
                     <TableCell>
-                      <span className={`text-sm font-black ${medalColor(i)}`}>#{i + 1}</span>
+                      <span className={`text-sm font-black italic ${medalColor(i)}`}>#{i + 1}</span>
                     </TableCell>
-                    <TableCell className="font-medium text-slate-200">
+                    <TableCell className="font-black text-foreground text-xs uppercase italic tracking-tight">
                       {row.email.split("@")[0]}
-                      <span className="text-xs text-slate-500 ml-1">@{row.email.split("@")[1]}</span>
                     </TableCell>
-                    <TableCell className="text-slate-400">{row.orders}</TableCell>
-                    <TableCell className="font-mono text-slate-300">{formatPrice(row.revenue)}</TableCell>
+                    <TableCell className="text-foreground/40 font-bold text-xs">
+                      <span style={{ fontFamily: 'var(--font-accent)' }}>{row.orders}</span>
+                    </TableCell>
+                    <TableCell className="font-black text-emerald-500 text-sm italic">
+                      <span style={{ fontFamily: 'var(--font-accent)' }}>{formatPrice(row.revenue)}</span>
+                    </TableCell>
                   </TableRow>
                 ))}
               </Table>
@@ -440,30 +458,35 @@ export default function ReportsPage() {
           </Card>
 
           {/* Top items */}
-          <Card className="border-white/5 bg-white/5 backdrop-blur-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <UtensilsCrossed className="w-5 h-5" /> Top 10 items más vendidos
-              </CardTitle>
-              <CardDescription>{periodDescription}</CardDescription>
+          <Card className="glass rounded-[2.5rem] border-white/5 overflow-hidden">
+            <CardHeader className="p-8 pb-4">
+               <div className="flex items-center gap-3 mb-2">
+                <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-500">
+                  <UtensilsCrossed className="w-5 h-5" />
+                </div>
+                <div>
+                   <CardTitle className="text-lg font-black text-foreground uppercase italic tracking-tight">Favoritos del Público</CardTitle>
+                   <CardDescription className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">Los 10 más pedidos</CardDescription>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
-              <Table headers={["Item", "Veces pedido", "Ingresos generados"]}>
+            <CardContent className="p-0">
+              <Table headers={["Plato", "Ventas", "Ingresos"]}>
                 {topItems.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center text-muted-foreground py-6">Sin datos.</TableCell>
+                    <TableCell colSpan={3} className="text-center text-foreground/40 py-12 font-bold uppercase tracking-widest text-xs">Sin platos vendidos.</TableCell>
                   </TableRow>
                 )}
                 {topItems.map((item, i) => (
                   <TableRow key={item.name}>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-black text-slate-600 w-5">#{i + 1}</span>
-                        <span className="font-medium text-slate-200">{item.name}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-[10px] font-black text-foreground/20 italic w-4">#{i + 1}</span>
+                        <span className="font-black text-foreground text-xs uppercase italic tracking-tight">{item.name}</span>
                       </div>
                     </TableCell>
-                    <TableCell><span className="font-bold text-primary">{item.count}x</span></TableCell>
-                    <TableCell className="font-mono text-slate-300">{formatPrice(item.revenue)}</TableCell>
+                    <TableCell><span className="font-black text-amber-500 text-sm italic">{item.count}x</span></TableCell>
+                    <TableCell className="font-bold text-foreground/40 text-xs">{formatPrice(item.revenue)}</TableCell>
                   </TableRow>
                 ))}
               </Table>
@@ -471,25 +494,30 @@ export default function ReportsPage() {
           </Card>
 
           {/* Ingresos por mesa */}
-          <Card className="border-white/5 bg-white/5 backdrop-blur-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TableProperties className="w-5 h-5" /> Ingresos por mesa
-              </CardTitle>
-              <CardDescription>{periodDescription} — ordenado por ingresos</CardDescription>
+          <Card className="glass rounded-[2.5rem] border-white/5 overflow-hidden">
+            <CardHeader className="p-8 pb-4">
+               <div className="flex items-center gap-3 mb-2">
+                <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">
+                  <TableProperties className="w-5 h-5" />
+                </div>
+                <div>
+                   <CardTitle className="text-lg font-black text-foreground uppercase italic tracking-tight">Ocupación por Mesa</CardTitle>
+                   <CardDescription className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">Rendimiento por zona</CardDescription>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
-              <Table headers={["Mesa", "Pedidos", "Ingresos totales"]}>
+            <CardContent className="p-0">
+              <Table headers={["Mesa", "Pedidos", "Total"]}>
                 {tableReports.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center text-muted-foreground py-6">Sin datos.</TableCell>
+                    <TableCell colSpan={3} className="text-center text-foreground/40 py-12 font-bold uppercase tracking-widest text-xs">Sin datos de mesas.</TableCell>
                   </TableRow>
                 )}
                 {tableReports.map((row) => (
                   <TableRow key={row.number}>
-                    <TableCell className="font-bold text-slate-200">Mesa {row.number}</TableCell>
-                    <TableCell className="text-slate-400">{row.orders}</TableCell>
-                    <TableCell className="font-mono text-slate-300">{formatPrice(row.revenue)}</TableCell>
+                    <TableCell className="font-black text-foreground text-sm uppercase italic tracking-tight">Mesa {row.number}</TableCell>
+                    <TableCell className="text-foreground/40 font-bold text-xs">{row.orders}</TableCell>
+                    <TableCell className="font-black text-primary text-sm italic">{formatPrice(row.revenue)}</TableCell>
                   </TableRow>
                 ))}
               </Table>

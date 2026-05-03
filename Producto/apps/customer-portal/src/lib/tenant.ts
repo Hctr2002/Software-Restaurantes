@@ -184,3 +184,41 @@ export async function placeOrder(
   }
 }
 
+// ─────────────────────────────────────────────
+// TEMAS Y BRANDING
+// ─────────────────────────────────────────────
+
+export interface RestaurantTheme {
+  primaryColor: string;
+  secondaryColor: string;
+  backgroundColor: string;
+  accentColor: string;
+  textColor: string;
+  cardBackground: string;
+  fontTitle?: string;
+  fontBody?: string;
+  logoUrl?: string | null;
+}
+
+export async function getThemeByRestaurant(restaurantId: string): Promise<RestaurantTheme | null> {
+  const { data, error } = await supabase
+    .from('restaurant_themes')
+    .select('*')
+    .eq('restaurant_id', restaurantId)
+    .eq('is_active', true)
+    .single();
+
+  if (error || !data) return null;
+
+  return {
+    primaryColor: data.primary_color,
+    secondaryColor: data.secondary_color,
+    backgroundColor: data.background_color,
+    accentColor: data.accent_color,
+    textColor: data.text_color,
+    cardBackground: data.card_background,
+    fontTitle: data.font_title,
+    fontBody: data.font_body,
+    logoUrl: data.logo_url,
+  };
+}

@@ -42,6 +42,7 @@ jspm_packages/
 **/web-build/
 **/ios/
 **/android/
+**/tsconfig.tsbuildinfo
 
 # others
 Entrega 1.pdf
@@ -59,4 +60,66 @@ markdown/
 
 # OLYMP-IA agents & tooling
 Producto/scripts/
+Producto/skills/
 AGENTS.md
+
+# Scratch / temp files
+Producto/apps/local-dashboard/scratch/
+color_proposals.html
+
+# AI/LLM coding agent directories (all hidden dirs under Producto/)
+Producto/.adal/
+Producto/.agents/
+Producto/.aider-desk/
+Producto/.augment/
+Producto/.bob/
+Producto/.claude/
+Producto/.codeartsdoer/
+Producto/.codebuddy/
+Producto/.codemaker/
+Producto/.codestudio/
+Producto/.commandcode/
+Producto/.continue/
+Producto/.cortex/
+Producto/.crush/
+Producto/.devin/
+Producto/.factory/
+Producto/.forge/
+Producto/.goose/
+Producto/.iflow/
+Producto/.junie/
+Producto/.kilocode/
+Producto/.kiro/
+Producto/.kode/
+Producto/.mcpjam/
+Producto/.mux/
+Producto/.neovate/
+Producto/.openhands/
+Producto/.pi/
+Producto/.pochi/
+Producto/.qoder/
+Producto/.qwen/
+Producto/.roo/
+Producto/.rovodev/
+Producto/.tabnine/
+Producto/.trae/
+Producto/.vibe/
+Producto/.windsurf/
+Producto/.zencoder/
+
+# Root AI/LLM directories
+.claude/
+
+# Skill locks
+Producto/skills-lock.json
+
+# Test results (auto-generados por workflows de testing)
+tests/results/**
+!tests/results/.gitkeep
+docs/auditorias/**
+!docs/auditorias/.gitkeep
+audit/**
+!audit/
+!audit/.gitkeep
+!audit/screenshots/
+!audit/screenshots/.gitkeep

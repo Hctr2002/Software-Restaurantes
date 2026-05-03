@@ -16,12 +16,15 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { TenantProvider, type TenantRestaurant } from '@/context/TenantContext';
-import { getRestaurantBySlug } from '@/lib/tenant';
+import { getRestaurantBySlug, getThemeByRestaurant, type RestaurantTheme } from '@/lib/tenant';
+import { supabase } from '@/lib/supabase';
+import { RestaurantThemeProvider } from '@menu-bites/ui';
 
 export default function TenantLayout({ children }: { children: React.ReactNode }) {
   const { restaurantSlug } = useParams<{ restaurantSlug: string }>();
 
   const [restaurant, setRestaurant] = useState<TenantRestaurant | null>(null);
+  const [theme, setTheme] = useState<RestaurantTheme | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -29,20 +32,40 @@ export default function TenantLayout({ children }: { children: React.ReactNode }
     if (!restaurantSlug) return;
 
     async function resolve() {
-      console.log('[TenantLayout] Buscando slug:', restaurantSlug);
-      console.log('[TenantLayout] Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
       const data = await getRestaurantBySlug(restaurantSlug);
-      console.log('[TenantLayout] Resultado:', data);
       if (!data) {
         setNotFound(true);
       } else {
         setRestaurant(data);
+        const themeData = await getThemeByRestaurant(data.id);
+        if (themeData) setTheme(themeData);
       }
       setLoading(false);
     }
 
     resolve();
   }, [restaurantSlug]);
+
+  useEffect(() => {
+    if (!restaurant?.id) return;
+    const restaurantId = restaurant.id;
+
+    const channel = supabase
+      .channel(`portal-theme-${restaurantId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'restaurant_themes', filter: `restaurant_id=eq.${restaurantId}` },
+        async (payload) => {
+          if (payload.new.is_active) {
+            const updated = await getThemeByRestaurant(restaurantId);
+            if (updated) setTheme(updated);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [restaurant?.id]);
 
   if (loading) {
     return (
@@ -66,8 +89,10 @@ export default function TenantLayout({ children }: { children: React.ReactNode }
   }
 
   return (
-    <TenantProvider restaurant={restaurant}>
-      {children}
-    </TenantProvider>
+    <RestaurantThemeProvider theme={theme} isGlobal={true}>
+      <TenantProvider restaurant={restaurant}>
+        {children}
+      </TenantProvider>
+    </RestaurantThemeProvider>
   );
 }
