@@ -10,20 +10,24 @@ export async function GET(req: NextRequest) {
   const { restaurantId } = auth;
 
   const { searchParams } = new URL(req.url);
-  const fromParam = searchParams.get("from");
+  const fromParam   = searchParams.get("from");
+  const toParam     = searchParams.get("to");
   const statusParam = searchParams.get("status");
+  const limitParam  = searchParams.get("limit");
+  const limit       = Math.min(parseInt(limitParam ?? "50", 10) || 50, 2000);
 
   const db = createServiceClient();
   let query = db
     .from("orders")
     .select(
-      "id, status, createdAt, tableId:table_id, tables(number), order_items(id, menuItemId:menu_item_id, unitPrice:unit_price, quantity, menu_items(name))"
+      "id, status, createdAt, tableId:table_id, userId:user_id, tables(number), users(email), order_items(id, menuItemId:menu_item_id, unitPrice:unit_price, quantity, menu_items(name))"
     )
     .eq("restaurant_id", restaurantId)
     .order("createdAt", { ascending: false })
-    .limit(50);
+    .limit(limit);
 
   if (fromParam) query = query.gte("createdAt", fromParam);
+  if (toParam)   query = query.lte("createdAt", toParam);
   if (statusParam && statusParam !== "ALL") query = query.eq("status", statusParam);
 
   const { data, error } = await query;

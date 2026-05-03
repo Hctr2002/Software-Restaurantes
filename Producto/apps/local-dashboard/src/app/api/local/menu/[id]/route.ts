@@ -18,6 +18,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const body = await req.json();
     const validatedData = menuSchema.parse(body);
 
+
     const { data, error } = await menuService.update(restaurantId, id, validatedData);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
