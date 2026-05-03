@@ -2,10 +2,10 @@
 
 import React, { useState, useMemo } from "react";
 import { useAuthStore } from "@menu-bites/store";
-import { useMenu } from "@menu-bites/auth";
-import { MenuItemCard, ProductSearchBar, CategoryTabs, cn } from "@menu-bites/ui";
+import { useMenu, supabase } from "@menu-bites/auth";
+import { MenuItemCard, ProductSearchBar, CategoryTabs, Button } from "@menu-bites/ui";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronLeft, ShoppingBag, Send, Trash2 } from "lucide-react";
+import { ChevronLeft, ShoppingBag, Send, Trash2, Loader2 } from "lucide-react";
 
 export default function TableMenuPage() {
   const params = useParams();
@@ -16,6 +16,9 @@ export default function TableMenuPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [cart, setCart] = useState<any[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+
+  const tableId = params.id as string;
 
   // Filtrado de menú
   const filteredMenu = useMemo(() => {
@@ -38,6 +41,56 @@ export default function TableMenuPage() {
 
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
+  const handleSubmitOrder = async () => {
+    if (!user?.restaurantId || cart.length === 0 || submitting) return;
+    setSubmitting(true);
+
+    try {
+      // 1. Crear la orden
+      const { data: order, error: orderError } = await supabase
+        .from("orders")
+        .insert({
+          restaurant_id: user.restaurantId,
+          table_id: tableId,
+          user_id: user.id,
+          status: "PENDING", // Pasa a cocina para validación/preparación
+          total_amount: total
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // 2. Insertar ítems
+      const orderItems = cart.map((item) => ({
+        order_id: order.id,
+        menu_item_id: item.id,
+        quantity: item.quantity,
+        unit_price: item.price
+      }));
+
+      const { error: itemsError } = await supabase
+        .from("order_items")
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
+
+      // 3. Marcar mesa como OCUPADA
+      await supabase
+        .from("tables")
+        .update({ status: "OCCUPIED" })
+        .eq("id", tableId);
+
+      // 4. Éxito: volver al inicio
+      router.push("/");
+    } catch (err) {
+      console.error("Error al enviar pedido:", err);
+      alert("Error al enviar a cocina. Inténtelo de nuevo.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-navy">
@@ -58,7 +111,7 @@ export default function TableMenuPage() {
         </button>
         <div>
           <h1 className="text-xl font-black tracking-tighter uppercase italic">
-            Mesa <span className="text-brand-accent">{params.id?.slice(0, 4)}</span>
+            Mesa <span className="text-brand-accent">{tableId.slice(0, 4)}</span>
           </h1>
           <p className="text-[10px] text-sage uppercase font-black tracking-[0.2em] mt-0.5">Nuevo Pedido</p>
         </div>
@@ -97,16 +150,16 @@ export default function TableMenuPage() {
         )}
       </main>
 
-      {/* Bandeja Flotante (Wow Factor — from client.html mockup) */}
+      {/* Bandeja Flotante (Wow Factor) */}
       {cart.length > 0 && (
         <div className="fixed bottom-6 inset-x-4 z-50 animate-in slide-in-from-bottom-8 duration-500">
-          <div className="max-w-2xl mx-auto glass-navy p-6 rounded-[2.5rem] shadow-2xl shadow-black/40 space-y-4">
+          <div className="max-w-2xl mx-auto glass-navy p-6 rounded-[2.5rem] shadow-2xl shadow-black/40 space-y-4 border border-white/5">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-4">
                 <div className="w-14 h-14 bg-white/10 rounded-[1.25rem] flex items-center justify-center border border-white/5 relative">
                   <ShoppingBag className="w-6 h-6 text-sage" />
                   <div className="absolute -top-1 -right-1 bg-sage text-navy text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-navy">
-                    {cart.length}
+                    {cart.reduce((a, b) => a + b.quantity, 0)}
                   </div>
                 </div>
                 <div>
@@ -116,7 +169,7 @@ export default function TableMenuPage() {
               </div>
               <button
                 onClick={() => setCart([])}
-                className="p-3 text-white/20 hover:text-destructive transition-colors"
+                className="p-3 text-white/20 hover:text-red-500 transition-colors"
                 title="Limpiar Carrito"
               >
                 <Trash2 className="w-5 h-5" />
@@ -124,11 +177,19 @@ export default function TableMenuPage() {
             </div>
 
             <div className="flex space-x-3">
-              <button className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all border border-white/5">
-                Detalle ({cart.length})
+              <button 
+                onClick={() => alert("Función de detalle en construcción")}
+                className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all border border-white/5"
+              >
+                Revisar ({cart.length})
               </button>
-              <button className="flex-[2] py-4 bg-sage text-navy font-black uppercase tracking-widest rounded-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center shadow-xl shadow-black/30 text-[10px]">
-                Enviar a Cocina <Send className="ml-2 w-4 h-4" />
+              <button 
+                onClick={handleSubmitOrder}
+                disabled={submitting}
+                className="flex-[2] py-4 bg-sage text-navy font-black uppercase tracking-widest rounded-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center shadow-xl shadow-black/30 text-[10px] disabled:opacity-50"
+              >
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="mr-2 w-4 h-4" />}
+                Enviar a Cocina
               </button>
             </div>
           </div>
