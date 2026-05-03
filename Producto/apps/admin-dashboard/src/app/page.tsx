@@ -7,13 +7,6 @@ import { User, Lock, ArrowRight, Loader2, Mail, Eye, EyeOff } from "lucide-react
 import { cn, Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@menu-bites/ui";
 import Link from "next/link";
 
-const ROLE_URLS: Record<string, string> = {
-  SUPER_ADMIN: "/dashboard",
-  ADMIN:       process.env.NEXT_PUBLIC_LOCAL_DASHBOARD_URL  || "http://localhost:3003",
-  COCINA:      process.env.NEXT_PUBLIC_KITCHEN_URL          || "http://localhost:3001",
-  CAJERO:      process.env.NEXT_PUBLIC_CASHIER_URL          || "http://localhost:3004",
-  GARZON:      process.env.NEXT_PUBLIC_WAITER_URL           || "http://localhost:3002",
-};
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -25,45 +18,75 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("LOGIN_DEBUG: Formulario enviado");
     setIsLoading(true);
     setError(null);
 
     try {
-      console.log("LOGIN_DEBUG: Intentando login con:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        password: password, // No trim para password
+        password,
       });
 
       if (error) {
-        console.log("LOGIN_DEBUG: Error de Supabase:", error);
-        if (error.status === 400) {
-          setError("Credenciales inválidas, intente nuevamente");
-        } else {
-          setError(error.message);
-        }
+        setError(error.status === 400 ? "Credenciales inválidas, intente nuevamente" : error.message);
         return;
       }
 
-      if (data.user) {
-        const role = data.user.app_metadata.role as string;
-        setUser({
-          id: data.user.id,
-          email: data.user.email!,
-          role: data.user.app_metadata.role,
-          restaurantId: data.user.app_metadata.restaurant_id,
-        });
+      if (!data.user) return;
 
-        const target = ROLE_URLS[role] ?? "/dashboard";
-        window.location.replace(target);
+      const role         = data.user.app_metadata.role as string;
+      const restaurantId = data.user.app_metadata.restaurant_id as string | undefined;
+
+      setUser({
+        id:           data.user.id,
+        email:        data.user.email!,
+        role,
+        restaurantId: restaurantId ?? '',
+      });
+
+      // SUPER_ADMIN: sin slug, panel global
+      if (role === 'SUPER_ADMIN') {
+        window.location.replace('/dashboard');
+        return;
       }
-    } catch (err) {
-      console.error("LOGIN_DEBUG: Error fatal en handleLogin:", err);
+
+      // Todos los demás roles requieren el slug de la organización
+      let slug: string | null = null;
+      if (restaurantId) {
+        const { data: rest } = await supabase
+          .from('restaurants')
+          .select('slug')
+          .eq('id', restaurantId)
+          .single();
+        slug = rest?.slug ?? null;
+      }
+
+      const localUrl   = process.env.NEXT_PUBLIC_LOCAL_DASHBOARD_URL;
+      const kitchenUrl = process.env.NEXT_PUBLIC_KITCHEN_URL;
+      const waiterUrl  = process.env.NEXT_PUBLIC_WAITER_URL;
+      const cashierUrl = process.env.NEXT_PUBLIC_CASHIER_URL;
+
+      // Helper: añade /{slug}/subPath si slug existe
+      const withSlug = (base: string, subPath: string) =>
+        slug ? `${base}/${slug}${subPath}` : base;
+
+      const roleRedirects: Record<string, string> = {
+        ADMIN:  withSlug(localUrl,   '/dashboard'),
+        COCINA: withSlug(kitchenUrl, ''),
+        GARZON: withSlug(waiterUrl,  ''),
+        CAJERO: withSlug(cashierUrl, ''),
+      };
+
+      const target = roleRedirects[role];
+      if (target) {
+        window.location.replace(target);
+      } else {
+        setError(`Rol no reconocido: ${role}`);
+      }
+    } catch {
       setError("Error de conexión, intente más tarde");
     } finally {
       setIsLoading(false);
-      console.log("LOGIN_DEBUG: Finalizado estado de carga");
     }
   };
 

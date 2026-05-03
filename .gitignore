@@ -45,6 +45,8 @@ jspm_packages/
 
 # others
 Entrega 1.pdf
+memoria.md
+CLAUDE.md
 
 # macOS metadata files
 .DS_Store
@@ -52,3 +54,9 @@ Entrega 1.pdf
 
 # Markdown folders
 markdown/
+
+.gitnexus
+
+# OLYMP-IA agents & tooling
+Producto/scripts/
+AGENTS.md
