@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const validatedData = tableSchema.parse(body);
     
-    const { data, error } = await tableService.create(restaurantId, validatedData, req.nextUrl.origin);
+    const { data, error } = await tableService.create(restaurantId, validatedData);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ data }, { status: 201 });

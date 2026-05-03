@@ -33,6 +33,25 @@ export async function getRestaurantBySlug(slug: string): Promise<TenantRestauran
   return data as TenantRestaurant;
 }
 
+/**
+ * Obtiene la lista de todos los restaurantes activos.
+ * Útil para el directorio de la landing page.
+ */
+export async function getActiveRestaurants(): Promise<{id: string, name: string, slug: string}[]> {
+  const { data, error } = await supabase
+    .from('restaurants')
+    .select('id, name, slug')
+    .eq('status', 'ACTIVE')
+    .order('name');
+
+  if (error) {
+    console.error('[tenant] getActiveRestaurants error:', error.message);
+    return [];
+  }
+  return data ?? [];
+}
+
+
 // ─────────────────────────────────────────────
 // CATEGORÍAS
 // ─────────────────────────────────────────────
