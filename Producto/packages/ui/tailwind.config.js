@@ -41,10 +41,11 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Menu Bites Brand Colors — Navy · Sage · Sand
+        // Menu Bites Brand Colors — Navy · Sage · Sand · Accent
         navy: "hsl(var(--navy) / <alpha-value>)",
         sage: "hsl(var(--sage) / <alpha-value>)",
         sand: "hsl(var(--sand) / <alpha-value>)",
+        'brand-accent': "hsl(var(--brand-accent) / <alpha-value>)",
       },
       borderRadius: {
         lg: "var(--radius)",

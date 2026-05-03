@@ -15,6 +15,7 @@ export function createSessionClient(req: NextRequest) {
           // Route handlers in this module are API-only; no cookie writes needed.
         },
       },
+      cookieOptions: { name: 'sb-default-session' },
     }
   );
 }
@@ -60,7 +61,10 @@ export async function requireSuperAdmin(req: NextRequest) {
     user = sessionUser;
   }
 
-  if (user.app_metadata?.role !== "SUPER_ADMIN") {
+  const role = String(user.app_metadata?.role || "").toUpperCase();
+  const restaurantId = user.app_metadata?.restaurant_id;
+
+  if (role !== "SUPER_ADMIN" && !(role === "ADMIN" && !restaurantId)) {
     return { errorResponse: NextResponse.json({ error: "Sin permisos" }, { status: 403 }) };
   }
 

@@ -2,9 +2,10 @@
 
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@menu-bites/ui";
-import { Store, Users } from "lucide-react";
+import { Store, Users, Activity, ShieldAlert, UserCheck } from "lucide-react";
 import DashboardShell from "./_components/DashboardShell";
 import { formatDate, Restaurant, UserRecord } from "./_components/adminShared";
+import { motion } from "framer-motion";
 
 export default function DashboardPage() {
   const [restaurants, setRestaurants] = React.useState<Restaurant[]>([]);
@@ -49,6 +50,21 @@ export default function DashboardPage() {
   const restaurantsSuspended = restaurants.filter((restaurant) => restaurant.status === "SUSPENDED").length;
   const usersWithRestaurant = users.filter((userRow) => !!userRow.restaurant_id).length;
   const adminUsers = users.filter((userRow) => userRow.role === "ADMIN" || userRow.role === "SUPER_ADMIN").length;
+ 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    show: { opacity: 1, scale: 1, transition: { type: "spring", stiffness: 300, damping: 20 } }
+  };
 
   return (
     <DashboardShell title="Panel Principal" subtitle="Resumen">
@@ -58,41 +74,75 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <KpiCard label="Organizaciones Totales" value={restaurants.length} detail={`${restaurantsActive} activos`} />
-        <KpiCard label="Organizaciones Suspendidas" value={restaurantsSuspended} detail="Estado SUSPENDED" />
-        <KpiCard label="Usuarios Totales" value={users.length} detail={`${adminUsers} admins/super admins`} />
-        <KpiCard label="Usuarios Asignados" value={usersWithRestaurant} detail="Con organización asociada" />
-      </div>
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6"
+      >
+        <motion.div variants={itemVariants}>
+          <KpiCard label="Organizaciones" value={restaurants.length} detail={`${restaurantsActive} activas`} icon={<Store className="w-4 h-4" />} />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <KpiCard label="Suspendidas" value={restaurantsSuspended} detail="Requieren atención" icon={<ShieldAlert className="w-4 h-4 text-destructive" />} />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <KpiCard label="Usuarios" value={users.length} detail={`${adminUsers} privilegios admin`} icon={<Users className="w-4 h-4" />} />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <KpiCard label="Asignados" value={usersWithRestaurant} detail="Con restaurante" icon={<UserCheck className="w-4 h-4 text-primary" />} />
+        </motion.div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        <Card className="border-white/5 bg-white/5 backdrop-blur-md">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-4">
+        <Card className="border-white/5 bg-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden group">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Store className="w-5 h-5" /> Últimas 10 Organizaciones</CardTitle>
-            <CardDescription>Registros más recientes creados en la plataforma</CardDescription>
+            <CardTitle className="flex items-center gap-3 text-white">
+              <div className="p-2 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform">
+                <Store className="w-5 h-5 text-primary" />
+              </div>
+              Últimas Organizaciones
+            </CardTitle>
+            <CardDescription className="text-slate-500 font-medium">Registros más recientes en la plataforma</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {latestRestaurants.length === 0 && (
-              <p className="text-sm text-muted-foreground">Aún no existen organizaciones registradas.</p>
+              <p className="text-sm text-slate-500 italic">Aún no existen organizaciones registradas.</p>
             )}
             {latestRestaurants.map((restaurant) => (
-              <div key={restaurant.id} className="p-3 rounded-xl border border-white/10 bg-black/20">
-                <p className="font-bold text-sm">{restaurant.name}</p>
-                <p className="text-xs text-muted-foreground">{restaurant.slug} - {restaurant.status}</p>
-                <p className="text-[11px] text-muted-foreground mt-1">{formatDate(restaurant.createdAt)}</p>
-              </div>
+              <motion.div 
+                whileHover={{ x: 6 }}
+                key={restaurant.id} 
+                className="p-4 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 transition-colors flex justify-between items-center"
+              >
+                <div>
+                  <p className="font-black text-white text-sm tracking-tight">{restaurant.name}</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{restaurant.slug}</p>
+                </div>
+                <div className="text-right">
+                  <span className={`text-[9px] font-black px-2 py-1 rounded-full uppercase tracking-tighter ${restaurant.status === 'ACTIVE' ? 'bg-primary/20 text-primary' : 'bg-destructive/20 text-destructive'}`}>
+                    {restaurant.status}
+                  </span>
+                  <p className="text-[9px] text-slate-600 font-bold mt-1 uppercase">{formatDate(restaurant.createdAt)}</p>
+                </div>
+              </motion.div>
             ))}
           </CardContent>
         </Card>
 
-        <Card className="border-white/5 bg-white/5 backdrop-blur-md">
+        <Card className="border-white/5 bg-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden group">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" /> Últimos 10 Usuarios</CardTitle>
-            <CardDescription>Altas más recientes de usuarios del sistema</CardDescription>
+            <CardTitle className="flex items-center gap-3 text-white">
+              <div className="p-2 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform">
+                <Users className="w-5 h-5 text-primary" />
+              </div>
+              Últimos Usuarios
+            </CardTitle>
+            <CardDescription className="text-slate-500 font-medium">Altas más recientes en el sistema</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {latestUsers.length === 0 && (
-              <p className="text-sm text-muted-foreground">Aún no existen usuarios registrados.</p>
+              <p className="text-sm text-slate-500 italic">Aún no existen usuarios registrados.</p>
             )}
             {latestUsers.map((userRow) => {
               const restaurantName = Array.isArray(userRow.restaurants)
@@ -100,11 +150,20 @@ export default function DashboardPage() {
                 : userRow.restaurants?.name;
 
               return (
-                <div key={userRow.id} className="p-3 rounded-xl border border-white/10 bg-black/20">
-                  <p className="font-bold text-sm">{userRow.email}</p>
-                  <p className="text-xs text-muted-foreground">{userRow.role} - {restaurantName || "Sin organización"}</p>
-                  <p className="text-[11px] text-muted-foreground mt-1">{formatDate(userRow.createdAt)}</p>
-                </div>
+                <motion.div 
+                  whileHover={{ x: 6 }}
+                  key={userRow.id} 
+                  className="p-4 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 transition-colors flex justify-between items-center"
+                >
+                  <div>
+                    <p className="font-black text-white text-sm tracking-tight">{userRow.email}</p>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{userRow.role}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-bold text-primary truncate max-w-[120px]">{restaurantName || "Sin Org."}</p>
+                    <p className="text-[9px] text-slate-600 font-bold mt-1 uppercase">{formatDate(userRow.createdAt)}</p>
+                  </div>
+                </motion.div>
               );
             })}
           </CardContent>
@@ -112,19 +171,33 @@ export default function DashboardPage() {
       </div>
 
       {loading && (
-        <p className="text-sm text-muted-foreground">Cargando datos de administracion...</p>
+        <div className="flex items-center gap-3 mt-8 text-primary font-bold uppercase tracking-widest text-[10px]">
+          <Activity className="w-4 h-4 animate-pulse" />
+          Sincronizando datos...
+        </div>
       )}
     </DashboardShell>
   );
 }
 
-function KpiCard({ label, value, detail }: { label: string; value: number; detail: string }) {
+function KpiCard({ label, value, detail, icon }: { label: string; value: number; detail: string; icon: React.ReactNode }) {
   return (
-    <Card className="border-white/5 bg-white/5 backdrop-blur-md">
-      <CardContent className="pt-6">
-        <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{label}</p>
-        <p className="text-3xl font-black tracking-tight mt-1">{value}</p>
-        <p className="text-xs text-muted-foreground mt-1">{detail}</p>
+    <Card className="border-white/5 bg-white/5 backdrop-blur-xl rounded-[2.5rem] hover:bg-white/10 transition-all duration-500 group overflow-hidden relative">
+      <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity group-hover:scale-150 transition-transform duration-700">
+        {icon}
+      </div>
+      <CardContent className="pt-8 px-8 pb-8 relative z-10">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="p-1.5 bg-primary/10 rounded-lg">
+            {React.isValidElement(icon) 
+              ? React.cloneElement(icon as React.ReactElement<any>, { className: "w-3 h-3 text-primary" })
+              : icon
+            }
+          </div>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-black">{label}</p>
+        </div>
+        <p className="text-4xl font-black tracking-tighter text-white">{value}</p>
+        <p className="text-[10px] font-bold text-slate-600 mt-2 uppercase tracking-widest">{detail}</p>
       </CardContent>
     </Card>
   );

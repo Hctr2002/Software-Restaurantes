@@ -3,9 +3,12 @@ import { createBrowserClient } from '@supabase/ssr';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
 
-// createBrowserClient from @supabase/ssr automatically manages session cookies
-// so the Next.js middleware can detect the active session and redirect correctly.
-export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
+// Named cookie per app so multiple sessions can coexist on the same localhost domain.
+// Each app sets NEXT_PUBLIC_APP_KEY in its next.config.mjs env block.
+const appKey = process.env.NEXT_PUBLIC_APP_KEY ?? 'default';
+export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey, {
+  cookieOptions: { name: `sb-${appKey}-session` },
+});
 
 export const getSession = async () => {
   const { data: { session } } = await supabase.auth.getSession();
@@ -41,6 +44,54 @@ export const updateUserPassword = async (password: string) => {
     password,
   });
   return { data, error };
+};
+
+export type AlertType = 'TABLE_ISSUE' | 'BILL_REQUEST' | 'STOCK_SHORTAGE' | 'HELP_REQUEST' | 'GENERAL';
+
+export const sendAlert = async (params: {
+  restaurantId: string;
+  userId?: string;
+  userEmail?: string;
+  type: AlertType;
+  message: string;
+  tableNumber?: number;
+  menuItemId?: string;
+  menuItemName?: string;
+}) => {
+  const { error } = await supabase.from('alerts').insert({
+    restaurant_id:  params.restaurantId,
+    user_id:        params.userId        ?? null,
+    user_email:     params.userEmail     ?? null,
+    type:           params.type,
+    message:        params.message,
+    table_number:   params.tableNumber   ?? null,
+    menu_item_id:   params.menuItemId    ?? null,
+    menu_item_name: params.menuItemName  ?? null,
+  });
+  return { error };
+};
+
+export const getRestaurantTheme = async (restaurantId: string) => {
+  const { data, error } = await supabase
+    .from('restaurant_themes')
+    .select('*')
+    .eq('restaurant_id', restaurantId)
+    .eq('is_active', true)
+    .single();
+
+  if (error || !data) return null;
+
+  return {
+    primaryColor: data.primary_color,
+    secondaryColor: data.secondary_color,
+    backgroundColor: data.background_color,
+    accentColor: data.accent_color,
+    textColor: data.text_color,
+    cardBackground: data.card_background,
+    fontTitle: data.font_title,
+    fontBody: data.font_body,
+    logoUrl: data.logo_url,
+  };
 };
 
 export * from "./hooks";
