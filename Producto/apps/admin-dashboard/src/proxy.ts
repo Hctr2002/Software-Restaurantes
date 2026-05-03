@@ -9,7 +9,7 @@ const ROLE_URLS: Record<string, string | undefined> = {
   CAJERO:  process.env.NEXT_PUBLIC_CASHIER_URL,
 };
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   let response = NextResponse.next({ request: { headers: req.headers } });
 
   const supabase = createServerClient(

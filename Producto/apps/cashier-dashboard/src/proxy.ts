@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   let response = NextResponse.next({ request: { headers: req.headers } });
 
   const supabase = createServerClient(
@@ -23,24 +23,16 @@ export async function middleware(req: NextRequest) {
   );
 
   const { data: { session } } = await supabase.auth.getSession();
-  const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
-  const role = session?.user?.app_metadata?.role;
+  const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
+  const role    = session?.user?.app_metadata?.role;
 
-  // Sin sesión → central login
-  if (!session) {
-    return NextResponse.redirect(new URL(authUrl));
-  }
-
-  // Rol incorrecto → central login
-  if (role !== 'GARZON') {
-    return NextResponse.redirect(new URL(authUrl));
+  if (!session || role !== 'CAJERO') {
+    return NextResponse.redirect(new URL(authUrl, req.url));
   }
 
   return response;
 }
 
 export const config = {
-  matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)',
-  ],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)'],
 };
