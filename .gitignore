@@ -106,3 +106,9 @@ Producto/.trae/
 Producto/.vibe/
 Producto/.windsurf/
 Producto/.zencoder/
+
+# Root AI/LLM directories
+.claude/
+
+# Skill locks
+Producto/skills-lock.json
