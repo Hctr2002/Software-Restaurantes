@@ -23,10 +23,20 @@ export const signOut = async () => {
   await supabase.auth.signOut();
 };
 
+const STATUS_TIMESTAMP: Record<string, string> = {
+  VALIDATED:  "validated_at",
+  PREPARING:  "preparing_at",
+  READY:      "ready_at",
+};
+
 export const updateOrderStatus = async (orderId: string, status: string) => {
+  const timestampField = STATUS_TIMESTAMP[status];
+  const payload: Record<string, unknown> = { status };
+  if (timestampField) payload[timestampField] = new Date().toISOString();
+
   const { data, error } = await supabase
     .from("orders")
-    .update({ status })
+    .update(payload)
     .eq("id", orderId)
     .select();
   return { data, error };

@@ -5,7 +5,7 @@ import LocalShell from "../_components/LocalShell";
 import { Table, TableRow, TableCell, Modal, Badge } from "@menu-bites/ui";
 import { Button, Input } from "@menu-bites/ui";
 import { Inventory } from "../_components/localShared";
-import { Plus, Pencil, Trash2, Loader2, AlertTriangle, Package, Layers } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, AlertTriangle, Package, Download } from "lucide-react";
 import { motion } from "framer-motion";
 
 const UNITS = ["unidades", "kg", "g", "L", "mL", "porciones"];
@@ -94,7 +94,25 @@ export default function InventoryPage() {
     }
   };
 
-  const lowStockCount = items.filter((i) => i.stock <= LOW_STOCK_THRESHOLD).length;
+  const criticalItems = items.filter((i) => i.stock <= 0);
+  const lowItems      = items.filter((i) => i.stock > 0 && i.stock <= LOW_STOCK_THRESHOLD);
+  const lowStockCount = criticalItems.length + lowItems.length;
+
+  const handleExportCSV = () => {
+    const lines = [
+      "id,nombre,stock_actual,unidad",
+      ...items.map((i) =>
+        `${i.id},"${i.name.replace(/"/g, '""')}",${Number(i.stock).toFixed(2)},${i.unit}`
+      ),
+    ];
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = "inventario.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <LocalShell title="Gestión" subtitle="Inventario">
@@ -104,21 +122,62 @@ export default function InventoryPage() {
         </div>
       )}
 
-      {lowStockCount > 0 && (
-        <div className="flex items-center gap-4 p-5 rounded-[2rem] border border-yellow-500/20 bg-yellow-500/10 text-yellow-500 mb-8 shadow-xl shadow-yellow-500/5">
-          <div className="p-3 rounded-2xl bg-yellow-500/20">
-            <AlertTriangle className="w-6 h-6 shrink-0" />
-          </div>
-          <div className="flex-1">
-            <p className="text-xs font-black uppercase tracking-widest leading-tight">Alerta de Suministros</p>
-            <p className="text-[11px] font-bold opacity-80 mt-1 leading-relaxed">
-              Hay <strong>{lowStockCount}</strong> ingredientes con stock bajo. Recomendamos revisar el inventario para evitar quiebres de stock en el menú.
-            </p>
-          </div>
+      {/* Sección Stock Crítico */}
+      {(criticalItems.length > 0 || lowItems.length > 0) && (
+        <div className="mb-8 space-y-3">
+          {criticalItems.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-[10px] font-black text-red-400 uppercase tracking-widest">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                Agotados — {criticalItems.length} ítem(s)
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {criticalItems.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between px-4 py-3 rounded-2xl bg-red-500/10 border border-red-500/20">
+                    <div className="flex items-center gap-2">
+                      <Package className="w-4 h-4 text-red-400 shrink-0" />
+                      <span className="text-red-300 text-sm font-bold truncate">{item.name}</span>
+                    </div>
+                    <span className="text-red-400 text-xs font-black ml-2 tabular-nums shrink-0">0 {item.unit}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {lowItems.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-[10px] font-black text-yellow-400 uppercase tracking-widest">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                Stock Bajo — {lowItems.length} ítem(s) (≤ {LOW_STOCK_THRESHOLD})
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {lowItems.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between px-4 py-3 rounded-2xl bg-yellow-500/10 border border-yellow-500/20">
+                    <div className="flex items-center gap-2">
+                      <Package className="w-4 h-4 text-yellow-400 shrink-0" />
+                      <span className="text-yellow-300 text-sm font-bold truncate">{item.name}</span>
+                    </div>
+                    <span className="text-yellow-400 text-xs font-black ml-2 tabular-nums shrink-0">
+                      {Number(item.stock).toFixed(2)} {item.unit}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      <div className="flex justify-end mb-8">
+      <div className="flex justify-end gap-3 mb-8">
+        <Button
+          variant="ghost"
+          onClick={handleExportCSV}
+          disabled={items.length === 0}
+          className="border border-white/10 hover:bg-white/5 text-foreground/60 hover:text-foreground font-bold h-11 px-5 rounded-2xl transition-all active:scale-95 gap-2"
+        >
+          <Download className="w-4 h-4" /> Exportar CSV
+        </Button>
         <Button onClick={openCreate} className="bg-primary hover:bg-primary/80 text-primary-foreground font-bold h-11 px-6 rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-95">
           <Plus className="w-4 h-4 mr-2" /> Nuevo Ingrediente
         </Button>

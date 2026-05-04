@@ -39,6 +39,7 @@ enum TableStatus {
   FREE
   OCCUPIED
   RESERVED
+  CLEANING
 }
 
 model Restaurant {
@@ -187,6 +188,12 @@ model Order {
   status       OrderStatus @default(PENDING)
   totalAmount  Decimal     @default(0) @map("total_amount") @db.Decimal(10, 2)
   notes        String?
+  sessionId    String?     @map("session_id")
+
+  // Timestamps de ciclo de vida para analytics de tiempos de cocina
+  validatedAt  DateTime?   @map("validated_at")  @db.Timestamptz(3)
+  preparingAt  DateTime?   @map("preparing_at")  @db.Timestamptz(3)
+  readyAt      DateTime?   @map("ready_at")      @db.Timestamptz(3)
 
   table      Table?      @relation(fields: [tableId, restaurantId], references: [id, restaurantId])
   restaurant Restaurant  @relation(fields: [restaurantId], references: [id])
@@ -197,6 +204,7 @@ model Order {
 
   @@unique([id, restaurantId])
   @@index([restaurantId])
+  @@index([sessionId])
   @@map("orders")
 }
 

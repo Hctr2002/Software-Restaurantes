@@ -253,9 +253,12 @@ erDiagram
 
 | Valor | Descripción |
 |---|---|
-| `FREE` | Mesa disponible |
-| `OCCUPIED` | Mesa con clientes activos |
-| `RESERVED` | Mesa reservada |
+| `FREE` | Mesa disponible para nuevos clientes |
+| `OCCUPIED` | Mesa con clientes activos y pedidos en curso |
+| `RESERVED` | Mesa reservada (no disponible para walk-ins) |
+| `CLEANING` | Mesa liberada tras el pago, pendiente de limpieza antes de volver a FREE |
+
+> **Ciclo normal:** `FREE → OCCUPIED` (al crear primer pedido) → `CLEANING` (al procesar pago en caja) → `FREE` (garzón confirma limpieza).
 
 #### `SubscriptionStatus` — Estado de Suscripción del Restaurante
 
@@ -355,7 +358,13 @@ Almacena las variables de branding por restaurante. Puede haber múltiples temas
 | `restaurant_id` | UUID FK | |
 | `status` | OrderStatus | Estado actual del pedido |
 | `total_amount` | Decimal(10,2) | Monto total calculado |
-| `notes` | String? | Notas generales del pedido |
+| `notes` | String? | Notas generales del pedido (ej: alergias) |
+| `session_id` | UUID? | ID de sesión compartida para mesas fusionadas. Nulo si la mesa no está fusionada |
+| `validated_at` | Timestamptz? | Momento en que el garzón validó el pedido. Usado para medir tiempos de atención |
+| `preparing_at` | Timestamptz? | Momento en que cocina inició la preparación |
+| `ready_at` | Timestamptz? | Momento en que cocina marcó el pedido como listo |
+
+> **Nota analytics:** `ready_at - validated_at` = tiempo neto de cocina. `validated_at - created_at` = tiempo de validación del garzón. Ambos alimentan el heatmap del Local Dashboard.
 
 **`order_items`:**
 
@@ -406,6 +415,40 @@ Constraint: `UNIQUE(menu_item_id, inventory_id)`.
 #### `menu_item_extras` (Modificadores Opcionales)
 
 Adiciones opcionales con costo extra (ej: "Extra Queso +$500"). Puede estar vinculado a `inventory_id` para descontar stock cuando es seleccionado.
+
+#### `push_subscriptions` (Suscripciones Web Push)
+
+Almacena los endpoints VAPID del navegador para enviar notificaciones push al Garzón cuando una orden pasa a READY.
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | UUID PK | |
+| `user_id` | UUID FK → auth.users | Usuario suscrito (rol GARZON) |
+| `restaurant_id` | UUID | Tenant al que pertenece |
+| `subscription` | JSONB | Objeto de suscripción del browser: `{ endpoint, keys: { p256dh, auth } }` |
+| `created_at` | Timestamptz | |
+| `updated_at` | Timestamptz | |
+
+**Constraint:** `UNIQUE(user_id, restaurant_id)` — un garzón tiene una sola suscripción activa por restaurante (se actualiza al re-registrarse).
+
+**RLS:** Inserción y lectura propia por el propio usuario. Lectura por roles ADMIN y COCINA (para enviar notificaciones).
+
+#### `reviews` (Calificaciones del Cliente)
+
+Ratings post-pago que el cliente deja desde el Customer Portal cuando su orden pasa a DELIVERED.
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | UUID PK | |
+| `order_id` | UUID | Orden calificada |
+| `restaurant_id` | UUID FK | |
+| `table_id` | UUID? | Mesa desde la que se calificó |
+| `session_id` | UUID? | Sesión de fusión de mesas si aplica |
+| `rating` | Smallint | Calificación 1–5 estrellas |
+| `comment` | Text? | Comentario libre opcional |
+| `created_at` | Timestamptz | |
+
+**RLS:** INSERT público (clientes anónimos). SELECT restringido a usuarios autenticados del mismo restaurante.
 
 ---
 

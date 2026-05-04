@@ -10,9 +10,10 @@
  import { motion } from "framer-motion";
  
  function tableStatusVariant(status: string) {
-   if (status === "FREE") return "success";
-   if (status === "OCCUPIED") return "danger";
-   if (status === "RESERVED") return "warning";
+   if (status === "FREE")      return "success";
+   if (status === "OCCUPIED")  return "danger";
+   if (status === "RESERVED")  return "warning";
+   if (status === "CLEANING")  return "info";
    return "neutral";
  }
  

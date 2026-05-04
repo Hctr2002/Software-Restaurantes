@@ -95,7 +95,7 @@
    useEffect(() => {
      if (!settings.sounds.criticalAlert) return;
      orders.forEach(order => {
-       if (order.status === "READY" || order.status === "DELIVERED") return;
+       if (order.status === "VALIDATED" || order.status === "READY" || order.status === "DELIVERED") return;
        const urgency = getTicketUrgency(order.created_at, settings.thresholds);
        if (urgency === "red" && !criticalAlerted.current.has(order.id)) {
          criticalAlerted.current.add(order.id);
@@ -163,7 +163,7 @@
      }
    };
  
-   const pendingOrders   = orders.filter((o) => o.status === "PENDING");
+   const pendingOrders   = orders.filter((o) => o.status === "VALIDATED");
    const preparingOrders = orders.filter((o) => o.status === "PREPARING");
    const readyOrders     = orders.filter((o) => o.status === "READY");
  

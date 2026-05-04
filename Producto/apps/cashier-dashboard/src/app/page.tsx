@@ -6,7 +6,7 @@ import { supabase, signOut, sendAlert, getSession, getRestaurantTheme } from "@m
 import { Badge, Button, RestaurantThemeProvider } from "@menu-bites/ui";
 import {
   Receipt, LogOut, CheckCircle, Loader2, AlertTriangle, X, RefreshCw, User,
-  Clock, History, CreditCard, ChevronRight, Hash, ArrowLeft
+  Clock, History, CreditCard, ChevronRight, Hash, ArrowLeft, Bell
 } from "lucide-react";
 
 type OrderItem = { id: string; quantity: number; unit_price: number; menu_items: { name: string } | null };
@@ -16,13 +16,48 @@ type Order = {
   createdAt: string;
   total_amount: number;
   table_id: string | null;
+  session_id: string | null;
   tables: { id: string; number: number } | null;
   users: { email: string } | null;
   order_items: OrderItem[];
 };
 
+type TableGroup = {
+  key: string;
+  tableId: string | null;
+  sessionId: string | null;
+  tableNumber: number | null;
+  orders: Order[];
+  total: number;
+  billRequested: boolean;
+  oldestCreatedAt: string;
+};
+
 function orderTotal(order: Order) {
   return order.order_items.reduce((s, i) => s + Number(i.unit_price) * i.quantity, 0);
+}
+
+function groupOrders(orders: Order[], billMap: Record<string, boolean>): TableGroup[] {
+  const map = new Map<string, TableGroup>();
+  for (const order of orders) {
+    const key = order.session_id ?? order.table_id ?? order.id;
+    if (!map.has(key)) {
+      map.set(key, {
+        key,
+        tableId: order.table_id,
+        sessionId: order.session_id ?? null,
+        tableNumber: order.tables?.number ?? null,
+        orders: [],
+        total: 0,
+        billRequested: order.table_id ? (billMap[order.table_id] ?? false) : false,
+        oldestCreatedAt: order.createdAt,
+      });
+    }
+    const g = map.get(key)!;
+    g.orders.push(order);
+    g.total += orderTotal(order);
+  }
+  return Array.from(map.values());
 }
 
 function formatCLP(n: number) {
@@ -44,7 +79,7 @@ export default function CashierPage() {
   const [loading, setLoading]     = useState(true);
   const [activeTab, setActiveTab] = useState<"pending" | "history">("pending");
   
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<TableGroup | null>(null);
   const [paymentReference, setPaymentReference] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   
@@ -55,6 +90,8 @@ export default function CashierPage() {
   const [alertSent, setAlertSent] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [theme, setTheme] = useState<any>(null);
+  // table_id → bill_requested
+  const [billRequestedTables, setBillRequestedTables] = useState<Record<string, boolean>>({});
 
   // Hydrate store
   useEffect(() => {
@@ -101,16 +138,17 @@ export default function CashierPage() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    const SELECT = "id, status, createdAt, total_amount, table_id, session_id, tables(id, number), users(email), order_items(id, quantity, unit_price, menu_items(name))";
     const [pendingRes, historyRes] = await Promise.all([
       supabase
         .from("orders")
-        .select("id, status, createdAt, total_amount, table_id, tables(id, number), users(email), order_items(id, quantity, unit_price, menu_items(name))")
+        .select(SELECT)
         .eq("restaurant_id", user.restaurantId)
         .eq("status", "READY")
         .order("createdAt", { ascending: true }),
       supabase
         .from("orders")
-        .select("id, status, createdAt, total_amount, table_id, tables(id, number), users(email), order_items(id, quantity, unit_price, menu_items(name))")
+        .select(SELECT)
         .eq("restaurant_id", user.restaurantId)
         .eq("status", "DELIVERED")
         .gte("createdAt", today.toISOString())
@@ -124,45 +162,91 @@ export default function CashierPage() {
   }, [user?.restaurantId]);
 
   useEffect(() => {
+    if (!user?.restaurantId) return;
+
     fetchOrders();
 
-    const channel = supabase
+    const ordersChannel = supabase
       .channel("cashier-orders")
-      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, fetchOrders)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders", filter: `restaurant_id=eq.${user.restaurantId}` },
+        fetchOrders
+      )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
-  }, [fetchOrders]);
+    return () => { supabase.removeChannel(ordersChannel); };
+  }, [fetchOrders, user?.restaurantId]);
 
-  const markDelivered = async (order: Order) => {
+  // Suscripción Realtime a tables para bill_requested
+  useEffect(() => {
+    if (!user?.restaurantId) return;
+    const restaurantId = user.restaurantId;
+
+    // Carga inicial
+    supabase
+      .from("tables")
+      .select("id, bill_requested")
+      .eq("restaurant_id", restaurantId)
+      .then(({ data }) => {
+        if (!data) return;
+        const map: Record<string, boolean> = {};
+        data.forEach((t) => { map[t.id] = t.bill_requested ?? false; });
+        setBillRequestedTables(map);
+      });
+
+    const tablesChannel = supabase
+      .channel(`cashier-tables-${restaurantId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "tables", filter: `restaurant_id=eq.${restaurantId}` },
+        (payload) => {
+          setBillRequestedTables((prev) => ({
+            ...prev,
+            [payload.new.id]: payload.new.bill_requested ?? false,
+          }));
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(tablesChannel); };
+  }, [user?.restaurantId]);
+
+  const markDelivered = async (group: TableGroup) => {
     if (isProcessing) return;
     setIsProcessing(true);
 
     try {
-      // 1. Actualizar orden (Cajero + Baucher)
+      // 1. Marcar todas las órdenes READY del grupo como DELIVERED
+      const orderIds = group.orders.map((o) => o.id);
       const { error: orderError } = await supabase
         .from("orders")
-        .update({ 
+        .update({
           status: "DELIVERED",
           user_id: user?.id,
-          payment_reference: paymentReference || null 
+          payment_reference: paymentReference || null,
         })
-        .eq("id", order.id);
+        .in("id", orderIds)
+        .eq("status", "READY");
 
       if (orderError) throw orderError;
 
-      // 2. Liberar mesa
-      if (order.table_id) {
-        const { error: tableError } = await supabase
+      // 2. Pasar mesa a CLEANING — el garzón la libera tras limpiarla
+      if (group.tableId) {
+        await supabase
           .from("tables")
-          .update({ status: "FREE" })
-          .eq("id", order.table_id);
-        
-        if (tableError) console.error("Error al liberar mesa:", tableError);
+          .update({ status: "CLEANING", bill_requested: false })
+          .eq("id", group.tableId);
       }
 
-      // 3. Reset
-      setSelectedOrder(null);
+      // 3. Abrir comprobante en nueva pestaña
+      const receiptUrl = group.sessionId
+        ? `/receipt/session/${group.sessionId}?rid=${user?.restaurantId}`
+        : `/receipt/table/${group.tableId}?rid=${user?.restaurantId}`;
+      window.open(receiptUrl, "_blank");
+
+      // 4. Reset
+      setSelectedGroup(null);
       setPaymentReference("");
       await fetchOrders();
     } catch (err) {
@@ -204,8 +288,10 @@ export default function CashierPage() {
     }
   };
 
-  const totalPending = orders.reduce((s, o) => s + orderTotal(o), 0);
-  const totalHistory = history.reduce((s, o) => s + orderTotal(o), 0);
+  const pendingGroups = groupOrders(orders, billRequestedTables);
+  const historyGroups = groupOrders(history, billRequestedTables);
+  const totalPending  = pendingGroups.reduce((s, g) => s + g.total, 0);
+  const totalHistory  = historyGroups.reduce((s, g) => s + g.total, 0);
 
   return (
     <RestaurantThemeProvider theme={theme} isGlobal={true}>
@@ -277,8 +363,8 @@ export default function CashierPage() {
             >
               <Clock className="w-4 h-4" />
               Pendientes
-              {orders.length > 0 && (
-                <span className="ml-1 bg-white/20 px-2 py-0.5 rounded-full text-[10px]">{orders.length}</span>
+              {pendingGroups.length > 0 && (
+                <span className="ml-1 bg-white/20 px-2 py-0.5 rounded-full text-[10px]">{pendingGroups.length}</span>
               )}
             </button>
             <button
@@ -312,7 +398,7 @@ export default function CashierPage() {
               <div className="w-12 h-12 border-4 border-white/5 border-t-emerald-500 rounded-full animate-spin" />
               <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">Sincronizando órdenes...</p>
             </div>
-          ) : (activeTab === "pending" ? orders : history).length === 0 ? (
+          ) : (activeTab === "pending" ? pendingGroups : historyGroups).length === 0 ? (
             <div className="flex flex-col items-center justify-center py-32 gap-6 text-muted-foreground">
               <div className="w-24 h-24 bg-card rounded-[2.5rem] flex items-center justify-center border border-border/10">
                 {activeTab === "pending" ? <CheckCircle className="w-10 h-10 text-emerald-500/20" /> : <History className="w-10 h-10 text-slate-700" />}
@@ -323,12 +409,18 @@ export default function CashierPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
-              {(activeTab === "pending" ? orders : history).map((order) => {
-                const total = orderTotal(order);
+              {(activeTab === "pending" ? pendingGroups : historyGroups).map((group) => {
+                const allItems = group.orders.flatMap((o) => o.order_items);
+                const previewItems = allItems.slice(0, 4);
+                const extraCount  = allItems.length - previewItems.length;
+                const tableLabel  = group.sessionId
+                  ? `Mesas fusionadas`
+                  : `Mesa ${group.tableNumber ?? "S/N"}`;
+
                 return (
-                  <div 
-                    key={order.id} 
-                    className={`group relative bg-card/50 border border-border/5 rounded-[2rem] p-6 flex flex-col transition-all hover:bg-card hover:border-border/20 hover:shadow-2xl hover:shadow-black/20 ${activeTab === 'history' ? 'opacity-80' : ''}`}
+                  <div
+                    key={group.key}
+                    className={`group relative bg-card/50 border border-border/5 rounded-[2rem] p-6 flex flex-col transition-all hover:bg-card hover:border-border/20 hover:shadow-2xl hover:shadow-black/20 ${activeTab === "history" ? "opacity-80" : ""}`}
                   >
                     <div className="flex items-start justify-between mb-6">
                       <div>
@@ -336,28 +428,31 @@ export default function CashierPage() {
                           <div className="w-8 h-8 bg-white/5 rounded-xl flex items-center justify-center border border-white/5">
                             <Hash className="w-4 h-4 text-primary" />
                           </div>
-                          <h3 className="text-xl font-black text-foreground tracking-tighter">Mesa {order.tables?.number ?? "S/N"}</h3>
+                          <h3 className="text-xl font-black text-foreground tracking-tighter">{tableLabel}</h3>
                         </div>
-                        {order.users?.email && (
-                          <p className="text-[10px] text-muted-foreground flex items-center gap-1.5 uppercase font-black tracking-widest">
-                            <User className="w-3 h-3" />
-                            {order.users.email.split("@")[0]}
-                          </p>
-                        )}
+                        <p className="text-[10px] text-muted-foreground font-black tracking-widest uppercase">
+                          {group.orders.length} pedido{group.orders.length > 1 ? "s" : ""}
+                        </p>
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <span className="text-[10px] font-black text-muted-foreground bg-foreground/5 px-2 py-1 rounded-lg border border-border/5">
-                          {timeAgo(order.createdAt)}
+                          {timeAgo(group.oldestCreatedAt)}
                         </span>
-                        <Badge variant={order.status === "READY" ? "success" : "neutral"} className="font-black text-[9px] px-2 py-0.5">
-                          {order.status}
+                        <Badge variant={activeTab === "pending" ? "success" : "neutral"} className="font-black text-[9px] px-2 py-0.5">
+                          {activeTab === "pending" ? "READY" : "PAGADO"}
                         </Badge>
+                        {group.billRequested && (
+                          <span className="flex items-center gap-1 text-[9px] font-black text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 px-2 py-0.5 rounded-lg animate-pulse">
+                            <Bell className="w-3 h-3" />
+                            CUENTA
+                          </span>
+                        )}
                       </div>
                     </div>
 
-                    <div className="flex-1 space-y-3 mb-6">
-                      {order.order_items.slice(0, 3).map((item) => (
-                        <div key={item.id} className="flex justify-between items-center group/item">
+                    <div className="flex-1 space-y-2 mb-6">
+                      {previewItems.map((item, idx) => (
+                        <div key={`${item.id}-${idx}`} className="flex justify-between items-center group/item">
                           <div className="flex items-center gap-2">
                             <span className="text-xs font-black text-muted-foreground bg-foreground/5 w-6 h-6 flex items-center justify-center rounded-lg">{item.quantity}</span>
                             <span className="text-xs font-bold text-muted-foreground group-hover/item:text-foreground transition-colors truncate max-w-[120px]">
@@ -369,9 +464,9 @@ export default function CashierPage() {
                           </span>
                         </div>
                       ))}
-                      {order.order_items.length > 3 && (
-                        <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest text-center pt-2">
-                          + {order.order_items.length - 3} ítems adicionales
+                      {extraCount > 0 && (
+                        <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest text-center pt-1">
+                          + {extraCount} ítems adicionales
                         </p>
                       )}
                     </div>
@@ -379,12 +474,12 @@ export default function CashierPage() {
                     <div className="mt-auto pt-6 border-t border-white/5 space-y-4">
                       <div className="flex justify-between items-end">
                         <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total Cuenta</span>
-                        <span className="text-2xl font-black text-emerald-400 tracking-tighter">{formatCLP(total)}</span>
+                        <span className="text-2xl font-black text-emerald-400 tracking-tighter">{formatCLP(group.total)}</span>
                       </div>
-                      
+
                       {activeTab === "pending" ? (
                         <Button
-                          onClick={() => setSelectedOrder(order)}
+                          onClick={() => setSelectedGroup(group)}
                           className="w-full h-14 bg-white text-slate-950 hover:bg-emerald-500 hover:text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all group-hover:scale-[1.02] shadow-xl shadow-black/20"
                         >
                           Revisar y Cobrar

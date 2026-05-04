@@ -4,6 +4,26 @@
 
 ---
 
+## CHANGELOG DE MIGRACIONES
+
+| Versión | Fecha | Descripción |
+|---|---|---|
+| `0003_schema_extensions` | 2025-05-04 | `TableStatus.CLEANING`; timestamps `validated_at / preparing_at / ready_at` en `orders`; campo `session_id` en `orders`; tablas `push_subscriptions` y `reviews` con sus políticas RLS |
+
+### Detalle de `0003_schema_extensions`
+
+**`TableStatus.CLEANING`:** Nuevo estado intermedio entre el cobro por caja y la habilitación de la mesa. El cajero la deja en `CLEANING` al procesar el pago; el garzón la mueve a `FREE` al terminar la limpieza.
+
+**Timestamps de ciclo de vida en `orders`:** Permiten calcular tiempos reales de operación sin depender de diferencias entre `created_at` y `updated_at`. La función `updateOrderStatus()` en `@menu-bites/auth` los escribe automáticamente al transicionar.
+
+**`session_id` en `orders`:** UUID compartido entre pedidos de mesas físicamente distintas que el garzón fusionó en una única cuenta. Nulo para mesas no fusionadas. Índice parcial `WHERE session_id IS NOT NULL` para eficiencia.
+
+**`push_subscriptions`:** Almacena suscripciones VAPID del browser para notificaciones push nativas (Wave 5.1). RLS permite inserción/lectura propia y lectura por roles con acceso al restaurante.
+
+**`reviews`:** Calificaciones 1–5 del cliente tras el pago (Wave 5.3). RLS permite INSERT anónimo (cliente sin sesión) y SELECT autenticado por restaurant_id.
+
+---
+
 ## 1. ARQUITECTURA MULTI-TENANT
 
 El sistema utiliza una arquitectura **shared database, shared schema** con discriminadores de columna. Todos los tenants (restaurantes) conviven en las mismas tablas físicas, aislados lógicamente por el campo `restaurant_id`.

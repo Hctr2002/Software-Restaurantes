@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { X, Plus, Trash2, Volume2, Timer, Layers, ShoppingBag, ChefHat } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { X, Plus, Trash2, Volume2, Timer, Layers, ShoppingBag, ChefHat, Package, Download, Upload, AlertTriangle, CheckCircle, Loader2 } from "lucide-react";
 import { supabase } from "@menu-bites/auth";
 import { cn } from "@menu-bites/ui";
 import { type KDSSettings } from "../../lib/kdsSettings";
 
-type Tab = "umbrales" | "categorias" | "sonido" | "auto" | "86items";
+type Tab = "umbrales" | "categorias" | "sonido" | "auto" | "86items" | "inventario";
 
 interface Props {
   settings: KDSSettings;
@@ -23,6 +23,13 @@ export function SettingsModal({ settings: initial, restaurantId, onSave, onClose
   const [loadingMenu, setLoadingMenu] = useState(false);
   const [newCatName, setNewCatName] = useState("");
   const [newCatMinutes, setNewCatMinutes] = useState(15);
+
+  // Inventario tab state
+  type InventarioStatus = "idle" | "downloading" | "uploading" | "success" | "error";
+  const [invStatus, setInvStatus]     = useState<InventarioStatus>("idle");
+  const [invMessage, setInvMessage]   = useState("");
+  const [invCritical, setInvCritical] = useState<{ name: string; stock: number; unit: string }[]>([]);
+  const fileInputRef                  = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!restaurantId || (tab !== "86items" && tab !== "categorias")) return;
@@ -43,6 +50,53 @@ export function SettingsModal({ settings: initial, restaurantId, onSave, onClose
     await supabase.from("menu_items").update({ is_active: newActive }).eq("id", item.id);
   };
 
+  const handleDownloadCSV = async () => {
+    if (!restaurantId) return;
+    setInvStatus("downloading");
+    setInvMessage("");
+    try {
+      const res = await fetch("/api/inventory");
+      if (!res.ok) throw new Error("Error al descargar");
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href     = url;
+      a.download = "inventario.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+      setInvStatus("idle");
+    } catch {
+      setInvStatus("error");
+      setInvMessage("Error al descargar el inventario.");
+    }
+  };
+
+  const handleUploadCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !restaurantId) return;
+    setInvStatus("uploading");
+    setInvMessage("");
+    setInvCritical([]);
+    try {
+      const text = await file.text();
+      const res  = await fetch("/api/inventory", {
+        method:  "POST",
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+        body:    text,
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Error al importar");
+      setInvStatus("success");
+      setInvMessage(`${json.updated} ítem(s) actualizado(s)${json.errors?.length ? ` · ${json.errors.length} error(es)` : ""}.`);
+      setInvCritical(json.critical ?? []);
+    } catch (err: any) {
+      setInvStatus("error");
+      setInvMessage(err.message ?? "Error inesperado al importar.");
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   const addCategoryTime = () => {
     if (!newCatName.trim()) return;
     setDraft(d => ({ ...d, categoryTimes: [...d.categoryTimes, { name: newCatName.trim(), minutes: newCatMinutes }] }));
@@ -55,11 +109,12 @@ export function SettingsModal({ settings: initial, restaurantId, onSave, onClose
   };
 
   const tabs: { key: Tab; label: string; Icon: React.ElementType }[] = [
-    { key: "umbrales", label: "Umbrales", Icon: Timer },
-    { key: "categorias", label: "Categorías", Icon: Layers },
-    { key: "sonido", label: "Sonido", Icon: Volume2 },
-    { key: "auto", label: "Auto-borrado", Icon: ChefHat },
-    { key: "86items", label: "Sin Stock", Icon: ShoppingBag },
+    { key: "umbrales",    label: "Umbrales",    Icon: Timer },
+    { key: "categorias",  label: "Categorías",  Icon: Layers },
+    { key: "sonido",      label: "Sonido",      Icon: Volume2 },
+    { key: "auto",        label: "Auto-borrado", Icon: ChefHat },
+    { key: "86items",     label: "Sin Stock",   Icon: ShoppingBag },
+    { key: "inventario",  label: "Inventario",  Icon: Package },
   ];
 
   return (
@@ -190,6 +245,102 @@ export function SettingsModal({ settings: initial, restaurantId, onSave, onClose
             </div>
           )}
 
+          {tab === "inventario" && (
+            <div className="space-y-6">
+              <p className="text-white/40 text-sm">
+                Descarga el inventario actual como CSV, actualiza los conteos en tu hoja de cálculo y vuelve a subirlo.
+              </p>
+
+              {/* Instrucciones rápidas */}
+              <div className="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-2 text-xs text-white/50">
+                <p className="font-bold text-white/70 uppercase tracking-widest text-[10px] mb-2">Cómo usar</p>
+                <p>1. Descarga el CSV con el botón de abajo.</p>
+                <p>2. Abre el archivo en Excel, Numbers o Google Sheets.</p>
+                <p>3. Edita la columna <span className="font-black text-white/80">stock_actual</span> con los conteos reales.</p>
+                <p>4. Guarda como CSV y súbelo con el botón "Subir Conteo".</p>
+                <p className="text-yellow-400/70 pt-1">Solo se actualizan los stocks. El nombre y la unidad no cambian.</p>
+              </div>
+
+              {/* Acciones */}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleDownloadCSV}
+                  disabled={!restaurantId || invStatus === "downloading"}
+                  className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary/20 text-primary border border-primary/30 text-xs font-bold uppercase tracking-widest hover:bg-primary/30 transition-all disabled:opacity-40"
+                >
+                  {invStatus === "downloading" ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )}
+                  Descargar CSV
+                </button>
+
+                <label className={cn(
+                  "flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl border text-xs font-bold uppercase tracking-widest transition-all cursor-pointer",
+                  !restaurantId || invStatus === "uploading"
+                    ? "opacity-40 pointer-events-none bg-white/5 border-white/10 text-white/40"
+                    : "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30"
+                )}>
+                  {invStatus === "uploading" ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Upload className="w-4 h-4" />
+                  )}
+                  Subir Conteo
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".csv,text/csv,text/plain"
+                    className="hidden"
+                    onChange={handleUploadCSV}
+                    disabled={!restaurantId || invStatus === "uploading"}
+                  />
+                </label>
+              </div>
+
+              {/* Resultado */}
+              {invStatus === "success" && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
+                    <CheckCircle className="w-4 h-4 shrink-0" />
+                    {invMessage}
+                  </div>
+                  {invCritical.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-[10px] font-black text-red-400 uppercase tracking-widest">
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                        Stock Crítico — {invCritical.length} ítem(s) bajo el umbral (≤ 5)
+                      </div>
+                      <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                        {invCritical.map((item, i) => (
+                          <div key={i} className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20">
+                            <span className="text-red-300 text-xs font-bold">{item.name}</span>
+                            <span className="text-red-400 text-xs font-black tabular-nums">
+                              {Number(item.stock).toFixed(2)} {item.unit}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {invCritical.length === 0 && (
+                    <p className="text-[10px] text-emerald-400/60 text-center font-bold uppercase tracking-widest">
+                      Todos los ítems tienen stock suficiente ✓
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {invStatus === "error" && (
+                <div className="flex items-center gap-2 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  {invMessage}
+                </div>
+              )}
+            </div>
+          )}
+
           {tab === "86items" && (
             <div className="space-y-4">
               <p className="text-white/40 text-sm">Marca productos como agotados. El cambio es inmediato en el sistema.</p>
@@ -224,9 +375,9 @@ export function SettingsModal({ settings: initial, restaurantId, onSave, onClose
 
         <div className="px-8 py-5 border-t border-white/5 flex justify-end space-x-3">
           <button onClick={onClose} className="px-6 py-3 rounded-xl text-white/40 text-xs font-bold uppercase tracking-widest hover:text-white transition-colors">
-            {tab === "86items" ? "Cerrar" : "Cancelar"}
+            {tab === "86items" || tab === "inventario" ? "Cerrar" : "Cancelar"}
           </button>
-          {tab !== "86items" && (
+          {tab !== "86items" && tab !== "inventario" && (
             <button onClick={() => onSave(draft)}
               className="px-8 py-3 bg-primary rounded-xl text-primary-foreground text-xs font-bold uppercase tracking-widest hover:bg-primary/90 transition-all">
               Guardar

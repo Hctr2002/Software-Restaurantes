@@ -1,19 +1,32 @@
 "use client";
 
-import React, { useState, useEffect, use, useRef } from 'react';
-import { ShoppingBag, Search, Plus, Info, ChevronRight, Loader2, MapPin, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { getPublicImageUrl } from '@/lib/supabase';
+import React, { useState, useEffect, use, useRef, useCallback } from 'react';
+import { ShoppingBag, Search, Plus, Info, ChevronRight, Loader2, MapPin, AlertCircle, CheckCircle2, Receipt, ClipboardList, X } from 'lucide-react';
+import { getPublicImageUrl, supabase } from '@/lib/supabase';
 import { useTenant } from '@/context/TenantContext';
 import {
   getCategoriesByRestaurant,
   getMenuItemsByRestaurant,
   getTableByNumber,
   placeOrder,
+  getTableOrders,
   type Category,
   type MenuItem,
   type CartItem,
   type Table,
+  type TableOrder,
 } from '@/lib/tenant';
+
+const STATUS_STEPS = [
+  { key: 'PENDING',    label: 'Solicitado',      icon: '📋' },
+  { key: 'VALIDATED',  label: 'Confirmado',       icon: '✅' },
+  { key: 'PREPARING',  label: 'En preparación',   icon: '🔥' },
+  { key: 'READY',      label: 'Listo',            icon: '🍽️' },
+] as const;
+
+function getStepIndex(status: string) {
+  return STATUS_STEPS.findIndex((s) => s.key === status);
+}
 
 export default function MenuPage({
   params: paramsPromise,
@@ -39,6 +52,17 @@ export default function MenuPage({
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
+  const [orderPlaced, setOrderPlaced]         = useState(false);
+  const [isRequestingBill, setIsRequestingBill] = useState(false);
+  const [billRequested, setBillRequested]       = useState(false);
+
+  // W2.2 — Tracker del último pedido
+  const [lastOrderId, setLastOrderId]       = useState<string | null>(null);
+  const [lastOrderStatus, setLastOrderStatus] = useState<string>('PENDING');
+
+  // W2.2 — Mi Cuenta (pedidos acumulados de la mesa)
+  const [tableOrders, setTableOrders]       = useState<TableOrder[]>([]);
+  const [isCuentaOpen, setIsCuentaOpen]     = useState(false);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -139,16 +163,80 @@ export default function MenuPage({
     setOrderError(null);
     try {
       console.log('[MenuPage] Enviando pedido → restaurantId:', restaurant.id, '| mesa:', validatedTable.number);
-      await placeOrder(restaurant.id, validatedTable.number.toString(), cart);
-      console.log('[MenuPage] Pedido creado con éxito');
+      const orderId = await placeOrder(restaurant.id, validatedTable.number.toString(), cart);
+      console.log('[MenuPage] Pedido creado con éxito:', orderId);
+      setLastOrderId(orderId);
+      setLastOrderStatus('PENDING');
       setCart([]);
       setIsCheckoutOpen(false);
       setOrderSuccess(true);
+      setOrderPlaced(true);
     } catch (err: any) {
       console.error('[MenuPage] Error al realizar pedido:', err);
       setOrderError(err?.message ?? 'Error al procesar el pedido. Intenta de nuevo.');
     } finally {
       setIsPlacingOrder(false);
+    }
+  };
+
+  // W2.2 — Cargar pedidos acumulados cuando la mesa está validada
+  const fetchTableOrders = useCallback(async () => {
+    if (!validatedTable) return;
+    const orders = await getTableOrders(validatedTable.id);
+    setTableOrders(orders);
+  }, [validatedTable]);
+
+  useEffect(() => {
+    if (!validatedTable) return;
+    fetchTableOrders();
+
+    const channel = supabase
+      .channel(`customer-orders-${validatedTable.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders', filter: `table_id=eq.${validatedTable.id}` },
+        () => { fetchTableOrders(); }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [validatedTable, fetchTableOrders]);
+
+  // W2.2 — Tracker Realtime del último pedido
+  useEffect(() => {
+    if (!lastOrderId) return;
+
+    const channel = supabase
+      .channel(`tracker-${lastOrderId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${lastOrderId}` },
+        (payload) => {
+          const newStatus = payload.new.status as string;
+          setLastOrderStatus(newStatus);
+          if (newStatus === 'DELIVERED' || newStatus === 'REJECTED') {
+            setTimeout(() => setLastOrderId(null), 4000);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [lastOrderId]);
+
+  const handleRequestBill = async () => {
+    if (!validatedTable || isRequestingBill || billRequested) return;
+    setIsRequestingBill(true);
+    try {
+      const res = await fetch('/api/bill-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ table_id: validatedTable.id }),
+      });
+      if (res.ok) setBillRequested(true);
+    } catch {
+    } finally {
+      setIsRequestingBill(false);
     }
   };
 
@@ -458,6 +546,142 @@ export default function MenuPage({
               Continuar comprando
             </button>
           </div>
+        </div>
+      )}
+
+      {/* W2.2 — Tracker del último pedido */}
+      {lastOrderId && lastOrderStatus !== 'DELIVERED' && lastOrderStatus !== 'REJECTED' && (
+        <div className="fixed top-[73px] left-0 right-0 z-40 px-4 py-2 bg-navy-dark/95 backdrop-blur-md border-b border-white/5">
+          <div className="max-w-md mx-auto flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 flex-1 overflow-x-auto no-scrollbar">
+              {STATUS_STEPS.map((step, idx) => {
+                const currentIdx = getStepIndex(lastOrderStatus);
+                const done    = idx < currentIdx;
+                const active  = idx === currentIdx;
+                return (
+                  <React.Fragment key={step.key}>
+                    <div className={`flex items-center gap-1.5 shrink-0 transition-all ${
+                      active  ? 'opacity-100' :
+                      done    ? 'opacity-60'  : 'opacity-20'
+                    }`}>
+                      <span className="text-base leading-none">{step.icon}</span>
+                      <span className={`text-[10px] font-black uppercase tracking-wide ${active ? 'text-sage' : 'text-sand/60'}`}>
+                        {step.label}
+                      </span>
+                    </div>
+                    {idx < STATUS_STEPS.length - 1 && (
+                      <span className={`text-[10px] shrink-0 transition-all ${idx < currentIdx ? 'text-sage/60' : 'text-white/10'}`}>›</span>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+            {lastOrderStatus === 'READY' && (
+              <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-lg shrink-0 animate-pulse">
+                ¡Listo!
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* W2.2 — Mi Cuenta (pedidos acumulados) */}
+      {isCuentaOpen && (
+        <div className="fixed inset-0 z-[70] animate-in fade-in duration-200">
+          <div className="absolute inset-0 bg-navy-dark/80 backdrop-blur-md" onClick={() => setIsCuentaOpen(false)} />
+          <div className="absolute bottom-0 left-0 right-0 glass-panel rounded-t-[2.5rem] p-6 max-h-[80vh] overflow-y-auto animate-in slide-in-from-bottom duration-300">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-sand flex items-center gap-2">
+                <ClipboardList className="text-sage w-5 h-5" />
+                Mi Cuenta — Mesa {validatedTable?.number}
+              </h2>
+              <button onClick={() => setIsCuentaOpen(false)} className="p-1.5 rounded-full hover:bg-sand/10 transition-colors">
+                <X className="w-4 h-4 text-sand/60" />
+              </button>
+            </div>
+
+            {tableOrders.length === 0 ? (
+              <p className="text-center text-sand/40 py-8 text-sm">No hay pedidos activos.</p>
+            ) : (
+              <div className="space-y-4">
+                {tableOrders.map((order, i) => (
+                  <div key={order.id} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black text-sand/40 uppercase tracking-widest">Pedido {i + 1}</span>
+                      <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${
+                        order.status === 'READY'      ? 'bg-emerald-500/20 text-emerald-400' :
+                        order.status === 'PREPARING'  ? 'bg-primary/20 text-primary' :
+                        order.status === 'VALIDATED'  ? 'bg-blue-500/20 text-blue-400' :
+                        'bg-sand/10 text-sand/50'
+                      }`}>
+                        {order.status === 'PENDING'   ? 'Solicitado'    :
+                         order.status === 'VALIDATED' ? 'Confirmado'    :
+                         order.status === 'PREPARING' ? 'En preparación':
+                         order.status === 'READY'     ? '🍽️ Listo'      : order.status}
+                      </span>
+                    </div>
+                    {order.order_items.map((item, j) => (
+                      <div key={j} className="flex justify-between items-center text-sm">
+                        <span className="text-sand/70">
+                          <span className="font-bold text-sand/50 mr-2">{item.quantity}×</span>
+                          {item.menu_items?.name ?? 'Item'}
+                        </span>
+                        <span className="text-sand font-bold">
+                          ${(Number(item.unit_price) * item.quantity).toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+                <div className="pt-4 border-t border-white/10 flex justify-between items-center">
+                  <span className="font-bold text-sand">Total acumulado</span>
+                  <span className="text-xl font-black text-sage">
+                    ${tableOrders.reduce((s, o) => s + o.order_items.reduce((si, i) => si + Number(i.unit_price) * i.quantity, 0), 0).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* W2.2 — Botón flotante "Mi Cuenta" */}
+      {orderPlaced && validatedTable && !isCheckoutOpen && tableOrders.length > 0 && (
+        <div className="fixed bottom-8 left-6 z-50 animate-in slide-in-from-bottom-10 fade-in duration-500">
+          <button
+            onClick={() => setIsCuentaOpen(true)}
+            aria-label="Ver mi cuenta"
+            className="flex items-center gap-2 px-4 py-3 rounded-2xl shadow-2xl font-bold text-sm bg-navy-light border border-sand/10 text-sand hover:bg-sand/10 transition-all active:scale-95"
+          >
+            <ClipboardList className="w-4 h-4 text-sage" aria-hidden="true" />
+            Mi Cuenta
+            <span className="bg-sage/20 text-sage text-[10px] font-black px-1.5 py-0.5 rounded-full">
+              {tableOrders.length}
+            </span>
+          </button>
+        </div>
+      )}
+
+      {/* Floating Bill Request Button — visible once an order has been placed */}
+      {orderPlaced && validatedTable && !isCheckoutOpen && (
+        <div className="fixed bottom-8 right-6 z-50 animate-in slide-in-from-bottom-10 fade-in duration-500">
+          <button
+            onClick={handleRequestBill}
+            disabled={isRequestingBill || billRequested}
+            aria-label="Solicitar la cuenta"
+            className={`flex items-center gap-2 px-5 py-3 rounded-2xl shadow-2xl font-bold text-sm transition-all active:scale-95 ${
+              billRequested
+                ? 'bg-green-700/80 text-white cursor-default border border-green-500/30'
+                : 'bg-navy-light border border-sand/10 text-sand hover:bg-sand/10'
+            }`}
+          >
+            {isRequestingBill ? (
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Receipt className="w-4 h-4" aria-hidden="true" />
+            )}
+            {billRequested ? 'Cuenta solicitada ✓' : 'Solicitar Cuenta'}
+          </button>
         </div>
       )}
 

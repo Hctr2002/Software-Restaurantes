@@ -266,13 +266,33 @@ Interfaz móvil para la atención de mesas y toma de pedidos. Accede por `/{slug
 
 ### 4.1 Vista de Planta (Mapa de Mesas)
 
-Vista en grilla del estado de todas las mesas del restaurante con indicadores visuales:
+Vista en grilla del estado de todas las mesas con indicadores visuales en tiempo real:
 
-- **Verde (FREE):** Mesa disponible para nuevos clientes.
-- **Rojo (OCCUPIED):** Mesa con pedido activo.
-- **Amarillo (RESERVED):** Mesa reservada.
-- **Icono de alerta:** Aparece cuando `help_requested = true` (el cliente pide asistencia).
-- **Icono de cuenta:** Aparece cuando `bill_requested = true` (el cliente pide la cuenta).
+| Badge | Color | Significado |
+|---|---|---|
+| `FREE` | Verde | Mesa disponible |
+| `OCCUPIED` | Rojo | Mesa con clientes activos |
+| `RESERVED` | Amarillo | Mesa reservada |
+| `CLEANING` | Azul cielo | Mesa pagada, pendiente de limpieza |
+| `LISTO` | Verde oscuro | Hay pedidos READY en esa mesa listos para servir |
+| `CUENTA` | Amarillo | El cliente solicitó la cuenta desde el portal |
+
+**Alertas automáticas con sonido:** Cuando el KDS marca una orden como READY, el terminal emite una alerta sonora para notificar al garzón que debe llevar el plato.
+
+**Sección "Limpieza pendiente":** Aparece automáticamente sobre el mapa de mesas cuando alguna mesa está en estado CLEANING. El garzón presiona "Mesa lista ✓" para marcarla como FREE una vez limpia.
+
+**Sección "Listos para servir":** Lista de órdenes en estado READY con el número de mesa correspondiente.
+
+**Sección "Cuenta solicitada":** Destaca las mesas con `bill_requested = true` para que el garzón coordine con caja.
+
+### 4.2 Tab "Pedidos Pendientes"
+
+Muestra todas las órdenes en estado `PENDING` que esperan validación del garzón. El badge del tab indica el número de pedidos sin atender.
+
+Acciones por pedido:
+- **Nota de cocina:** Campo de texto para agregar instrucciones especiales (alergias, preparación) antes de validar. Se guarda en `orders.notes` y el KDS lo muestra en el ticket.
+- **Rechazar:** Cambia el status a `REJECTED`. Si no quedan pedidos activos en la mesa, la mesa vuelve a `FREE` automáticamente.
+- **Validar:** Cambia el status a `VALIDATED`. La orden aparece en el KDS para que cocina la prepare.
 
 ### 4.2 Toma de Pedidos
 
@@ -369,12 +389,14 @@ TOTAL                $24.970
 
 ### 5.3 Proceso de Cobro y Cierre
 
-1. El cajero revisa el detalle de la cuenta.
-2. Selecciona el método de pago: `Efectivo`, `Tarjeta` o `Transferencia`.
+1. El cajero revisa el detalle de la cuenta (todas las órdenes READY de la mesa consolidadas).
+2. Ingresa la referencia de comprobante (voucher físico, transferencia, etc.).
 3. Confirma el cobro → el sistema ejecuta en secuencia:
-   - `order.status → DELIVERED` (todos los pedidos de la mesa).
-   - `table.status → FREE`.
+   - `orders.status → DELIVERED` para todas las órdenes READY de esa mesa.
+   - `table.status → CLEANING` *(nuevo)*: la mesa no queda libre inmediatamente; el garzón debe confirmar la limpieza desde su terminal.
    - `table.bill_requested → false`.
+
+> **Ciclo completo de mesa:** `FREE → OCCUPIED → CLEANING → FREE`. El estado `CLEANING` garantiza que no se asignen clientes nuevos a una mesa que aún no ha sido preparada.
 
 ```mermaid
 %%{init: {
@@ -471,17 +493,33 @@ sequenceDiagram
 3. Confirma el pedido → `POST /api/customer/orders` con `restaurant_id` y `table_id` embebidos.
 4. El pedido aparece en el Local Dashboard y en el KDS como `PENDING`.
 
-### 6.4 Seguimiento del Estado del Pedido
+### 6.4 Tracker de Pedido en Tiempo Real
 
-Después de confirmar, el cliente puede seguir el estado de su pedido en tiempo real:
+Inmediatamente después de confirmar, aparece una barra de progreso en la parte superior de la pantalla con el estado en tiempo real del último pedido realizado:
 
-| Estado mostrado | Estado interno | Mensaje al cliente |
-|---|---|---|
-| "Recibido" | `PENDING` | Tu pedido fue recibido |
-| "Confirmado" | `VALIDATED` | Tu pedido está confirmado |
-| "En preparación" | `PREPARING` | Tu pedido está siendo preparado |
-| "Listo" | `READY` | Tu pedido está listo, el garzón lo llevará pronto |
-| "Entregado" | `DELIVERED` | Disfruta tu pedido |
+```
+[📋 Solicitado] › [✅ Confirmado] › [🔥 En preparación] › [🍽️ Listo]
+```
+
+El tracker usa Supabase Realtime para actualizarse sin recargar la página. Desaparece automáticamente cuando el pedido pasa a `DELIVERED`.
+
+| Paso visible | Estado interno |
+|---|---|
+| Solicitado | `PENDING` — esperando validación del garzón |
+| Confirmado | `VALIDATED` — el garzón aprobó, va a cocina |
+| En preparación | `PREPARING` — cocina está trabajando en el pedido |
+| Listo | `READY` — el garzón llevará el plato a la mesa |
+
+### 6.5 Mi Cuenta (Consumo Acumulado)
+
+El cliente puede ver el total acumulado de todos sus pedidos activos desde el botón flotante **"Mi Cuenta"** en la esquina inferior izquierda. Aparece automáticamente después del primer pedido confirmado.
+
+El panel muestra:
+- Cada pedido del turno con sus items, cantidades y precios.
+- Estado de cada pedido (Solicitado / Confirmado / En preparación / Listo).
+- **Total acumulado** sumando todos los pedidos activos de la mesa.
+
+> Este total es de referencia. El cajero calcula el total oficial al cerrar la cuenta.
 
 ### 6.5 Solicitudes desde la Mesa
 

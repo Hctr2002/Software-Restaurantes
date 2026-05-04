@@ -90,7 +90,7 @@ export function useKitchenOrders(restaurantId: string | undefined) {
           )
         `)
         .eq("restaurant_id", restaurantId)
-        .neq("status", "DELIVERED")
+        .in("status", ["VALIDATED", "PREPARING", "READY"])
         .order("created_at", { ascending: true });
 
       if (!error) setOrders(data);
