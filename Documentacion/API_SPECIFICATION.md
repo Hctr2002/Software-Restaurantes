@@ -431,3 +431,138 @@ El único endpoint REST que consume el KDS es para cambiar el estado de un pedid
 | `404 Not Found` | El recurso solicitado no existe | |
 | `409 Conflict` | Conflicto de unicidad (ej: slug duplicado) | |
 | `500 Internal Server Error` | Error no controlado en el servidor | |
+| `503 Service Unavailable` | Servicio externo no disponible (ej: VAPID no configurado) | |
+
+---
+
+## 11. ENDPOINTS NUEVOS — WAVES 1-6 (v2.0)
+
+### 11.1 Customer Portal — Nuevos Endpoints
+
+#### `POST /api/orders` (actualizado)
+Además de crear la orden, ahora actualiza el estado de la mesa:
+
+```json
+// Efecto colateral nuevo (automático):
+// tables.status → "OCCUPIED" cuando table_id != null
+```
+
+#### `POST /api/bill-request`
+Permite al cliente solicitar la cuenta desde el portal.
+
+- **Auth:** Ninguna (anon, usa service role en servidor)
+- **Body:** `{ "table_id": "uuid" }`
+- **Response 200:** `{ "ok": true }`
+- **Efecto:** `tables.bill_requested = true` — dispara badge en Waiter Terminal y Cashier Dashboard via Realtime.
+
+#### `POST /api/reviews`
+Registra la calificación del cliente tras el pago.
+
+- **Auth:** Ninguna (anon, usa service role en servidor)
+- **Body:**
+```json
+{
+  "order_id":      "uuid",
+  "restaurant_id": "uuid",
+  "table_id":      "uuid | null",
+  "rating":        5,
+  "comment":       "Excelente servicio"
+}
+```
+- **Validación:** `rating` entre 1 y 5 (obligatorio). `comment` opcional.
+- **Response 200:** `{ "ok": true }`
+- **RLS:** INSERT público. SELECT restringido a usuarios del restaurante.
+
+---
+
+### 11.2 Kitchen KDS — Endpoints de Inventario
+
+#### `GET /api/inventory`
+Exporta el inventario del restaurante como archivo CSV descargable.
+
+- **Auth:** Cookie de sesión `sb-kds-session` (rol COCINA)
+- **Response 200:** `text/csv` con cabecera `Content-Disposition: attachment; filename="inventario.csv"`
+- **Formato CSV:**
+```
+id,nombre,stock_actual,unidad
+uuid-1,"Tomates",5.00,kg
+uuid-2,"Queso Rallado",0.50,kg
+```
+
+#### `POST /api/inventory`
+Importa conteos de stock desde un CSV y actualiza únicamente el campo `stock`.
+
+- **Auth:** Cookie de sesión `sb-kds-session` (rol COCINA)
+- **Content-Type:** `text/plain; charset=utf-8`
+- **Body:** Texto CSV con columnas `id` y `stock_actual` (o `stock`)
+- **Response 200:**
+```json
+{
+  "updated":  12,
+  "errors":   [],
+  "critical": [
+    { "name": "Tomates", "stock": 2.0, "unit": "kg" }
+  ],
+  "criticalThreshold": 5
+}
+```
+- **Regla de negocio:** Solo se actualiza `stock`. `nombre` y `unidad` nunca se sobreescriben desde el CSV.
+
+---
+
+### 11.3 Waiter Terminal — Endpoints de Sesión y Push
+
+#### `POST /api/sessions`
+Fusiona varias mesas bajo un `session_id` compartido, asignándolo a todas sus órdenes activas.
+
+- **Auth:** Cookie `sb-waiter-session` (rol GARZON)
+- **Body:** `{ "tableIds": ["uuid-a", "uuid-b"] }` — mínimo 2 elementos
+- **Response 200:** `{ "sessionId": "uuid-nuevo", "ordersUpdated": 4 }`
+- **Efecto:** Cashier Dashboard agrupará estas órdenes como una sola cuenta cobrable.
+
+#### `DELETE /api/sessions`
+Separa mesas fusionadas limpiando el `session_id` de sus órdenes activas.
+
+- **Auth:** Cookie `sb-waiter-session` (rol GARZON)
+- **Body:** `{ "sessionId": "uuid" }`
+- **Response 200:** `{ "ok": true }`
+
+#### `POST /api/push/subscribe`
+Registra la suscripción VAPID del browser del garzón en la tabla `push_subscriptions`.
+
+- **Auth:** Cookie `sb-waiter-session` (rol GARZON)
+- **Body:** Objeto de suscripción PushSubscription (`{ endpoint, keys: { p256dh, auth } }`)
+- **Response 200:** `{ "ok": true }`
+- **Comportamiento:** Upsert por `(user_id, restaurant_id)` — solo una suscripción activa por garzón por restaurante.
+
+#### `DELETE /api/push/subscribe`
+Elimina la suscripción push del garzón actual.
+
+- **Auth:** Cookie `sb-waiter-session`
+- **Response 200:** `{ "ok": true }`
+
+#### `POST /api/push/notify`
+Envía una notificación Web Push a todos los garzones del restaurante.
+
+- **Auth:** Interno — llamado desde el propio Waiter Terminal cuando detecta ORDER_READY via Realtime
+- **Body:** `{ "restaurantId": "uuid", "tableNumber": 7 }`
+- **Response 200:** `{ "sent": 2 }` — número de dispositivos notificados
+- **Manejo de errores:** Suscripciones expiradas (HTTP 410/404) se eliminan automáticamente.
+
+---
+
+### 11.4 Cashier Dashboard — Comprobantes Digitales
+
+#### `GET /receipt/table/[tableId]?rid=[restaurantId]`
+Página Server Component de comprobante imprimible para una mesa sin fusión.
+
+- **Auth:** Ninguna — acceso público filtrado por `restaurant_id`
+- **Parámetros:** `tableId` en ruta, `rid` como query param obligatorio
+- **Renders:** HTML imprimible con `@media print` que oculta botones de acción
+- **Contenido:** Nombre del restaurante, mesa, fecha/hora, desglose de ítems por pedido, subtotal, propina sugerida 10%, total, referencia de pago
+
+#### `GET /receipt/session/[sessionId]?rid=[restaurantId]`
+Comprobante unificado para mesas fusionadas bajo un `session_id`.
+
+- **Auth:** Ninguna — acceso público filtrado por `restaurant_id`
+- **Renders:** HTML imprimible con desglose separado por mesa dentro de la sesión y total global

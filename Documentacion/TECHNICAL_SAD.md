@@ -345,6 +345,104 @@ flowchart LR
 - **Turborepo Build Cache:** Turborepo detecta qué paquetes cambiaron y solo recompila los afectados, reduciendo tiempos de build hasta en un 80%.
 - **Variables de Entorno:** Cada aplicación tiene sus propias variables de entorno en Vercel (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`). El `SUPABASE_SERVICE_ROLE_KEY` nunca se expone al cliente.
 
+### 6.3 Estrategia de Dominios (sin cambios)
+
+---
+
+## 7. ACTUALIZACIONES ARQUITECTÓNICAS — v2.0 (Waves 1–6)
+
+### 7.1 Patrón de Componentes `_components/`
+
+A partir de la Wave 6 se adoptó el patrón de extracción de sub-componentes dentro de cada app. Cada directorio `src/app/_components/` contiene componentes autónomos (solo reciben props, sin acceso a estado global):
+
+| App | Componentes |
+|---|---|
+| `cashier-dashboard` | `AlertModal`, `OrderGroupCard`, `PaymentSlideOver` |
+| `waiter-terminal` | `PendingOrderCard`, `ReadyOrdersBanner`, `TableMergeBar` |
+| `customer-portal` | `OrderTracker`, `RatingModal`, `CuentaSheet`, `MenuItemCard` |
+
+**Criterio de extracción:** Un bloque JSX se extrae cuando supera 50 líneas, tiene responsabilidad única y es reutilizable o testeable de forma independiente.
+
+### 7.2 Paquete Compartido `@menu-bites/auth` — Extensiones
+
+El paquete `packages/auth` ahora exporta dos módulos adicionales:
+
+**`src/utils.ts` — Utilidades de negocio:**
+
+| Función | Descripción |
+|---|---|
+| `formatCLP(n)` | Formatea número como moneda CLP |
+| `timeAgo(iso)` | Tiempo relativo legible ("5 min", "1h") |
+| `formatDateTime(iso)` | Fecha y hora formateada en es-CL |
+| `orderItemTotal(item)` | Calcula subtotal de un ítem de orden |
+| `diffMinutes(a, b)` | Diferencia en minutos entre dos timestamps |
+| `pluralize(n, s, p?)` | Pluralización simple en español |
+
+**`src/constants.ts` — Constantes operacionales:**
+
+| Constante | Valor | Uso |
+|---|---|---|
+| `LOW_STOCK_THRESHOLD` | `5` | Umbral de stock bajo en inventario |
+| `CRITICAL_STOCK_THRESHOLD` | `5` | Umbral crítico en API del KDS |
+| `STALE_ORDER_MINUTES` | `3` | Minutos sin validar antes de escalación |
+| `ORDER_STATUS_LABEL` | Record | Etiquetas en español por estado de orden |
+| `TABLE_STATUS_LABEL` | Record | Etiquetas en español por estado de mesa |
+
+### 7.3 Service Workers
+
+Dos Service Workers registrados para resiliencia offline:
+
+**KDS (`apps/kitchen-kds/public/sw.js`):**
+- Estrategia Cache-First para `_next/static/`
+- Estrategia Network-First con fallback para páginas
+- En modo offline: sirve última carga cacheada; sincroniza al reconectar
+- Registrado desde `layout.tsx` vía `window.load`
+
+**Waiter Terminal (`apps/waiter-terminal/public/sw.js`):**
+- Maneja eventos `push` del navegador para Web Push ORDER_READY
+- Muestra notificación nativa del OS con título, cuerpo y vibración
+- Maneja click en notificación: enfoca la pestaña o abre nueva
+
+### 7.4 Arquitectura Web Push
+
+```
+[KDS actualiza orden a READY]
+        ↓ Supabase Realtime
+[Waiter Terminal detecta nuevo READY]
+        ↓ fetch POST /api/push/notify
+[Servidor lee push_subscriptions del restaurante]
+        ↓ web-push + VAPID
+[Servicios push (Google FCM / Mozilla)]
+        ↓ protocolo Web Push
+[Service Worker del garzón]
+        ↓ showNotification()
+[Notificación nativa del OS]
+```
+
+Las claves VAPID se configuran en `.env` bajo `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` y `VAPID_EMAIL`. La clave privada nunca llega al browser.
+
+### 7.5 Ciclo de Vida de Mesa (actualizado)
+
+```
+FREE → OCCUPIED (al crear primer pedido)
+     → CLEANING  (al procesar pago en caja)
+     → FREE      (garzón confirma limpieza)
+```
+
+El campo `bill_requested` es un overlay booleano independiente del status. Una mesa puede estar `OCCUPIED + bill_requested=true` simultáneamente.
+
+### 7.6 Timestamps de Ciclo de Vida en Órdenes
+
+La función `updateOrderStatus()` en `@menu-bites/auth` escribe automáticamente:
+
+| Transición | Campo escrito |
+|---|---|
+| `→ VALIDATED` | `validated_at` |
+| `→ PREPARING` | `preparing_at` |
+| `→ READY` | `ready_at` |
+
+Estos timestamps habilitan el cálculo de KPIs operacionales sin instrumentación adicional.
+
 ### 6.3 Estrategia de Dominios
 
 El sistema utiliza subrutas o subdominios para diferenciar organizaciones, orquestado mediante el middleware de Next.js:

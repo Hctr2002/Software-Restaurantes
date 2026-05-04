@@ -231,3 +231,184 @@
 **TC-R-004: Ranking de top productos**
 - Crear 10 pedidos: producto A aparece 8 veces, producto B 3 veces.
 - Verificar que el reporte de top items retorna A en posición 1 y B en posición 2.
+
+---
+
+## 9. TESTS SUGERIDOS — NUEVAS FUNCIONALIDADES v2.0
+
+### 9.1 Tests de Utilidades Compartidas (`@menu-bites/auth`)
+
+```typescript
+// packages/auth/src/utils.test.ts
+
+describe("formatCLP", () => {
+  it("formatea miles correctamente en es-CL", () => {
+    expect(formatCLP(36000)).toBe("$36.000");
+    expect(formatCLP(1500)).toBe("$1.500");
+    expect(formatCLP(0)).toBe("$0");
+  });
+});
+
+describe("timeAgo", () => {
+  it("retorna 'Ahora' para menos de 1 minuto", () => {
+    expect(timeAgo(new Date().toISOString())).toBe("Ahora");
+  });
+  it("retorna minutos para < 60 min", () => {
+    const ago = new Date(Date.now() - 5 * 60000).toISOString();
+    expect(timeAgo(ago)).toBe("5 min");
+  });
+  it("retorna horas para >= 60 min", () => {
+    const ago = new Date(Date.now() - 90 * 60000).toISOString();
+    expect(timeAgo(ago)).toBe("1h");
+  });
+});
+
+describe("diffMinutes", () => {
+  it("retorna null si algún argumento es nulo", () => {
+    expect(diffMinutes(null, "2026-01-01T00:00:00Z")).toBeNull();
+    expect(diffMinutes("2026-01-01T00:00:00Z", null)).toBeNull();
+  });
+  it("calcula diferencia positiva en minutos", () => {
+    const a = "2026-01-01T10:00:00Z";
+    const b = "2026-01-01T10:15:00Z";
+    expect(diffMinutes(a, b)).toBe(15);
+  });
+});
+
+describe("constants", () => {
+  it("LOW_STOCK_THRESHOLD es 5", () => {
+    expect(LOW_STOCK_THRESHOLD).toBe(5);
+  });
+  it("ORDER_STATUS_LABEL contiene todos los estados", () => {
+    const required = ["PENDING", "VALIDATED", "PREPARING", "READY", "DELIVERED", "REJECTED"];
+    required.forEach(s => expect(ORDER_STATUS_LABEL[s]).toBeDefined());
+  });
+});
+```
+
+### 9.2 Tests de API — Customer Portal
+
+**TC-API-REVIEW-001: POST /api/reviews — rating válido**
+```
+POST /api/reviews
+Body: { order_id: "uuid", restaurant_id: "uuid", table_id: "uuid", rating: 5 }
+→ 200 { ok: true }
+→ Verificar: registro insertado en tabla reviews con rating=5
+```
+
+**TC-API-REVIEW-002: POST /api/reviews — rating fuera de rango**
+```
+POST /api/reviews
+Body: { order_id: "uuid", restaurant_id: "uuid", rating: 6 }
+→ 400 { error: "Datos inválidos" }
+```
+
+**TC-API-BILL-001: POST /api/bill-request — mesa válida**
+```
+POST /api/bill-request
+Body: { table_id: "uuid-valido" }
+→ 200 { ok: true }
+→ Verificar: tables.bill_requested = true vía Realtime en Waiter y Cashier
+```
+
+**TC-API-BILL-002: POST /api/bill-request — sin table_id**
+```
+POST /api/bill-request
+Body: {}
+→ 400 { error: "table_id es obligatorio" }
+```
+
+### 9.3 Tests de API — Kitchen KDS
+
+**TC-API-INV-001: GET /api/inventory — exportar CSV**
+```
+GET /api/inventory (con cookie sb-kds-session válida)
+→ 200 Content-Type: text/csv
+→ Primera línea: "id,nombre,stock_actual,unidad"
+→ Filas con datos reales del restaurante autenticado
+```
+
+**TC-API-INV-002: POST /api/inventory — importar CSV válido**
+```
+POST /api/inventory
+Body (text/plain):
+  id,nombre,stock_actual,unidad
+  uuid-1,Tomates,3.00,kg
+
+→ 200 { updated: 1, errors: [], critical: [{name:"Tomates", stock:3, unit:"kg"}] }
+→ Verificar: inventories.stock = 3 donde id = uuid-1
+→ Verificar: nombre y unidad NO cambiaron
+```
+
+**TC-API-INV-003: POST /api/inventory — id inválido en CSV**
+```
+POST /api/inventory
+Body: CSV con id="00000000-0000-0000-0000-000000000000" (no existe)
+→ 200 { updated: 0, errors: [] }   -- fila ignorada silenciosamente
+```
+
+### 9.4 Tests de API — Waiter Terminal
+
+**TC-API-SESSION-001: POST /api/sessions — fusión exitosa**
+```
+POST /api/sessions
+Body: { tableIds: ["uuid-a", "uuid-b"] }
+→ 200 { sessionId: "uuid-nuevo", ordersUpdated: N }
+→ Verificar: órdenes activas de ambas mesas tienen session_id = uuid-nuevo
+```
+
+**TC-API-SESSION-002: POST /api/sessions — solo 1 mesa**
+```
+POST /api/sessions
+Body: { tableIds: ["uuid-a"] }
+→ 400 { error: "Se necesitan al menos 2 mesas" }
+```
+
+**TC-API-SESSION-003: DELETE /api/sessions — separar mesas**
+```
+DELETE /api/sessions
+Body: { sessionId: "uuid-existente" }
+→ 200 { ok: true }
+→ Verificar: orders.session_id = null para las órdenes afectadas
+```
+
+### 9.5 Tests de Integración — Flujo de Órdenes Completo
+
+**TC-INT-FLOW-001: Ciclo completo sin fusión**
+1. `POST /api/orders` → orden PENDING, mesa OCCUPIED
+2. `PUT /api/local/orders/{id}` status=VALIDATED → orden VALIDATED, validated_at set
+3. `PUT /api/local/orders/{id}` status=PREPARING → preparing_at set
+4. `PUT /api/local/orders/{id}` status=READY → ready_at set
+5. Cashier: `PATCH orders` status=DELIVERED, `PATCH tables` status=CLEANING
+6. Waiter: `PATCH tables` status=FREE
+→ Verificar cada transición via `GET /api/local/orders/{id}`
+
+**TC-INT-FLOW-002: Rechazo con liberación de mesa**
+1. `POST /api/orders` → mesa OCCUPIED (única orden activa)
+2. Waiter rechaza → orden REJECTED
+3. → Verificar: `tables.status = FREE` automáticamente
+
+### 9.6 Tests de Componentes — Customer Portal
+
+**TC-COMP-TRACKER-001: OrderTracker muestra paso correcto**
+```tsx
+render(<OrderTracker status="PREPARING" />)
+expect(screen.getByText("En preparación")).toBeInTheDocument()
+// Solicitado y Confirmado aparecen con opacity-60 (done)
+// Listo aparece con opacity-20 (pending)
+```
+
+**TC-COMP-RATING-001: RatingModal envía correctamente**
+```tsx
+const onSubmit = jest.fn()
+render(<RatingModal stars={4} onSubmit={onSubmit} ... />)
+fireEvent.click(screen.getByText("Enviar"))
+expect(onSubmit).toHaveBeenCalledTimes(1)
+```
+
+**TC-COMP-MENUITEM-001: MenuItemCard muestra contador si está en carrito**
+```tsx
+render(<MenuItemCard item={mockItem} cartQuantity={2} ... />)
+expect(screen.getByText("2")).toBeInTheDocument()
+// Botones + y - visibles en vez de "Añadir"
+```

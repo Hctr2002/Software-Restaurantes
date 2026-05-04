@@ -189,4 +189,83 @@ Casos a cubrir:
 
 - **Concurrencia Realtime:** 50 suscriptores simultáneos al canal `orders` durante 5 minutos. Verificar 0 eventos perdidos.
 - **Latencia 3G:** Simular conexión 3G (50kbps down) en Customer Portal. Los skeletons de carga deben aparecer y el menú cargar en < 8s.
+
+---
+
+## 8. PLAN DE PRUEBAS — NUEVAS FUNCIONALIDADES v2.0
+
+### 8.1 Flujo Completo de Órdenes
+
+| ID | Caso | App | Resultado Esperado |
+|---|---|---|---|
+| F-01 | Cliente crea orden | Customer Portal | Mesa pasa a OCCUPIED; orden aparece en Waiter Terminal |
+| F-02 | Garzón valida orden | Waiter Terminal | Orden pasa a VALIDATED; aparece en KDS columna "Pedidos Nuevos" |
+| F-03 | Garzón rechaza única orden activa | Waiter Terminal | Mesa vuelve a FREE automáticamente |
+| F-04 | KDS mueve a PREPARING | Kitchen KDS | Waiter Terminal refleja estado; Cashier no ve aún |
+| F-05 | KDS mueve a READY | Kitchen KDS | Cashier ve la orden; garzón recibe alerta sonora |
+| F-06 | Cashier cobra | Cashier Dashboard | Órdenes → DELIVERED; mesa → CLEANING; comprobante se abre |
+| F-07 | Garzón confirma limpieza | Waiter Terminal | Mesa → FREE |
+
+### 8.2 Sistema de Inventario KDS
+
+| ID | Caso | Resultado Esperado |
+|---|---|---|
+| I-01 | Descargar CSV desde KDS | CSV con columnas id, nombre, stock_actual, unidad para todos los ítems del restaurante |
+| I-02 | Subir CSV con stocks actualizados | N ítems actualizados; solo campo `stock` modificado; `nombre` y `unidad` intactos |
+| I-03 | CSV con id inválido | Fila ignorada silenciosamente; otras filas procesadas |
+| I-04 | Stock ≤ 5 post-upload | Lista de ítems críticos visible en respuesta y en Local Dashboard |
+
+### 8.3 Estado CLEANING de Mesa
+
+| ID | Caso | Resultado Esperado |
+|---|---|---|
+| C-01 | Pago procesado en cashier | Mesa pasa a CLEANING (no FREE); badge azul en mapa del garzón |
+| C-02 | Garzón presiona "Mesa lista ✓" | Mesa → FREE; badge CLEANING desaparece del mapa |
+| C-03 | Local Dashboard refleja CLEANING | Grilla de mesas muestra color azul cielo para mesas en limpieza |
+
+### 8.4 Web Push ORDER_READY
+
+| ID | Caso | Resultado Esperado |
+|---|---|---|
+| P-01 | Garzón abre terminal — permite notificaciones | Suscripción guardada en push_subscriptions; confirmación 200 de /api/push/subscribe |
+| P-02 | Garzón rechaza permiso de notificaciones | Terminal funciona normalmente sin push; degradación silenciosa |
+| P-03 | KDS marca orden READY | Notificación nativa del OS en dispositivo del garzón con mesa y mensaje |
+| P-04 | Suscripción expirada | Servidor elimina suscripción automáticamente; no rompe el flujo de otros garzones |
+
+### 8.5 Fusión de Mesas
+
+| ID | Caso | Resultado Esperado |
+|---|---|---|
+| M-01 | Seleccionar 2 mesas OCCUPIED y fusionar | session_id compartido en todas las órdenes activas de ambas mesas |
+| M-02 | Cashier ve mesas fusionadas | Una sola tarjeta "Mesas fusionadas" con total consolidado |
+| M-03 | Comprobante de sesión | /receipt/session/[id] muestra desglose por mesa |
+| M-04 | Intentar fusionar mesa FREE | Mesa no seleccionable en modo fusión |
+
+### 8.6 Rating Post-Pago
+
+| ID | Caso | Resultado Esperado |
+|---|---|---|
+| R-01 | Orden llega a DELIVERED via Realtime | Modal de rating aparece 1.5s después en Customer Portal |
+| R-02 | Cliente envía 5 estrellas con comentario | Registro insertado en tabla reviews; modal desaparece |
+| R-03 | Cliente presiona "Omitir" | Modal cierra; no se crea registro; flujo continúa normal |
+| R-04 | Rating < 1 o > 5 enviado | Servidor rechaza con 400 Bad Request |
+
+### 8.7 Analytics de Cocina
+
+| ID | Caso | Resultado Esperado |
+|---|---|---|
+| A-01 | Orden completada con timestamps completos | Heatmap muestra tiempos de validación y cocina para la categoría del plato |
+| A-02 | Dashboard live con 3 órdenes en PREPARING | Widget "Flujo en Vivo" muestra 3 en columna "Preparando" |
+| A-03 | Orden PENDING por 4 minutos sin validar | Banner rojo de escalación aparece en Local Dashboard |
+| A-04 | Orden validada antes de 3 minutos | Banner de escalación no aparece o desaparece si ya estaba visible |
+
+### 8.8 Utilidades Compartidas `@menu-bites/auth`
+
+| ID | Caso | Resultado Esperado |
+|---|---|---|
+| U-01 | `formatCLP(36000)` | Retorna "$36.000" en formato es-CL |
+| U-02 | `timeAgo(new Date().toISOString())` | Retorna "Ahora" |
+| U-03 | `timeAgo(hace 90 min)` | Retorna "1h" |
+| U-04 | `LOW_STOCK_THRESHOLD` | Valor = 5 en todas las apps que lo importan |
+| U-05 | `ORDER_STATUS_LABEL["VALIDATED"]` | Retorna "Confirmado" |
 - **Volumen de datos:** Restaurante con 500 pedidos históricos. Verificar que la vista de reportes carga en < 2s con paginación.

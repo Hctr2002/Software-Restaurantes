@@ -207,7 +207,78 @@ El Customer Portal opera con el rol `anon` de Supabase para lectura del menú y 
 
 ---
 
-## 7. MONITOREO Y AUDITORÍA
+## 7. NUEVAS POLÍTICAS DE SEGURIDAD — v2.0
+
+### 7.1 Tabla `reviews` — INSERT Público Controlado
+
+La tabla `reviews` permite inserción anónima para que clientes sin sesión puedan calificar su experiencia. El riesgo de spam se mitiga mediante:
+
+- La `order_id` debe existir en el sistema (FK implícita validada en servidor).
+- El campo `rating` es validado server-side (1–5, obligatorio).
+- La lectura (`SELECT`) está restringida a usuarios autenticados del mismo restaurante.
+
+```sql
+-- Política activa:
+CREATE POLICY "reviews_insert_public" ON "reviews"
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "reviews_read_admin" ON "reviews"
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM auth.users u
+      WHERE u.id = auth.uid()
+        AND (u.raw_app_meta_data->>'restaurant_id')::uuid = restaurant_id
+    )
+  );
+```
+
+### 7.2 Tabla `push_subscriptions` — Aislamiento por Usuario
+
+Cada garzón solo puede leer y modificar su propia suscripción. Los administradores y el rol COCINA pueden leer todas las suscripciones del restaurante para poder enviar notificaciones.
+
+```sql
+-- Política de propiedad:
+CREATE POLICY "push_sub_own" ON "push_subscriptions"
+  FOR ALL USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- Lectura por admin/cocina para envío de push:
+CREATE POLICY "push_sub_admin_read" ON "push_subscriptions"
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM auth.users u
+      WHERE u.id = auth.uid()
+        AND (u.raw_app_meta_data->>'restaurant_id')::uuid = restaurant_id
+        AND u.raw_app_meta_data->>'role' IN ('ADMIN', 'COCINA')
+    )
+  );
+```
+
+### 7.3 Claves VAPID — Gestión Segura
+
+| Clave | Ubicación | Exposición |
+|---|---|---|
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | `.env` + browser | Pública — seguro exponer |
+| `VAPID_PRIVATE_KEY` | `.env` solo servidor | **Nunca** al cliente |
+| `VAPID_EMAIL` | `.env` solo servidor | Contacto técnico |
+
+Las claves VAPID deben rotarse si se filtran. Al rotar, todas las suscripciones existentes se invalidan y los garzones deben reabrir el terminal para re-suscribirse.
+
+### 7.4 Endpoint `/api/bill-request` — Acceso Anónimo Controlado
+
+Permite al cliente solicitar la cuenta sin autenticación. El riesgo de abuso es bajo porque:
+- Requiere `table_id` válido (UUID real de la DB).
+- Solo setea `bill_requested = true` (no crea ni elimina datos).
+- El campo se resetea a `false` automáticamente al procesar el pago.
+- No expone datos sensibles en la respuesta.
+
+### 7.5 Comprobantes Digitales — Acceso Público Filtrado
+
+Las páginas `/receipt/table/[id]` y `/receipt/session/[id]` son accesibles sin autenticación pero requieren el parámetro `?rid=[restaurantId]`. El servidor verifica que el `tableId` o `sessionId` pertenece al `restaurantId` proporcionado antes de retornar datos.
+
+---
+
+## 8. MONITOREO Y AUDITORÍA
 
 - **Logs de acceso:** Vercel registra todas las solicitudes HTTP con timestamps, IPs y códigos de respuesta.
 - **Auditoría de datos:** Todas las tablas incluyen `createdAt` y `updatedAt` con Timestamptz para trazabilidad temporal.
