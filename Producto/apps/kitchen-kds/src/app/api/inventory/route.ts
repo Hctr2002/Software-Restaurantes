@@ -2,8 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-
-const CRITICAL_THRESHOLD = 5;
+import { CRITICAL_STOCK_THRESHOLD as CRITICAL_THRESHOLD } from '@menu-bites/auth';
 
 function serviceClient() {
   return createClient(

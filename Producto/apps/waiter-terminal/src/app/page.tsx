@@ -1,13 +1,16 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@menu-bites/store";
-import { supabase, useTables, signOut, sendAlert, updateOrderStatus, AlertType, getRestaurantTheme } from "@menu-bites/auth";
-import { LayoutDashboard, LogOut, User, AlertTriangle, X, Loader2, CheckCircle, XCircle, Receipt, Bell, UtensilsCrossed, Sparkles, MessageSquare, ChevronDown, ChevronUp, RefreshCw, Hash } from "lucide-react";
+import { supabase, useTables, signOut, sendAlert, updateOrderStatus, AlertType, getRestaurantTheme, timeAgo } from "@menu-bites/auth";
+import { LayoutDashboard, LogOut, User, AlertTriangle, X, Loader2, CheckCircle, XCircle, Receipt, Bell, UtensilsCrossed, Sparkles, MessageSquare, ChevronDown, ChevronUp, RefreshCw, Hash, Link2, Link2Off } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TableGrid, TableCard, Button, RestaurantThemeProvider, CardSkeleton, OrderCardSkeleton } from "@menu-bites/ui";
+import { TableGrid, TableCard, Button, Badge, RestaurantThemeProvider, CardSkeleton, OrderCardSkeleton } from "@menu-bites/ui";
 
 const READY_SFX = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
+
+
 
 const ALERT_OPTIONS: { type: AlertType; label: string; color: string }[] = [
   { type: "TABLE_ISSUE",  label: "Problema en Mesa", color: "border-red-500/40 text-red-400 hover:bg-red-500/10" },
@@ -63,6 +66,38 @@ export default function WaiterDashboard() {
     await supabase.from("tables").update({ status: "FREE" }).eq("id", tableId);
   };
 
+  // W5.2: fusión de mesas
+  const [mergeMode, setMergeMode]         = useState(false);
+  const [selectedForMerge, setSelectedForMerge] = useState<Set<string>>(new Set());
+  const [merging, setMerging]             = useState(false);
+  const [mergeResult, setMergeResult]     = useState<string | null>(null);
+
+  const toggleMergeSelect = (tableId: string) => {
+    setSelectedForMerge((prev) => {
+      const next = new Set(prev);
+      next.has(tableId) ? next.delete(tableId) : next.add(tableId);
+      return next;
+    });
+  };
+
+  const handleMergeTables = async () => {
+    if (selectedForMerge.size < 2) return;
+    setMerging(true);
+    const res = await fetch("/api/sessions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tableIds: Array.from(selectedForMerge) }),
+    });
+    const json = await res.json();
+    setMerging(false);
+    if (res.ok) {
+      setMergeResult(`Mesas fusionadas — ${json.ordersUpdated} pedido(s) unificados.`);
+      setMergeMode(false);
+      setSelectedForMerge(new Set());
+      setTimeout(() => setMergeResult(null), 4000);
+    }
+  };
+
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [alertModal, setAlertModal]     = useState(false);
   const [alertType, setAlertType]       = useState<AlertType>("HELP_REQUEST");
@@ -87,6 +122,55 @@ export default function WaiterDashboard() {
     setReadyOrders(rows.filter((o) => o.status === "READY"));
     setOrdersLoading(false);
   }, [user?.restaurantId]);
+
+  // W5.1: registro del service worker y suscripción a Web Push
+  React.useEffect(() => {
+    if (!user?.restaurantId || typeof window === "undefined") return;
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+
+    const VAPID_PUBLIC = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    if (!VAPID_PUBLIC) return;
+
+    (async () => {
+      try {
+        const reg = await navigator.serviceWorker.register("/sw.js");
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") return;
+
+        let sub = await reg.pushManager.getSubscription();
+        if (!sub) {
+          sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: VAPID_PUBLIC,
+          });
+        }
+        await fetch("/api/push/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(sub.toJSON()),
+        });
+      } catch {
+        // Push no disponible — degradar silenciosamente
+      }
+    })();
+  }, [user?.restaurantId]);
+
+  // W5.1: disparar notificación push cuando llega ORDER_READY
+  const prevReadyForPush = useRef(0);
+  useEffect(() => {
+    if (!user?.restaurantId) return;
+    if (readyOrders.length > prevReadyForPush.current) {
+      const newReady = readyOrders.slice(prevReadyForPush.current);
+      newReady.forEach((order) => {
+        fetch("/api/push/notify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ restaurantId: user.restaurantId, tableNumber: order.tables?.number }),
+        }).catch(() => {});
+      });
+    }
+    prevReadyForPush.current = readyOrders.length;
+  }, [readyOrders.length, user?.restaurantId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   React.useEffect(() => {
     if (!user?.restaurantId) return;
@@ -467,12 +551,40 @@ export default function WaiterDashboard() {
                 exit={{ opacity: 0, y: -20 }}
                 className="space-y-8"
               >
-                <div className="flex flex-col gap-2">
-                  <h2 className="text-4xl font-black tracking-tighter">Gestión de <span className="text-primary">Salón</span></h2>
-                  <p className="text-muted-foreground text-xs font-black uppercase tracking-widest opacity-60">
-                    Selecciona una mesa para tomar comandas o ver estado
-                  </p>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex flex-col gap-1">
+                    <h2 className="text-4xl font-black tracking-tighter">Gestión de <span className="text-primary">Salón</span></h2>
+                    <p className="text-muted-foreground text-xs font-black uppercase tracking-widest opacity-60">
+                      {mergeMode ? "Selecciona 2+ mesas OCCUPIED para fusionar" : "Selecciona una mesa para tomar comandas o ver estado"}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => { setMergeMode((m) => !m); setSelectedForMerge(new Set()); }}
+                    title={mergeMode ? "Cancelar fusión" : "Fusionar mesas"}
+                    className={`rounded-xl w-11 h-11 shrink-0 transition-all ${mergeMode ? "border-primary/40 text-primary bg-primary/10" : "border-border/20"}`}
+                  >
+                    {mergeMode ? <Link2Off className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
+                  </Button>
                 </div>
+
+                {mergeResult && (
+                  <div className="flex items-center gap-2 p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black">
+                    <CheckCircle className="w-4 h-4 shrink-0" /> {mergeResult}
+                  </div>
+                )}
+
+                {mergeMode && selectedForMerge.size >= 2 && (
+                  <Button
+                    onClick={handleMergeTables}
+                    disabled={merging}
+                    className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest gap-2 shadow-lg shadow-primary/20"
+                  >
+                    {merging ? <Loader2 className="w-4 h-4 animate-spin" /> : <Link2 className="w-4 h-4" />}
+                    Fusionar {selectedForMerge.size} mesas seleccionadas
+                  </Button>
+                )}
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                   {tables.map((table) => {
@@ -486,9 +598,29 @@ export default function WaiterDashboard() {
                         layout
                         whileHover={{ y: -8, scale: 1.02 }}
                         whileTap={{ scale: 0.95 }}
-                        className="relative group perspective"
-                        onClick={() => router.push(`/tables/${table.id}/menu`)}
+                        className={`relative group perspective ${mergeMode && table.status === "OCCUPIED" ? "cursor-pointer" : ""}`}
+                        onClick={() => {
+                          if (mergeMode && table.status === "OCCUPIED") {
+                            toggleMergeSelect(table.id);
+                          } else if (!mergeMode) {
+                            router.push(`/tables/${table.id}/menu`);
+                          }
+                        }}
                       >
+                        {/* Indicador de selección en modo fusión */}
+                        {mergeMode && table.status === "OCCUPIED" && (
+                          <div className={`absolute inset-0 z-10 rounded-[inherit] border-2 transition-all ${
+                            selectedForMerge.has(table.id)
+                              ? "border-primary bg-primary/10"
+                              : "border-transparent hover:border-primary/40"
+                          }`} />
+                        )}
+                        {mergeMode && selectedForMerge.has(table.id) && (
+                          <div className="absolute -top-2 -left-2 z-20 w-5 h-5 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/40">
+                            <CheckCircle className="w-3 h-3 text-primary-foreground" />
+                          </div>
+                        )}
+
                         {/* Indicadores de Estado Flotantes */}
                         <div className="absolute -top-3 -right-3 z-20 flex flex-col gap-1.5 pointer-events-none">
                           {isReady && (

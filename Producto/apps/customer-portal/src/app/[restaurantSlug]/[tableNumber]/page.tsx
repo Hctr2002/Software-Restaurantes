@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, use, useRef, useCallback } from 'react';
-import { ShoppingBag, Search, Plus, Info, ChevronRight, Loader2, MapPin, AlertCircle, CheckCircle2, Receipt, ClipboardList, X } from 'lucide-react';
-import { getPublicImageUrl, supabase } from '@/lib/supabase';
+import { motion } from 'framer-motion';
+import { ShoppingBag, Search, Plus, Info, ChevronRight, Loader2, MapPin, AlertCircle, CheckCircle2, Receipt, ClipboardList } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 import { useTenant } from '@/context/TenantContext';
 import {
   getCategoriesByRestaurant,
@@ -16,17 +17,10 @@ import {
   type Table,
   type TableOrder,
 } from '@/lib/tenant';
-
-const STATUS_STEPS = [
-  { key: 'PENDING',    label: 'Solicitado',      icon: '📋' },
-  { key: 'VALIDATED',  label: 'Confirmado',       icon: '✅' },
-  { key: 'PREPARING',  label: 'En preparación',   icon: '🔥' },
-  { key: 'READY',      label: 'Listo',            icon: '🍽️' },
-] as const;
-
-function getStepIndex(status: string) {
-  return STATUS_STEPS.findIndex((s) => s.key === status);
-}
+import { OrderTracker } from '../../_components/OrderTracker';
+import { RatingModal } from '../../_components/RatingModal';
+import { CuentaSheet } from '../../_components/CuentaSheet';
+import { MenuItemCard } from '../../_components/MenuItemCard';
 
 export default function MenuPage({
   params: paramsPromise,
@@ -59,6 +53,14 @@ export default function MenuPage({
   // W2.2 — Tracker del último pedido
   const [lastOrderId, setLastOrderId]       = useState<string | null>(null);
   const [lastOrderStatus, setLastOrderStatus] = useState<string>('PENDING');
+
+  // W5.3 — Rating post-pago
+  const [showRating, setShowRating]       = useState(false);
+  const [ratingOrderId, setRatingOrderId] = useState<string | null>(null);
+  const [stars, setStars]                 = useState(0);
+  const [ratingComment, setRatingComment] = useState('');
+  const [ratingSubmitting, setRatingSubmitting] = useState(false);
+  const [ratingDone, setRatingDone]       = useState(false);
 
   // W2.2 — Mi Cuenta (pedidos acumulados de la mesa)
   const [tableOrders, setTableOrders]       = useState<TableOrder[]>([]);
@@ -214,8 +216,14 @@ export default function MenuPage({
         (payload) => {
           const newStatus = payload.new.status as string;
           setLastOrderStatus(newStatus);
-          if (newStatus === 'DELIVERED' || newStatus === 'REJECTED') {
-            setTimeout(() => setLastOrderId(null), 4000);
+          if (newStatus === 'DELIVERED') {
+            setRatingOrderId(lastOrderId);
+            setTimeout(() => {
+              setShowRating(true);
+              setLastOrderId(null);
+            }, 1500);
+          } else if (newStatus === 'REJECTED') {
+            setTimeout(() => setLastOrderId(null), 3000);
           }
         }
       )
@@ -223,6 +231,34 @@ export default function MenuPage({
 
     return () => { supabase.removeChannel(channel); };
   }, [lastOrderId]);
+
+  const handleSubmitRating = async () => {
+    if (!stars || !ratingOrderId || !restaurant?.id) return;
+    setRatingSubmitting(true);
+    try {
+      await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_id:      ratingOrderId,
+          restaurant_id: restaurant.id,
+          table_id:      validatedTable?.id ?? null,
+          rating:        stars,
+          comment:       ratingComment,
+        }),
+      });
+      setRatingDone(true);
+      setTimeout(() => {
+        setShowRating(false);
+        setStars(0);
+        setRatingComment('');
+        setRatingDone(false);
+        setRatingOrderId(null);
+      }, 2000);
+    } finally {
+      setRatingSubmitting(false);
+    }
+  };
 
   const handleRequestBill = async () => {
     if (!validatedTable || isRequestingBill || billRequested) return;
@@ -346,63 +382,38 @@ export default function MenuPage({
 
       {/* Menu Items */}
       <section className="px-6 mt-10 space-y-6">
-        <h3 className="text-lg font-semibold text-sage-light border-l-4 border-sage pl-3">
+        <h3 className="text-lg font-semibold text-sage-light border-l-4 border-sage pl-3 uppercase tracking-widest text-sm">
           {categories.find((c) => c.id === activeCategory)?.name ?? 'Nuestros Platos'}
         </h3>
-        <div className="grid grid-cols-1 gap-5">
+        <motion.div
+          key={activeCategory}
+          initial="hidden"
+          animate="show"
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06 } } }}
+          className="grid grid-cols-1 gap-4"
+        >
           {filteredItems.length > 0 ? (
             filteredItems.map((item) => (
-              <div
+              <MenuItemCard
                 key={item.id}
-                className="glass-card rounded-2xl overflow-hidden flex h-36 group border border-white/5"
-              >
-                <div className="w-1/3 relative overflow-hidden bg-navy-light/20">
-                  <img
-                    src={getPublicImageUrl(item.imageUrl)}
-                    width={400}
-                    height={300}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    alt={item.name}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=400&auto=format&fit=crop';
-                    }}
-                  />
-                  <button aria-label="Información del plato" className="absolute top-2 left-2 p-1.5 glass-panel rounded-full text-sand hover:text-accent transition-colors">
-                    <Info className="w-3.5 h-3.5" aria-hidden="true" />
-                  </button>
-                </div>
-                <div className="w-2/3 p-4 flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-start">
-                      <h4 className="font-bold text-sand leading-tight line-clamp-1">{item.name}</h4>
-                      <span className="text-sage font-bold text-sm ml-2">
-                        ${item.price.toLocaleString()}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-sand/60 mt-1 line-clamp-2 font-light italic">
-                      {item.description}
-                    </p>
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      onClick={() => addToCart(item)}
-                      aria-label={`Añadir ${item.name} al pedido`}
-                      className="flex items-center gap-2 bg-sage/10 hover:bg-sage text-sand hover:text-navy-dark px-4 py-1.5 rounded-full border border-sage/30 transition-all duration-300 text-xs font-bold active:scale-90"
-                    >
-                      <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-                      Añadir
-                    </button>
-                  </div>
-                </div>
-              </div>
+                item={item}
+                cartQuantity={cart.find((c) => c.id === item.id)?.quantity ?? 0}
+                onAdd={addToCart}
+                onDecrement={(id: string) =>
+                  setCart((prev) =>
+                    prev
+                      .map((c) => c.id === id && c.quantity > 1 ? { ...c, quantity: c.quantity - 1 } : c)
+                      .filter((c) => c.quantity > 0)
+                  )
+                }
+              />
             ))
           ) : (
             <div className="text-center py-12">
               <p className="text-sand/40 italic">No hay platos disponibles en esta categoría.</p>
             </div>
           )}
-        </div>
+        </motion.div>
       </section>
 
       {/* Checkout Modal */}
@@ -549,100 +560,30 @@ export default function MenuPage({
         </div>
       )}
 
-      {/* W2.2 — Tracker del último pedido */}
-      {lastOrderId && lastOrderStatus !== 'DELIVERED' && lastOrderStatus !== 'REJECTED' && (
-        <div className="fixed top-[73px] left-0 right-0 z-40 px-4 py-2 bg-navy-dark/95 backdrop-blur-md border-b border-white/5">
-          <div className="max-w-md mx-auto flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 flex-1 overflow-x-auto no-scrollbar">
-              {STATUS_STEPS.map((step, idx) => {
-                const currentIdx = getStepIndex(lastOrderStatus);
-                const done    = idx < currentIdx;
-                const active  = idx === currentIdx;
-                return (
-                  <React.Fragment key={step.key}>
-                    <div className={`flex items-center gap-1.5 shrink-0 transition-all ${
-                      active  ? 'opacity-100' :
-                      done    ? 'opacity-60'  : 'opacity-20'
-                    }`}>
-                      <span className="text-base leading-none">{step.icon}</span>
-                      <span className={`text-[10px] font-black uppercase tracking-wide ${active ? 'text-sage' : 'text-sand/60'}`}>
-                        {step.label}
-                      </span>
-                    </div>
-                    {idx < STATUS_STEPS.length - 1 && (
-                      <span className={`text-[10px] shrink-0 transition-all ${idx < currentIdx ? 'text-sage/60' : 'text-white/10'}`}>›</span>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-            {lastOrderStatus === 'READY' && (
-              <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-lg shrink-0 animate-pulse">
-                ¡Listo!
-              </span>
-            )}
-          </div>
-        </div>
+      {showRating && (
+        <RatingModal
+          restaurantName={restaurant.name}
+          stars={stars}
+          comment={ratingComment}
+          submitting={ratingSubmitting}
+          done={ratingDone}
+          onStarsChange={setStars}
+          onCommentChange={setRatingComment}
+          onSubmit={handleSubmitRating}
+          onSkip={() => setShowRating(false)}
+        />
       )}
 
-      {/* W2.2 — Mi Cuenta (pedidos acumulados) */}
-      {isCuentaOpen && (
-        <div className="fixed inset-0 z-[70] animate-in fade-in duration-200">
-          <div className="absolute inset-0 bg-navy-dark/80 backdrop-blur-md" onClick={() => setIsCuentaOpen(false)} />
-          <div className="absolute bottom-0 left-0 right-0 glass-panel rounded-t-[2.5rem] p-6 max-h-[80vh] overflow-y-auto animate-in slide-in-from-bottom duration-300">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-sand flex items-center gap-2">
-                <ClipboardList className="text-sage w-5 h-5" />
-                Mi Cuenta — Mesa {validatedTable?.number}
-              </h2>
-              <button onClick={() => setIsCuentaOpen(false)} className="p-1.5 rounded-full hover:bg-sand/10 transition-colors">
-                <X className="w-4 h-4 text-sand/60" />
-              </button>
-            </div>
+      {lastOrderId && lastOrderStatus !== 'DELIVERED' && lastOrderStatus !== 'REJECTED' && (
+        <OrderTracker status={lastOrderStatus} />
+      )}
 
-            {tableOrders.length === 0 ? (
-              <p className="text-center text-sand/40 py-8 text-sm">No hay pedidos activos.</p>
-            ) : (
-              <div className="space-y-4">
-                {tableOrders.map((order, i) => (
-                  <div key={order.id} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-black text-sand/40 uppercase tracking-widest">Pedido {i + 1}</span>
-                      <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${
-                        order.status === 'READY'      ? 'bg-emerald-500/20 text-emerald-400' :
-                        order.status === 'PREPARING'  ? 'bg-primary/20 text-primary' :
-                        order.status === 'VALIDATED'  ? 'bg-blue-500/20 text-blue-400' :
-                        'bg-sand/10 text-sand/50'
-                      }`}>
-                        {order.status === 'PENDING'   ? 'Solicitado'    :
-                         order.status === 'VALIDATED' ? 'Confirmado'    :
-                         order.status === 'PREPARING' ? 'En preparación':
-                         order.status === 'READY'     ? '🍽️ Listo'      : order.status}
-                      </span>
-                    </div>
-                    {order.order_items.map((item, j) => (
-                      <div key={j} className="flex justify-between items-center text-sm">
-                        <span className="text-sand/70">
-                          <span className="font-bold text-sand/50 mr-2">{item.quantity}×</span>
-                          {item.menu_items?.name ?? 'Item'}
-                        </span>
-                        <span className="text-sand font-bold">
-                          ${(Number(item.unit_price) * item.quantity).toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ))}
-                <div className="pt-4 border-t border-white/10 flex justify-between items-center">
-                  <span className="font-bold text-sand">Total acumulado</span>
-                  <span className="text-xl font-black text-sage">
-                    ${tableOrders.reduce((s, o) => s + o.order_items.reduce((si, i) => si + Number(i.unit_price) * i.quantity, 0), 0).toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+      {isCuentaOpen && validatedTable && (
+        <CuentaSheet
+          tableNumber={validatedTable.number}
+          orders={tableOrders}
+          onClose={() => setIsCuentaOpen(false)}
+        />
       )}
 
       {/* W2.2 — Botón flotante "Mi Cuenta" */}

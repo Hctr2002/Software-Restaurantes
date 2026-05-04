@@ -7,9 +7,9 @@ import { Button, Input } from "@menu-bites/ui";
 import { Inventory } from "../_components/localShared";
 import { Plus, Pencil, Trash2, Loader2, AlertTriangle, Package, Download } from "lucide-react";
 import { motion } from "framer-motion";
+import { LOW_STOCK_THRESHOLD } from "@menu-bites/auth";
 
 const UNITS = ["unidades", "kg", "g", "L", "mL", "porciones"];
-const LOW_STOCK_THRESHOLD = 5;
 
 const EMPTY_FORM = { name: "", stock: "", unit: "unidades" };
 

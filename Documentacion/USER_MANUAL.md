@@ -92,9 +92,25 @@ Interfaz de control completo para el ADMIN de un restaurante. Accede por `/{slug
 
 ### 2.1 Overview (Vista General)
 
-- **Monitor de Ventas:** Ingresos acumulados del día con comparativa respecto al día anterior.
-- **Estado de Comandas:** Contadores en tiempo real de pedidos por estado (`PENDING`, `PREPARING`, `READY`).
-- **Ocupación de Salón:** Porcentaje de mesas con estado `OCCUPIED` sobre el total.
+**KPIs principales:**
+- Ingresos del día y del mes con ticket promedio
+- Pedidos activos en cocina y sala
+
+**Flujo en Vivo (W4.2):** Widget con contadores en tiempo real de órdenes por estado:
+
+| Estado | Color | Quién actúa |
+|---|---|---|
+| Pendiente | Amarillo | Esperando validación del garzón |
+| Validado | Azul | En tránsito hacia cocina |
+| Preparando | Primario | Cocina trabajando |
+| Listo | Verde | Esperando ser servido |
+
+**Tiempo Promedio Hoy (W4.2):** Muestra el ciclo completo `created_at → ready_at` en minutos, basado en pedidos ya entregados del día. Indicador de rendimiento: Óptimo (< 15 min), Normal (15–30 min), Lento (> 30 min).
+
+**Escalación de alertas (W4.3):** Si una o más órdenes llevan más de 3 minutos en estado `PENDING` sin que el garzón las valide, aparece un banner de alerta rojo con el número de mesa y el tiempo transcurrido. Se recalcula automáticamente cada 30 segundos.
+
+**Estado de Mesas:** Grilla visual con colores por estado:
+- Verde (`FREE`), Rojo (`OCCUPIED`), Amarillo (`RESERVED`), Azul claro (`CLEANING`)
 
 ### 2.2 Gestión de Pedidos (Orders)
 
@@ -159,13 +175,28 @@ graph TD
 
 ### 2.6 Inteligencia de Negocio (Reportes)
 
-El sistema genera 5 tipos de análisis exportables a Excel (`.xlsx`):
+El sistema genera análisis exportables a Excel (`.xls` SpreadsheetML):
 
 | Reporte | Descripción |
 |---|---|
-| Ventas Diarias | Transacciones por fecha con total acumulado |
-| Top Productos | Ranking de items más vendidos por período |
+| Ventas Diarias | Transacciones por fecha con ingresos y ticket promedio |
+| Top Productos | Ranking de los 10 items más vendidos por período |
 | Desempeño de Personal | Pedidos y ventas por garzón |
+| Ocupación por Mesa | Ingresos totales y pedidos por número de mesa |
+
+**Filtros de período:** 7D, 14D, 30D, 90D o rango personalizado.
+
+**Heatmap de Tiempos de Cocina (W4.1):** Sección de análisis de tiempos operativos por categoría de plato:
+
+| Métrica | Cálculo | Significado |
+|---|---|---|
+| Tiempo de Validación | `validated_at − created_at` | Cuánto tarda el garzón en aprobar el pedido |
+| Tiempo de Cocina | `ready_at − validated_at` | Tiempo neto de preparación en cocina |
+| Tiempo Total | `ready_at − created_at` | Ciclo completo desde el pedido hasta estar listo |
+
+Los tiempos se muestran como barras horizontales con código de color: verde (< 10 min), amarillo (10–20 min), rojo (> 20 min). Solo aparece para órdenes que tienen `validated_at` y `ready_at` registrados (disponibles desde Wave 1).
+
+> **Nota:** Los timestamps se escriben automáticamente al transicionar el estado de la orden. Órdenes creadas antes de Wave 1 no tendrán estos datos.
 | Eficiencia de Mesas | Tiempo promedio de ocupación y rotación |
 | Reporte Consolidado | Resumen de cierre de caja para contabilidad |
 
@@ -361,42 +392,85 @@ Cuando un cliente presiona "Pedir asistencia" en el Customer Portal, `help_reque
 
 Interfaz para el procesamiento de pagos y cierre de mesas. Accede por `/{slug}/cashier`. Rol: `CAJERO`.
 
-### 5.1 Cola de Cuentas Pendientes
+### 5.1 Vista de Cuentas Pendientes — Agrupada por Mesa
 
-Vista principal que muestra exclusivamente las mesas con `bill_requested = true`. Ordenadas por tiempo de espera.
+La vista principal muestra **tarjetas agrupadas por mesa** (o por sesión si las mesas están fusionadas). Cada tarjeta representa una cuenta cobrable completa.
 
-Cada tarjeta de mesa muestra:
-- Número y nombre de la mesa.
-- Tiempo desde que el cliente solicitó la cuenta.
-- Total estimado de los pedidos activos.
+**Tarjeta de mesa normal:**
+```
+Mesa 7 — CUENTA SOLICITADA 🔔
+  2 pedidos consolidados
+  Hace 12 min
+  ─────────────────────────────
+  2x Lomo Saltado      $28.000
+  1x Postre             $8.000
+  ─────────────────────────────
+  Total Cuenta:        $36.000
+  [Revisar y Cobrar]
+```
+
+**Tarjeta de mesas fusionadas:**
+```
+Mesas fusionadas 🔗
+  3 pedidos consolidados
+  ─────────────────────────────
+  TOTAL SESIÓN:        $74.000
+  [Revisar y Cobrar]
+```
+
+La agrupación funciona así: si los pedidos comparten `session_id`, se muestran juntos como una sola unidad cobrable. Si no, se agrupan por `table_id`.
 
 ### 5.2 Vista Detalle de Cuenta
 
-Al seleccionar una mesa, el cajero ve el desglose completo:
+Al hacer clic en "Revisar y Cobrar", se abre un panel lateral con el desglose completo de **todos los pedidos** del grupo:
 
 ```
-Mesa 4 — Terraza
-─────────────────────────────
-2x Pizza Margarita    $19.980
-   └─ Extra Queso     $ 1.000
-1x Limonada Frozen    $ 3.990
-─────────────────────────────
-TOTAL                $24.970
+Mesa 7  |  2 Comandas consolidadas
+─────────────────────────────────────
+Pedido 1:
+  2x Lomo Saltado        $28.000
+Pedido 2:
+  1x Postre               $8.000
+─────────────────────────────────────
+Neto Consumo:            $36.000
+Propina sugerida (10%):   $3.600
+TOTAL FINAL:             $39.600
+─────────────────────────────────────
+Ref. Pago: [______________]
+[Confirmar Pago y Liberar Mesa]
 ```
 
-- Los precios se toman del **snapshot** (`unit_price` en `order_items`), no del precio actual del menú.
-- Si la mesa tiene múltiples pedidos (ej: rondas adicionales), todos se consolidan en una sola cuenta.
+Los precios se toman del **snapshot** (`unit_price` en `order_items`), no del precio actual del menú.
 
 ### 5.3 Proceso de Cobro y Cierre
 
-1. El cajero revisa el detalle de la cuenta (todas las órdenes READY de la mesa consolidadas).
-2. Ingresa la referencia de comprobante (voucher físico, transferencia, etc.).
+1. El cajero revisa el detalle consolidado de todos los pedidos.
+2. Ingresa la referencia de comprobante (número de voucher, transferencia, etc.).
 3. Confirma el cobro → el sistema ejecuta en secuencia:
-   - `orders.status → DELIVERED` para todas las órdenes READY de esa mesa.
-   - `table.status → CLEANING` *(nuevo)*: la mesa no queda libre inmediatamente; el garzón debe confirmar la limpieza desde su terminal.
+   - `orders.status → DELIVERED` para todos los pedidos del grupo.
+   - `table.status → CLEANING`: la mesa no queda libre inmediatamente; el garzón confirma la limpieza desde su terminal.
    - `table.bill_requested → false`.
+4. Se abre automáticamente el comprobante digital en una nueva pestaña.
 
-> **Ciclo completo de mesa:** `FREE → OCCUPIED → CLEANING → FREE`. El estado `CLEANING` garantiza que no se asignen clientes nuevos a una mesa que aún no ha sido preparada.
+> **Ciclo completo de mesa:** `FREE → OCCUPIED → CLEANING → FREE`. El estado `CLEANING` garantiza que no se asignen clientes nuevos a una mesa que aún no fue preparada.
+
+### 5.4 Comprobante Digital
+
+Tras confirmar el pago, el sistema abre automáticamente una página de comprobante imprimible en una nueva pestaña.
+
+**Rutas de comprobante:**
+- Mesa normal: `/receipt/table/[tableId]?rid=[restaurantId]`
+- Mesas fusionadas: `/receipt/session/[sessionId]?rid=[restaurantId]`
+
+**El comprobante muestra:**
+- Nombre del restaurante
+- Número(s) de mesa
+- Fecha y hora del cobro
+- Desglose de todos los ítems (con cantidad y precio unitario)
+- Subtotal, propina sugerida (10%) y total final
+- Referencia de pago si fue ingresada
+
+**Para imprimir:** El cajero presiona el botón "Imprimir" en la página del comprobante, o usa `Ctrl+P` / `Cmd+P`. La versión impresa oculta automáticamente los botones de acción (CSS `@media print`).
 
 ```mermaid
 %%{init: {
@@ -526,16 +600,108 @@ El panel muestra:
 Dos acciones disponibles que el cliente puede activar en cualquier momento:
 
 - **"Pedir asistencia":** Activa `help_requested = true` en la mesa → el garzón recibe alerta visual.
-- **"Pedir la cuenta":** Activa `bill_requested = true` → la mesa aparece en la cola del Cashier Dashboard.
+- **"Solicitar Cuenta":** Activa `bill_requested = true` → badge en waiter terminal y cashier dashboard. El botón aparece como flotante (esquina inferior derecha) después del primer pedido confirmado.
 
-### 6.6 Personalización de Marca
+### 6.6 Rating Post-Pago (W5.3)
+
+Cuando el cajero procesa el pago y la orden pasa a `DELIVERED`, el cliente ve automáticamente un modal de calificación:
+
+1. Sistema de 1 a 5 estrellas.
+2. Campo de comentario opcional.
+3. Botón "Omitir" para saltar.
+4. La calificación se guarda en la tabla `reviews` con `order_id`, `table_id` y `restaurant_id`.
+
+El admin puede ver el promedio de calificaciones en el widget del Local Dashboard overview.
+
+### 6.7 Menú Fine Dining (W6.3)
+
+Mejoras visuales al explorar el menú:
+
+- Cards de platos con animación de entrada escalonada (stagger) al cambiar de categoría.
+- Imagen con efecto zoom suave al pasar el cursor.
+- Contador inline por ítem (+/-) cuando ya está en el carrito, sin necesidad de abrir el bottom sheet.
+- Gradiente sobre la imagen para mejor legibilidad del precio.
+
+### 6.8 Personalización de Marca
 
 El Customer Portal aplica automáticamente el tema activo del restaurante:
-- Colores (`primary`, `secondary`, `background`, `accent`, `text`, `cardBackground`) inyectados como CSS Custom Properties.
+- Colores inyectados como CSS Custom Properties.
 - Tipografías cargadas dinámicamente desde Google Fonts.
 - Logotipo del restaurante si está configurado en el tema.
 
-Cada restaurante ve su propio Customer Portal con su identidad visual única.
+Cada restaurante ve su propio Customer Portal con identidad visual única.
+
+---
+
+## GUÍA DE CONFIGURACIÓN: Web Push (W5.1)
+
+> Requiere HTTPS en producción. En desarrollo local las notificaciones se muestran solo cuando el tab está abierto.
+
+### Generar claves VAPID
+
+```bash
+# Desde el directorio del waiter-terminal
+npx web-push generate-vapid-keys
+```
+
+El comando genera:
+
+```
+Public Key:  BNxxx...  ← agregar a .env como NEXT_PUBLIC_VAPID_PUBLIC_KEY
+Private Key: xxx...    ← agregar a .env como VAPID_PRIVATE_KEY
+```
+
+### Variables de entorno requeridas (waiter-terminal)
+
+```
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=BNxxx...
+VAPID_PRIVATE_KEY=xxx...
+VAPID_EMAIL=mailto:tu@email.com
+```
+
+### Flujo completo
+
+1. Garzón abre el Terminal → el browser solicita permiso de notificaciones.
+2. Si acepta → la suscripción VAPID se guarda en `push_subscriptions` via `POST /api/push/subscribe`.
+3. Cuando el KDS mueve una orden a `READY` → el Waiter Terminal detecta el cambio via Realtime → llama `POST /api/push/notify`.
+4. El servidor envía Web Push a todas las suscripciones activas del restaurante.
+5. El Service Worker (`/sw.js`) muestra la notificación del OS aunque el tab esté cerrado.
+
+---
+
+## GUÍA DE CONFIGURACIÓN: Fusión de Mesas (W5.2)
+
+### Flujo para el Garzón
+
+1. En el Terminal de Garzón, tab "Mesas" → presionar el ícono de fusión (🔗).
+2. El mapa entra en **modo selección**: solo mesas `OCCUPIED` son seleccionables.
+3. Hacer tap en 2 o más mesas → aparece un checkmark azul en cada una.
+4. Presionar "Fusionar N mesas seleccionadas".
+5. El sistema genera un `session_id` UUID compartido y lo asigna a todas las órdenes activas de esas mesas.
+6. En el Cashier Dashboard, esas órdenes aparecen como una sola tarjeta "Mesas fusionadas" con el total consolidado.
+7. El comprobante de pago usa la ruta `/receipt/session/[sessionId]` que desglosa por mesa.
+
+### Separar mesas
+
+El `session_id` solo aplica a órdenes activas. Al pagar y cerrar la cuenta, el `session_id` queda en las órdenes históricas como referencia pero las mesas vuelven a operar independientemente.
+
+---
+
+## GUÍA: KDS Modo Offline (W6.1)
+
+El Kitchen KDS registra un Service Worker (`/sw.js`) al cargar. Estrategia de caché:
+
+| Tipo de recurso | Estrategia |
+|---|---|
+| Assets estáticos (`_next/static/`) | Cache-First — sirve inmediatamente del caché |
+| Páginas y API | Network-First — intenta red, usa caché si falla |
+
+**En caso de corte de internet:**
+- Las órdenes activas permanecen visibles (última carga cacheada).
+- El Realtime de Supabase se desconecta — no habrá actualizaciones en tiempo real.
+- Al reconectar, la página se refresca automáticamente y sincroniza el estado.
+
+El Service Worker se actualiza automáticamente en cada nueva build del proyecto.
 
 ---
 

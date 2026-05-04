@@ -352,9 +352,16 @@
      red:    "ring-2 ring-red-500/60 shadow-lg shadow-red-500/20",
    };
    return (
-     <div className={cn("rounded-[2.5rem]", URGENCY_RING[urgency])}>
+     <motion.div
+       layout
+       initial={{ opacity: 0, y: -16, scale: 0.96 }}
+       animate={{ opacity: 1, y: 0, scale: 1 }}
+       exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.2 } }}
+       transition={{ type: "spring", stiffness: 340, damping: 26 }}
+       className={cn("rounded-[2.5rem]", URGENCY_RING[urgency])}
+     >
        {children}
-     </div>
+     </motion.div>
    );
  }
  
@@ -362,7 +369,18 @@
    return (
      <div className="text-center group">
        <p className="text-[9px] font-black text-muted-foreground uppercase mb-1 tracking-[0.2em] group-hover:text-foreground transition-colors">{label}</p>
-       <p className={cn("text-3xl font-black tracking-tighter leading-none transition-transform group-hover:scale-110", color)}>{value}</p>
+       <AnimatePresence mode="popLayout">
+         <motion.p
+           key={value}
+           initial={{ opacity: 0, y: -8, scale: 0.8 }}
+           animate={{ opacity: 1, y: 0, scale: 1 }}
+           exit={{ opacity: 0, y: 8 }}
+           transition={{ type: "spring", stiffness: 400, damping: 20 }}
+           className={cn("text-3xl font-black tracking-tighter leading-none", color)}
+         >
+           {value}
+         </motion.p>
+       </AnimatePresence>
      </div>
    );
  }

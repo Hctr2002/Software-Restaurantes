@@ -55,6 +55,9 @@ export type Order = {
   userId: string | null;          // DB: user_id — aliased in GET /api/local/orders
   status: string;
   createdAt: string;              // DB: createdAt (no @map in Prisma — kept as-is)
+  validated_at?: string | null;
+  preparing_at?: string | null;
+  ready_at?: string | null;
   tables?: { number: number } | null;
   users?: { email: string } | null;
   order_items?: OrderItem[];

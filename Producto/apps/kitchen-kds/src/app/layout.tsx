@@ -7,15 +7,19 @@ export const metadata: Metadata = {
   description: "Kitchen Display System",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className="dark">
       <body className={cn("antialiased bg-background text-foreground min-h-screen")}>
         {children}
+        {/* W6.1: registro del service worker para modo offline */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+              navigator.serviceWorker.register('/sw.js').catch(() => {});
+            });
+          }
+        `}} />
       </body>
     </html>
   );

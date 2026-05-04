@@ -3,14 +3,16 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "@menu-bites/store";
-import { supabase, signOut, sendAlert, getSession, getRestaurantTheme } from "@menu-bites/auth";
+import { supabase, signOut, sendAlert, getSession, getRestaurantTheme, formatCLP, timeAgo } from "@menu-bites/auth";
 import { Badge, Button, RestaurantThemeProvider, OrderCardSkeleton } from "@menu-bites/ui";
 import {
-  Receipt, LogOut, CheckCircle, Loader2, AlertTriangle, X, RefreshCw, User,
-  Clock, History, CreditCard, ChevronRight, Hash, ArrowLeft, Bell, Search
+  Receipt, LogOut, CheckCircle, Loader2, AlertTriangle, RefreshCw,
+  History, Bell, Search, Clock, Hash, ChevronRight, CreditCard, ArrowLeft
 } from "lucide-react";
+import { AlertModal } from "./_components/AlertModal";
+import { OrderGroupCard, groupOrders, type Order, type TableGroup } from "./_components/OrderGroupCard";
+import { PaymentSlideOver } from "./_components/PaymentSlideOver";
 
-// Componente para números animados con efecto Fade
 const AnimatedNumber = ({ value, formatFn }: { value: number; formatFn: (n: number) => string }) => (
   <motion.span
     key={value}
@@ -23,70 +25,6 @@ const AnimatedNumber = ({ value, formatFn }: { value: number; formatFn: (n: numb
     {formatFn(value)}
   </motion.span>
 );
-
-
-type OrderItem = { id: string; quantity: number; unit_price: number; menu_items: { name: string } | null };
-type Order = {
-  id: string;
-  status: string;
-  createdAt: string;
-  total_amount: number;
-  table_id: string | null;
-  session_id: string | null;
-  tables: { id: string; number: number } | null;
-  users: { email: string } | null;
-  order_items: OrderItem[];
-};
-
-type TableGroup = {
-  key: string;
-  tableId: string | null;
-  sessionId: string | null;
-  tableNumber: number | null;
-  orders: Order[];
-  total: number;
-  billRequested: boolean;
-  oldestCreatedAt: string;
-};
-
-function orderTotal(order: Order) {
-  return order.order_items.reduce((s, i) => s + Number(i.unit_price) * i.quantity, 0);
-}
-
-function groupOrders(orders: Order[], billMap: Record<string, boolean>): TableGroup[] {
-  const map = new Map<string, TableGroup>();
-  for (const order of orders) {
-    const key = order.session_id ?? order.table_id ?? order.id;
-    if (!map.has(key)) {
-      map.set(key, {
-        key,
-        tableId: order.table_id,
-        sessionId: order.session_id ?? null,
-        tableNumber: order.tables?.number ?? null,
-        orders: [],
-        total: 0,
-        billRequested: order.table_id ? (billMap[order.table_id] ?? false) : false,
-        oldestCreatedAt: order.createdAt,
-      });
-    }
-    const g = map.get(key)!;
-    g.orders.push(order);
-    g.total += orderTotal(order);
-  }
-  return Array.from(map.values());
-}
-
-function formatCLP(n: number) {
-  return new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(n);
-}
-
-function timeAgo(iso: string) {
-  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
-  if (diff < 1) return "Ahora";
-  if (diff === 1) return "1 min";
-  if (diff < 60) return `${diff} min`;
-  return `${Math.floor(diff / 60)}h`;
-}
 
 export default function CashierPage() {
   const { user, setUser, logout: clearAuth } = useAuthStore();
@@ -669,235 +607,30 @@ export default function CashierPage() {
         </main>
 
 
-        {/* Payment Slide-over / Modal (Detalle de Cuenta) */}
-        <AnimatePresence>
-          {selectedGroup && (
-            <div className="fixed inset-0 z-50 flex items-center justify-end p-6 overflow-hidden pointer-events-none">
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-background/40 backdrop-blur-md pointer-events-auto" 
-                onClick={() => setSelectedGroup(null)} 
-              />
-
-              <motion.div 
-                initial={{ opacity: 0, x: 20, scale: 0.95 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 20, scale: 0.95 }}
-                transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className="relative w-full max-w-lg bg-card/95 backdrop-blur-xl h-[calc(100vh-3rem)] shadow-2xl border border-white/10 flex flex-col rounded-[2.5rem] pointer-events-auto"
-              >
-              {/* Modal Header */}
-              <div className="p-10 border-b border-white/5 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 opacity-5">
-                   <Receipt className="w-32 h-32 rotate-12" />
-                </div>
-
-                <div className="flex items-center justify-between mb-8 relative z-10">
-                  <button 
-                    onClick={() => setSelectedGroup(null)}
-                    className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition-all group"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-all">
-                      <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                    </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest">Volver</span>
-                  </button>
-                  <div className="flex items-center gap-2">
-                    {selectedGroup.billRequested && (
-                      <span className="bg-yellow-500/20 text-yellow-500 text-[9px] font-black px-3 py-1.5 rounded-full border border-yellow-500/30 animate-pulse">
-                        CUENTA SOLICITADA
-                      </span>
-                    )}
-                    <Badge variant="success" className="font-black px-4 py-1.5 rounded-full">TOTAL LISTO</Badge>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-6 relative z-10">
-                  <div className="w-20 h-20 bg-primary rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-primary/30 border border-white/20">
-                    <Hash className="w-10 h-10 text-primary-foreground" />
-                  </div>
-                  <div>
-                    <h2 className="text-4xl font-black tracking-tighter text-foreground leading-none">
-                      {selectedGroup.tableNumber ? `Mesa ${selectedGroup.tableNumber}` : "Mesa S/N"}
-                    </h2>
-                    <p className="text-xs text-muted-foreground font-black uppercase tracking-widest mt-2 opacity-60">
-                      {selectedGroup.orders.length} Comandas consolidadas
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Modal Body (Items List) */}
-              <div className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em]">Detalle de Consumo</h3>
-                    <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-1 rounded-lg border border-primary/10">
-                      {selectedGroup.orders.flatMap(o => o.order_items).length} Ítems
-                    </span>
-                  </div>
-                  <motion.div 
-                    initial="hidden"
-                    animate="show"
-                    variants={{
-                      hidden: { opacity: 0 },
-                      show: {
-                        opacity: 1,
-                        transition: {
-                          staggerChildren: 0.05
-                        }
-                      }
-                    }}
-                    className="grid gap-3"
-                  >
-                    {selectedGroup.orders.flatMap(o => o.order_items).map((item, idx) => (
-                      <motion.div 
-                        key={`${item.id}-${idx}`}
-                        variants={{
-                          hidden: { x: 20, opacity: 0 },
-                          show: { x: 0, opacity: 1 }
-                        }}
-                        className="group/item bg-white/5 border border-white/5 rounded-3xl p-5 flex justify-between items-center hover:bg-white/10 transition-all"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 flex items-center justify-center bg-card rounded-2xl text-xs font-black text-primary border border-white/10 shadow-lg">
-                            {item.quantity}
-                          </div>
-                          <div>
-                            <p className="text-sm font-black text-foreground/90 leading-tight mb-1">{item.menu_items?.name ?? "Item"}</p>
-                            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-60">
-                              {formatCLP(Number(item.unit_price))} p/u
-                            </p>
-                          </div>
-                        </div>
-                        <span className="text-sm font-black text-foreground font-mono">
-                          {formatCLP(Number(item.unit_price) * item.quantity)}
-                        </span>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                </div>
-
-                <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 space-y-5 relative overflow-hidden group/total">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[80px] -z-10 group-hover/total:bg-emerald-500/20 transition-all"></div>
-                  
-                  <div className="flex justify-between items-center text-muted-foreground/60">
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Neto Consumo</span>
-                    <span className="text-sm font-black font-mono">{formatCLP(selectedGroup.total)}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-muted-foreground/60">
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Propina Sugerida (10%)</span>
-                    <span className="text-sm font-black font-mono">{formatCLP(selectedGroup.total * 0.1)}</span>
-                  </div>
-                  <div className="h-px bg-white/5" />
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-black text-primary uppercase tracking-[0.2em]">Total Final</span>
-                    <span className="text-4xl font-black text-emerald-400 tracking-tighter drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
-                      {formatCLP(selectedGroup.total * 1.1)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Referencia de Baucher */}
-                <div className="space-y-2">
-                  <label htmlFor="payment_ref" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Referencia de Baucher / Pago</label>
-                  <div className="relative group">
-                    <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-emerald-500 transition-colors" />
-                    <input 
-                      id="payment_ref"
-                      type="text" 
-                      placeholder="Ej: #998877"
-                      value={paymentReference}
-                      onChange={(e) => setPaymentReference(e.target.value)}
-                      className="w-full bg-background border border-border/10 rounded-2xl p-4 pl-12 focus:outline-none focus:border-emerald-500/50 transition-all font-mono text-sm text-foreground"
-                    />
-                  </div>
-                  <p className="text-[9px] text-muted-foreground/60 italic ml-1">Vincule el ticket físico con este registro del sistema.</p>
-                </div>
-              </div>
-
-              {/* Modal Footer (Action) */}
-              <div className="p-10 border-t border-white/5 bg-card/50 backdrop-blur-xl">
-                <Button
-                  onClick={() => markDelivered(selectedGroup)}
-                  disabled={isProcessing}
-                  className="w-full h-20 bg-emerald-600 hover:bg-emerald-500 text-white rounded-3xl font-black text-sm uppercase tracking-[0.2em] transition-all shadow-2xl shadow-emerald-600/30 gap-4 disabled:opacity-50 active:scale-95 group/pay"
-                >
-                  {isProcessing ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                  ) : (
-                    <>
-                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center group-hover/pay:bg-white/30 transition-all">
-                        <CreditCard className="w-5 h-5" />
-                      </div>
-                      Finalizar Pago y Cerrar Mesa
-                    </>
-                  )}
-                </Button>
-                <p className="text-center text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-6 opacity-40">
-                  Esta acción liberará la mesa y generará el comprobante
-                </p>
-              </div>
-            </motion.div>
-          </div>
+        {/* Payment Slide-over */}
+        {selectedGroup && (
+          <PaymentSlideOver
+            group={selectedGroup}
+            paymentReference={paymentReference}
+            isProcessing={isProcessing}
+            onPaymentRefChange={setPaymentReference}
+            onConfirm={() => markDelivered(selectedGroup)}
+            onClose={() => setSelectedGroup(null)}
+          />
         )}
-      </AnimatePresence>
 
-        {/* Alert Modal */}
+
         {alertModal && (
-          <div className="fixed inset-0 bg-background/80 backdrop-blur-xl z-[60] flex items-center justify-center p-6">
-            <div className="w-full max-w-md bg-card border border-border/10 rounded-[2.5rem] p-8 shadow-2xl space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-yellow-500/10 rounded-xl flex items-center justify-center border border-yellow-500/20">
-                    <AlertTriangle className="w-5 h-5 text-yellow-500" />
-                  </div>
-                  <h2 className="text-lg font-black tracking-tight text-foreground">Alerta al Admin</h2>
-                </div>
-                <button onClick={() => setAlertModal(false)} aria-label="Cerrar modal" className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="cashier_table_num" className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1.5 block">N° de Mesa (opcional)</label>
-                  <input
-                    id="cashier_table_num"
-                    type="number"
-                    placeholder="Ej. 3"
-                    value={tableNum}
-                    onChange={(e) => setTableNum(e.target.value)}
-                    className="w-full px-5 py-4 rounded-2xl bg-input border border-border/10 text-foreground text-sm font-bold focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="cashier_alert_msg" className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1.5 block">Mensaje de Emergencia</label>
-                  <textarea
-                    id="cashier_alert_msg"
-                    rows={3}
-                    placeholder="Explica el problema aquí..."
-                    value={alertMsg}
-                    onChange={(e) => setAlertMsg(e.target.value)}
-                    className="w-full px-5 py-4 rounded-2xl bg-input border border-border/10 text-foreground text-sm font-bold focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all resize-none"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <Button variant="outline" onClick={() => setAlertModal(false)} className="flex-1 h-14 rounded-2xl border-white/5 font-black uppercase text-[10px] tracking-widest">Cerrar</Button>
-                <Button
-                  onClick={handleSendAlert}
-                  disabled={!alertMsg.trim() || sendingAlert || alertSent}
-                  className="flex-1 h-14 bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase text-[10px] tracking-widest shadow-lg shadow-yellow-500/10"
-                >
-                  {alertSent ? "✓ Enviado" : sendingAlert ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : "Enviar Alerta"}
-                </Button>
-              </div>
-            </div>
-          </div>
+          <AlertModal
+            tableNum={tableNum}
+            alertMsg={alertMsg}
+            sendingAlert={sendingAlert}
+            alertSent={alertSent}
+            onTableNumChange={setTableNum}
+            onMsgChange={setAlertMsg}
+            onSend={handleSendAlert}
+            onClose={() => setAlertModal(false)}
+          />
         )}
       </div>
     </RestaurantThemeProvider>
