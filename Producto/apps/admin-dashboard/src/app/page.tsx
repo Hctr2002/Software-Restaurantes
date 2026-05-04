@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import { useAuthStore } from "@menu-bites/store";
 import { supabase } from "@menu-bites/auth";
-import { User, Lock, ArrowRight, Loader2, Mail, Eye, EyeOff } from "lucide-react";
-import { cn, Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@menu-bites/ui";
+import { Lock, ArrowRight, Loader2, Mail, Eye, EyeOff } from "lucide-react";
+import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@menu-bites/ui";
 import Link from "next/link";
 
 
@@ -65,7 +65,7 @@ export default function LoginPage() {
             const { data: rest } = await supabase.from('restaurants').select('slug').eq('id', restaurantId).single();
             slug = rest?.slug ?? null;
           }
-          const nextPath = roleUpper === 'CAJERO' ? '/' : (slug ? `/${slug}` : '/');
+          const nextPath = slug ? `/${slug}` : '/';
           const hash = new URLSearchParams({
             access_token:  data.session!.access_token,
             refresh_token: data.session!.refresh_token,

@@ -1,0 +1,20 @@
+{
+  "name": "menu-bites-docs-render",
+  "version": "1.0.0",
+  "description": "Script de render de diagramas Mermaid con beautiful-mermaid para la documentacion de Menu Bites",
+  "type": "module",
+  "scripts": {
+    "render": "node render-diagrams.mjs --theme tokyo-night",
+    "render:patch": "node render-diagrams.mjs --theme tokyo-night --patch",
+    "render:light": "node render-diagrams.mjs --theme github-light --patch",
+    "render:catppuccin": "node render-diagrams.mjs --theme catppuccin-mocha --patch",
+    "render:dracula": "node render-diagrams.mjs --theme dracula --patch",
+    "restore": "node render-diagrams.mjs --restore"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "beautiful-mermaid": "^1.1.3"
+  }
+}

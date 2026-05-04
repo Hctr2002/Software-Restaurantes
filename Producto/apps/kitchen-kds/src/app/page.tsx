@@ -169,7 +169,7 @@
  
    if (loading) {
      return (
-       <div className="min-h-screen flex items-center justify-center bg-slate-950">
+       <div className="min-h-screen flex items-center justify-center bg-background">
          <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-primary shadow-2xl shadow-primary/20" />
        </div>
      );
@@ -198,7 +198,7 @@
  
            <div className="flex items-center space-x-6">
              <div className="flex items-center space-x-12 px-10 py-3 glass rounded-[2rem] border border-white/5 shadow-xl">
-               <Stat label="Recibidos" value={pendingOrders.length} color="text-slate-400" />
+               <Stat label="Recibidos" value={pendingOrders.length} color="text-foreground/50" />
                <Stat label="En Fuego"   value={preparingOrders.length} color="text-primary" />
                <Stat label="Listos"     value={readyOrders.length} color="text-emerald-500" />
              </div>
@@ -231,7 +231,7 @@
  
          <main className="flex-1 grid grid-cols-3 gap-6 overflow-hidden">
            <AnimatePresence mode="popLayout">
-             <KDSColumn key="column-pending" title="Pedidos Nuevos" count={pendingOrders.length} icon={<Bell className="w-5 h-5 text-slate-500" />}>
+             <KDSColumn key="column-pending" title="Pedidos Nuevos" count={pendingOrders.length} icon={<Bell className="w-5 h-5 text-muted-foreground" />}>
                {pendingOrders.map((order) => (
                  <TicketWrapper key={`pending-${order.id}`} createdAt={order.created_at} thresholds={settings.thresholds} status={order.status}>
                    <OrderTicket id={order.id} tableNumber={order.table.number} status={order.status} createdAt={order.created_at} items={order.items} onStatusChange={(s) => handleStatusChange(order.id, s)} />
@@ -279,34 +279,34 @@
                      <div className="p-3 bg-yellow-500/10 rounded-2xl">
                        <AlertTriangle className="w-6 h-6 text-yellow-500" />
                      </div>
-                     <h2 className="text-xl font-black text-white tracking-tighter uppercase italic">
+                     <h2 className="text-xl font-black text-foreground tracking-tighter uppercase italic">
                        Reportar Quiebre
                      </h2>
                    </div>
-                   <button onClick={() => setAlertModal(false)} className="p-2 rounded-xl glass hover:text-white transition-colors">
+                   <button onClick={() => setAlertModal(false)} className="p-2 rounded-xl glass hover:text-foreground transition-colors">
                      <X className="w-5 h-5" />
                    </button>
                  </div>
  
                  <div className="space-y-6">
                    <div className="space-y-2">
-                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Producto Afectado</label>
+                     <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Producto Afectado</label>
                      <input
                        type="text"
                        placeholder="Ej. Salmón Ahumado..."
                        value={alertItem}
                        onChange={(e) => setAlertItem(e.target.value)}
-                       className="w-full px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold placeholder:text-slate-700 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+                       className="w-full px-6 py-4 rounded-2xl bg-foreground/5 border border-foreground/10 text-foreground font-bold placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
                      />
                    </div>
                    <div className="space-y-2">
-                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Mensaje Detallado</label>
+                     <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Mensaje Detallado</label>
                      <textarea
                        rows={3}
                        placeholder="Indica el motivo o cantidad restante..."
                        value={alertMsg}
                        onChange={(e) => setAlertMsg(e.target.value)}
-                       className="w-full px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold placeholder:text-slate-700 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 resize-none"
+                       className="w-full px-6 py-4 rounded-2xl bg-foreground/5 border border-foreground/10 text-foreground font-bold placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-500/50 resize-none"
                      />
                    </div>
                  </div>
@@ -361,7 +361,7 @@
  function Stat({ label, value, color }: { label: string; value: number; color: string }) {
    return (
      <div className="text-center group">
-       <p className="text-[9px] font-black text-slate-600 uppercase mb-1 tracking-[0.2em] group-hover:text-foreground transition-colors">{label}</p>
+       <p className="text-[9px] font-black text-muted-foreground uppercase mb-1 tracking-[0.2em] group-hover:text-foreground transition-colors">{label}</p>
        <p className={cn("text-3xl font-black tracking-tighter leading-none transition-transform group-hover:scale-110", color)}>{value}</p>
      </div>
    );

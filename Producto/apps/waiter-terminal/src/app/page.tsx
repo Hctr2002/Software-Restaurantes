@@ -11,7 +11,7 @@ const ALERT_OPTIONS: { type: AlertType; label: string; color: string }[] = [
   { type: "TABLE_ISSUE",  label: "Problema en Mesa", color: "border-red-500/40 text-red-400 hover:bg-red-500/10" },
   { type: "BILL_REQUEST", label: "Pedir Cuenta",      color: "border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/10" },
   { type: "HELP_REQUEST", label: "Necesito Ayuda",    color: "border-blue-500/40 text-blue-400 hover:bg-blue-500/10" },
-  { type: "GENERAL",      label: "Mensaje General",   color: "border-slate-500/40 text-slate-400 hover:bg-slate-500/10" },
+  { type: "GENERAL",      label: "Mensaje General",   color: "border-border text-muted-foreground hover:bg-foreground/10" },
 ];
 
 export default function WaiterDashboard() {
@@ -88,7 +88,7 @@ export default function WaiterDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary" />
       </div>
     );
@@ -178,12 +178,12 @@ export default function WaiterDashboard() {
       {/* Modal de alerta */}
       {alertModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
+          <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-100 flex items-center gap-2">
+              <h2 className="text-base font-bold text-foreground flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-yellow-400" aria-hidden="true" /> Enviar Alerta
               </h2>
-              <button onClick={() => setAlertModal(false)} aria-label="Cerrar modal" className="p-1 rounded text-slate-400 hover:text-white">
+              <button onClick={() => setAlertModal(false)} aria-label="Cerrar modal" className="p-1 rounded text-muted-foreground hover:text-foreground">
                 <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
@@ -204,7 +204,7 @@ export default function WaiterDashboard() {
 
             <div className="space-y-3">
               <div>
-                <label htmlFor="table_num" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">N° de Mesa (opcional)</label>
+                <label htmlFor="table_num" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">N° de Mesa (opcional)</label>
                 <input
                   id="table_num"
                   type="number"
@@ -212,18 +212,18 @@ export default function WaiterDashboard() {
                   placeholder="Ej. 5"
                   value={tableNum}
                   onChange={(e) => setTableNum(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  className="mt-1 w-full px-3 py-2 rounded-lg bg-input border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
                 />
               </div>
               <div>
-                <label htmlFor="alert_msg" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mensaje *</label>
+                <label htmlFor="alert_msg" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Mensaje *</label>
                 <textarea
                   id="alert_msg"
                   rows={3}
                   placeholder="Describe la situación…"
                   value={alertMsg}
                   onChange={(e) => setAlertMsg(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 resize-none"
+                  className="mt-1 w-full px-3 py-2 rounded-lg bg-input border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 resize-none"
                 />
               </div>
             </div>

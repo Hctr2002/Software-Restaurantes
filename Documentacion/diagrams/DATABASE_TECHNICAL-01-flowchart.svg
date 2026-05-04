@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 673.06375 1527.058" width="673.06375" height="1527.058" style="--bg:#1a1b26;--fg:#a9b1d6;--line:#3d59a1;--accent:#7aa2f7;--muted:#565f89;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="REQ" data-to="MW" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="198.65049999999997,76.9 198.65049999999997,124.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="MW" data-to="SLUG" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="198.65049999999997,161.8 198.65049999999997,209.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="SLUG" data-to="E404" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="No" points="160.3653333333333,401.2258333333333 160.3653333333333,706.2410000000001 103.21199999999999,706.2410000000001 103.212,786.541" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="SLUG" data-to="JWT" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="Si" points="236.93566666666663,401.2258333333333 236.93566666666663,475.51099999999997 294.089,475.51099999999997 294.089,555.811" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="JWT" data-to="LOGIN" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="No" points="260.86733333333336,721.9193333333334 260.86733333333336,791.1410000000001 194.46175,791.1410000000001 194.46175,871.441" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="JWT" data-to="META" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="Si" points="327.31066666666663,721.9193333333334 327.31066666666663,791.1410000000001 393.71625,791.1410000000001 393.71625,871.441" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="META" data-to="CHECK" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="393.71625,908.341 393.71625,956.3410000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CHECK" data-to="E403" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="No" points="347.2800833333333,1188.5218333333335 347.2800833333333,1270.9579999999999 283.15924999999993,1270.9579999999999 283.15925,1351.2579999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CHECK" data-to="RLS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="Si" points="440.1524166666666,1188.5218333333335 440.1524166666666,1270.9579999999999 504.27324999999996,1270.9579999999999 504.27324999999996,1351.2579999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="RLS" data-to="DATA" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="504.27324999999996,1388.158 504.27325,1436.158" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="SLUG" data-to="E404" data-label="No">
+  <rect x="87.71199999999999" y="713.2410000000001" width="30.718000000000004" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="103.071" y="728.3910000000001" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">No</text>
+</g>
+<g class="edge-label" data-from="SLUG" data-to="JWT" data-label="Si">
+  <rect x="280.089" y="482.51099999999997" width="27.154000000000003" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="293.666" y="497.66099999999994" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Si</text>
+</g>
+<g class="edge-label" data-from="JWT" data-to="LOGIN" data-label="No">
+  <rect x="178.96175" y="798.1410000000001" width="30.718000000000004" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="194.32075" y="813.291" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">No</text>
+</g>
+<g class="edge-label" data-from="JWT" data-to="META" data-label="Si">
+  <rect x="379.71624999999995" y="798.1410000000001" width="27.154000000000003" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="393.29324999999994" y="813.291" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Si</text>
+</g>
+<g class="edge-label" data-from="CHECK" data-to="E403" data-label="No">
+  <rect x="267.65924999999993" y="1277.9579999999999" width="30.718000000000004" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="283.0182499999999" y="1293.108" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">No</text>
+</g>
+<g class="edge-label" data-from="CHECK" data-to="RLS" data-label="Si">
+  <rect x="490.27324999999996" y="1277.9579999999999" width="27.154000000000003" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="503.85024999999996" y="1293.108" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Si</text>
+</g>
+<g class="node" data-id="REQ" data-label="Request HTTP con slug en URL" data-shape="rectangle">
+  <rect x="85.42099999999999" y="40" width="226.45899999999995" height="36.900000000000006" rx="0" ry="0" fill="#1e293b" stroke="#0f172a" stroke-width="0.75" />
+  <text x="198.65049999999997" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="#fff" dy="4.55">Request HTTP con slug en URL</text>
+</g>
+<g class="node" data-id="MW" data-label="Next.js Middleware" data-shape="rectangle">
+  <rect x="122.10049999999995" y="124.9" width="153.10000000000002" height="36.900000000000006" rx="0" ry="0" fill="#f59e0b" stroke="#d97706" stroke-width="0.75" />
+  <text x="198.65049999999997" y="143.35000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="#fff" dy="4.55">Next.js Middleware</text>
+</g>
+<g class="node" data-id="SLUG" data-label="Slug resuelve a restaurant?" data-shape="diamond">
+  <polygon points="198.65049999999997,209.8 313.506,324.6555 198.65049999999997,439.511 83.79499999999997,324.6555" fill="#f59e0b" stroke="#d97706" stroke-width="0.75" />
+  <text x="198.65049999999997" y="324.6555" text-anchor="middle" font-size="13" font-weight="500" fill="#fff" dy="4.55">Slug resuelve a restaurant?</text>
+</g>
+<g class="node" data-id="E404" data-label="404 Not Found" data-shape="rectangle">
+  <rect x="40" y="786.541" width="126.424" height="36.900000000000006" rx="0" ry="0" fill="#ef4444" stroke="#dc2626" stroke-width="0.75" />
+  <text x="103.212" y="804.9910000000001" text-anchor="middle" font-size="13" font-weight="500" fill="#fff" dy="4.55">404 Not Found</text>
+</g>
+<g class="node" data-id="JWT" data-label="JWT valido en cookie?" data-shape="diamond">
+  <polygon points="294.089,555.811 393.754,655.476 294.089,755.141 194.424,655.476" fill="#f59e0b" stroke="#d97706" stroke-width="0.75" />
+  <text x="294.089" y="655.476" text-anchor="middle" font-size="13" font-weight="500" fill="#fff" dy="4.55">JWT valido en cookie?</text>
+</g>
+<g class="node" data-id="LOGIN" data-label="Redirect a /login" data-shape="rectangle">
+  <rect x="126.43324999999999" y="871.441" width="136.05700000000002" height="36.900000000000006" rx="0" ry="0" fill="#10b981" stroke="#059669" stroke-width="0.75" />
+  <text x="194.46175" y="889.8910000000001" text-anchor="middle" font-size="13" font-weight="500" fill="#fff" dy="4.55">Redirect a /login</text>
+</g>
+<g class="node" data-id="META" data-label="Leer app_metadata del JWT" data-shape="rectangle">
+  <rect x="290.49025" y="871.441" width="206.45199999999994" height="36.900000000000006" rx="0" ry="0" fill="#10b981" stroke="#059669" stroke-width="0.75" />
+  <text x="393.71624999999995" y="889.8910000000001" text-anchor="middle" font-size="13" font-weight="500" fill="#fff" dy="4.55">Leer app_metadata del JWT</text>
+</g>
+<g class="node" data-id="CHECK" data-label="restaurant_id del JWT = restaurant?" data-shape="diamond">
+  <polygon points="393.71624999999995,956.341 533.0247499999999,1095.6495 393.71624999999995,1234.958 254.40774999999996,1095.6495" fill="#f59e0b" stroke="#d97706" stroke-width="0.75" />
+  <text x="393.71624999999995" y="1095.6495" text-anchor="middle" font-size="13" font-weight="500" fill="#fff" dy="4.55">restaurant_id del JWT = restaurant?</text>
+</g>
+<g class="node" data-id="E403" data-label="403 Forbidden" data-shape="rectangle">
+  <rect x="218.83574999999996" y="1351.2579999999998" width="128.647" height="36.900000000000006" rx="0" ry="0" fill="#ef4444" stroke="#dc2626" stroke-width="0.75" />
+  <text x="283.15924999999993" y="1369.7079999999999" text-anchor="middle" font-size="13" font-weight="500" fill="#fff" dy="4.55">403 Forbidden</text>
+</g>
+<g class="node" data-id="RLS" data-label="Consulta pasa por RLS de Supabase" data-shape="rectangle">
+  <rect x="375.48274999999995" y="1351.2579999999998" width="257.581" height="36.900000000000006" rx="0" ry="0" fill="#10b981" stroke="#059669" stroke-width="0.75" />
+  <text x="504.27324999999996" y="1369.7079999999999" text-anchor="middle" font-size="13" font-weight="500" fill="#fff" dy="4.55">Consulta pasa por RLS de Supabase</text>
+</g>
+<g class="node" data-id="DATA" data-label="Datos filtrados del tenant" data-shape="cylinder">
+  <rect x="412.53275" y="1443.158" width="183.481" height="36.900000000000006" fill="#1e293b" stroke="none" />
+  <line x1="412.53275" y1="1443.158" x2="412.53275" y2="1480.058" stroke="#0f172a" stroke-width="0.75" />
+  <line x1="596.0137500000001" y1="1443.158" x2="596.0137500000001" y2="1480.058" stroke="#0f172a" stroke-width="0.75" />
+  <ellipse cx="504.27325" cy="1480.058" rx="91.7405" ry="7" fill="#1e293b" stroke="#0f172a" stroke-width="0.75" />
+  <ellipse cx="504.27325" cy="1443.158" rx="91.7405" ry="7" fill="#1e293b" stroke="#0f172a" stroke-width="0.75" />
+  <text x="504.27325" y="1461.608" text-anchor="middle" font-size="13" font-weight="500" fill="#fff" dy="4.55">Datos filtrados del tenant</text>
+</g>
+</svg>
