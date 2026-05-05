@@ -9,7 +9,6 @@ export type PendingOrder = {
   table_id: string | null;
   total_amount: number;
   createdAt: string;
-  created_at: string;
   tables: { number: number } | null;
   order_items: { id: string; quantity: number; menu_items: { name: string } | null }[];
 };

@@ -25,7 +25,6 @@ type PendingOrder = {
   table_id: string | null;
   total_amount: number;
   createdAt: string;
-  created_at: string;
   tables: { number: number } | null;
   order_items: { id: string; quantity: number; menu_items: { name: string } | null }[];
 };
@@ -112,10 +111,10 @@ export default function WaiterDashboard() {
     setOrdersLoading(true);
     const { data } = await supabase
       .from("orders")
-      .select("id, status, table_id, total_amount, createdAt, created_at, tables(number), order_items(id, quantity, menu_items(name))")
+      .select("id, status, table_id, total_amount, createdAt, tables(number), order_items(id, quantity, menu_items(name))")
       .eq("restaurant_id", user.restaurantId)
       .in("status", ["PENDING", "READY"])
-      .order("created_at", { ascending: true });
+      .order("createdAt", { ascending: true });
 
     const rows = (data as any[]) ?? [];
     setPendingOrders(rows.filter((o) => o.status === "PENDING"));
@@ -743,7 +742,7 @@ export default function WaiterDashboard() {
                               <div>
                                 <h3 className="text-xl font-black tracking-tighter text-foreground leading-none">Mesa {order.tables?.number ?? "—"}</h3>
                                 <p className="text-[9px] text-muted-foreground font-black tracking-widest uppercase mt-1.5 opacity-60">
-                                  {timeAgo(order.created_at)} · {order.order_items.length} Ítems
+                                  {timeAgo(order.createdAt)} · {order.order_items.length} Ítems
                                 </p>
                               </div>
                             </div>

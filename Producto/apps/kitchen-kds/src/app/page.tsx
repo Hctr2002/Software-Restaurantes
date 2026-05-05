@@ -51,8 +51,10 @@
    const orders = rawOrders.filter(o => !clearedOrders.has(o.id));
    const loading = MOCK_MODE ? false : liveLoading;
  
-   // Load settings from localStorage on mount
-   useEffect(() => { setSettings(loadSettings()); }, []);
+   // Load settings from database on mount
+   useEffect(() => { 
+     loadSettings().then(setSettings); 
+   }, []);
  
    // Tick every 30s to refresh color coding and check critical alerts
    useEffect(() => {
@@ -134,9 +136,9 @@
      }
    };
  
-   const handleSaveSettings = (s: KDSSettings) => {
+   const handleSaveSettings = async (s: KDSSettings) => {
      setSettings(s);
-     saveSettings(s);
+     await saveSettings(s);
      setSettingsOpen(false);
    };
  
@@ -233,24 +235,24 @@
            <AnimatePresence mode="popLayout">
              <KDSColumn key="column-pending" title="Pedidos Nuevos" count={pendingOrders.length} icon={<Bell className="w-5 h-5 text-muted-foreground" />}>
                {pendingOrders.map((order) => (
-                 <TicketWrapper key={`pending-${order.id}`} createdAt={order.created_at} thresholds={settings.thresholds} status={order.status}>
-                   <OrderTicket id={order.id} tableNumber={order.table.number} status={order.status} createdAt={order.created_at} items={order.items} onStatusChange={(s) => handleStatusChange(order.id, s)} />
+                 <TicketWrapper key={`pending-${order.id}`} createdAt={order.createdAt} thresholds={settings.thresholds} status={order.status}>
+                   <OrderTicket id={order.id} tableNumber={order.table.number} status={order.status} createdAt={order.createdAt} items={order.items} onStatusChange={(s) => handleStatusChange(order.id, s)} />
                  </TicketWrapper>
                ))}
              </KDSColumn>
              
              <KDSColumn key="column-preparing" title="Preparando" count={preparingOrders.length} icon={<ChefHat className="w-5 h-5 text-primary" />} active>
                {preparingOrders.map((order) => (
-                 <TicketWrapper key={`preparing-${order.id}`} createdAt={order.created_at} thresholds={settings.thresholds} status={order.status}>
-                   <OrderTicket id={order.id} tableNumber={order.table.number} status={order.status} createdAt={order.created_at} items={order.items} onStatusChange={(s) => handleStatusChange(order.id, s)} />
+                 <TicketWrapper key={`preparing-${order.id}`} createdAt={order.createdAt} thresholds={settings.thresholds} status={order.status}>
+                   <OrderTicket id={order.id} tableNumber={order.table.number} status={order.status} createdAt={order.createdAt} items={order.items} onStatusChange={(s) => handleStatusChange(order.id, s)} />
                  </TicketWrapper>
                ))}
              </KDSColumn>
  
              <KDSColumn key="column-ready" title="Para Despacho" count={readyOrders.length} icon={<Activity className="w-5 h-5 text-emerald-500" />}>
                {readyOrders.map((order) => (
-                 <TicketWrapper key={`ready-${order.id}`} createdAt={order.created_at} thresholds={settings.thresholds} status={order.status}>
-                   <OrderTicket id={order.id} tableNumber={order.table.number} status={order.status} createdAt={order.created_at} items={order.items} onStatusChange={(s) => handleStatusChange(order.id, s)} />
+                 <TicketWrapper key={`ready-${order.id}`} createdAt={order.createdAt} thresholds={settings.thresholds} status={order.status}>
+                   <OrderTicket id={order.id} tableNumber={order.table.number} status={order.status} createdAt={order.createdAt} items={order.items} onStatusChange={(s) => handleStatusChange(order.id, s)} />
                  </TicketWrapper>
                ))}
              </KDSColumn>

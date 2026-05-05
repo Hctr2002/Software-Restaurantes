@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { supabase } from "./index";
 
@@ -91,7 +93,7 @@ export function useKitchenOrders(restaurantId: string | undefined) {
         `)
         .eq("restaurant_id", restaurantId)
         .in("status", ["VALIDATED", "PREPARING", "READY"])
-        .order("created_at", { ascending: true });
+        .order("createdAt", { ascending: true });
 
       if (!error) setOrders(data);
       setLoading(false);

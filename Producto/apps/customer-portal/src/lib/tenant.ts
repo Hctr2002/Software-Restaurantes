@@ -210,17 +210,17 @@ export interface TableOrder {
   id: string;
   status: string;
   total_amount: number;
-  created_at: string;
+  createdAt: string;
   order_items: { quantity: number; unit_price: number; menu_items: { name: string } | null }[];
 }
 
 export async function getTableOrders(tableId: string): Promise<TableOrder[]> {
   const { data, error } = await supabase
     .from('orders')
-    .select('id, status, total_amount, created_at, order_items(quantity, unit_price, menu_items(name))')
+    .select('id, status, total_amount, createdAt, order_items(quantity, unit_price, menu_items(name))')
     .eq('table_id', tableId)
     .not('status', 'in', '("DELIVERED","REJECTED")')
-    .order('created_at', { ascending: true });
+    .order('createdAt', { ascending: true });
 
   if (error) {
     console.error('[tenant] getTableOrders:', error.message);

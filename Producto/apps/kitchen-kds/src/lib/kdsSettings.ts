@@ -14,21 +14,28 @@ export const DEFAULT_SETTINGS: KDSSettings = {
   autoClear: { enabled: false, delaySeconds: 30 },
 };
 
-const STORAGE_KEY = "kds-settings";
-
-export function loadSettings(): KDSSettings {
-  if (typeof window === "undefined") return DEFAULT_SETTINGS;
+export async function loadSettings(): Promise<KDSSettings> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_SETTINGS;
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    const res = await fetch("/api/settings");
+    if (!res.ok) return DEFAULT_SETTINGS;
+    const data = await res.json();
+    if (!data) return DEFAULT_SETTINGS;
+    return { ...DEFAULT_SETTINGS, ...data };
   } catch {
     return DEFAULT_SETTINGS;
   }
 }
 
-export function saveSettings(s: KDSSettings): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+export async function saveSettings(s: KDSSettings): Promise<void> {
+  try {
+    await fetch("/api/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(s),
+    });
+  } catch (error) {
+    console.error("Error saving KDS settings:", error);
+  }
 }
 
 export function getTicketUrgency(

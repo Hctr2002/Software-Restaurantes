@@ -64,6 +64,7 @@ model Restaurant {
   orderItems          OrderItem[]
   orderItemExtras     OrderItemExtra[]
   themes              Theme[]
+  kdsSettings         KdsSettings?
 
   @@map("restaurants")
 }
@@ -300,5 +301,18 @@ model Theme {
   updatedAt       DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 
   @@map("restaurant_themes")
+  @@index([restaurantId])
+}
+
+model KdsSettings {
+  id              String   @id @default(uuid())
+  restaurantId    String   @unique @map("restaurant_id")
+  settings        Json     // Stores thresholds, categoryTimes, sounds, autoClear
+  createdAt       DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@map("kds_settings")
   @@index([restaurantId])
 }
