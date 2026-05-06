@@ -39,6 +39,7 @@ enum TableStatus {
   FREE
   OCCUPIED
   RESERVED
+  CLEANING
 }
 
 model Restaurant {
@@ -63,6 +64,7 @@ model Restaurant {
   orderItems          OrderItem[]
   orderItemExtras     OrderItemExtra[]
   themes              Theme[]
+  kdsSettings         KdsSettings?
 
   @@map("restaurants")
 }
@@ -187,6 +189,12 @@ model Order {
   status       OrderStatus @default(PENDING)
   totalAmount  Decimal     @default(0) @map("total_amount") @db.Decimal(10, 2)
   notes        String?
+  sessionId    String?     @map("session_id")
+
+  // Timestamps de ciclo de vida para analytics de tiempos de cocina
+  validatedAt  DateTime?   @map("validated_at")  @db.Timestamptz(3)
+  preparingAt  DateTime?   @map("preparing_at")  @db.Timestamptz(3)
+  readyAt      DateTime?   @map("ready_at")      @db.Timestamptz(3)
 
   table      Table?      @relation(fields: [tableId, restaurantId], references: [id, restaurantId])
   restaurant Restaurant  @relation(fields: [restaurantId], references: [id])
@@ -197,6 +205,7 @@ model Order {
 
   @@unique([id, restaurantId])
   @@index([restaurantId])
+  @@index([sessionId])
   @@map("orders")
 }
 
@@ -292,5 +301,18 @@ model Theme {
   updatedAt       DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 
   @@map("restaurant_themes")
+  @@index([restaurantId])
+}
+
+model KdsSettings {
+  id              String   @id @default(uuid())
+  restaurantId    String   @unique @map("restaurant_id")
+  settings        Json     // Stores thresholds, categoryTimes, sounds, autoClear
+  createdAt       DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@map("kds_settings")
   @@index([restaurantId])
 }

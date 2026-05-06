@@ -123,3 +123,12 @@ audit/**
 !audit/.gitkeep
 !audit/screenshots/
 !audit/screenshots/.gitkeep
+
+# Documentacion — scripts de render (dependencias npm locales)
+Documentacion/scripts/
+
+# Scratch / archivos de debug temporales
+Producto/scratch/
+
+# PR descriptions (notas locales, no van al repo)
+PR_*.md

@@ -1,19 +1,26 @@
 "use client";
 
-import React, { useState, useEffect, use, useRef } from 'react';
-import { ShoppingBag, Search, Plus, Info, ChevronRight, Loader2, MapPin, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { getPublicImageUrl } from '@/lib/supabase';
+import React, { useState, useEffect, use, useRef, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { ShoppingBag, Search, Plus, Info, ChevronRight, Loader2, MapPin, AlertCircle, CheckCircle2, Receipt, ClipboardList } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 import { useTenant } from '@/context/TenantContext';
 import {
   getCategoriesByRestaurant,
   getMenuItemsByRestaurant,
   getTableByNumber,
   placeOrder,
+  getTableOrders,
   type Category,
   type MenuItem,
   type CartItem,
   type Table,
+  type TableOrder,
 } from '@/lib/tenant';
+import { OrderTracker } from '../../_components/OrderTracker';
+import { RatingModal } from '../../_components/RatingModal';
+import { CuentaSheet } from '../../_components/CuentaSheet';
+import { MenuItemCard } from '../../_components/MenuItemCard';
 
 export default function MenuPage({
   params: paramsPromise,
@@ -39,6 +46,25 @@ export default function MenuPage({
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
+  const [orderPlaced, setOrderPlaced]         = useState(false);
+  const [isRequestingBill, setIsRequestingBill] = useState(false);
+  const [billRequested, setBillRequested]       = useState(false);
+
+  // W2.2 — Tracker del último pedido
+  const [lastOrderId, setLastOrderId]       = useState<string | null>(null);
+  const [lastOrderStatus, setLastOrderStatus] = useState<string>('PENDING');
+
+  // W5.3 — Rating post-pago
+  const [showRating, setShowRating]       = useState(false);
+  const [ratingOrderId, setRatingOrderId] = useState<string | null>(null);
+  const [stars, setStars]                 = useState(0);
+  const [ratingComment, setRatingComment] = useState('');
+  const [ratingSubmitting, setRatingSubmitting] = useState(false);
+  const [ratingDone, setRatingDone]       = useState(false);
+
+  // W2.2 — Mi Cuenta (pedidos acumulados de la mesa)
+  const [tableOrders, setTableOrders]       = useState<TableOrder[]>([]);
+  const [isCuentaOpen, setIsCuentaOpen]     = useState(false);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -139,16 +165,114 @@ export default function MenuPage({
     setOrderError(null);
     try {
       console.log('[MenuPage] Enviando pedido → restaurantId:', restaurant.id, '| mesa:', validatedTable.number);
-      await placeOrder(restaurant.id, validatedTable.number.toString(), cart);
-      console.log('[MenuPage] Pedido creado con éxito');
+      const orderId = await placeOrder(restaurant.id, validatedTable.number.toString(), cart);
+      console.log('[MenuPage] Pedido creado con éxito:', orderId);
+      setLastOrderId(orderId);
+      setLastOrderStatus('PENDING');
       setCart([]);
       setIsCheckoutOpen(false);
       setOrderSuccess(true);
+      setOrderPlaced(true);
     } catch (err: any) {
       console.error('[MenuPage] Error al realizar pedido:', err);
       setOrderError(err?.message ?? 'Error al procesar el pedido. Intenta de nuevo.');
     } finally {
       setIsPlacingOrder(false);
+    }
+  };
+
+  // W2.2 — Cargar pedidos acumulados cuando la mesa está validada
+  const fetchTableOrders = useCallback(async () => {
+    if (!validatedTable) return;
+    const orders = await getTableOrders(validatedTable.id);
+    setTableOrders(orders);
+  }, [validatedTable]);
+
+  useEffect(() => {
+    if (!validatedTable) return;
+    fetchTableOrders();
+
+    const channel = supabase
+      .channel(`customer-orders-${validatedTable.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders', filter: `table_id=eq.${validatedTable.id}` },
+        () => { fetchTableOrders(); }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [validatedTable, fetchTableOrders]);
+
+  // W2.2 — Tracker Realtime del último pedido
+  useEffect(() => {
+    if (!lastOrderId) return;
+
+    const channel = supabase
+      .channel(`tracker-${lastOrderId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${lastOrderId}` },
+        (payload) => {
+          const newStatus = payload.new.status as string;
+          setLastOrderStatus(newStatus);
+          if (newStatus === 'DELIVERED') {
+            setRatingOrderId(lastOrderId);
+            setTimeout(() => {
+              setShowRating(true);
+              setLastOrderId(null);
+            }, 1500);
+          } else if (newStatus === 'REJECTED') {
+            setTimeout(() => setLastOrderId(null), 3000);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [lastOrderId]);
+
+  const handleSubmitRating = async () => {
+    if (!stars || !ratingOrderId || !restaurant?.id) return;
+    setRatingSubmitting(true);
+    try {
+      await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_id:      ratingOrderId,
+          restaurant_id: restaurant.id,
+          table_id:      validatedTable?.id ?? null,
+          rating:        stars,
+          comment:       ratingComment,
+        }),
+      });
+      setRatingDone(true);
+      setTimeout(() => {
+        setShowRating(false);
+        setStars(0);
+        setRatingComment('');
+        setRatingDone(false);
+        setRatingOrderId(null);
+      }, 2000);
+    } finally {
+      setRatingSubmitting(false);
+    }
+  };
+
+  const handleRequestBill = async () => {
+    if (!validatedTable || isRequestingBill || billRequested) return;
+    setIsRequestingBill(true);
+    try {
+      const res = await fetch('/api/bill-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ table_id: validatedTable.id }),
+      });
+      if (res.ok) setBillRequested(true);
+    } catch {
+    } finally {
+      setIsRequestingBill(false);
     }
   };
 
@@ -258,63 +382,38 @@ export default function MenuPage({
 
       {/* Menu Items */}
       <section className="px-6 mt-10 space-y-6">
-        <h3 className="text-lg font-semibold text-sage-light border-l-4 border-sage pl-3">
+        <h3 className="text-lg font-semibold text-sage-light border-l-4 border-sage pl-3 uppercase tracking-widest text-sm">
           {categories.find((c) => c.id === activeCategory)?.name ?? 'Nuestros Platos'}
         </h3>
-        <div className="grid grid-cols-1 gap-5">
+        <motion.div
+          key={activeCategory}
+          initial="hidden"
+          animate="show"
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06 } } }}
+          className="grid grid-cols-1 gap-4"
+        >
           {filteredItems.length > 0 ? (
             filteredItems.map((item) => (
-              <div
+              <MenuItemCard
                 key={item.id}
-                className="glass-card rounded-2xl overflow-hidden flex h-36 group border border-white/5"
-              >
-                <div className="w-1/3 relative overflow-hidden bg-navy-light/20">
-                  <img
-                    src={getPublicImageUrl(item.imageUrl)}
-                    width={400}
-                    height={300}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    alt={item.name}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=400&auto=format&fit=crop';
-                    }}
-                  />
-                  <button aria-label="Información del plato" className="absolute top-2 left-2 p-1.5 glass-panel rounded-full text-sand hover:text-accent transition-colors">
-                    <Info className="w-3.5 h-3.5" aria-hidden="true" />
-                  </button>
-                </div>
-                <div className="w-2/3 p-4 flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-start">
-                      <h4 className="font-bold text-sand leading-tight line-clamp-1">{item.name}</h4>
-                      <span className="text-sage font-bold text-sm ml-2">
-                        ${item.price.toLocaleString()}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-sand/60 mt-1 line-clamp-2 font-light italic">
-                      {item.description}
-                    </p>
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      onClick={() => addToCart(item)}
-                      aria-label={`Añadir ${item.name} al pedido`}
-                      className="flex items-center gap-2 bg-sage/10 hover:bg-sage text-sand hover:text-navy-dark px-4 py-1.5 rounded-full border border-sage/30 transition-all duration-300 text-xs font-bold active:scale-90"
-                    >
-                      <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-                      Añadir
-                    </button>
-                  </div>
-                </div>
-              </div>
+                item={item}
+                cartQuantity={cart.find((c) => c.id === item.id)?.quantity ?? 0}
+                onAdd={addToCart}
+                onDecrement={(id: string) =>
+                  setCart((prev) =>
+                    prev
+                      .map((c) => c.id === id && c.quantity > 1 ? { ...c, quantity: c.quantity - 1 } : c)
+                      .filter((c) => c.quantity > 0)
+                  )
+                }
+              />
             ))
           ) : (
             <div className="text-center py-12">
               <p className="text-sand/40 italic">No hay platos disponibles en esta categoría.</p>
             </div>
           )}
-        </div>
+        </motion.div>
       </section>
 
       {/* Checkout Modal */}
@@ -458,6 +557,72 @@ export default function MenuPage({
               Continuar comprando
             </button>
           </div>
+        </div>
+      )}
+
+      {showRating && (
+        <RatingModal
+          restaurantName={restaurant.name}
+          stars={stars}
+          comment={ratingComment}
+          submitting={ratingSubmitting}
+          done={ratingDone}
+          onStarsChange={setStars}
+          onCommentChange={setRatingComment}
+          onSubmit={handleSubmitRating}
+          onSkip={() => setShowRating(false)}
+        />
+      )}
+
+      {lastOrderId && lastOrderStatus !== 'DELIVERED' && lastOrderStatus !== 'REJECTED' && (
+        <OrderTracker status={lastOrderStatus} />
+      )}
+
+      {isCuentaOpen && validatedTable && (
+        <CuentaSheet
+          tableNumber={validatedTable.number}
+          orders={tableOrders}
+          onClose={() => setIsCuentaOpen(false)}
+        />
+      )}
+
+      {/* W2.2 — Botón flotante "Mi Cuenta" */}
+      {orderPlaced && validatedTable && !isCheckoutOpen && tableOrders.length > 0 && (
+        <div className="fixed bottom-8 left-6 z-50 animate-in slide-in-from-bottom-10 fade-in duration-500">
+          <button
+            onClick={() => setIsCuentaOpen(true)}
+            aria-label="Ver mi cuenta"
+            className="flex items-center gap-2 px-4 py-3 rounded-2xl shadow-2xl font-bold text-sm bg-navy-light border border-sand/10 text-sand hover:bg-sand/10 transition-all active:scale-95"
+          >
+            <ClipboardList className="w-4 h-4 text-sage" aria-hidden="true" />
+            Mi Cuenta
+            <span className="bg-sage/20 text-sage text-[10px] font-black px-1.5 py-0.5 rounded-full">
+              {tableOrders.length}
+            </span>
+          </button>
+        </div>
+      )}
+
+      {/* Floating Bill Request Button — visible once an order has been placed */}
+      {orderPlaced && validatedTable && !isCheckoutOpen && (
+        <div className="fixed bottom-8 right-6 z-50 animate-in slide-in-from-bottom-10 fade-in duration-500">
+          <button
+            onClick={handleRequestBill}
+            disabled={isRequestingBill || billRequested}
+            aria-label="Solicitar la cuenta"
+            className={`flex items-center gap-2 px-5 py-3 rounded-2xl shadow-2xl font-bold text-sm transition-all active:scale-95 ${
+              billRequested
+                ? 'bg-green-700/80 text-white cursor-default border border-green-500/30'
+                : 'bg-navy-light border border-sand/10 text-sand hover:bg-sand/10'
+            }`}
+          >
+            {isRequestingBill ? (
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Receipt className="w-4 h-4" aria-hidden="true" />
+            )}
+            {billRequested ? 'Cuenta solicitada ✓' : 'Solicitar Cuenta'}
+          </button>
         </div>
       )}
 
