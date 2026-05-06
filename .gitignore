@@ -123,3 +123,6 @@ audit/**
 !audit/.gitkeep
 !audit/screenshots/
 !audit/screenshots/.gitkeep
+
+#temp files
+*.temp
