@@ -57,16 +57,26 @@ export const tableService = {
   async delete(restaurantId: string, id: string) {
     const db = createServiceClient();
 
-    const { count } = await db
+    // Bloquea solo si hay órdenes activas — las históricas (DELIVERED/REJECTED)
+    // no impiden la eliminación gracias al ON DELETE SET NULL en el FK de BD.
+    const ACTIVE_STATUSES = ["PENDING", "VALIDATED", "PREPARING", "READY"];
+
+    const { count, error: countError } = await db
       .from("orders")
       .select("id", { count: "exact", head: true })
       .eq("table_id", id)
-      .eq("restaurant_id", restaurantId);
+      .in("status", ACTIVE_STATUSES);
+
+    if (countError) {
+      return { data: null, error: { message: "Error al verificar órdenes activas." } };
+    }
 
     if (count && count > 0) {
       return {
         data: null,
-        error: { message: `No se puede eliminar la mesa porque tiene ${count} orden(es) asociada(s). Elimina o reasigna las órdenes primero.` },
+        error: {
+          message: `La mesa tiene ${count} orden(es) activa(s). Ciérralas antes de eliminarla.`,
+        },
       };
     }
 
