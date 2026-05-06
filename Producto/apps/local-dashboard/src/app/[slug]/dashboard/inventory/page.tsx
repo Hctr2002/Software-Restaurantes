@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import LocalShell from "../_components/LocalShell";
 import { Table, TableRow, TableCell, Modal, Badge } from "@menu-bites/ui";
 import { Button, Input } from "@menu-bites/ui";
 import { Inventory } from "../_components/localShared";
-import { Plus, Pencil, Trash2, Loader2, AlertTriangle, Package, Download } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, AlertTriangle, Package, Download, Upload, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { LOW_STOCK_THRESHOLD } from "@menu-bites/auth";
 
@@ -28,6 +28,11 @@ export default function InventoryPage() {
   const [form, setForm]           = useState(EMPTY_FORM);
   const [saving, setSaving]       = useState(false);
   const [deleteId, setDeleteId]   = useState<string | null>(null);
+
+  type ImportStatus = "idle" | "uploading" | "success" | "error";
+  const [importStatus, setImportStatus]   = useState<ImportStatus>("idle");
+  const [importMessage, setImportMessage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
@@ -97,6 +102,33 @@ export default function InventoryPage() {
   const criticalItems = items.filter((i) => i.stock <= 0);
   const lowItems      = items.filter((i) => i.stock > 0 && i.stock <= LOW_STOCK_THRESHOLD);
   const lowStockCount = criticalItems.length + lowItems.length;
+
+  const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImportStatus("uploading");
+    setImportMessage(null);
+    try {
+      const text = await file.text();
+      const res  = await fetch("/api/local/inventory/import", {
+        method: "POST",
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+        body: text,
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Error al importar");
+      const errNote = json.errors?.length ? ` (${json.errors.length} fila(s) con error)` : "";
+      setImportMessage(`${json.updated} ítem(s) actualizados${errNote}.`);
+      setImportStatus("success");
+      fetchItems();
+      setTimeout(() => { setImportStatus("idle"); setImportMessage(null); }, 4000);
+    } catch (err) {
+      setImportMessage(err instanceof Error ? err.message : "Error inesperado");
+      setImportStatus("error");
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const handleExportCSV = () => {
     const lines = [
@@ -169,6 +201,20 @@ export default function InventoryPage() {
         </div>
       )}
 
+      {/* Feedback importación */}
+      {importMessage && (
+        <div className={`flex items-center gap-3 p-4 rounded-2xl border text-sm font-bold mb-4 ${
+          importStatus === "success"
+            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+            : "bg-destructive/10 border-destructive/30 text-destructive"
+        }`}>
+          {importStatus === "success"
+            ? <CheckCircle className="w-4 h-4 shrink-0" />
+            : <AlertTriangle className="w-4 h-4 shrink-0" />}
+          {importMessage}
+        </div>
+      )}
+
       <div className="flex justify-end gap-3 mb-8">
         <Button
           variant="ghost"
@@ -178,6 +224,26 @@ export default function InventoryPage() {
         >
           <Download className="w-4 h-4" /> Exportar CSV
         </Button>
+
+        <label className={`inline-flex items-center gap-2 h-11 px-5 rounded-2xl border font-bold text-sm cursor-pointer transition-all active:scale-95 ${
+          importStatus === "uploading"
+            ? "opacity-50 pointer-events-none border-white/10 text-foreground/40"
+            : "border-white/10 hover:bg-white/5 text-foreground/60 hover:text-foreground"
+        }`}>
+          {importStatus === "uploading"
+            ? <Loader2 className="w-4 h-4 animate-spin" />
+            : <Upload className="w-4 h-4" />}
+          Importar CSV
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,text/csv,text/plain"
+            className="hidden"
+            onChange={handleImportCSV}
+            disabled={importStatus === "uploading"}
+          />
+        </label>
+
         <Button onClick={openCreate} className="bg-primary hover:bg-primary/80 text-primary-foreground font-bold h-11 px-6 rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-95">
           <Plus className="w-4 h-4 mr-2" /> Nuevo Ingrediente
         </Button>
