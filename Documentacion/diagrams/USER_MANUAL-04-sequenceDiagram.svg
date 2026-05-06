@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 649.6925 545" width="649.6925" height="545" style="--bg:#1a1b26;--fg:#a9b1d6;--line:#3d59a1;--accent:#7aa2f7;--muted:#565f89;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="seq-arrow" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" />
+  </marker>
+  <marker id="seq-arrow-open" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polyline points="0 0, 8 2.5, 0 5" fill="none" stroke="var(--_arrow)" stroke-width="1" />
+  </marker>
+</defs>
+<line class="lifeline" data-actor="G" x1="70" y1="70" x2="70" y2="515" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="WT" x1="212.917" y1="70" x2="212.917" y2="515" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="KDS" x1="369.4885" y1="70" x2="369.4885" y2="515" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="C" x1="509.4885" y1="70" x2="509.4885" y2="515" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<g class="message" data-from="G" data-to="WT" data-label="Selecciona mesa y toma pedido" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="70" y1="90" x2="212.917" y2="90" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="141.45850000000002" y="80" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Selecciona mesa y toma pedido</text>
+</g>
+<g class="message" data-from="WT" data-to="WT" data-label="Crea orden con status PENDING" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="212.917,130 242.917,130 242.917,150 212.917,150" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="250.917" y="140" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Crea orden con status PENDING</text>
+</g>
+<g class="message" data-from="G" data-to="WT" data-label="Valida disponibilidad de items" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="70" y1="200" x2="212.917" y2="200" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="141.45850000000002" y="190" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Valida disponibilidad de items</text>
+</g>
+<g class="message" data-from="WT" data-to="WT" data-label="Cambia status a VALIDATED" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="212.917,240 242.917,240 242.917,260 212.917,260" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="250.917" y="250" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Cambia status a VALIDATED</text>
+</g>
+<g class="message" data-from="KDS" data-to="KDS" data-label="Chef inicia (PREPARING) y termina (READY)" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="369.4885,325 399.4885,325 399.4885,345 369.4885,345" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="407.4885" y="335" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Chef inicia (PREPARING) y termina (READY)</text>
+</g>
+<g class="message" data-from="KDS" data-to="WT" data-label="Notificacion: Pedido LISTO mesa 3" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="369.4885" y1="395" x2="212.917" y2="395" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="291.20275" y="385" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Notificacion: Pedido LISTO mesa 3</text>
+</g>
+<g class="message" data-from="G" data-to="C" data-label="Entrega el pedido" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="70" y1="435" x2="509.4885" y2="435" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="289.74424999999997" y="425" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Entrega el pedido</text>
+</g>
+<g class="message" data-from="G" data-to="WT" data-label="Marca como DELIVERED" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="70" y1="475" x2="212.917" y2="475" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="141.45850000000002" y="465" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Marca como DELIVERED</text>
+</g>
+<g class="note" data-position="over" data-actors="KDS">
+  <polygon points="294.5905,278 438.3865,278 444.3865,284 444.3865,301 294.5905,301" fill="var(--bg)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <polygon points="438.3865,278 444.3865,284 438.3865,284" fill="var(--_inner-stroke)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="369.48850000000004" y="289.5" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Ticket aparece en pantalla</text>
+</g>
+<g class="actor" data-id="G" data-label="Garzon" data-type="participant">
+  <rect x="30" y="30" width="80" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="70" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">Garzon</text>
+</g>
+<g class="actor" data-id="WT" data-label="Waiter Terminal" data-type="participant">
+  <rect x="150" y="30" width="125.834" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="212.917" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">Waiter Terminal</text>
+</g>
+<g class="actor" data-id="KDS" data-label="Kitchen KDS" data-type="participant">
+  <rect x="315.834" y="30" width="107.30899999999998" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="369.4885" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">Kitchen KDS</text>
+</g>
+<g class="actor" data-id="C" data-label="Cliente" data-type="participant">
+  <rect x="469.4885" y="30" width="80" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="509.4885" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">Cliente</text>
+</g>
+</svg>

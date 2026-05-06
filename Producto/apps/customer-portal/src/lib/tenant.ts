@@ -174,7 +174,7 @@ export async function placeOrder(
   restaurantId: string,
   tableNumber: string,
   cartItems: CartItem[]
-): Promise<void> {
+): Promise<string> {
   const totalAmount = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
@@ -201,6 +201,32 @@ export async function placeOrder(
     const err = await res.json().catch(() => ({ error: 'Error desconocido' }));
     throw new Error(`[tenant] placeOrder: ${err.error}`);
   }
+
+  const { id } = await res.json();
+  return id as string;
+}
+
+export interface TableOrder {
+  id: string;
+  status: string;
+  total_amount: number;
+  createdAt: string;
+  order_items: { quantity: number; unit_price: number; menu_items: { name: string } | null }[];
+}
+
+export async function getTableOrders(tableId: string): Promise<TableOrder[]> {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('id, status, total_amount, createdAt, order_items(quantity, unit_price, menu_items(name))')
+    .eq('table_id', tableId)
+    .not('status', 'in', '("DELIVERED","REJECTED")')
+    .order('createdAt', { ascending: true });
+
+  if (error) {
+    console.error('[tenant] getTableOrders:', error.message);
+    return [];
+  }
+  return (data ?? []) as unknown as TableOrder[];
 }
 
 // ─────────────────────────────────────────────

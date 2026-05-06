@@ -9,7 +9,7 @@ interface MockOrderItem {
 export interface MockOrder {
   id: string;
   status: OrderStatus;
-  created_at: string;
+  createdAt: string;
   table: { number: number };
   items: MockOrderItem[];
 }
@@ -21,7 +21,7 @@ export const MOCK_ORDERS: MockOrder[] = [
   {
     id: "mock-order-001",
     status: "PENDING",
-    created_at: mins(2),
+    createdAt: mins(2),
     table: { number: 3 },
     items: [
       { id: "i1", quantity: 2, menu_item: { name: "Lomo a lo Pobre" } },
@@ -31,7 +31,7 @@ export const MOCK_ORDERS: MockOrder[] = [
   {
     id: "mock-order-002",
     status: "PENDING",
-    created_at: mins(5),
+    createdAt: mins(5),
     table: { number: 7 },
     items: [
       { id: "i3", quantity: 1, menu_item: { name: "Cazuela de Vacuno" } },
@@ -42,7 +42,7 @@ export const MOCK_ORDERS: MockOrder[] = [
   {
     id: "mock-order-003",
     status: "PREPARING",
-    created_at: mins(8),
+    createdAt: mins(8),
     table: { number: 2 },
     items: [
       { id: "i6", quantity: 2, menu_item: { name: "Pastel de Choclo" } },
@@ -53,7 +53,7 @@ export const MOCK_ORDERS: MockOrder[] = [
     // Este pedido supera los 15 min — activa la alerta de retraso (brand-accent pulsante)
     id: "mock-order-004",
     status: "PREPARING",
-    created_at: mins(18),
+    createdAt: mins(18),
     table: { number: 5 },
     items: [
       { id: "i8", quantity: 1, menu_item: { name: "Reineta a la Plancha" } },
@@ -64,7 +64,7 @@ export const MOCK_ORDERS: MockOrder[] = [
   {
     id: "mock-order-005",
     status: "READY",
-    created_at: mins(22),
+    createdAt: mins(22),
     table: { number: 1 },
     items: [
       { id: "i11", quantity: 4, menu_item: { name: "Sopaipillas" } },

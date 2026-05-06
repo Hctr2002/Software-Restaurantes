@@ -87,6 +87,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: itemsError.message }, { status: 500 });
     }
 
+    // Marcar mesa como OCCUPIED al recibir el primer pedido
+    if (table_id) {
+      await supabaseAdmin
+        .from('tables')
+        .update({ status: 'OCCUPIED' })
+        .eq('id', table_id);
+    }
+
     return NextResponse.json({ id: orderId }, { status: 201 });
   } catch (err: any) {
     console.error('[api/orders] Error inesperado:', err);
