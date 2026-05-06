@@ -56,6 +56,20 @@ export const tableService = {
 
   async delete(restaurantId: string, id: string) {
     const db = createServiceClient();
+
+    const { count } = await db
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("table_id", id)
+      .eq("restaurant_id", restaurantId);
+
+    if (count && count > 0) {
+      return {
+        data: null,
+        error: { message: `No se puede eliminar la mesa porque tiene ${count} orden(es) asociada(s). Elimina o reasigna las órdenes primero.` },
+      };
+    }
+
     return await db
       .from("tables")
       .delete()
