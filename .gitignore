@@ -123,3 +123,7 @@ audit/**
 !audit/.gitkeep
 !audit/screenshots/
 !audit/screenshots/.gitkeep
+
+# Local scratch
+scratch/
+

@@ -212,13 +212,13 @@ Si un archivo supera las **400 líneas**, se deben extraer partes en componentes
 
 ---
 
-## 7. ESTILO DE CÓDIGO (OLYMP-IA STANDARD)
+## 7. ESTILO DE CÓDIGO (Sistema de Gestión STANDARD)
 
 - **UI:** Seguir guía de estilos de Magic MCP (Vibrance/Glassmorphism).
 - **Semántica:** HTML5 estricto para accesibilidad.
 - **Git:** Art. 2.2 (No commits sin permiso directo).
 
-## 8. REGLAS OLYMP-IA (CONSTITUCIÓN V2.2.0+)
+## 8. REGLAS Sistema de Gestión (CONSTITUCIÓN V2.2.0+)
 
 - **Art. 1 (Ambigüedad):** Prohibido ejecutar sobre términos vagos.
 - **Art. 2 (Gated Pipeline):** Esperar "APROBADO" antes de cambios estructurales.
@@ -230,7 +230,7 @@ Leer siempre `task.md` y `memoria.md` para recuperar el estado mental del agente
 
 ---
 
-Desarrollado por OLYMP-IA · Supremacía Digital
+Desarrollado por el Equipo Técnico de Software-Restaurantes
 
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
