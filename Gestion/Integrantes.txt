@@ -1,0 +1,16 @@
+INTEGRANTES DEL EQUIPO - MENU BITES
+
+Integrante 1: Héctor Omar Antonio Robledo Aguilar
+RUT: 21150403-K
+Rol: QA Engineer / Desarrollador Fullstack / Scrum Master
+Responsabilidades: Asegurar la calidad mediante pruebas unitarias/integración (Jest/Testing Library). Desarrollo frontend (Next.js/Expo) y backend. Validación de políticas RLS de Supabase. Facilitador de ceremonias Scrum.
+
+Integrante 2: Alejandro Andres Placencia Menares
+RUT: 17070619-6
+Rol: Desarrollador Fullstack / Diseñador UI/UX
+Responsabilidades: Diseño de interfaces web y móvil (Next.js, Tailwind CSS, Expo, NativeWind). Definición de arquitectura visual y UX por roles. Desarrollo de componentes compartidos. Foco en frontend y backend.
+
+Integrante 3: José Luis Medina Mercado
+RUT: 13731386-3
+Rol: Product Owner / Project Manager
+Responsabilidades: Visión del producto y priorización del backlog. Validación de requerimientos por sprint. Coordinación con el docente. Gestión de planificación semestral y seguimiento de hitos.

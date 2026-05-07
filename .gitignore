@@ -154,3 +154,5 @@ Producto/test-update.js
 # Extra temporary files
 color_proposals.html
 **/scratch/
+Producto/tests/
+Documentacion/audits/

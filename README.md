@@ -30,9 +30,15 @@ Olvídese de las recargas manuales. Gracias al **Realtime Sync Engine** basado e
 
 ---
 
-## 🏗️ Arquitectura del Sistema
+## 🏗️ Estructura del Repositorio
 
-El proyecto está organizado bajo una estructura de **Monorepo** moderna que maximiza la reutilización de código y la velocidad de desarrollo.
+El proyecto sigue una organización estandarizada para facilitar la auditoría y el mantenimiento:
+
+*   **`Documentacion/`**: Especificaciones técnicas, manuales de usuario y reportes de QA.
+*   **`Gestion/`**: Planificación del proyecto, integrantes y reportes de avance.
+*   **`Producto/`**: Código fuente del sistema (Monorepo Turborepo).
+
+### Arquitectura del Sistema (Monorepo)
 
 ```mermaid
 %%{init: {
@@ -48,7 +54,7 @@ El proyecto está organizado bajo una estructura de **Monorepo** moderna que max
   }
 }}%%
 graph TD
-    subgraph Monorepo ["Monorepo (Turborepo + npm Workspaces)"]
+    subgraph Monorepo ["Producto (Turborepo + npm Workspaces)"]
         direction TB
         A[Apps] --> B[admin-dashboard]
         A --> C[local-dashboard]
@@ -57,9 +63,9 @@ graph TD
         A --> F[cashier-dashboard]
         A --> G[customer-portal]
 
-        P[Packages Shared] --> UI["@menu-bites/ui (Design System)"]
-        P --> AUTH["@menu-bites/auth (Supabase Logic)"]
-        P --> STORE["@menu-bites/store (Global State)"]
+        P[Packages Shared] --> UI["@menu-bites/ui"]
+        P --> AUTH["@menu-bites/auth"]
+        P --> STORE["@menu-bites/store"]
 
         Apps -.->|importa| Packages
     end
