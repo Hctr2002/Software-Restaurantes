@@ -10,14 +10,15 @@
 ## 2. Resumen Técnico de Ejecución
 
 - Implementación del estado terminal COMPLETED en el ciclo de vida de pedidos para asegurar un cierre lógico y financiero de las transacciones.
-- Desarrollo de trigger PostgreSQL validate_order_transition para forzar la integridad de la máquina de estados, impidiendo saltos de estado inválidos.
-- Creación de tabla kds_settings en Supabase para la persistencia centralizada de configuraciones de cocina, eliminando la dependencia de almacenamiento local volátil.
-- Refactorización final y despliegue del hook useRealtimeSync en el paquete @menu-bites/auth, logrando una reducción de redundancia del 40% en la lógica de comunicación.
-- Ejecución de limpieza profunda del repositorio mediante la optimización de .gitignore con patrones recursivos para excluir artefactos de agentes y herramientas.
-- Consolidación de la documentación técnica (TECHNICAL_SAD, DATABASE_TECHNICAL) reflejando el estado actual de la infraestructura multitenant.
-- Reconstrucción y actualización de reportes históricos de avance en el directorio Gestion para garantizar trazabilidad institucional.
-- Sincronización final de memoria operacional (memoria.md) siguiendo el protocolo de Flight Recorder (Art. 4).
-- Preparación de activos para la creación manual de Pull Request (PR_DETALLES.md) por parte del usuario.
+- Desarrollo de trigger PostgreSQL validate_order_transition para forzar la integridad de la máquina de estados.
+- Creación de tabla kds_settings en Supabase para la persistencia centralizada de configuraciones de cocina.
+- Refactorización final y despliegue del hook useRealtimeSync y useCustomerPortal en @menu-bites/auth.
+- Migración de componentes de alta fidelidad (OrderGroupCard, PaymentSlideOver, BillAlertIsland) a @menu-bites/ui.
+- Ejecución de limpieza profunda eliminando scripts de depuración (scratch/*.ts) y archivos temporales de visualización.
+- Optimización de .gitignore con patrones recursivos para exclusión total de artefactos de agentes.
+- Consolidación de la documentación técnica (TECHNICAL_SAD, DATABASE_TECHNICAL) y manuales de usuario.
+- Sincronización final de memoria operacional (memoria.md) siguiendo el protocolo de Flight Recorder.
+
 
 ## 3. Artefactos y Código (Trazabilidad)
 
