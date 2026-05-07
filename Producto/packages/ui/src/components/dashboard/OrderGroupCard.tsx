@@ -16,7 +16,7 @@ interface Props {
 }
 
 export function OrderGroupCard({ group, index, isPending, onClick }: Props) {
-  const allItems    = group.orders.flatMap((o) => o.order_items ?? []);
+  const allItems    = group.orders.flatMap((o) => o.orderItems ?? []);
   const previewItems = allItems.slice(0, 4);
   const extraCount   = allItems.length - previewItems.length;
   const tableLabel   = group.sessionId ? "Mesas fusionadas" : `Mesa ${group.tableNumber ?? "S/N"}`;
@@ -84,11 +84,11 @@ export function OrderGroupCard({ group, index, isPending, onClick }: Props) {
                 {item.quantity}
               </span>
               <span className="text-xs font-bold text-muted-foreground group-hover/item:text-foreground transition-colors truncate max-w-[120px]">
-                {item.menu_items?.name ?? "Item"}
+                {item.menuItem?.name ?? "Item"}
               </span>
             </div>
             <span className="text-xs font-black text-muted-foreground font-mono">
-              {formatCLP(Number(item.unit_price) * item.quantity)}
+              {formatCLP(Number(item.unitPrice) * item.quantity)}
             </span>
           </div>
         ))}
@@ -125,22 +125,22 @@ export function OrderGroupCard({ group, index, isPending, onClick }: Props) {
 }
 
 export function orderTotal(order: Order): number {
-  return (order.order_items ?? []).reduce((s, i) => s + Number(i.unit_price) * i.quantity, 0);
+  return (order.orderItems ?? []).reduce((s, i) => s + Number(i.unitPrice) * i.quantity, 0);
 }
 
 export function groupOrders(orders: Order[], billMap: Record<string, boolean>): TableGroup[] {
   const map = new Map<string, TableGroup>();
   for (const order of orders) {
-    const key = order.session_id ?? order.table_id ?? order.tableId ?? order.id;
+    const key = order.sessionId ?? order.tableId ?? order.id;
     if (!map.has(key)) {
       map.set(key, {
         key,
-        tableId:          order.table_id ?? order.tableId ?? null,
-        sessionId:        order.session_id ?? null,
-        tableNumber:      order.tables?.number ?? order.table?.number ?? null,
+        tableId:          order.tableId ?? null,
+        sessionId:        order.sessionId ?? null,
+        tableNumber:      order.table?.number ?? null,
         orders:           [],
         total:            0,
-        billRequested:    (order.table_id && billMap[order.table_id]) || (order.tableId && billMap[order.tableId]) || false,
+        billRequested:    (order.tableId && billMap[order.tableId]) || false,
         oldestCreatedAt:  order.createdAt,
       });
     }

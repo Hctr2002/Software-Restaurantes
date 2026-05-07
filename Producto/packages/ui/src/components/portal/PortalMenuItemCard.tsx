@@ -19,7 +19,7 @@ interface Props {
   onDecrement: (itemId: string) => void;
 }
 
-export function MenuItemCard({ item, cartQuantity, onAdd, onDecrement }: Props) {
+export function PortalMenuItemCard({ item, cartQuantity, onAdd, onDecrement }: Props) {
   return (
     <motion.div
       variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }}

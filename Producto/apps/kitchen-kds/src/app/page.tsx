@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+// Rebuild trigger: 2026-05-07T06:09:40Z
 import { useAuthStore } from "@menu-bites/store";
 import { useKitchenOrders, updateOrderStatus, signOut, useThemeSync } from "@menu-bites/auth";
 import { OrderTicket, Button, RestaurantThemeProvider, KDSColumn, TicketWrapper } from "@menu-bites/ui";
@@ -8,13 +9,12 @@ import { ChefHat, Bell, Settings, LogOut, AlertTriangle, Activity } from "lucide
 import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 
-import { MOCK_ORDERS, type MockOrder } from "../lib/mock-orders";
+
 import { SettingsModal } from "./_components/SettingsModal";
 import { KDSStat } from "./_components/KDSStat";
 import { StockAlertModal } from "./_components/StockAlertModal";
 import { loadSettings, saveSettings, getTicketUrgency, DEFAULT_SETTINGS, type KDSSettings } from "../lib/kdsSettings";
 
-const MOCK_MODE     = process.env.NEXT_PUBLIC_MOCK_MODE === "true";
 const NEW_TICKET_SFX = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
 const CRITICAL_SFX   = "https://assets.mixkit.co/active_storage/sfx/2997/2997-preview.mp3";
 
@@ -22,8 +22,7 @@ function playSound(url: string) { new Audio(url).play().catch(() => {}); }
 
 export default function KitchenKDSPage() {
   const { user, logout: clearAuth } = useAuthStore();
-  const { orders: liveOrders, loading: liveLoading } = useKitchenOrders(MOCK_MODE ? undefined : user?.restaurantId);
-  const [mockOrders, setMockOrders] = useState<MockOrder[]>(MOCK_ORDERS);
+  const { orders: liveOrders, loading: liveLoading } = useKitchenOrders(user?.restaurantId);
   const [clearedOrders, setClearedOrders] = useState<Set<string>>(new Set());
   const [settings, setSettings] = useState<KDSSettings>(DEFAULT_SETTINGS);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -37,9 +36,8 @@ export default function KitchenKDSPage() {
   const autoClearTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const router          = useRouter();
 
-  const rawOrders = MOCK_MODE ? mockOrders : liveOrders;
-  const orders    = rawOrders.filter((o) => !clearedOrders.has(o.id));
-  const loading   = MOCK_MODE ? false : liveLoading;
+  const orders    = liveOrders.filter((o) => !clearedOrders.has(o.id));
+  const loading   = liveLoading;
 
   useEffect(() => { loadSettings().then(setSettings); }, []);
   useEffect(() => {
@@ -56,7 +54,7 @@ export default function KitchenKDSPage() {
     if (!settings.sounds.criticalAlert) return;
     orders.forEach((order) => {
       if (["VALIDATED", "READY", "DELIVERED"].includes(order.status)) return;
-      const urgency = getTicketUrgency(order.created_at, settings.thresholds);
+      const urgency = getTicketUrgency(order.createdAt, settings.thresholds);
       if (urgency === "red" && !criticalAlerted.current.has(order.id)) {
         criticalAlerted.current.add(order.id);
         playSound(CRITICAL_SFX);
@@ -69,18 +67,13 @@ export default function KitchenKDSPage() {
     console.log(`[KDS] Intentando cambiar estado del pedido ${orderId} a ${newStatus}`);
     
     try {
-      if (MOCK_MODE) {
-        setMockOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status: newStatus as MockOrder["status"] } : o)));
-        console.log(`[KDS] [MOCK] Estado actualizado localmente`);
-      } else {
-        const { error } = await updateOrderStatus(orderId, newStatus);
-        if (error) {
-          console.error(`[KDS] Error al actualizar estado en Supabase:`, error);
-          alert(`Error al actualizar el pedido: ${error.message}`);
-          return;
-        }
-        console.log(`[KDS] Estado actualizado exitosamente en Supabase`);
+      const { error } = await updateOrderStatus(orderId, newStatus);
+      if (error) {
+        console.error(`[KDS] Error al actualizar estado en Supabase:`, error);
+        alert(`Error al actualizar el pedido: ${error.message}`);
+        return;
       }
+      console.log(`[KDS] Estado actualizado exitosamente en Supabase`);
 
       if (newStatus === "READY" && settings.autoClear.enabled) {
         const timer = setTimeout(() => setClearedOrders((prev) => new Set([...prev, orderId])), settings.autoClear.delaySeconds * 1000);
@@ -141,7 +134,7 @@ export default function KitchenKDSPage() {
               <div className="flex items-center space-x-3 text-[10px] font-black text-foreground/40 uppercase tracking-[0.3em] mt-1">
                 <span className="text-emerald-500 animate-pulse">● Live System</span>
                 <span>•</span>
-                <span>{MOCK_MODE ? "Demo Mode" : "Main Station"}</span>
+                <span>Main Station</span>
               </div>
             </div>
           </div>
@@ -152,7 +145,7 @@ export default function KitchenKDSPage() {
               <KDSStat label="En Fuego"  value={preparingOrders.length} color="text-primary" />
               <KDSStat label="Listos"    value={readyOrders.length} color="text-emerald-500" />
             </div>
-            <Button variant="outline" onClick={() => setAlertOpen(true)} disabled={MOCK_MODE}
+            <Button variant="outline" onClick={() => setAlertOpen(true)}
               className="rounded-2xl h-14 px-8 border-yellow-500/20 bg-yellow-500/5 text-yellow-500 hover:bg-yellow-500/10 hover:border-yellow-500/40 gap-3 font-black uppercase tracking-widest text-[10px]">
               <AlertTriangle className="w-5 h-5" />
               Alerta Stock
@@ -160,7 +153,7 @@ export default function KitchenKDSPage() {
             <Button variant="outline" size="icon" className="rounded-2xl w-14 h-14" onClick={() => setSettingsOpen(true)}>
               <Settings className="w-6 h-6 text-muted-foreground" />
             </Button>
-            <Button variant="destructive" size="icon" onClick={handleSignOut} disabled={isSigningOut || MOCK_MODE} className="rounded-2xl w-14 h-14 shadow-xl shadow-destructive/20">
+            <Button variant="destructive" size="icon" onClick={handleSignOut} disabled={isSigningOut} className="rounded-2xl w-14 h-14 shadow-xl shadow-destructive/20">
               <LogOut className="w-6 h-6" />
             </Button>
           </div>
@@ -172,7 +165,7 @@ export default function KitchenKDSPage() {
               <KDSColumn key={col.key} title={col.title} count={col.orders.length} icon={col.icon} active={col.active}>
                 {col.orders.map((order) => (
                   <TicketWrapper key={`${col.key}-${order.id}`} createdAt={order.createdAt} thresholds={settings.thresholds} status={order.status}>
-                    <OrderTicket id={order.id} tableNumber={order.table?.number} status={order.status} createdAt={order.createdAt} items={order.items} onStatusChange={(s) => handleStatusChange(order.id, s)} />
+                    <OrderTicket id={order.id} tableNumber={order.table?.number} status={order.status} createdAt={order.createdAt} items={order.orderItems} onStatusChange={(s) => handleStatusChange(order.id, s)} />
                   </TicketWrapper>
                 ))}
               </KDSColumn>

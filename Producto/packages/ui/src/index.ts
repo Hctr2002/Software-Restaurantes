@@ -15,3 +15,4 @@ export * from "./components/dashboard";
 export * from "./components/terminal";
 export * from "./components/portal";
 
+// Rebuild trigger: 2026-05-07T05:28:00Z

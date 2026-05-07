@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase, updateOrderStatus, sendAlert, getRestaurantTheme } from "./index";
-import type { AlertType, Order, TableRecord, Alert, StatsData } from "./types";
+import type { AlertType, Order, TableRecord, Alert, StatsData, MenuItem, Category, Role } from "./types";
+import { mapMenuItem, mapTable, mapOrder, mapCategory } from "./utils";
 
 /**
  * Generic hook for fetching data and keeping it in sync with Supabase Realtime.
@@ -12,17 +13,24 @@ export function useRealtimeSync<T>(
   restaurantId: string | undefined,
   tableName: string,
   fetchFn: () => Promise<{ data: T | null; error: any }>,
-  options: { channelId?: string; filter?: string; initialData?: T } = {}
+  options: { 
+    channelId?: string; 
+    filter?: string; 
+    initialData?: T;
+    transform?: (data: any) => any;
+  } = {}
 ) {
-  const { channelId, filter, initialData = (tableName === 'orders' || tableName === 'tables' ? [] : null) as any } = options;
+  const { channelId, filter, initialData = (['orders', 'tables', 'menu_items', 'categories', 'alerts'].includes(tableName) ? [] : null) as any, transform } = options;
   const [data, setData] = useState<T>(initialData);
   const [loading, setLoading] = useState(true);
 
   const performFetch = useCallback(async () => {
     const { data: res, error } = await fetchFn();
-    if (!error) setData(res as T);
+    if (!error && res) {
+      setData(transform ? (Array.isArray(res) ? res.map(transform) : transform(res)) as any : res);
+    }
     setLoading(false);
-  }, [fetchFn]);
+  }, [fetchFn, transform]);
 
   useEffect(() => {
     performFetch();
@@ -40,6 +48,30 @@ export function useRealtimeSync<T>(
   return { data, loading, setData, refetch: performFetch };
 }
 
+export function useTable(tableId: string | undefined) {
+  const fetchFn = useCallback(async () => {
+    if (!tableId) return { data: null, error: "No table ID" };
+    return supabase
+      .from("tables")
+      .select("*")
+      .eq("id", tableId)
+      .single();
+  }, [tableId]);
+
+  const { data: table, loading, refetch } = useRealtimeSync<TableRecord | null>(
+    undefined,
+    "tables",
+    fetchFn,
+    { 
+      channelId: `table-${tableId}`,
+      filter: `id=eq.${tableId}`,
+      transform: mapTable
+    }
+  );
+
+  return { table, loading, refetch };
+}
+
 export function useTables(restaurantId: string | undefined) {
   const fetchFn = useCallback(async () => {
     return supabase
@@ -52,11 +84,14 @@ export function useTables(restaurantId: string | undefined) {
   const { data: tables, loading, refetch } = useRealtimeSync<TableRecord[]>(
     restaurantId, 
     "tables", 
-    fetchFn
+    fetchFn,
+    { transform: mapTable }
   );
 
   return { tables, loading, refetch };
 }
+
+export const useTableStatus = useTables;
 
 export function useMenu(restaurantId: string | undefined) {
   const fetchMenu = useCallback(async () => {
@@ -67,8 +102,8 @@ export function useMenu(restaurantId: string | undefined) {
     return supabase.from("categories").select("*").eq("restaurant_id", restaurantId).eq("is_active", true);
   }, [restaurantId]);
 
-  const { data: menu, loading: menuLoading } = useRealtimeSync<any[]>(restaurantId, "menu_items", fetchMenu);
-  const { data: categories, loading: catLoading } = useRealtimeSync<any[]>(restaurantId, "categories", fetchCats);
+  const { data: menu, loading: menuLoading } = useRealtimeSync<MenuItem[]>(restaurantId, "menu_items", fetchMenu, { transform: mapMenuItem });
+  const { data: categories, loading: catLoading } = useRealtimeSync<Category[]>(restaurantId, "categories", fetchCats, { transform: mapCategory });
 
   return { menu, categories, loading: menuLoading || catLoading };
 }
@@ -108,10 +143,20 @@ export function useRealtimeOrders(restaurantId: string | undefined, options: Rea
     restaurantId,
     "orders",
     fetchFn,
-    { channelId: `orders-${statusesStr}` }
+    { 
+      channelId: `orders-${statusesStr}`,
+      transform: mapOrder
+    }
   );
 
   return { orders, loading, refetch };
+}
+
+export function useKitchenOrders(restaurantId: string | undefined) {
+  return useRealtimeOrders(restaurantId, {
+    statuses: ["VALIDATED", "PREPARING", "READY"],
+    ascending: true
+  });
 }
 
 export function useRealtimeStats(restaurantId: string | undefined) {
@@ -133,7 +178,7 @@ export function useRealtimeStats(restaurantId: string | undefined) {
     restaurantId,
     "orders",
     fetchFn,
-    { channelId: "stats", initialData: null }
+    { channelId: "local-stats" }
   );
 
   return { stats, loading, refetch };
@@ -145,8 +190,8 @@ export function useRealtimeAlerts(restaurantId: string | undefined) {
       .from("alerts")
       .select("*")
       .eq("restaurant_id", restaurantId)
-      .order("created_at", { ascending: false })
-      .limit(20);
+      .eq("isRead", false)
+      .order("createdAt", { ascending: false });
   }, [restaurantId]);
 
   const { data: alerts, loading, refetch } = useRealtimeSync<Alert[]>(
@@ -158,162 +203,13 @@ export function useRealtimeAlerts(restaurantId: string | undefined) {
   return { alerts, loading, refetch };
 }
 
-export function useKitchenOrders(restaurantId: string | undefined) {
-  const { orders, loading, refetch } = useRealtimeOrders(restaurantId, {
-    statuses: ["VALIDATED", "PREPARING", "READY"],
-    ascending: true,
-    limit: 100
-  });
-
-  const pendingOrders = useMemo(() => orders.filter((o) => o.status === "VALIDATED"), [orders]);
-  const preparingOrders = useMemo(() => orders.filter((o) => o.status === "PREPARING"), [orders]);
-  const readyOrders = useMemo(() => orders.filter((o) => o.status === "READY"), [orders]);
-
-  return {
-    orders,
-    pendingOrders,
-    preparingOrders,
-    readyOrders,
-    loading,
-    refetch
-  };
-}
-
-
-export function useCashierOrders(restaurantId: string | undefined) {
-  const [history, setHistory] = useState<any[]>([]);
-  
-  const fetchFn = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("orders")
-      .select(`*, table:tables(number), order_items(*, menu_items(name))`)
-      .eq("restaurant_id", restaurantId)
-      .eq("status", "READY")
-      .order("createdAt", { ascending: true });
-    
-    // Also fetch history in the same "sync" cycle but separately
-    // Use ISO string for today 00:00:00 to avoid timezone issues with Supabase
-    const todayStr = new Date().toISOString().split('T')[0] + 'T00:00:00.000Z';
-    
-    const { data: historyData } = await supabase
-      .from("orders")
-      .select(`*, table:tables(number), order_items(*, menu_items(name))`)
-      .eq("restaurant_id", restaurantId)
-      .eq("status", "DELIVERED")
-      .gte("createdAt", todayStr)
-      .order("createdAt", { ascending: false })
-      .limit(50);
-    
-    if (historyData) setHistory(historyData);
-    
-    return { data, error };
-  }, [restaurantId]);
-
-  const { data: orders, loading, refetch } = useRealtimeSync<any[]>(
-    restaurantId,
-    "orders",
-    fetchFn,
-    { channelId: "cashier-orders" }
-  );
-
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const markDelivered = async (orderIds: string[], tableId?: string, paymentReference?: string, userId?: string) => {
-    setIsProcessing(true);
-    try {
-      const { error } = await supabase
-        .from("orders")
-        .update({ 
-          status: "DELIVERED", 
-          user_id: userId, 
-          payment_reference: paymentReference || null 
-        })
-        .in("id", orderIds)
-        .eq("status", "READY");
-
-      if (error) throw error;
-
-      if (tableId) {
-        await supabase
-          .from("tables")
-          .update({ status: "CLEANING", bill_requested: false })
-          .eq("id", tableId);
-      }
-
-      await refetch();
-      return { success: true };
-    } catch (err) {
-      console.error("Error in markDelivered:", err);
-      return { success: false, error: err };
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  return { orders, history, loading, refetch, markDelivered, isProcessing };
-}
-
-export const useTableStatus = useTables;
-
-export function useCustomerOrderTracker(orderId: string | null) {
-  const fetchFn = useCallback(async () => {
-    if (!orderId) return { data: null, error: "No order ID" };
-    const { data } = await supabase
-      .from("orders")
-      .select("status")
-      .eq("id", orderId)
-      .single();
-    return { data: data?.status || "PENDING", error: null };
-  }, [orderId]);
-
-  const { data: status, loading } = useRealtimeSync<string>(
-    undefined,
-    "orders",
-    fetchFn,
-    { 
-      channelId: `tracker-${orderId}`, 
-      filter: `id=eq.${orderId}`,
-      initialData: "PENDING"
-    }
-  );
-
-  return { status, loading };
-}
-
-export function useTableOrders(tableId: string | undefined) {
-  const fetchFn = useCallback(async () => {
-    if (!tableId) return { data: [], error: null };
-    return supabase
-      .from("orders")
-      .select(`
-        *,
-        items:order_items(*, menu_item:menu_items(name))
-      `)
-      .eq("table_id", tableId)
-      .not("status", "in", '("REJECTED")')
-      .order("createdAt", { ascending: false });
-  }, [tableId]);
-
-  const { data: orders, loading, refetch } = useRealtimeSync<any[]>(
-    undefined,
-    "orders",
-    fetchFn,
-    { 
-      channelId: `table-orders-${tableId}`,
-      filter: `table_id=eq.${tableId}`
-    }
-  );
-
-  return { orders, loading, refetch };
-}
-
-export function useAlertForm(restaurantId: string | undefined, userId: string | undefined, userEmail: string | undefined) {
+export function useAlertForm(restaurantId: string | undefined, userId?: string, userEmail?: string) {
   const [form, setForm] = useState({
-    type: "HELP_REQUEST" as AlertType,
+    type: "HELP" as AlertType,
     msg: "",
     table: "",
     sending: false,
-    sent: false
+    sent: false,
   });
 
   const handleSendAlert = async (): Promise<boolean> => {
@@ -326,12 +222,12 @@ export function useAlertForm(restaurantId: string | undefined, userId: string | 
     });
     setForm(p => ({ ...p, sending: false, sent: !error }));
     if (!error) {
-      setTimeout(() => setForm({ type: "HELP_REQUEST", msg: "", table: "", sending: false, sent: false }), 1500);
+      setTimeout(() => setForm({ type: "HELP", msg: "", table: "", sending: false, sent: false }), 1500);
     }
     return !error;
   };
 
-  const reset = () => setForm({ type: "HELP_REQUEST", msg: "", table: "", sending: false, sent: false });
+  const reset = () => setForm({ type: "HELP", msg: "", table: "", sending: false, sent: false });
 
   return {
     alertType: form.type, setAlertType: (type: AlertType) => setForm(p => ({ ...p, type })),
@@ -404,9 +300,9 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
     await supabase.from("tables").update({ status: "FREE" }).eq("id", tableId);
   };
 
-  const billRequestedTableIds = useMemo(() => new Set(tables.filter((t) => t.bill_requested).map((t) => t.id)), [tables]);
-  const readyTableIds = useMemo(() => new Set(readyOrders.map((o) => o.table_id).filter(Boolean)), [readyOrders]);
-  const preparingTableIds = useMemo(() => new Set(preparingOrders.map((o) => o.table_id).filter(Boolean)), [preparingOrders]);
+  const billRequestedTableIds = useMemo(() => new Set(tables.filter((t) => t.billRequested).map((t) => t.id)), [tables]);
+  const readyTableIds = useMemo(() => new Set(readyOrders.map((o) => o.tableId).filter(Boolean)), [readyOrders]);
+  const preparingTableIds = useMemo(() => new Set(preparingOrders.map((o) => o.tableId).filter(Boolean)), [preparingOrders]);
   const cleaningTables = useMemo(() => tables.filter((t) => t.status === "CLEANING"), [tables]);
 
   return {
@@ -431,6 +327,104 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
   };
 }
 
+export function useTableOrders(tableId: string | undefined) {
+  const fetchFn = useCallback(async () => {
+    if (!tableId) return { data: [], error: null };
+    return supabase
+      .from("orders")
+      .select(`
+        *,
+        items:order_items(*, menu_item:menu_items(name))
+      `)
+      .eq("table_id", tableId)
+      .not("status", "in", '("REJECTED","COMPLETED")')
+      .order("createdAt", { ascending: false });
+  }, [tableId]);
+
+  const { data: orders, loading, refetch } = useRealtimeSync<Order[]>(
+    undefined,
+    "orders",
+    fetchFn,
+    { 
+      channelId: `table-orders-${tableId}`,
+      filter: `table_id=eq.${tableId}`,
+      transform: mapOrder
+    }
+  );
+
+  return { orders, loading, refetch };
+}
+
+export function useCashierOrders(restaurantId: string | undefined) {
+  const [history, setHistory] = useState<Order[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  const fetchFn = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("orders")
+      .select(`*, table:tables(number), order_items(*, menu_items(name))`)
+      .eq("restaurant_id", restaurantId)
+      .in("status", ["PENDING", "VALIDATED", "PREPARING", "READY", "DELIVERED"])
+      .order("createdAt", { ascending: true });
+    
+    const todayStr = new Date().toISOString().split('T')[0] + 'T00:00:00.000Z';
+    
+    const { data: historyData } = await supabase
+      .from("orders")
+      .select(`*, table:tables(number), order_items(*, menu_items(name))`)
+      .eq("restaurant_id", restaurantId)
+      .eq("status", "COMPLETED")
+      .gte("createdAt", todayStr)
+      .order("createdAt", { ascending: false })
+      .limit(50);
+    
+    if (historyData) setHistory(historyData.map(mapOrder));
+    
+    return { data, error };
+  }, [restaurantId]);
+
+  const { data: orders, loading, refetch } = useRealtimeSync<Order[]>(
+    restaurantId, 
+    "orders", 
+    fetchFn, 
+    { 
+      channelId: "cashier-orders",
+      transform: mapOrder
+    }
+  );
+
+  const markDelivered = async (orderIds: string[], tableId: string | null, reference: string, userId?: string) => {
+    setIsProcessing(true);
+    try {
+      const { error: oErr } = await supabase
+        .from("orders")
+        .update({ 
+          status: "COMPLETED", 
+          notes: reference ? `Ref: ${reference}` : "Pagado en Caja",
+        })
+        .in("id", orderIds);
+      if (oErr) throw oErr;
+
+      if (tableId) {
+        await supabase
+          .from("tables")
+          .update({ status: "FREE", bill_requested: false })
+          .eq("id", tableId);
+      }
+
+      await refetch();
+      return { success: true };
+    } catch (err: any) {
+      console.error("Error marking delivered:", err?.message ?? err?.code ?? JSON.stringify(err));
+      return { success: false, error: err };
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return { orders, history, loading, refetch, markDelivered, isProcessing };
+}
+
 export function useThemeSync(restaurantId: string | undefined, channelPrefix: string = "default") {
   const fetchFn = useCallback(async () => {
     if (!restaurantId) return { data: null, error: "No restaurant ID" };
@@ -450,6 +444,7 @@ export function useThemeSync(restaurantId: string | undefined, channelPrefix: st
 
   return theme;
 }
+
 export function useCustomerPortal(restaurantId: string | undefined, tableNumber?: string) {
   const [table, setTable] = useState({
     input: tableNumber ?? "",
@@ -481,7 +476,7 @@ export function useCustomerPortal(restaurantId: string | undefined, tableNumber?
       if (error || !data) {
         setTable(p => ({ ...p, error: `Mesa ${num} no existe`, data: null }));
       } else {
-        setTable(p => ({ ...p, data: data as TableRecord }));
+        setTable(p => ({ ...p, data: mapTable(data) }));
       }
     } catch {
       setTable(p => ({ ...p, error: "Error de validación" }));
@@ -489,6 +484,20 @@ export function useCustomerPortal(restaurantId: string | undefined, tableNumber?
       setTable(p => ({ ...p, loading: false }));
     }
   }, [restaurantId]);
+
+  useEffect(() => {
+    if (!table.data?.id) return;
+    const channel = supabase
+      .channel(`table-status-${table.data.id}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "tables", filter: `id=eq.${table.data.id}` }, (payload) => {
+        if (payload.new.status === "FREE") {
+          setOrder(p => ({ ...p, cart: [], success: false, lastId: null, error: null }));
+          setTable(p => ({ ...p, data: mapTable(payload.new) }));
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [table.data?.id]);
 
   useEffect(() => { if (tableNumber) validateTable(tableNumber); }, [tableNumber, validateTable]);
 
@@ -508,20 +517,25 @@ export function useCustomerPortal(restaurantId: string | undefined, tableNumber?
     setOrder(p => ({ ...p, placing: true, error: null }));
 
     try {
-      const { data: ord, error: oErr } = await supabase.from("orders")
-        .insert({ restaurant_id: restaurantId, table_id: table.data.id, status: "PENDING" })
-        .select().single();
-      if (oErr) throw oErr;
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          restaurant_id: restaurantId,
+          table_id:      table.data.id,
+          total_amount:  totals.total,
+          items:         order.cart.map(c => ({
+            menu_item_id: c.id,
+            quantity:     c.quantity,
+            unit_price:   c.price
+          }))
+        })
+      });
 
-      const items = order.cart.map(c => ({ order_id: ord.id, menu_item_id: c.id, quantity: c.quantity, unit_price: c.price }));
-      const { error: iErr } = await supabase.from("order_items").insert(items);
-      if (iErr) throw iErr;
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Error al procesar el pedido");
 
-      if (table.data.status === "FREE") {
-        await supabase.from("tables").update({ status: "OCCUPIED" }).eq("id", table.data.id);
-      }
-
-      setOrder(p => ({ ...p, lastId: ord.id, cart: [], success: true }));
+      setOrder(p => ({ ...p, lastId: result.id, cart: [], success: true }));
     } catch (err: any) {
       setOrder(p => ({ ...p, error: err.message }));
     } finally {
@@ -544,4 +558,24 @@ export function useCustomerPortal(restaurantId: string | undefined, tableNumber?
     cartTotal: totals.total,
     placeOrder,
   };
+}
+
+export function useCustomerOrderTracker(orderId: string | null) {
+  const fetchFn = useCallback(async () => {
+    if (!orderId) return { data: null, error: null };
+    return supabase.from("orders").select("status").eq("id", orderId).single();
+  }, [orderId]);
+
+  const { data: order } = useRealtimeSync<{ status: string } | null>(
+    undefined,
+    "orders",
+    fetchFn,
+    { 
+      channelId: `tracker-${orderId}`, 
+      filter: `id=eq.${orderId}`,
+      initialData: null 
+    }
+  );
+
+  return { status: order?.status || null };
 }

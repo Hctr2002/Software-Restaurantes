@@ -84,7 +84,7 @@ export function PaymentSlideOver({
               <div className="flex items-center justify-between">
                 <h3 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em]">Detalle de Consumo</h3>
                 <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-1 rounded-lg border border-primary/10">
-                  {group.orders.flatMap((o) => o.order_items ?? []).length} Ítems
+                  {group.orders.flatMap((o) => o.orderItems ?? []).length} Ítems
                 </span>
               </div>
               <motion.div
@@ -96,7 +96,7 @@ export function PaymentSlideOver({
                 }}
                 className="grid gap-3"
               >
-                {group.orders.flatMap((o) => o.order_items ?? []).map((item, idx) => (
+                {group.orders.flatMap((o) => o.orderItems ?? []).map((item, idx) => (
                   <motion.div
                     key={`${item.id}-${idx}`}
                     variants={{ hidden: { x: 20, opacity: 0 }, show: { x: 0, opacity: 1 } }}
@@ -107,14 +107,14 @@ export function PaymentSlideOver({
                         {item.quantity}
                       </div>
                       <div>
-                        <p className="text-sm font-black text-foreground/90 leading-tight mb-1">{item.menu_items?.name ?? "Item"}</p>
+                        <p className="text-sm font-black text-foreground/90 leading-tight mb-1">{item.menuItem?.name ?? "Item"}</p>
                         <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-60">
-                          {formatCLP(Number(item.unit_price))} p/u
+                          {formatCLP(Number(item.unitPrice))} p/u
                         </p>
                       </div>
                     </div>
                     <span className="text-sm font-black text-foreground font-mono">
-                      {formatCLP(Number(item.unit_price) * item.quantity)}
+                      {formatCLP(Number(item.unitPrice) * item.quantity)}
                     </span>
                   </motion.div>
                 ))}

@@ -3,16 +3,16 @@
 import { ClipboardList, X } from "lucide-react";
 interface OrderItem {
   quantity: number;
-  unit_price: number;
-  menu_item: { name: string } | null;
+  unitPrice: number;
+  menuItem: { name: string } | null;
 }
 
 interface TableOrder {
   id: string;
   status: string;
-  total_amount: number;
+  totalAmount: number;
   createdAt: string;
-  items: OrderItem[];
+  orderItems: OrderItem[];
 }
 
 interface Props {
@@ -41,7 +41,7 @@ const STATUS_CLASS: Record<string, string> = {
 
 export function CuentaSheet({ tableNumber, orders, onClose }: Props) {
   const total = orders.reduce(
-    (s, o) => s + (o.items?.reduce((si, i) => si + Number(i.unit_price) * i.quantity, 0) || 0),
+    (s, o) => s + (o.orderItems?.reduce((si, i) => si + Number(i.unitPrice) * i.quantity, 0) || 0),
     0,
   );
 
@@ -71,14 +71,14 @@ export function CuentaSheet({ tableNumber, orders, onClose }: Props) {
                     {STATUS_LABEL[order.status] ?? order.status}
                   </span>
                 </div>
-                {order.items?.map((item, j) => (
+                {order.orderItems?.map((item, j) => (
                   <div key={j} className="flex justify-between items-center text-sm">
                     <span className="text-sand/70">
                       <span className="font-bold text-sand/50 mr-2">{item.quantity}×</span>
-                      {item.menu_item?.name ?? "Item"}
+                      {item.menuItem?.name ?? "Item"}
                     </span>
                     <span className="text-sand font-bold">
-                      {formatCLP(Number(item.unit_price) * item.quantity)}
+                      {formatCLP(Number(item.unitPrice) * item.quantity)}
                     </span>
                   </div>
                 ))}

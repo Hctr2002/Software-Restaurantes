@@ -2,6 +2,8 @@ import { createClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
 import { formatCLP, formatDateTime } from "@menu-bites/auth";
 
+import { ReceiptActions } from "./ReceiptActions";
+
 function serviceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -50,7 +52,7 @@ export default async function ReceiptTablePage({
     .select("id, status, createdAt, payment_reference, order_items(quantity, unit_price, menu_items(name))")
     .eq("table_id", tableId)
     .eq("restaurant_id", restaurantId)
-    .eq("status", "DELIVERED")
+    .in("status", ["DELIVERED", "COMPLETED"])
     .gte("createdAt", today.toISOString())
     .order("createdAt", { ascending: true });
 
@@ -72,20 +74,7 @@ export default async function ReceiptTablePage({
         body { font-family: 'Courier New', monospace; background: #f4f4f4; margin: 0; padding: 16px; }
       `}</style>
 
-      <div className="no-print" style={{ display: "flex", gap: 12, justifyContent: "center", padding: "16px 0 0" }}>
-        <button
-          onClick={() => window.print()}
-          style={{ padding: "8px 20px", background: "#10b981", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer", fontSize: 13 }}
-        >
-          Imprimir
-        </button>
-        <button
-          onClick={() => window.close()}
-          style={{ padding: "8px 20px", background: "#6b7280", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer", fontSize: 13 }}
-        >
-          Cerrar
-        </button>
-      </div>
+      <ReceiptActions />
 
       <div className="receipt" style={{
         maxWidth: 380, margin: "16px auto", background: "#fff",

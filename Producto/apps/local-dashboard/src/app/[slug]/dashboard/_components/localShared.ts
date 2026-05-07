@@ -17,5 +17,5 @@ export type {
   LocalUserRecord 
 } from "@menu-bites/auth";
 
-export const ORDER_STATUSES = ["PENDING", "VALIDATED", "PREPARING", "READY", "DELIVERED", "REJECTED"];
+export const ORDER_STATUSES = ["PENDING", "VALIDATED", "PREPARING", "READY", "DELIVERED", "COMPLETED", "REJECTED"];
 export const LOCAL_ROLES = ["ADMIN", "COCINA", "CAJERO", "GARZON"];

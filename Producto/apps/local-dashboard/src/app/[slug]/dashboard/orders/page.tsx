@@ -10,11 +10,12 @@ import { motion, AnimatePresence } from "framer-motion";
 
 type BadgeVariant = "success" | "danger" | "warning" | "neutral" | "info";
 
-function orderStatusVariant(status: string): BadgeVariant {
-  if (status === "PENDING") return "warning";
-  if (status === "PREPARING") return "info";
-  if (status === "READY") return "success";
-  if (status === "DELIVERED") return "neutral";
+function orderStatusVariant(order: Order): BadgeVariant {
+  if (order.status === "PENDING") return "warning";
+  if (order.status === "PREPARING") return "info";
+  if (order.status === "READY") return "success";
+  if (order.status === "COMPLETED") return "success";
+  if (order.status === "DELIVERED") return "neutral";
   return "neutral";
 }
 
@@ -159,8 +160,8 @@ export default function OrdersPage() {
                       <span>{timeAgo(order.createdAt)}</span>
                     </div>
                   </div>
-                  <Badge variant={orderStatusVariant(order.status)} className="px-3 py-1 text-[9px] font-black uppercase tracking-widest">
-                    {order.status}
+                  <Badge variant={orderStatusVariant(order)} className="px-3 py-1 text-[9px] font-black uppercase tracking-widest">
+                    {order.status === "COMPLETED" ? "PAGADO" : order.status}
                   </Badge>
                 </div>
 
@@ -197,8 +198,8 @@ export default function OrdersPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={orderStatusVariant(order.status)} className="px-4 py-1 text-[10px] font-black uppercase tracking-widest">
-                      {order.status}
+                    <Badge variant={orderStatusVariant(order)} className="px-4 py-1 text-[10px] font-black uppercase tracking-widest">
+                      {order.status === "COMPLETED" ? "PAGADO" : order.status}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-foreground/40 text-[11px] font-bold">

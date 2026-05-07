@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { useAuthStore } from "@menu-bites/store";
-import { useMenu, supabase } from "@menu-bites/auth";
+import { useMenu, useTable, supabase } from "@menu-bites/auth";
 import { MenuItemCard, ProductSearchBar, CategoryTabs, Button } from "@menu-bites/ui";
 import { useParams, useRouter } from "next/navigation";
 import { ChevronLeft, ShoppingBag, Send, Trash2, Loader2 } from "lucide-react";
@@ -11,20 +11,23 @@ export default function TableMenuPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuthStore();
-  const { menu, categories, loading } = useMenu(user?.restaurantId);
+  const tableId = params.id as string;
+
+  const { menu, categories, loading: menuLoading } = useMenu(user?.restaurantId);
+  const { table, loading: tableLoading } = useTable(tableId);
   
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [cart, setCart] = useState<any[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
-  const tableId = params.id as string;
+  const loading = menuLoading || tableLoading;
 
   // Filtrado de menú
   const filteredMenu = useMemo(() => {
     return menu.filter((item) => {
       const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = activeCategory === "all" || item.category_id === activeCategory;
+      const matchesCategory = activeCategory === "all" || item.categoryId === activeCategory;
       return matchesSearch && matchesCategory;
     });
   }, [menu, searchTerm, activeCategory]);
@@ -66,7 +69,8 @@ export default function TableMenuPage() {
         order_id: order.id,
         menu_item_id: item.id,
         quantity: item.quantity,
-        unit_price: item.price
+        unit_price: item.price,
+        restaurant_id: user.restaurantId
       }));
 
       const { error: itemsError } = await supabase
@@ -111,7 +115,7 @@ export default function TableMenuPage() {
         </button>
         <div>
           <h1 className="text-xl font-black tracking-tighter uppercase italic">
-            Mesa <span className="text-brand-accent">{tableId.slice(0, 4)}</span>
+            Mesa <span className="text-brand-accent">{table?.number ?? "..."}</span>
           </h1>
           <p className="text-[10px] text-sage uppercase font-black tracking-[0.2em] mt-0.5">Nuevo Pedido</p>
         </div>
@@ -136,8 +140,8 @@ export default function TableMenuPage() {
               key={item.id}
               name={item.name}
               price={item.price}
-              imageUrl={item.image_url}
-              description={item.description}
+              imageUrl={item.imageUrl ?? undefined}
+              description={item.description ?? undefined}
               onAdd={() => addToCart(item)}
             />
           ))}

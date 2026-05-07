@@ -1,4 +1,48 @@
 import { supabase } from "./index";
+import { MenuItem, TableRecord, Order, Category } from "./types";
+
+export const mapMenuItem = (item: any): MenuItem => ({
+  ...item,
+  categoryId: item.category_id,
+  imageUrl: item.image_url,
+  isActive: item.is_active,
+  restaurantId: item.restaurant_id
+});
+
+export const mapCategory = (cat: any): Category => ({
+  ...cat,
+  restaurantId: cat.restaurant_id,
+  isActive: cat.is_active
+});
+
+export const mapTable = (t: any): TableRecord => ({
+  ...t,
+  restaurantId: t.restaurant_id,
+  qrData: t.qr_data,
+  billRequested: t.bill_requested,
+  helpRequested: t.help_requested
+});
+
+export const mapOrder = (o: any): Order => ({
+  ...o,
+  restaurantId: o.restaurant_id,
+  tableId: o.table_id,
+  userId: o.user_id,
+  sessionId: o.session_id,
+  totalAmount: Number(o.total_amount),
+  createdAt: o.created_at || o.createdAt,
+  validatedAt: o.validated_at,
+  preparingAt: o.preparing_at,
+  readyAt: o.ready_at,
+  orderItems: (o.order_items || o.items)?.map((oi: any) => ({
+    ...oi,
+    orderId: oi.order_id,
+    menuItemId: oi.menu_item_id,
+    restaurantId: oi.restaurant_id,
+    unitPrice: Number(oi.unit_price),
+    menuItem: oi.menu_items || oi.menu_item ? { name: (oi.menu_items || oi.menu_item).name } : null
+  }))
+});
 
 export function formatCLP(n: number): string {
   return new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(n);

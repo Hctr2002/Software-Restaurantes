@@ -168,14 +168,14 @@ export default function WaiterDashboard() {
               )}
             </AnimatePresence>
             <AnimatePresence>
-              {tables.some((t) => t.bill_requested) && (
+              {tables.some((t) => t.billRequested) && (
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex-1 bg-yellow-500/10 border border-yellow-500/20 rounded-[2.5rem] p-5 flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-yellow-500/20 flex items-center justify-center border border-yellow-500/30">
                     <Receipt className="w-5 h-5 text-yellow-400 animate-bounce-slow" />
                   </div>
                   <div>
                     <h3 className="font-black text-xs text-yellow-400 uppercase tracking-widest leading-none mb-1.5">Cuentas</h3>
-                    <p className="text-[10px] text-yellow-400/60 font-black uppercase tracking-widest">{tables.filter((t) => t.bill_requested).length} Por cobrar</p>
+                    <p className="text-[10px] text-yellow-400/60 font-black uppercase tracking-widest">{tables.filter((t) => t.billRequested).length} Por cobrar</p>
                   </div>
                 </motion.div>
               )}
@@ -261,7 +261,7 @@ export default function WaiterDashboard() {
                               onNoteChange={(id, val) => orders.setNotesByOrder((p) => ({ ...p, [id]: val }))}
                               onSaveNote={orders.handleSaveNote}
                               onValidate={(order) => orders.handleValidate(order.id)}
-                              onReject={(order) => orders.handleReject(order.id, order.table_id)}
+                              onReject={(order) => orders.handleReject(order.id, order.tableId)}
                             />
                           </motion.div>
                         ))}

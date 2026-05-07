@@ -10,7 +10,7 @@
  interface OrderItem {
    id: string;
    quantity: number;
-   menu_item: {
+   menuItem: {
      name: string;
    };
  }
@@ -91,7 +91,7 @@
                <span className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-xs font-black text-primary border border-primary/10">
                  {item.quantity}
                </span>
-               <span className="text-sm font-black text-foreground tracking-tight">{item.menu_item.name}</span>
+               <span className="text-sm font-black text-foreground tracking-tight">{item.menuItem?.name || item.menu_items?.name || "Plato sin nombre"}</span>
              </div>
              <Utensils className="w-4 h-4 text-foreground/10 group-hover:text-primary/40 transition-colors" />
            </motion.div>

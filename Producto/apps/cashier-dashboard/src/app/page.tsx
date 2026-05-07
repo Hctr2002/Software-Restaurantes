@@ -66,7 +66,7 @@ export default function CashierPage() {
   }, [user, setUser]);
 
   const billRequestedTables = useMemo(() => 
-    Object.fromEntries(tables.map((t) => [t.id, t.bill_requested ?? false])), 
+    Object.fromEntries(tables.map((t) => [t.id, t.billRequested ?? false])), 
   [tables]);
 
   const groups = useMemo(() => ({
