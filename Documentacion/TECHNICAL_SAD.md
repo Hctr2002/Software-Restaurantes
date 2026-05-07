@@ -446,14 +446,21 @@ La función `updateOrderStatus()` en `@menu-bites/auth` escribe automáticamente
 
 Estos timestamps habilitan el cálculo de KPIs operacionales sin instrumentación adicional.
 
-### 6.3 Estrategia de Dominios
+### 7.7 Motor de Sincronización en Tiempo Real (Realtime Sync Engine)
 
-El sistema utiliza subrutas o subdominios para diferenciar organizaciones, orquestado mediante el middleware de Next.js:
+A partir de la Wave 8, el sistema abandonó las suscripciones manuales ad-hoc en favor de un motor centralizado en `@menu-bites/auth/hooks.ts` denominado `useRealtimeSync`.
 
-```
-app.menubites.com/{slug}/dashboard       → Local Dashboard del restaurante
-app.menubites.com/{slug}/kds             → Kitchen KDS
-app.menubites.com/{slug}/waiter          → Waiter Terminal
-app.menubites.com/{slug}/cashier         → Cashier Dashboard
-menu.menubites.com/{slug}                → Customer Portal (público)
-```
+#### Arquitectura de Reactividad:
+- **Hook `useRealtimeSync`**: Hook genérico que gestiona el ciclo de vida de la conexión (suscripción, manejo de errores, limpieza de canales y reconexión).
+- **Estrategia de Actualización**: Ante cualquier evento de Postgres (`INSERT`, `UPDATE`, `DELETE`) en las tablas configuradas, el motor dispara una función de refresco (`performFetch`) que invalida el estado local y sincroniza con la base de datos, garantizando consistencia absoluta sin recargas de página.
+- **Tablas Habilitadas**: `orders`, `tables`, `order_items`, `alerts`, `restaurant_themes`.
+
+#### Beneficios:
+1. **Eliminación de Polling**: Reducción drástica del tráfico de red innecesario.
+2. **Consistencia Multiterminal**: Un cambio en la Cocina (KDS) se refleja instantáneamente en el Garzón (Terminal) y el Cliente (Portal).
+3. **Observabilidad**: Logs de diagnóstico `[Realtime]` estandarizados en consola para facilitar la depuración en producción.
+
+---
+
+## 8. CONCLUSIÓN
+El sistema Menu Bites v2.0 se consolida como una arquitectura moderna, reactiva y resiliente, lista para escalar en entornos multitenant con alta concurrencia operativa.

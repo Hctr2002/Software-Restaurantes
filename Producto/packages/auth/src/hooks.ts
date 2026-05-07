@@ -38,11 +38,29 @@ export function useRealtimeSync<T>(
     if (!f) return;
 
     const name = `${tableName}-sync-${restaurantId ?? "global"}${channelId ? `-${channelId}` : ""}`;
+    console.log(`[Realtime] Initializing channel: ${name} for table ${tableName}`);
+    
     const channel = supabase.channel(name)
-      .on("postgres_changes", { event: "*", schema: "public", table: tableName, filter: f }, performFetch)
-      .subscribe();
+      .on("postgres_changes", { 
+        event: "*", 
+        schema: "public", 
+        table: tableName, 
+        filter: f 
+      }, (payload) => {
+        console.log(`[Realtime] Change detected on ${tableName}:`, payload.eventType);
+        performFetch();
+      })
+      .subscribe((status) => {
+        console.log(`[Realtime] Subscription status for ${name}:`, status);
+        if (status === 'CHANNEL_ERROR') {
+          console.error(`[Realtime] Error in channel ${name}. Check if table has Realtime enabled.`);
+        }
+      });
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { 
+      console.log(`[Realtime] Cleaning up channel: ${name}`);
+      supabase.removeChannel(channel); 
+    };
   }, [restaurantId, performFetch, tableName, channelId, filter]);
 
   return { data, loading, setData, refetch: performFetch };
@@ -485,19 +503,29 @@ export function useCustomerPortal(restaurantId: string | undefined, tableNumber?
     }
   }, [restaurantId]);
 
+  const { data: realtimeTable } = useRealtimeSync<TableRecord | null>(
+    restaurantId,
+    "tables",
+    useCallback(async () => {
+      if (!table.data?.id) return { data: null, error: null };
+      const { data, error } = await supabase.from("tables").select("*").eq("id", table.data.id).single();
+      return { data, error };
+    }, [table.data?.id]),
+    {
+      channelId: `table-portal-${table.data?.id}`,
+      filter: table.data?.id ? `id=eq.${table.data.id}` : undefined,
+      transform: mapTable
+    }
+  );
+
   useEffect(() => {
-    if (!table.data?.id) return;
-    const channel = supabase
-      .channel(`table-status-${table.data.id}`)
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "tables", filter: `id=eq.${table.data.id}` }, (payload) => {
-        if (payload.new.status === "FREE") {
-          setOrder(p => ({ ...p, cart: [], success: false, lastId: null, error: null }));
-          setTable(p => ({ ...p, data: mapTable(payload.new) }));
-        }
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [table.data?.id]);
+    if (realtimeTable && realtimeTable.status === "FREE") {
+      setOrder(p => ({ ...p, cart: [], success: false, lastId: null, error: null }));
+      setTable(p => ({ ...p, data: realtimeTable }));
+    } else if (realtimeTable) {
+      setTable(p => ({ ...p, data: realtimeTable }));
+    }
+  }, [realtimeTable]);
 
   useEffect(() => { if (tableNumber) validateTable(tableNumber); }, [tableNumber, validateTable]);
 
