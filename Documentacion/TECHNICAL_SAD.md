@@ -224,7 +224,9 @@ stateDiagram-v2
     VALIDATED --> PREPARING : Cocina inicia preparacion (KDS)
     PREPARING --> READY : Cocina marca como listo (KDS)
     READY --> DELIVERED : Garzon entrega al cliente
-    DELIVERED --> [*]
+    READY --> COMPLETED : Pago directo (Caja)
+    DELIVERED --> COMPLETED : Pago realizado (Caja)
+    COMPLETED --> [*]
     REJECTED --> [*]
 ```
 
@@ -440,6 +442,7 @@ La función `updateOrderStatus()` en `@menu-bites/auth` escribe automáticamente
 | `→ VALIDATED` | `validated_at` |
 | `→ PREPARING` | `preparing_at` |
 | `→ READY` | `ready_at` |
+| `→ COMPLETED` | `updatedAt` (Snapshot final) |
 
 Estos timestamps habilitan el cálculo de KPIs operacionales sin instrumentación adicional.
 

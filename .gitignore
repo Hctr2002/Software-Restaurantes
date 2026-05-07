@@ -131,4 +131,26 @@ Documentacion/scripts/
 Producto/scratch/
 
 # PR descriptions (notas locales, no van al repo)
-PR_*.md
+**/PR_*.md
+
+# Build output logs
+**/build_output.txt
+
+# Scratch scripts in Producto
+**/test-*.js
+**/test-*.ts
+**/preview.html
+Producto/test-rls.js
+Producto/test-update.js
+
+# Agent tooling config
+**/conductor.json
+**/AGENTS.md
+**/CLAUDE.md
+**/memoria.md
+**/.gemini/
+**/.claude/
+
+# Extra temporary files
+color_proposals.html
+**/scratch/
