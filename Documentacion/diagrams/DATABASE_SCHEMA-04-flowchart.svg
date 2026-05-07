@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1434.655 209.8" width="1434.655" height="209.8" style="--bg:#1a1b26;--fg:#a9b1d6;--line:#3d59a1;--accent:#7aa2f7;--muted:#565f89;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="User" data-to="Query" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="145,104.9 193,104.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Query" data-to="RLS" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="372.03499999999997,104.9 420.03499999999997,104.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="RLS" data-to="Policy" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="Contexto JWT" points="549.711,104.9 721.8889999999999,104.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Policy" data-to="Result" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="Coincide" points="1080.2459999999999,98.75 1116.2459999999999,98.75 1116.2459999999999,65.45 1234.307,65.45" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Policy" data-to="Empty" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="No coincide" points="1080.2459999999999,111.05000000000001 1116.246,111.05000000000001 1116.246,144.35000000000002 1234.307,144.35" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="RLS" data-to="Policy" data-label="Contexto JWT">
+  <rect x="593.711" y="88.9" width="84.178" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="635.8" y="104.05000000000001" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Contexto JWT</text>
+</g>
+<g class="edge-label" data-from="Policy" data-to="Result" data-label="Coincide">
+  <rect x="1124.2459999999999" y="49.45000000000001" width="59.230000000000004" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1153.8609999999999" y="64.60000000000001" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Coincide</text>
+</g>
+<g class="edge-label" data-from="Policy" data-to="Empty" data-label="No coincide">
+  <rect x="1124.246" y="128.35000000000002" width="72.89200000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1160.692" y="143.50000000000003" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">No coincide</text>
+</g>
+<g class="node" data-id="User" data-label="Usuario" data-shape="circle">
+  <circle cx="92.5" cy="104.9" r="52.5" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="92.5" y="104.9" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Usuario</text>
+</g>
+<g class="node" data-id="Query" data-label="SELECT FROM orders" data-shape="rectangle">
+  <rect x="193" y="86.45" width="179.03499999999997" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="282.5175" y="104.9" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">SELECT FROM orders</text>
+</g>
+<g class="node" data-id="RLS" data-label="Motor RLS" data-shape="diamond">
+  <polygon points="484.87299999999993,40.06200000000001 549.7109999999999,104.9 484.87299999999993,169.738 420.03499999999997,104.9" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="484.87299999999993" y="104.9" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Motor RLS</text>
+</g>
+<g class="node" data-id="Policy" data-label="Policy: restaurant_id = jwt.app_metadata.restaurant_id" data-shape="rectangle">
+  <rect x="721.8889999999999" y="86.45" width="358.35699999999986" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="901.0674999999999" y="104.9" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Policy: restaurant_id = jwt.app_metadata.restaurant_id</text>
+</g>
+<g class="node" data-id="Result" data-label="Datos del propio local" data-shape="cylinder">
+  <rect x="1234.307" y="47" width="167.17899999999997" height="36.900000000000006" fill="var(--_node-fill)" stroke="none" />
+  <line x1="1234.307" y1="47" x2="1234.307" y2="83.9" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <line x1="1401.4859999999999" y1="47" x2="1401.4859999999999" y2="83.9" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <ellipse cx="1317.8965" cy="83.9" rx="83.58949999999999" ry="7" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <ellipse cx="1317.8965" cy="47" rx="83.58949999999999" ry="7" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1317.8965" y="65.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Datos del propio local</text>
+</g>
+<g class="node" data-id="Empty" data-label="Resultado vacio" data-shape="cylinder">
+  <rect x="1234.307" y="125.9" width="136.05700000000002" height="36.900000000000006" fill="var(--_node-fill)" stroke="none" />
+  <line x1="1234.307" y1="125.9" x2="1234.307" y2="162.8" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <line x1="1370.364" y1="125.9" x2="1370.364" y2="162.8" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <ellipse cx="1302.3355000000001" cy="162.8" rx="68.02850000000001" ry="7" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <ellipse cx="1302.3355000000001" cy="125.9" rx="68.02850000000001" ry="7" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1302.3355000000001" y="144.35000000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Resultado vacio</text>
+</g>
+</svg>

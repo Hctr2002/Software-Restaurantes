@@ -2,17 +2,19 @@
  
  import React from "react";
  import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@menu-bites/ui";
- import { TrendingUp, Wallet, ReceiptText, ClipboardList, UtensilsCrossed, Activity, ShieldAlert, UserCheck } from "lucide-react";
+ import { TrendingUp, Wallet, ReceiptText, ClipboardList, UtensilsCrossed, Activity, ShieldAlert, UserCheck, AlertTriangle, Timer, Flame } from "lucide-react";
  import LocalShell from "./_components/LocalShell";
  import { formatPrice, formatDate, Order, StatsData, TableRecord } from "./_components/localShared";
  import { Badge } from "@menu-bites/ui";
  import { cn } from "@menu-bites/ui/lib/utils";
- import { motion } from "framer-motion";
+ import { motion, AnimatePresence } from "framer-motion";
+ import { STALE_ORDER_MINUTES } from "@menu-bites/auth";
  
  function tableStatusVariant(status: string) {
-   if (status === "FREE") return "success";
-   if (status === "OCCUPIED") return "danger";
-   if (status === "RESERVED") return "warning";
+   if (status === "FREE")      return "success";
+   if (status === "OCCUPIED")  return "danger";
+   if (status === "RESERVED")  return "warning";
+   if (status === "CLEANING")  return "info";
    return "neutral";
  }
  
@@ -24,6 +26,8 @@
    return "neutral";
  }
  
+ const STALE_MINUTES = STALE_ORDER_MINUTES;
+
  export default function DashboardPage() {
    const [stats, setStats] = React.useState<StatsData | null>(null);
    const [pedidosDia, setPedidosDia] = React.useState(0);
@@ -31,6 +35,13 @@
    const [tables, setTables] = React.useState<TableRecord[]>([]);
    const [loading, setLoading] = React.useState(true);
    const [error, setError] = React.useState<string | null>(null);
+
+   // W4.2: flujo en vivo y tiempo promedio
+   const [now, setNow] = React.useState(() => Date.now());
+   React.useEffect(() => {
+     const id = setInterval(() => setNow(Date.now()), 30_000);
+     return () => clearInterval(id);
+   }, []);
  
    const fetchData = React.useCallback(async () => {
      setError(null);
@@ -64,6 +75,28 @@
    React.useEffect(() => { fetchData(); }, [fetchData]);
  
    const pendingOrders = orders.filter((o) => o.status === "PENDING" || o.status === "PREPARING");
+
+   // W4.2: live flow counts
+   const flowCounts = {
+     PENDING:    orders.filter((o) => o.status === "PENDING").length,
+     VALIDATED:  orders.filter((o) => o.status === "VALIDATED").length,
+     PREPARING:  orders.filter((o) => o.status === "PREPARING").length,
+     READY:      orders.filter((o) => o.status === "READY").length,
+   };
+
+   // W4.2: avg cycle time from today's delivered orders that have ready_at
+   const deliveredWithTime = orders.filter((o) => o.status === "DELIVERED" && o.ready_at && o.createdAt);
+   const avgCycleMin = deliveredWithTime.length > 0
+     ? Math.round(deliveredWithTime.reduce((s, o) => {
+         return s + (new Date(o.ready_at!).getTime() - new Date(o.createdAt).getTime()) / 60000;
+       }, 0) / deliveredWithTime.length)
+     : null;
+
+   // W4.3: stale PENDING orders (> STALE_MINUTES sin validar)
+   const staleOrders = orders.filter((o) => {
+     if (o.status !== "PENDING") return false;
+     return (now - new Date(o.createdAt).getTime()) / 60000 > STALE_MINUTES;
+   });
  
    const containerVariants = {
      hidden: { opacity: 0 },
@@ -128,6 +161,98 @@
          </motion.div>
        </motion.div>
  
+       {/* W4.3: Escalación de alertas — órdenes PENDING sin atender */}
+       <AnimatePresence>
+         {staleOrders.length > 0 && (
+           <motion.div
+             initial={{ opacity: 0, y: -10 }}
+             animate={{ opacity: 1, y: 0 }}
+             exit={{ opacity: 0, y: -10 }}
+             className="flex items-start gap-4 p-5 rounded-[2rem] border border-red-500/30 bg-red-500/10 text-red-400"
+           >
+             <div className="p-2.5 rounded-xl bg-red-500/20 shrink-0 mt-0.5">
+               <AlertTriangle className="w-5 h-5" />
+             </div>
+             <div className="flex-1">
+               <p className="text-xs font-black uppercase tracking-widest mb-1">
+                 {staleOrders.length} pedido{staleOrders.length > 1 ? "s" : ""} sin validar — más de {STALE_MINUTES} minutos
+               </p>
+               <div className="flex flex-wrap gap-2 mt-2">
+                 {staleOrders.map((o) => (
+                   <span key={o.id} className="text-[10px] font-black bg-red-500/20 px-2.5 py-1 rounded-lg border border-red-500/20">
+                     Mesa {o.tables?.number ?? "S/N"} · {Math.round((now - new Date(o.createdAt).getTime()) / 60000)}min
+                   </span>
+                 ))}
+               </div>
+             </div>
+           </motion.div>
+         )}
+       </AnimatePresence>
+
+       {/* W4.2: Flujo en vivo + Tiempo promedio */}
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+         <Card className="border-white/5 bg-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
+           <CardHeader className="pb-2">
+             <CardTitle className="flex items-center gap-3 text-white text-base">
+               <div className="p-2 bg-primary/10 rounded-xl">
+                 <Flame className="w-4 h-4 text-primary" />
+               </div>
+               Flujo en Vivo
+             </CardTitle>
+             <CardDescription className="text-slate-500 font-medium text-xs">Estado de órdenes en curso</CardDescription>
+           </CardHeader>
+           <CardContent>
+             <div className="grid grid-cols-4 gap-3">
+               {[
+                 { label: "Pendiente",   count: flowCounts.PENDING,   color: "text-yellow-400",  bg: "bg-yellow-500/10 border-yellow-500/20" },
+                 { label: "Validado",    count: flowCounts.VALIDATED,  color: "text-blue-400",    bg: "bg-blue-500/10 border-blue-500/20" },
+                 { label: "Preparando",  count: flowCounts.PREPARING,  color: "text-primary",     bg: "bg-primary/10 border-primary/20" },
+                 { label: "Listo",       count: flowCounts.READY,      color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
+               ].map(({ label, count, color, bg }) => (
+                 <div key={label} className={`flex flex-col items-center p-3 rounded-2xl border ${bg}`}>
+                   <span className={`text-2xl font-black tracking-tighter ${color}`}>{count}</span>
+                   <span className="text-[9px] font-black text-foreground/40 uppercase tracking-widest mt-1 text-center leading-tight">{label}</span>
+                 </div>
+               ))}
+             </div>
+           </CardContent>
+         </Card>
+
+         <Card className="border-white/5 bg-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
+           <CardHeader className="pb-2">
+             <CardTitle className="flex items-center gap-3 text-white text-base">
+               <div className="p-2 bg-amber-500/10 rounded-xl">
+                 <Timer className="w-4 h-4 text-amber-400" />
+               </div>
+               Tiempo Promedio Hoy
+             </CardTitle>
+             <CardDescription className="text-slate-500 font-medium text-xs">Ciclo completo pedido → listo</CardDescription>
+           </CardHeader>
+           <CardContent>
+             {avgCycleMin === null ? (
+               <p className="text-sm text-foreground/30 italic">Sin entregas con timestamps hoy.</p>
+             ) : (
+               <div className="flex items-end gap-3">
+                 <span className="text-4xl font-black tracking-tighter text-amber-400">{avgCycleMin}</span>
+                 <span className="text-sm font-black text-foreground/40 uppercase tracking-widest pb-1">min</span>
+                 <div className="ml-auto">
+                   <span className={`text-[10px] font-black px-3 py-1.5 rounded-xl ${
+                     avgCycleMin > 30 ? "bg-red-500/20 text-red-400" :
+                     avgCycleMin > 15 ? "bg-yellow-500/20 text-yellow-400" :
+                     "bg-emerald-500/20 text-emerald-400"
+                   }`}>
+                     {avgCycleMin > 30 ? "Lento" : avgCycleMin > 15 ? "Normal" : "Óptimo"}
+                   </span>
+                 </div>
+               </div>
+             )}
+             <p className="text-[10px] text-foreground/20 mt-3">
+               Basado en {deliveredWithTime.length} entrega{deliveredWithTime.length !== 1 ? "s" : ""} hoy
+             </p>
+           </CardContent>
+         </Card>
+       </div>
+
        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-4">
          {/* Top items */}
          <Card className="border-white/5 bg-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden group">
@@ -216,27 +341,31 @@
                      key={table.id}
                      className={cn(
                        "flex flex-col items-center justify-center p-4 rounded-3xl border text-center transition-all duration-300 shadow-lg",
-                       table.status === "FREE" && "bg-emerald-500/10 border-emerald-500/20 shadow-emerald-500/5",
-                       table.status === "OCCUPIED" && "bg-red-500/10 border-red-500/20 shadow-red-500/5",
-                       table.status === "RESERVED" && "bg-amber-500/10 border-amber-500/20 shadow-amber-500/5",
-                       !["FREE", "OCCUPIED", "RESERVED"].includes(table.status) && "bg-white/5 border-white/10"
+                       table.status === "FREE"      && "bg-emerald-500/10 border-emerald-500/20 shadow-emerald-500/5",
+                       table.status === "OCCUPIED"  && "bg-red-500/10 border-red-500/20 shadow-red-500/5",
+                       table.status === "RESERVED"  && "bg-amber-500/10 border-amber-500/20 shadow-amber-500/5",
+                       table.status === "CLEANING"  && "bg-sky-500/10 border-sky-500/20 shadow-sky-500/5",
+                       !["FREE","OCCUPIED","RESERVED","CLEANING"].includes(table.status) && "bg-white/5 border-white/10"
                      )}
                    >
                      <p className={cn(
                        "text-2xl font-black tracking-tighter",
-                       table.status === "FREE" && "text-emerald-400",
+                       table.status === "FREE"     && "text-emerald-400",
                        table.status === "OCCUPIED" && "text-red-400",
                        table.status === "RESERVED" && "text-amber-400",
+                       table.status === "CLEANING" && "text-sky-400",
                      )}>
                        {table.number}
                      </p>
                      <span className={cn(
                        "text-[9px] font-black uppercase mt-1 tracking-widest",
-                       table.status === "FREE" && "text-emerald-600",
+                       table.status === "FREE"     && "text-emerald-600",
                        table.status === "OCCUPIED" && "text-red-600",
                        table.status === "RESERVED" && "text-amber-600",
+                       table.status === "CLEANING" && "text-sky-600",
                      )}>
-                       {table.status === "FREE" ? "Libre" : table.status === "OCCUPIED" ? "Uso" : "Resv"}
+                       {table.status === "FREE" ? "Libre" : table.status === "OCCUPIED" ? "Uso" :
+                        table.status === "CLEANING" ? "Limpieza" : "Resv"}
                      </span>
                    </motion.div>
                  ))}

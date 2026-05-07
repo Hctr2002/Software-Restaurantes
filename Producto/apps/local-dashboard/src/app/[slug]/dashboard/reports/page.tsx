@@ -15,6 +15,55 @@ type TopItem      = { name: string; count: number; revenue: number };
 type TableReport  = { number: number; orders: number; revenue: number };
 type GarzonReport = { email: string; orders: number; revenue: number };
 
+type TimingStats  = {
+  category:       string;
+  validationMin:  number;  // avg created_at → validated_at
+  kitchenMin:     number;  // avg validated_at → ready_at
+  totalMin:       number;  // avg created_at → ready_at
+  count:          number;
+};
+
+function diffMinutes(a: string | null | undefined, b: string | null | undefined): number | null {
+  if (!a || !b) return null;
+  return (new Date(b).getTime() - new Date(a).getTime()) / 60000;
+}
+
+function avgOrNull(vals: number[]): number {
+  if (!vals.length) return 0;
+  return Math.round(vals.reduce((s, v) => s + v, 0) / vals.length);
+}
+
+function buildTimingStats(orders: any[]): TimingStats[] {
+  const map = new Map<string, { val: number[]; kit: number[]; tot: number[] }>();
+
+  for (const order of orders) {
+    if (!order.ready_at) continue;
+    const cat = order.order_items?.[0]?.menu_items?.categories?.name ?? "Sin categoría";
+
+    if (!map.has(cat)) map.set(cat, { val: [], kit: [], tot: [] });
+    const g = map.get(cat)!;
+
+    const valTime = diffMinutes(order.createdAt, order.validated_at);
+    const kitTime = diffMinutes(order.validated_at, order.ready_at);
+    const totTime = diffMinutes(order.createdAt, order.ready_at);
+
+    if (valTime !== null && valTime >= 0) g.val.push(valTime);
+    if (kitTime !== null && kitTime >= 0) g.kit.push(kitTime);
+    if (totTime !== null && totTime >= 0) g.tot.push(totTime);
+  }
+
+  return Array.from(map.entries())
+    .map(([category, g]) => ({
+      category,
+      validationMin: avgOrNull(g.val),
+      kitchenMin:    avgOrNull(g.kit),
+      totalMin:      avgOrNull(g.tot),
+      count:         g.tot.length,
+    }))
+    .filter((s) => s.count > 0)
+    .sort((a, b) => b.kitchenMin - a.kitchenMin);
+}
+
 // ─── Period presets ───────────────────────────────────────────────────────────
 const PRESETS = [
   { label: "7D",   days: 7 },
@@ -153,6 +202,7 @@ export default function ReportsPage() {
   const [topItems,      setTopItems]      = useState<TopItem[]>([]);
   const [tableReports,  setTableReports]  = useState<TableReport[]>([]);
   const [garzonReports, setGarzonReports] = useState<GarzonReport[]>([]);
+  const [timingStats,   setTimingStats]   = useState<TimingStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState<string | null>(null);
 
@@ -241,6 +291,10 @@ export default function ReportsPage() {
           .map(([email, v]) => ({ email, ...v }))
           .sort((a, b) => b.revenue - a.revenue)
       );
+
+      // W4.1: Timing analytics (solo para órdenes con ready_at disponible)
+      setTimingStats(buildTimingStats(orders));
+
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error inesperado");
     } finally {
@@ -522,6 +576,95 @@ export default function ReportsPage() {
                 ))}
               </Table>
             </CardContent>
+          </Card>
+
+          {/* W4.1: Heatmap de tiempos de cocina */}
+          <Card className="glass rounded-[2.5rem] border-white/5 overflow-hidden xl:col-span-2">
+            <CardHeader className="p-8 pb-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2.5 rounded-2xl bg-rose-500/10 text-rose-400">
+                  <Calendar className="w-5 h-5" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-black text-foreground uppercase italic tracking-tight">Tiempos de Cocina</CardTitle>
+                  <CardDescription className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">
+                    Promedios por categoría · {periodDescription}
+                  </CardDescription>
+                </div>
+              </div>
+              {timingStats.length === 0 && !loading && (
+                <p className="text-xs text-foreground/30 italic mt-2">
+                  Sin datos — requiere órdenes con timestamps completos (validated_at / ready_at).
+                </p>
+              )}
+            </CardHeader>
+            {timingStats.length > 0 && (
+              <CardContent className="px-8 pb-8 space-y-5">
+                {/* Legend */}
+                <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-widest text-foreground/40">
+                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-blue-500/60 inline-block" />Validación (min)</span>
+                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-primary/60 inline-block" />Cocina (min)</span>
+                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-emerald-500/60 inline-block" />Total (min)</span>
+                </div>
+
+                {(() => {
+                  const maxTotal = Math.max(...timingStats.map((s) => s.totalMin), 1);
+                  return timingStats.map((stat) => (
+                    <div key={stat.category} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-black text-foreground uppercase italic tracking-tight">{stat.category}</span>
+                        <span className="text-[10px] font-bold text-foreground/30">{stat.count} pedido{stat.count !== 1 ? "s" : ""}</span>
+                      </div>
+
+                      {/* Validación bar */}
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-blue-500/60 rounded-full transition-all duration-700"
+                              style={{ width: `${Math.min((stat.validationMin / maxTotal) * 100, 100)}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] font-black text-blue-400 w-12 text-right tabular-nums">
+                            {stat.validationMin === 0 ? "—" : `${stat.validationMin}m`}
+                          </span>
+                        </div>
+                        {/* Cocina bar */}
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all duration-700 ${
+                                stat.kitchenMin > 20 ? "bg-red-500/70" :
+                                stat.kitchenMin > 10 ? "bg-yellow-500/70" : "bg-primary/60"
+                              }`}
+                              style={{ width: `${Math.min((stat.kitchenMin / maxTotal) * 100, 100)}%` }}
+                            />
+                          </div>
+                          <span className={`text-[10px] font-black w-12 text-right tabular-nums ${
+                            stat.kitchenMin > 20 ? "text-red-400" :
+                            stat.kitchenMin > 10 ? "text-yellow-400" : "text-primary"
+                          }`}>
+                            {stat.kitchenMin === 0 ? "—" : `${stat.kitchenMin}m`}
+                          </span>
+                        </div>
+                        {/* Total bar */}
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-emerald-500/50 rounded-full transition-all duration-700"
+                              style={{ width: `${Math.min((stat.totalMin / maxTotal) * 100, 100)}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] font-black text-emerald-400 w-12 text-right tabular-nums">
+                            {stat.totalMin === 0 ? "—" : `${stat.totalMin}m`}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ));
+                })()}
+              </CardContent>
+            )}
           </Card>
 
         </div>
