@@ -2,13 +2,11 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { cn } from "@menu-bites/ui";
-import { getTicketUrgency } from "../../lib/kdsSettings";
-import type { KDSSettings } from "../../lib/kdsSettings";
+import { cn } from "../../lib/utils";
 
 interface Props {
   createdAt: string;
-  thresholds: KDSSettings["thresholds"];
+  thresholds: { yellow: number; red: number };
   status: string;
   children: React.ReactNode;
 }
@@ -20,7 +18,17 @@ const URGENCY_RING: Record<"green" | "yellow" | "red", string> = {
 };
 
 export function TicketWrapper({ createdAt, thresholds, status, children }: Props) {
-  const urgency = status === "READY" ? "green" : getTicketUrgency(createdAt, thresholds);
+  // Simple urgency logic integrated
+  const getUrgency = () => {
+    if (status === "READY") return "green";
+    const elapsed = Math.floor((Date.now() - new Date(createdAt).getTime()) / 60000);
+    if (elapsed >= thresholds.red) return "red";
+    if (elapsed >= thresholds.yellow) return "yellow";
+    return "green";
+  };
+
+  const urgency = getUrgency();
+
   return (
     <motion.div
       layout

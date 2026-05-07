@@ -20,7 +20,7 @@ const mins = (m: number) => new Date(now - m * 60 * 1000).toISOString();
 export const MOCK_ORDERS: MockOrder[] = [
   {
     id: "mock-order-001",
-    status: "PENDING",
+    status: "VALIDATED",
     createdAt: mins(2),
     table: { number: 3 },
     items: [
@@ -30,7 +30,7 @@ export const MOCK_ORDERS: MockOrder[] = [
   },
   {
     id: "mock-order-002",
-    status: "PENDING",
+    status: "VALIDATED",
     createdAt: mins(5),
     table: { number: 7 },
     items: [

@@ -2,13 +2,20 @@
 
 import { motion } from "framer-motion";
 import { Minus, Plus } from "lucide-react";
-import { getPublicImageUrl } from "@menu-bites/auth/utils";
-import type { MenuItem, CartItem } from "@/lib/tenant";
+import { getPublicImageUrl } from "@menu-bites/auth";
+
+export interface PortalMenuItem {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  imageUrl: string | null;
+}
 
 interface Props {
-  item: MenuItem;
+  item: PortalMenuItem;
   cartQuantity: number;
-  onAdd: (item: MenuItem) => void;
+  onAdd: (item: PortalMenuItem) => void;
   onDecrement: (itemId: string) => void;
 }
 

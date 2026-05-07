@@ -1,8 +1,9 @@
 "use client";
 
+import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bell } from "lucide-react";
-import type { TableGroup } from "./OrderGroupCard";
+import { TableGroup } from "./dashboardTypes";
 
 interface Props {
   groups: TableGroup[];

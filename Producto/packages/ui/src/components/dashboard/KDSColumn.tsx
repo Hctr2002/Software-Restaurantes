@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { cn } from "@menu-bites/ui";
+import { cn } from "../../lib/utils";
 
 interface Props {
   title: string;

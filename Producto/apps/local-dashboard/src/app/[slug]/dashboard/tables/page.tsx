@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import LocalShell from "../_components/LocalShell";
 import { Modal, Badge } from "@menu-bites/ui";
-import { TABLE_STATUSES, TableRecord } from "../_components/localShared";
+import { TABLE_STATUSES, TableRecord } from "@menu-bites/ui";
 import { Button, Input } from "@menu-bites/ui";
 import { Plus, Pencil, Trash2, Loader2, Download, Table as TableIcon } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";

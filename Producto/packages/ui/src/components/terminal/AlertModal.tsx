@@ -1,10 +1,12 @@
 "use client";
 
+import React from "react";
 import { AlertTriangle, Loader2, X } from "lucide-react";
 import { motion } from "framer-motion";
-import { Button } from "@menu-bites/ui";
-import type { AlertType } from "@menu-bites/auth";
-import type { useAlertForm } from "../../hooks/useAlertForm";
+import { Button } from "../ui/button";
+
+// Note: This matches AlertType from @menu-bites/auth
+type AlertType = 'TABLE_ISSUE' | 'BILL_REQUEST' | 'STOCK_SHORTAGE' | 'HELP_REQUEST' | 'GENERAL';
 
 const ALERT_OPTIONS: { type: AlertType; label: string }[] = [
   { type: "TABLE_ISSUE",  label: "Problema en Mesa" },
@@ -13,19 +15,26 @@ const ALERT_OPTIONS: { type: AlertType; label: string }[] = [
   { type: "GENERAL",      label: "Mensaje General" },
 ];
 
-interface Props {
-  alertForm: ReturnType<typeof useAlertForm>;
+interface AlertModalProps {
+  alertType: AlertType;
+  setAlertType: (type: AlertType) => void;
+  alertMsg: string;
+  setAlertMsg: (msg: string) => void;
+  tableNum: string;
+  setTableNum: (num: string) => void;
+  sendingAlert: boolean;
+  alertSent: boolean;
+  onSend: () => void;
   onClose: () => void;
 }
 
-export function AlertModal({ alertForm, onClose }: Props) {
-  const { alertType, setAlertType, alertMsg, setAlertMsg, tableNum, setTableNum, sendingAlert, alertSent, handleSendAlert } = alertForm;
-
-  const handleSend = async () => {
-    const ok = await handleSendAlert();
-    if (ok) setTimeout(onClose, 1500);
-  };
-
+export function AlertModal({
+  alertType, setAlertType,
+  alertMsg, setAlertMsg,
+  tableNum, setTableNum,
+  sendingAlert, alertSent,
+  onSend, onClose
+}: AlertModalProps) {
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
       <motion.div
@@ -108,7 +117,7 @@ export function AlertModal({ alertForm, onClose }: Props) {
             Cancelar
           </Button>
           <Button
-            onClick={handleSend}
+            onClick={onSend}
             disabled={!alertMsg.trim() || sendingAlert || alertSent}
             className="flex-1 h-16 bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase text-[10px] tracking-[0.2em] shadow-xl shadow-yellow-500/20"
           >

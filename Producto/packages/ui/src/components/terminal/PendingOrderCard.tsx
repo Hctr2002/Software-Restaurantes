@@ -1,7 +1,8 @@
 "use client";
 
-import { Button } from "@menu-bites/ui";
+import React from "react";
 import { CheckCircle, Loader2, MessageSquare, XCircle } from "lucide-react";
+import { Button } from "../ui/button";
 
 export type PendingOrder = {
   id: string;
@@ -13,7 +14,7 @@ export type PendingOrder = {
   order_items: { id: string; quantity: number; menu_items: { name: string } | null }[];
 };
 
-interface Props {
+interface PendingOrderCardProps {
   order: PendingOrder;
   note: string;
   processingId: string | null;
@@ -27,7 +28,7 @@ interface Props {
 export function PendingOrderCard({
   order, note, processingId, savingNoteId,
   onNoteChange, onSaveNote, onValidate, onReject,
-}: Props) {
+}: PendingOrderCardProps) {
   const isProcessing = processingId === order.id;
 
   return (

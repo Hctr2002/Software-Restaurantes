@@ -56,7 +56,7 @@ export const updateUserPassword = async (password: string) => {
   return { data, error };
 };
 
-export type AlertType = 'TABLE_ISSUE' | 'BILL_REQUEST' | 'STOCK_SHORTAGE' | 'HELP_REQUEST' | 'GENERAL';
+export * from "./types";
 
 export const sendAlert = async (params: {
   restaurantId: string;

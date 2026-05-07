@@ -23,15 +23,13 @@ Estandarización del proyecto `Software-Restaurantes` de Héctor Robledo dentro 
 - **2026-04-28:** Creación de `cashier-dashboard` (puerto 3004, rol CAJERO, rama `feature/front_cajero`). POS en tiempo real con tabs "Por Cobrar" e "Historial", PaymentModal slide-over, suscripción Supabase para pedidos READY.
 - **2026-04-28:** Enriquecimiento de `local-dashboard` (rama `feature/front_admin_local`): KPIs financieros (ingresos día/mes, ticket promedio), grilla visual de mesas, top items del día, gestión operacional de pedidos con modal de detalle y cambio de estado, CRUD de categorías de menú, sección de reportes (ventas 7 días, top 10 items, ingresos por mesa). Corrección de middleware para validar rol ADMIN y bloquear acceso a sesiones de otros roles.
 
-- **2026-04-29:** Corrección de aliases PostgREST invertidos en `local-dashboard` (rutas `/api/local/orders` y `/api/local/menu`). La sintaxis correcta es `alias:columna_real`; los campos afectados eran `menuItemId`, `unitPrice`, `tableId` y `categoryId`.
-- **2026-04-29:** Centralización de autenticación en `localhost:3000` (admin-dashboard). Se actualizó el middleware de `local-dashboard` para redirigir usuarios sin sesión o rol incorrecto a `NEXT_PUBLIC_AUTH_URL` en lugar de a su propio login. Se eliminó el formulario de login de `local-dashboard/page.tsx`. Se crearon middlewares reales (`middleware.ts`) para `kitchen-kds` (guard COCINA) y `waiter-terminal` (guard GARZON), reemplazando los archivos `proxy.ts` inactivos. Se añadió `@supabase/ssr` como dependencia directa en ambas apps.
-- **2026-04-29:** Implementación de panel de Configuración KDS en `kitchen-kds`. Nuevo `SettingsModal` con 5 secciones: (1) Umbrales de Alerta con color coding verde/amarillo/rojo configurable por minutos, (2) Tiempos de Preparación por Categoría, (3) Alertas Sonoras toggle por tipo (nuevo ticket / alerta crítica), (4) Auto-borrado de comandas listas tras N segundos, (5) Gestión "Sin Stock" (86 items) con toggle inmediato en Supabase. Settings persistidos en `localStorage` por dispositivo. Se extrajeron tipos y helpers a `src/lib/kdsSettings.ts`. Se eliminaron animaciones (`animate-in`, `animate-pulse`) del componente `OrderTicket` en `packages/ui`.
-- **2026-04-30:** Resolución de Incidente 404 en `kitchen-kds`. Se identificó que el acceso correcto es `http://localhost:3001` (root) y no `/kds`. Verificación de conectividad exitosa.
+- **2026-05-06:** Sincronización bidireccional KDS-Garzón. Se implementó el seguimiento de estados `VALIDATED` y `PREPARING` en tiempo real en la terminal del garzón. Se añadieron indicadores visuales ("COCINA" badge y glow) en `TableCard` y la acción de "Retirar de Cocina" (estado `DELIVERED`) en el dashboard del garzón para cerrar el ciclo del pedido y limpiar el monitor de cocina.
 
 ## 5. INCIDENTES REGISTRADOS
 
 - **Incidente 02:25:00:** `fatal: could not read Username for 'https://github.com'`. Bloqueo de Git Pull por autenticación en entorno no interactivo.
 - **Incidente 2026-04-30:** Error 404 al acceder a `localhost:3001/kds`. Causa: Desajuste entre URL solicitada y rutas configuradas en el App Router. Resolución: Uso de URL raíz.
+- **Incidente 2026-05-06:** Botón "Comenzar" en KDS no respondía. Causa: Desconexión entre el evento del componente `OrderTicket` y el manejador de la página. Resolución: Corrección de la propagación del evento `onStatusChange`.
 
 ## 6. FLIGHT LOG — ZENITH SESSIONS
 
@@ -44,6 +42,7 @@ Estandarización del proyecto `Software-Restaurantes` de Héctor Robledo dentro 
 | RUN-20260429-005 | 2026-04-29T23:27:00-04:00 | FLUJO-000 / /zenith | 00_Zenith | 🟢 COMPLETED — Rama feature/front_kds publicada en GitHub |
 | RUN-20260504-001 | 2026-05-04T02:45:00-04:00 | FLUJO-000 / /zenith | 00_Zenith | 🟢 COMPLETED — Análisis de flujos y propuesta de plan completo |
 | RUN-20260505-001 | 2026-05-05T19:30:00-04:00 | /core_pipeline | 00_Zenith | 🟡 IN_PROGRESS — Resolución de error de build y migración de persistencia KDS |
+| RUN-20260506-001 | 2026-05-06T14:41:16-04:00 | /core_pipeline | 00_Zenith | 🟢 COMPLETED — Sincronización KDS-Waiter Finalizada |
 
 ---
 Desarrollado por OLYMP-IA · Supremacía Digital

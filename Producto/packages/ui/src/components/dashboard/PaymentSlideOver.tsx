@@ -1,10 +1,12 @@
 "use client";
 
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Badge, Button } from "@menu-bites/ui";
 import { ArrowLeft, CreditCard, Hash, Loader2, Receipt } from "lucide-react";
 import { formatCLP } from "@menu-bites/auth";
-import type { TableGroup } from "./OrderGroupCard";
+import { Badge } from "../Badge";
+import { Button } from "../ui/button";
+import { TableGroup } from "./dashboardTypes";
 
 interface Props {
   group: TableGroup;
@@ -82,7 +84,7 @@ export function PaymentSlideOver({
               <div className="flex items-center justify-between">
                 <h3 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em]">Detalle de Consumo</h3>
                 <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-1 rounded-lg border border-primary/10">
-                  {group.orders.flatMap((o) => o.order_items).length} Ítems
+                  {group.orders.flatMap((o) => o.order_items ?? []).length} Ítems
                 </span>
               </div>
               <motion.div
@@ -94,7 +96,7 @@ export function PaymentSlideOver({
                 }}
                 className="grid gap-3"
               >
-                {group.orders.flatMap((o) => o.order_items).map((item, idx) => (
+                {group.orders.flatMap((o) => o.order_items ?? []).map((item, idx) => (
                   <motion.div
                     key={`${item.id}-${idx}`}
                     variants={{ hidden: { x: 20, opacity: 0 }, show: { x: 0, opacity: 1 } }}

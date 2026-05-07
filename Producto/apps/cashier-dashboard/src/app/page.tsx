@@ -1,19 +1,31 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "@menu-bites/store";
-import { supabase, signOut, getSession, formatCLP } from "@menu-bites/auth";
-import { RestaurantThemeProvider, OrderCardSkeleton } from "@menu-bites/ui";
+import { 
+  supabase, 
+  signOut, 
+  getSession, 
+  formatCLP, 
+  useCashierOrders, 
+  useTableStatus, 
+  useThemeSync,
+  useAlertForm
+} from "@menu-bites/auth";
+import { 
+  RestaurantThemeProvider, 
+  OrderCardSkeleton,
+  OrderGroupCard,
+  groupOrders,
+  PaymentSlideOver,
+  BillAlertIsland,
+  type TableGroup
+} from "@menu-bites/ui";
 import { CheckCircle, History, Clock } from "lucide-react";
 
 import { AlertModal } from "./_components/AlertModal";
-import { OrderGroupCard, groupOrders, type Order, type TableGroup } from "./_components/OrderGroupCard";
-import { PaymentSlideOver } from "./_components/PaymentSlideOver";
 import { CashierHeader } from "./_components/CashierHeader";
-import { BillAlertIsland } from "./_components/BillAlertIsland";
-import { useCashierOrders } from "../hooks/useCashierOrders";
-import { useThemeSync } from "../hooks/useThemeSync";
 
 const AnimatedNumber = ({ value, formatFn }: { value: number; formatFn: (n: number) => string }) => (
   <motion.span key={value} initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }} transition={{ duration: 0.3 }} className="inline-block">
@@ -23,20 +35,24 @@ const AnimatedNumber = ({ value, formatFn }: { value: number; formatFn: (n: numb
 
 export default function CashierPage() {
   const { user, setUser, logout: clearAuth } = useAuthStore();
-  const { orders, history, loading, fetchOrders } = useCashierOrders(user?.restaurantId);
+  const { 
+    orders, 
+    history, 
+    loading, 
+    refetch, 
+    markDelivered, 
+    isProcessing 
+  } = useCashierOrders(user?.restaurantId);
+  const { tables } = useTableStatus(user?.restaurantId);
   const theme = useThemeSync(user?.restaurantId, "cashier");
 
   const [activeTab, setActiveTab] = useState<"pending" | "history">("pending");
   const [selectedGroup, setSelectedGroup] = useState<TableGroup | null>(null);
   const [paymentReference, setPaymentReference] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
   const [alertModal, setAlertModal] = useState(false);
-  const [alertMsg, setAlertMsg] = useState("");
-  const [tableNum, setTableNum] = useState("");
-  const [sendingAlert, setSendingAlert] = useState(false);
-  const [alertSent, setAlertSent] = useState(false);
+  
+  const alertForm = useAlertForm(user?.restaurantId, user?.id, user?.email);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const [billRequestedTables, setBillRequestedTables] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
@@ -49,52 +65,34 @@ export default function CashierPage() {
     });
   }, [user, setUser]);
 
-  // Bill-requested realtime
-  useEffect(() => {
-    if (!user?.restaurantId) return;
-    const restaurantId = user.restaurantId;
-    supabase.from("tables").select("id, bill_requested").eq("restaurant_id", restaurantId).then(({ data }) => {
-      if (!data) return;
-      const map: Record<string, boolean> = {};
-      data.forEach((t) => { map[t.id] = t.bill_requested ?? false; });
-      setBillRequestedTables(map);
-    });
-    const channel = supabase
-      .channel(`cashier-tables-${restaurantId}`)
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "tables", filter: `restaurant_id=eq.${restaurantId}` },
-        (payload) => setBillRequestedTables((prev) => ({ ...prev, [payload.new.id]: payload.new.bill_requested ?? false })))
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [user?.restaurantId]);
+  const billRequestedTables = useMemo(() => 
+    Object.fromEntries(tables.map((t) => [t.id, t.bill_requested ?? false])), 
+  [tables]);
 
-  const markDelivered = async (group: TableGroup) => {
-    if (isProcessing) return;
-    setIsProcessing(true);
-    try {
-      const { error } = await supabase.from("orders").update({ status: "DELIVERED", user_id: user?.id, payment_reference: paymentReference || null }).in("id", group.orders.map((o) => o.id)).eq("status", "READY");
-      if (error) throw error;
-      if (group.tableId) await supabase.from("tables").update({ status: "CLEANING", bill_requested: false }).eq("id", group.tableId);
-      const receiptUrl = group.sessionId ? `/receipt/session/${group.sessionId}?rid=${user?.restaurantId}` : `/receipt/table/${group.tableId}?rid=${user?.restaurantId}`;
-      window.open(receiptUrl, "_blank");
+  const groups = useMemo(() => ({
+    pending: groupOrders(orders, billRequestedTables),
+    history: groupOrders(history, billRequestedTables)
+  }), [orders, history, billRequestedTables]);
+
+  const totals = useMemo(() => ({
+    pending: groups.pending.reduce((s, g) => s + g.total, 0),
+    history: groups.history.reduce((s, g) => s + g.total, 0)
+  }), [groups]);
+
+  const filtered = useMemo(() => {
+    const current = activeTab === "pending" ? groups.pending : groups.history;
+    return current.filter((g) =>
+      g.tableNumber?.toString().includes(searchQuery) || g.key.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [activeTab, groups, searchQuery]);
+
+  const handleMarkDelivered = async (group: TableGroup) => {
+    const { success } = await markDelivered(group.orders.map(o => o.id), group.tableId, paymentReference, user?.id);
+    if (success) {
+      const receiptUrl = group.sessionId ? `/receipt/session/${group.sessionId}` : `/receipt/table/${group.tableId}`;
+      window.open(`${receiptUrl}?rid=${user?.restaurantId}`, "_blank");
       setSelectedGroup(null);
       setPaymentReference("");
-      await fetchOrders();
-    } catch (err) {
-      console.error("Error al procesar pago:", err);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleSendAlert = async () => {
-    if (!alertMsg.trim() || !user?.restaurantId) return;
-    setSendingAlert(true);
-    const { sendAlert } = await import("@menu-bites/auth");
-    const { error } = await sendAlert({ restaurantId: user.restaurantId, userId: user.id, userEmail: user.email, type: "BILL_REQUEST", message: alertMsg.trim(), tableNumber: tableNum ? parseInt(tableNum) : undefined });
-    setSendingAlert(false);
-    if (!error) {
-      setAlertSent(true);
-      setTimeout(() => { setAlertSent(false); setAlertModal(false); setAlertMsg(""); setTableNum(""); }, 1500);
     }
   };
 
@@ -102,16 +100,6 @@ export default function CashierPage() {
     setIsSigningOut(true);
     try { await signOut(); } finally { clearAuth(); window.location.href = process.env.NEXT_PUBLIC_AUTH_URL ?? "/"; }
   };
-
-  const pendingGroups = groupOrders(orders, billRequestedTables);
-  const historyGroups = groupOrders(history, billRequestedTables);
-  const totalPending  = pendingGroups.reduce((s, g) => s + g.total, 0);
-  const totalHistory  = historyGroups.reduce((s, g) => s + g.total, 0);
-
-  const currentGroups = activeTab === "pending" ? pendingGroups : historyGroups;
-  const filtered = currentGroups.filter((g) =>
-    g.tableNumber?.toString().includes(searchQuery) || g.key.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
@@ -121,14 +109,14 @@ export default function CashierPage() {
           restaurantId={user?.restaurantId}
           isSigningOut={isSigningOut}
           isRefreshing={loading}
-          totalPending={totalPending}
-          alertCount={pendingGroups.filter((g) => g.billRequested).length}
+          totalPending={totals.pending}
+          alertCount={groups.pending.filter((g) => g.billRequested).length}
           searchQuery={searchQuery}
           isSearchExpanded={isSearchExpanded}
           onSearchChange={setSearchQuery}
           onSearchToggle={() => setIsSearchExpanded((p) => !p)}
           onAlertClick={() => setAlertModal(true)}
-          onRefresh={fetchOrders}
+          onRefresh={refetch}
           onSignOut={handleSignOut}
         />
 
@@ -140,8 +128,8 @@ export default function CashierPage() {
                 className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab ? (tab === "pending" ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" : "bg-secondary text-secondary-foreground shadow-lg") : "text-muted-foreground hover:text-foreground"}`}>
                 {tab === "pending" ? <Clock className="w-4 h-4" /> : <History className="w-4 h-4" />}
                 {tab === "pending" ? "Pendientes" : "Historial"}
-                {tab === "pending" && pendingGroups.length > 0 && (
-                  <span className="ml-1 bg-white/20 px-2 py-0.5 rounded-full text-[10px]">{pendingGroups.length}</span>
+                {tab === "pending" && groups.pending.length > 0 && (
+                  <span className="ml-1 bg-white/20 px-2 py-0.5 rounded-full text-[10px]">{groups.pending.length}</span>
                 )}
               </button>
             ))}
@@ -149,12 +137,12 @@ export default function CashierPage() {
           <div className="flex items-center gap-8">
             <div className="flex flex-col">
               <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Caja Pendiente</span>
-              <span className="text-xl font-black text-emerald-400"><AnimatedNumber value={totalPending} formatFn={formatCLP} /></span>
+              <span className="text-xl font-black text-emerald-400"><AnimatedNumber value={totals.pending} formatFn={formatCLP} /></span>
             </div>
             <div className="h-10 w-px bg-white/5" />
             <div className="flex flex-col">
               <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Cobrado hoy</span>
-              <span className="text-xl font-black text-foreground/80"><AnimatedNumber value={totalHistory} formatFn={formatCLP} /></span>
+              <span className="text-xl font-black text-foreground/80"><AnimatedNumber value={totals.history} formatFn={formatCLP} /></span>
             </div>
           </div>
         </div>
@@ -190,16 +178,16 @@ export default function CashierPage() {
               </motion.div>
             )}
           </AnimatePresence>
-
-          <BillAlertIsland groups={pendingGroups} onSelect={setSelectedGroup} />
+ 
+          <BillAlertIsland groups={groups.pending} onSelect={setSelectedGroup} />
         </main>
-
+ 
         {selectedGroup && (
-          <PaymentSlideOver group={selectedGroup} paymentReference={paymentReference} isProcessing={isProcessing} onPaymentRefChange={setPaymentReference} onConfirm={() => markDelivered(selectedGroup)} onClose={() => setSelectedGroup(null)} />
+          <PaymentSlideOver group={selectedGroup} paymentReference={paymentReference} isProcessing={isProcessing} onPaymentRefChange={setPaymentReference} onConfirm={() => handleMarkDelivered(selectedGroup)} onClose={() => setSelectedGroup(null)} />
         )}
-
+ 
         {alertModal && (
-          <AlertModal tableNum={tableNum} alertMsg={alertMsg} sendingAlert={sendingAlert} alertSent={alertSent} onTableNumChange={setTableNum} onMsgChange={setAlertMsg} onSend={handleSendAlert} onClose={() => setAlertModal(false)} />
+          <AlertModal alertForm={alertForm} onClose={() => setAlertModal(false)} />
         )}
       </div>
     </RestaurantThemeProvider>

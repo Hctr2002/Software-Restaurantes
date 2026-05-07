@@ -8,50 +8,52 @@ import { RestaurantThemeProvider, CardSkeleton, Button, Badge } from "@menu-bite
 import { AnimatePresence, motion } from "framer-motion";
 import { LayoutDashboard, Bell, LogOut, AlertTriangle, UtensilsCrossed, Sparkles, ChevronDown, RefreshCw, Receipt, Link2 } from "lucide-react";
 
-import { PendingOrderCard } from "./_components/PendingOrderCard";
-import { ReadyOrdersBanner } from "./_components/ReadyOrdersBanner";
-import { TableMergeBar } from "./_components/TableMergeBar";
-import { AlertModal } from "./_components/AlertModal";
-import { TableCard } from "./_components/TableCard";
-import { useWaiterOrders } from "../hooks/useWaiterOrders";
+import { 
+  PendingOrderCard, 
+  ReadyOrdersBanner, 
+  TableMergeBar, 
+  AlertModal, 
+  TableCard,
+  PreparingOrdersList
+} from "@menu-bites/ui";
+import { useRealtimeWaiterOrders as useWaiterOrders, useAlertForm, useThemeSync } from "@menu-bites/auth";
 import { useWebPush } from "../hooks/useWebPush";
-import { useThemeSync } from "../hooks/useThemeSync";
 import { useMergeTables } from "../hooks/useMergeTables";
-import { useAlertForm } from "../hooks/useAlertForm";
 
 export default function WaiterDashboard() {
-  const { user, logout: clearAuth } = useAuthStore();
-  const { tables, loading: tablesLoading } = useTables(user?.restaurantId);
   const router = useRouter();
-
-  const [activeTab, setActiveTab] = useState<"mesas" | "pedidos">("mesas");
-  const [alertModal, setAlertModal] = useState(false);
-  const [isSigningOut, setIsSigningOut] = useState(false);
-  const [isIslandExpanded, setIsIslandExpanded] = useState(false);
-
-  const theme = useThemeSync(user?.restaurantId, "waiter");
+  const { user, logout: clearAuth } = useAuthStore();
   const orders = useWaiterOrders(user?.restaurantId);
+  const { 
+    tables, 
+    loading: waiterLoading, 
+    handleTableClean,
+    billRequestedTableIds,
+    readyTableIds,
+    preparingTableIds,
+    cleaningTables
+  } = orders;
+
   useWebPush(user?.restaurantId, orders.readyOrders);
   const merge = useMergeTables();
   const alertForm = useAlertForm(user?.restaurantId, user?.id, user?.email);
+  const theme = useThemeSync(user?.restaurantId);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [alertModal, setAlertModal] = useState(false);
+  const [isIslandExpanded, setIsIslandExpanded] = useState(false);
+  const [activeTab, setActiveTab] = useState<"mesas" | "pedidos">("mesas");
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
-    try { await signOut(); } finally {
+    try {
+      await signOut();
+    } finally {
       clearAuth();
-      window.location.href = process.env.NEXT_PUBLIC_AUTH_URL || "http://localhost:3000";
+      window.location.href = process.env.NEXT_PUBLIC_AUTH_URL ?? '/';
     }
   };
 
-  const handleTableClean = async (tableId: string) => {
-    await supabase.from("tables").update({ status: "FREE" }).eq("id", tableId);
-  };
-
-  const billRequestedTableIds = new Set(tables.filter((t) => t.bill_requested).map((t) => t.id));
-  const readyTableIds = new Set(orders.readyOrders.map((o) => o.table_id).filter(Boolean));
-  const cleaningTables = tables.filter((t) => t.status === "CLEANING");
-
-  if (tablesLoading) {
+  if (waiterLoading) {
     return (
       <div className="min-h-screen bg-background p-6 space-y-8">
         <header className="flex justify-between items-center py-4">
@@ -133,8 +135,8 @@ export default function WaiterDashboard() {
                 </div>
                 <AnimatePresence>
                   {isIslandExpanded && (
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="pt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      <ReadyOrdersBanner orders={orders.readyOrders} />
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="pt-6 w-full">
+                      <ReadyOrdersBanner orders={orders.readyOrders} onDeliver={orders.handleDeliver} />
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -223,6 +225,7 @@ export default function WaiterDashboard() {
                       table={table}
                       isBillRequested={billRequestedTableIds.has(table.id)}
                       isReady={readyTableIds.has(table.id)}
+                      isPreparing={preparingTableIds.has(table.id)}
                       mergeMode={merge.mergeMode}
                       isSelectedForMerge={merge.selectedForMerge.has(table.id)}
                       onSelect={merge.toggleMergeSelect}
@@ -233,32 +236,46 @@ export default function WaiterDashboard() {
               </motion.div>
             ) : (
               <motion.div key="pedidos" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
-                <div>
-                  <h2 className="text-4xl font-black tracking-tighter">Pedidos <span className="text-primary">Pendientes</span></h2>
-                  <p className="text-muted-foreground text-xs font-black uppercase tracking-widest opacity-60 mt-1">Validación y notas de cocina</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-4xl font-black tracking-tighter">Gestión de <span className="text-primary">Pedidos</span></h2>
+                    <p className="text-muted-foreground text-xs font-black uppercase tracking-widest opacity-60 mt-1">Validación y seguimiento de cocina</p>
+                  </div>
                 </div>
-                {orders.pendingOrders.length === 0 ? (
+
+                {orders.pendingOrders.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-yellow-500/80 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+                      Por Validar ({orders.pendingOrders.length})
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <AnimatePresence mode="popLayout">
+                        {orders.pendingOrders.map((order) => (
+                          <motion.div key={order.id} layout initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }}>
+                            <PendingOrderCard
+                              order={order}
+                              note={orders.notesByOrder[order.id] ?? ""}
+                              processingId={orders.processingId}
+                              savingNoteId={orders.savingNoteId}
+                              onNoteChange={(id, val) => orders.setNotesByOrder((p) => ({ ...p, [id]: val }))}
+                              onSaveNote={orders.handleSaveNote}
+                              onValidate={(order) => orders.handleValidate(order.id)}
+                              onReject={(order) => orders.handleReject(order.id, order.table_id)}
+                            />
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                )}
+
+                {/* En Cocina (Unified Component) */}
+                <PreparingOrdersList orders={orders.preparingOrders} />
+
+                {orders.pendingOrders.length === 0 && orders.preparingOrders.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-32 gap-6 text-muted-foreground border-2 border-dashed border-white/5 rounded-[3rem]">
                     <p className="text-sm font-black uppercase tracking-widest opacity-40">Todo está al día</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <AnimatePresence mode="popLayout">
-                      {orders.pendingOrders.map((order) => (
-                        <motion.div key={order.id} layout initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }}>
-                          <PendingOrderCard
-                            order={order}
-                            note={orders.notesByOrder[order.id] ?? ""}
-                            processingId={orders.processingId}
-                            savingNoteId={orders.savingNoteId}
-                            onNoteChange={(id, val) => orders.setNotesByOrder((p) => ({ ...p, [id]: val }))}
-                            onSaveNote={orders.handleSaveNote}
-                            onValidate={orders.handleValidate}
-                            onReject={orders.handleReject}
-                          />
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
                   </div>
                 )}
               </motion.div>

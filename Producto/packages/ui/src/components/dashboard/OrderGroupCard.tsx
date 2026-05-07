@@ -1,39 +1,12 @@
 "use client";
 
+import React from "react";
 import { motion } from "framer-motion";
-import { Badge, Button } from "@menu-bites/ui";
 import { CheckCircle, ChevronRight, Clock, Hash, Bell } from "lucide-react";
 import { formatCLP, timeAgo } from "@menu-bites/auth";
-
-export type OrderItem = {
-  id: string;
-  quantity: number;
-  unit_price: number;
-  menu_items: { name: string } | null;
-};
-
-export type Order = {
-  id: string;
-  status: string;
-  createdAt: string;
-  total_amount: number;
-  table_id: string | null;
-  session_id: string | null;
-  tables: { id: string; number: number } | null;
-  users: { email: string } | null;
-  order_items: OrderItem[];
-};
-
-export type TableGroup = {
-  key: string;
-  tableId: string | null;
-  sessionId: string | null;
-  tableNumber: number | null;
-  orders: Order[];
-  total: number;
-  billRequested: boolean;
-  oldestCreatedAt: string;
-};
+import { Badge } from "../Badge";
+import { Button } from "../ui/button";
+import { Order, TableGroup } from "./dashboardTypes";
 
 interface Props {
   group: TableGroup;
@@ -43,7 +16,7 @@ interface Props {
 }
 
 export function OrderGroupCard({ group, index, isPending, onClick }: Props) {
-  const allItems    = group.orders.flatMap((o) => o.order_items);
+  const allItems    = group.orders.flatMap((o) => o.order_items ?? []);
   const previewItems = allItems.slice(0, 4);
   const extraCount   = allItems.length - previewItems.length;
   const tableLabel   = group.sessionId ? "Mesas fusionadas" : `Mesa ${group.tableNumber ?? "S/N"}`;
@@ -152,22 +125,22 @@ export function OrderGroupCard({ group, index, isPending, onClick }: Props) {
 }
 
 export function orderTotal(order: Order): number {
-  return order.order_items.reduce((s, i) => s + Number(i.unit_price) * i.quantity, 0);
+  return (order.order_items ?? []).reduce((s, i) => s + Number(i.unit_price) * i.quantity, 0);
 }
 
 export function groupOrders(orders: Order[], billMap: Record<string, boolean>): TableGroup[] {
   const map = new Map<string, TableGroup>();
   for (const order of orders) {
-    const key = order.session_id ?? order.table_id ?? order.id;
+    const key = order.session_id ?? order.table_id ?? order.tableId ?? order.id;
     if (!map.has(key)) {
       map.set(key, {
         key,
-        tableId:          order.table_id,
+        tableId:          order.table_id ?? order.tableId ?? null,
         sessionId:        order.session_id ?? null,
-        tableNumber:      order.tables?.number ?? null,
+        tableNumber:      order.tables?.number ?? order.table?.number ?? null,
         orders:           [],
         total:            0,
-        billRequested:    order.table_id ? (billMap[order.table_id] ?? false) : false,
+        billRequested:    (order.table_id && billMap[order.table_id]) || (order.tableId && billMap[order.tableId]) || false,
         oldestCreatedAt:  order.createdAt,
       });
     }

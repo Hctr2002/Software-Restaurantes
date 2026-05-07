@@ -1,5 +1,4 @@
-// Utilidades de negocio compartidas entre todas las apps del monorepo.
-// Importar desde "@menu-bites/auth".
+import { supabase } from "./index";
 
 export function formatCLP(n: number): string {
   return new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(n);
@@ -35,3 +34,18 @@ export function diffMinutes(
 export function pluralize(count: number, singular: string, plural = `${singular}s`): string {
   return count === 1 ? singular : plural;
 }
+
+/**
+ * Helper to get the public URL for an image stored in Supabase Storage.
+ * Handles both full URLs and relative storage paths.
+ */
+export const getPublicImageUrl = (path: string | null) => {
+  if (!path) return "/placeholder-food.jpg";
+  if (path.startsWith("http")) return path;
+
+  const { data } = supabase.storage
+    .from("menu-images")
+    .getPublicUrl(path);
+
+  return data.publicUrl;
+};

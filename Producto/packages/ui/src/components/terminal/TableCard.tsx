@@ -1,21 +1,23 @@
 "use client";
 
+import React from "react";
 import { CheckCircle, Hash } from "lucide-react";
 import { motion } from "framer-motion";
 
-type TableStatus = "FREE" | "OCCUPIED" | "CLEANING";
+export type TableStatus = "FREE" | "OCCUPIED" | "CLEANING";
 
-interface Table {
+export interface TableRecord {
   id: string;
   number: number;
   status: TableStatus;
   bill_requested?: boolean;
 }
 
-interface Props {
-  table: Table;
+interface TableCardProps {
+  table: TableRecord;
   isBillRequested: boolean;
   isReady: boolean;
+  isPreparing: boolean;
   mergeMode: boolean;
   isSelectedForMerge: boolean;
   onSelect: (id: string) => void;
@@ -34,7 +36,7 @@ const STATUS_TEXT: Record<TableStatus, string> = {
   CLEANING: "text-sky-400",
 };
 
-export function TableCard({ table, isBillRequested, isReady, mergeMode, isSelectedForMerge, onSelect, onNavigate }: Props) {
+export function TableCard({ table, isBillRequested, isReady, isPreparing, mergeMode, isSelectedForMerge, onSelect, onNavigate }: TableCardProps) {
   const isCleaning = table.status === "CLEANING";
   const isSelectable = mergeMode && table.status === "OCCUPIED";
 
@@ -68,6 +70,11 @@ export function TableCard({ table, isBillRequested, isReady, mergeMode, isSelect
             LISTO
           </motion.div>
         )}
+        {isPreparing && !isReady && (
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-primary text-primary-foreground text-[8px] font-black px-2 py-1 rounded-lg shadow-lg">
+            COCINA
+          </motion.div>
+        )}
         {isBillRequested && (
           <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-yellow-500 text-black text-[8px] font-black px-2 py-1 rounded-lg shadow-lg">
             CUENTA
@@ -82,7 +89,7 @@ export function TableCard({ table, isBillRequested, isReady, mergeMode, isSelect
 
       <div className={`relative bg-card/40 border border-white/5 rounded-[2.5rem] p-6 flex flex-col items-center justify-center gap-4 transition-all cursor-pointer hover:bg-card/60 hover:border-white/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] ${
         isBillRequested ? "ring-2 ring-yellow-500/30" : ""
-      } ${isReady ? "ring-2 ring-emerald-500/30" : ""}`}>
+      } ${isReady ? "ring-2 ring-emerald-500/30" : ""} ${isPreparing && !isReady ? "ring-2 ring-primary/30" : ""}`}>
         <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center border transition-all ${STATUS_STYLES[table.status]}`}>
           <Hash className="w-8 h-8 font-black" />
         </div>

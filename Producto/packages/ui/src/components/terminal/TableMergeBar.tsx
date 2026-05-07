@@ -1,9 +1,10 @@
 "use client";
 
-import { Button } from "@menu-bites/ui";
+import React from "react";
+import { Button } from "../ui/button";
 import { CheckCircle, Link2, Link2Off, Loader2 } from "lucide-react";
 
-interface Props {
+interface TableMergeBarProps {
   mergeMode: boolean;
   selectedCount: number;
   merging: boolean;
@@ -15,7 +16,7 @@ interface Props {
 export function TableMergeBar({
   mergeMode, selectedCount, merging, mergeResult,
   onToggleMode, onConfirmMerge,
-}: Props) {
+}: TableMergeBarProps) {
   return (
     <>
       {mergeResult && (

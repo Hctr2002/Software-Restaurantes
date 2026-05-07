@@ -11,4 +11,7 @@ export * from "./components/ui/card";
 export * from "./lib/utils";
 export * from "./components/RestaurantThemeProvider";
 export * from "./components/SkeletonLoader";
+export * from "./components/dashboard";
+export * from "./components/terminal";
+export * from "./components/portal";
 
