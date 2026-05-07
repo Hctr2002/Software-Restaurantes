@@ -7,7 +7,16 @@
 
 ---
 
-## 1. Propósito del Documento
+## 1. Estructura de Roles y Responsabilidades
+Para asegurar la integridad del proyecto, se ha definido una matriz de responsabilidades alineada con la Carta Gantt en Notion:
+
+- **José Luis Medina (Líder Técnico)**: Responsable de la orquestación del monorepo, despliegue de Apps Móviles (Super Admin) y certificación de calidad técnica global.
+- **Héctor Robledo (Arquitecto de Datos)**: Responsable del diseño de infraestructura en Supabase, modelado de entidades y auditoría de políticas de seguridad RLS.
+- **Alejandro Placencia (Desarrollador Fullstack)**: Responsable del motor de lógica de negocio (Stripe Billing), refinamiento de UX/UI y flujos de cliente final.
+
+---
+
+## 2. Propósito del Documento
 Este informe resume el estado actual del proyecto **Menu Bites**, consolidando la evidencia de los hitos alcanzados y alineando la documentación del repositorio con la "Fuente de Verdad" en Notion. Se enfoca en la validación del ecosistema multitenant y la operación en tiempo real.
 
 ## 2. Roadmap de Desarrollo (Notion Sync)
