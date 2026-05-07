@@ -32,7 +32,7 @@ npm run dev:all
 ```
 
 ## Estado del Proyecto
-Actualmente en **Fase 2 (S8)**: Ejecución Real-time. El ecosistema base está certificado y validado contra el Workspace de Notion.
+Actualmente en **Fase 2 (S8)**: Ejecución Real-time. El ecosistema base está certificado y validado contra la planificación estratégica.
 
 ---
 Desarrollado para el ecosistema Menu Bites

@@ -8,7 +8,7 @@
 ---
 
 ## 1. Estructura de Roles y Responsabilidades
-Para asegurar la integridad del proyecto, se ha definido una matriz de responsabilidades alineada con la Carta Gantt en Notion:
+Para asegurar la integridad del proyecto, se ha definido una matriz de responsabilidades alineada con la Carta Gantt:
 
 - **José Luis Medina (Líder Técnico)**: Responsable de la orquestación del monorepo, despliegue de Apps Móviles (Super Admin) y certificación de calidad técnica global.
 - **Héctor Robledo (Arquitecto de Datos)**: Responsable del diseño de infraestructura en Supabase, modelado de entidades y auditoría de políticas de seguridad RLS.
@@ -17,9 +17,9 @@ Para asegurar la integridad del proyecto, se ha definido una matriz de responsab
 ---
 
 ## 2. Propósito del Documento
-Este informe resume el estado actual del proyecto **Menu Bites**, consolidando la evidencia de los hitos alcanzados y alineando la documentación del repositorio con la "Fuente de Verdad" en Notion. Se enfoca en la validación del ecosistema multitenant y la operación en tiempo real.
+Este informe resume el estado actual del proyecto **Menu Bites**, consolidando la evidencia de los hitos alcanzados y alineando la documentación del repositorio con la planificación estratégica del proyecto. Se enfoca en la validación del ecosistema multitenant y la operación en tiempo real.
 
-## 2. Roadmap de Desarrollo (Notion Sync)
+## 2. Roadmap de Desarrollo
 
 ### 2.1 Hitos Completados (Fase 1: Cimientos)
 - **S1 - S3**: Arquitectura Base y Modelado de Datos en Supabase.
@@ -56,7 +56,7 @@ Se ha certificado la operación concurrente de los siguientes módulos:
 ![Ecosistema Completo](Diagramas/img/ecosistema_completo.png)
 
 ## 5. Auditoría y Cumplimiento
-Tras la auditoría realizada el 2026-05-07, se confirma la **paridad total** entre el repositorio y el workspace de Notion.
+Tras la validación interna realizada el 2026-05-07, se confirma la **paridad total** entre el repositorio y la planificación estratégica.
 
 - **Documentación SAD**: Actualizada con diagramas Mermaid vivos.
 - **Mockups**: Capturados con usuarios reales de Supabase.
