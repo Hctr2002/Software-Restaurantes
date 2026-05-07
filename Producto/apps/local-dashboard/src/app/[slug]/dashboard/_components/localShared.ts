@@ -14,7 +14,8 @@ export type {
   Category, 
   MenuItem, 
   Inventory, 
-  LocalUserRecord 
+  LocalUserRecord,
+  OrderStatus
 } from "@menu-bites/auth";
 
 export const ORDER_STATUSES = ["PENDING", "VALIDATED", "PREPARING", "READY", "DELIVERED", "COMPLETED", "REJECTED"];

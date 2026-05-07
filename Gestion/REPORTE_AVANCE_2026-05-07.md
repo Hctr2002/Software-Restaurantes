@@ -9,33 +9,32 @@
 
 ## 2. Resumen Técnico de Ejecución
 
-- Implementación del estado terminal COMPLETED en el ciclo de vida de pedidos para asegurar un cierre lógico y financiero de las transacciones.
-- Desarrollo de trigger PostgreSQL validate_order_transition para forzar la integridad de la máquina de estados.
-- Creación de tabla kds_settings en Supabase para la persistencia centralizada de configuraciones de cocina.
-- Consolidación del Motor de Sincronización Realtime: Implementación de reactividad total en el flujo Cliente -> Garzón -> Cocina -> Caja, eliminando la necesidad de refrescos manuales.
-- Creación de un README.md detallado con arquitectura técnica, stack tecnológico y guías de inicio rápido.
-- Verificación E2E Exitosa: Validación de publicaciones Supabase Realtime para tablas críticas (`orders`, `tables`, `alerts`).
-- Sincronización final de memoria operacional siguiendo el protocolo de profesionalización del repositorio.
-
+- **v2.2.0 - Refactorización Arquitectónica Modular:**
+  - Implementación del sistema de **Asistencia en Mesa (Llamar Garzón)** descentralizado: Notificaciones directas al terminal del garzón sin saturar el dashboard administrativo.
+  - Optimización del Sistema de Alertas: Rediseño visual (no-transparente) y lógica de persistencia de sonido para evitar repeticiones innecesarias durante la navegación.
+  - Sincronización de KPIs de Cocina: Corrección del mapeo de `readyAt` en el motor de reportes para habilitar el Heatmap de tiempos de preparación.
+  - Estabilización de Tipos: Armonización de interfaces `camelCase` en `waiter-terminal` y paquetes compartidos, eliminando errores de compilación de TypeScript.
+- Consolidación del Motor de Sincronización Realtime: Implementación de reactividad total en el flujo Cliente -> Garzón -> Cocina -> Caja.
+- Verificación E2E Exitosa: Validación de flujo completo de ayuda y pedidos lista en terminales móviles.
 
 ## 3. Artefactos y Código (Trazabilidad)
 
-- **Ramas Modificadas:** feature/front_kds
-- **Hash/PR:** acb86c4, b5d130a, 1cc1cb8, 3a0ae8d, db0df22
-- **Archivos Clave Afectados:** .gitignore, packages/auth/src/hooks.ts, Documentacion/TECHNICAL_SAD.md, Documentacion/DATABASE_TECHNICAL.md, esquema de base de datos Supabase.
+- **Ramas Modificadas:** feature/front_kds, hotfix/waiter-terminal-types
+- **Archivos Clave Afectados:** apps/waiter-terminal/src/app/page.tsx, packages/ui/src/components/terminal/*, apps/local-dashboard/src/lib/reportUtils.ts, Documentacion/TECHNICAL_SAD.md
 
 ## 4. Estado de Validación (QA)
 
 - Pruebas Unitarias Ejecutadas: Sí
 - Pruebas End-to-End (E2E): Sí
-- Notas de Validación: Validación exitosa del flujo completo KDS -> Pago -> COMPLETED. Verificación de exclusión de archivos en .gitignore mediante git check-ignore.
+- Notas de Validación: Validación exitosa del sistema de ayuda descentralizado y visualización de reportes de tiempo.
 
 ## 5. Bloqueos, Deuda Técnica o Riesgos
 
-- **Riesgo/Bloqueo 1:** El Dashboard de Administración Global requiere una migración final a los nuevos hooks para eliminar por completo la lógica de polling heredada.
-- **Riesgo/Bloqueo 2:** La transición al estado COMPLETED debe ser monitoreada en producción para asegurar que no afecte a reportes analíticos preexistentes que dependían del estado DELIVERED.
+- **Resuelto:** El conflicto de tipos entre `AlertType` de auth y UI ha sido mitigado mediante tipado flexible en componentes de presentación.
+- **Deuda:** Se recomienda una auditoría final de las claves VAPID en entornos de producción.
 
 ## 6. Siguientes Pasos
 
-- Fusión de la rama feature/front_kds a develop para integración general.
-- Inicio de la Fase 3 centrada en analíticas avanzadas y optimización de rendimiento.
+- Cierre formal de la Fase 2 de Estabilización.
+- Preparación del entorno para la Fase 3: Inteligencia Predictiva de Inventario.
+- Commit y Push final de la arquitectura v2.2.0.

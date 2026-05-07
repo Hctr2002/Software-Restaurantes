@@ -439,12 +439,12 @@ La función `updateOrderStatus()` en `@menu-bites/auth` escribe automáticamente
 
 | Transición | Campo escrito |
 |---|---|
-| `→ VALIDATED` | `validated_at` |
-| `→ PREPARING` | `preparing_at` |
-| `→ READY` | `ready_at` |
+| `→ VALIDATED` | `validatedAt` (antes `validated_at`) |
+| `→ PREPARING` | `preparingAt` (antes `preparing_at`) |
+| `→ READY` | `readyAt` (antes `ready_at`) |
 | `→ COMPLETED` | `updatedAt` (Snapshot final) |
 
-Estos timestamps habilitan el cálculo de KPIs operacionales sin instrumentación adicional.
+Estos timestamps habilitan el cálculo de KPIs operacionales (Kitchen Times) sin instrumentación adicional. Se ha garantizado la compatibilidad con el módulo de reportes mediante el uso de aliases en la API de analítica.
 
 ### 7.7 Motor de Sincronización en Tiempo Real (Realtime Sync Engine)
 
@@ -455,12 +455,20 @@ A partir de la Wave 8, el sistema abandonó las suscripciones manuales ad-hoc en
 - **Estrategia de Actualización**: Ante cualquier evento de Postgres (`INSERT`, `UPDATE`, `DELETE`) en las tablas configuradas, el motor dispara una función de refresco (`performFetch`) que invalida el estado local y sincroniza con la base de datos, garantizando consistencia absoluta sin recargas de página.
 - **Tablas Habilitadas**: `orders`, `tables`, `order_items`, `alerts`, `restaurant_themes`.
 
-#### Beneficios:
-1. **Eliminación de Polling**: Reducción drástica del tráfico de red innecesario.
-2. **Consistencia Multiterminal**: Un cambio en la Cocina (KDS) se refleja instantáneamente en el Garzón (Terminal) y el Cliente (Portal).
-3. **Observabilidad**: Logs de diagnóstico `[Realtime]` estandarizados en consola para facilitar la depuración en producción.
+### 7.8 Sistema de Asistencia en Mesa (Llamar Garzón)
+
+Implementado en v2.2.0, este sistema permite la comunicación directa Cliente-Garzón sin pasar por el panel administrativo central, optimizando el flujo de trabajo en sala:
+- **Trigger:** Botón en Customer Portal actualiza `tables.help_requested = true`.
+- **Notificación:** El `waiter-terminal` detecta el cambio vía Realtime y muestra una **Isla de Ayuda** (UI roja pulsante).
+- **Resolución:** El garzón limpia la solicitud directamente desde su terminal, sincronizando el estado global.
+
+### 7.9 Optimización de Alertas y Sonidos
+
+Se ha refinado el sistema de notificaciones para evitar bucles de sonido:
+- **Persistence Check:** El hook `useAlerts` ahora utiliza una referencia de conteo inicializada en `-1` para diferenciar la carga inicial (o navegación entre páginas) de la llegada de nuevas alertas reales.
+- **UI Non-Transparent:** Los paneles de alertas ahora utilizan fondos sólidos para garantizar legibilidad Pro Max sobre cualquier fondo de mapa o dashboard.
 
 ---
 
 ## 8. CONCLUSIÓN
-El sistema Menu Bites v2.0 se consolida como una arquitectura moderna, reactiva y resiliente, lista para escalar en entornos multitenant con alta concurrencia operativa.
+El sistema Menu Bites v2.2.0 se consolida como una arquitectura moderna, reactiva y resiliente, lista para escalar en entornos multitenant con alta concurrencia operativa.

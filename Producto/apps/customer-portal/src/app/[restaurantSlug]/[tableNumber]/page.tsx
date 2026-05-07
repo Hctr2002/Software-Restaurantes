@@ -112,13 +112,17 @@ export default function MenuPage({
   };
 
   const handleRequestBill = async () => {
-    if (!portal.table.data || isRequestingBill || billRequested) return;
+    if (!portal.table.data || isRequestingBill || billRequested || !restaurant?.id) return;
     setIsRequestingBill(true);
     try {
       const res = await fetch('/api/bill-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ table_id: portal.table.data.id }),
+        body: JSON.stringify({ 
+          table_id: portal.table.data.id,
+          restaurant_id: restaurant.id,
+          table_number: portal.table.data.number
+        }),
       });
       if (res.ok) setBillRequested(true);
     } catch {
@@ -126,6 +130,28 @@ export default function MenuPage({
       setIsRequestingBill(false);
     }
   };
+
+  const handleCallWaiter = async () => {
+    if (!portal.table.data || !restaurant?.id) return;
+    try {
+      await fetch('/api/help-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          table_id: portal.table.data.id,
+          restaurant_id: restaurant.id,
+          table_number: portal.table.data.number
+        }),
+      });
+    } catch (err) {
+      console.error('Error calling waiter:', err);
+    }
+  };
+
+  useEffect(() => {
+    (window as any).handleCallWaiter = handleCallWaiter;
+    return () => { delete (window as any).handleCallWaiter; };
+  }, [portal.table.data, restaurant?.id]);
 
   if (menuLoading || !items) {
     return (

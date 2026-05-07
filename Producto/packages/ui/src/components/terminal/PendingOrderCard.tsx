@@ -7,22 +7,22 @@ import { Button } from "../ui/button";
 export type PendingOrder = {
   id: string;
   status: string;
-  table_id: string | null;
-  total_amount: number;
+  tableId: string | null;
+  totalAmount: number;
   createdAt: string;
-  tables: { number: number } | null;
-  order_items: { id: string; quantity: number; menu_items: { name: string } | null }[];
+  table: { number: number } | null;
+  orderItems: { id: string; quantity: number; menu_items: { name: string } | null }[];
 };
 
 interface PendingOrderCardProps {
-  order: PendingOrder;
+  order: any; // Usamos any para evitar conflictos de importación o el tipo Order de auth
   note: string;
   processingId: string | null;
   savingNoteId: string | null;
   onNoteChange: (id: string, value: string) => void;
   onSaveNote: (id: string) => void;
-  onValidate: (order: PendingOrder) => void;
-  onReject: (order: PendingOrder) => void;
+  onValidate: (order: any) => void;
+  onReject: (order: any) => void;
 }
 
 export function PendingOrderCard({
@@ -37,10 +37,10 @@ export function PendingOrderCard({
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-xl font-black tracking-tighter text-foreground">
-            Mesa {order.tables?.number ?? "—"}
+            Mesa {order.table?.number ?? "—"}
           </h3>
           <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
-            {order.order_items.length} ítem(s)
+            {order.orderItems?.length ?? 0} ítem(s)
           </p>
         </div>
         <span className="text-[9px] font-black text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 px-2 py-1 rounded-lg uppercase tracking-wider">
@@ -50,7 +50,7 @@ export function PendingOrderCard({
 
       {/* Items preview */}
       <div className="space-y-1.5">
-        {order.order_items.slice(0, 4).map((item) => (
+        {order.orderItems?.slice(0, 4).map((item: any) => (
           <div key={item.id} className="flex items-center gap-2 text-sm">
             <span className="w-6 h-6 flex items-center justify-center bg-foreground/5 rounded-lg text-xs font-black text-muted-foreground">
               {item.quantity}
@@ -60,8 +60,8 @@ export function PendingOrderCard({
             </span>
           </div>
         ))}
-        {order.order_items.length > 4 && (
-          <p className="text-[10px] text-muted-foreground pl-8">+{order.order_items.length - 4} más</p>
+        {(order.orderItems?.length ?? 0) > 4 && (
+          <p className="text-[10px] text-muted-foreground pl-8">+{(order.orderItems?.length ?? 0) - 4} más</p>
         )}
       </div>
 

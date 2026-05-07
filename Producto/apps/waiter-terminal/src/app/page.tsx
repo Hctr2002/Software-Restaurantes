@@ -146,6 +146,29 @@ export default function WaiterDashboard() {
 
           <div className="flex flex-col md:flex-row gap-3">
             <AnimatePresence>
+              {orders.helpRequestedTables?.length > 0 && (
+                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex-1 bg-red-500/10 border border-red-500/20 rounded-[2.5rem] p-5 flex items-center justify-between gap-4 shadow-lg shadow-red-500/5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-red-500/20 flex items-center justify-center border border-red-500/30">
+                      <Bell className="w-5 h-5 text-red-400 animate-pulse" />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-xs text-red-400 uppercase tracking-widest leading-none mb-1.5">Solicitud Ayuda</h3>
+                      <p className="text-[10px] text-red-400/60 font-black uppercase tracking-widest">{orders.helpRequestedTables.length} Mesas esperando</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {orders.helpRequestedTables.slice(0, 2).map((t: any) => (
+                      <button key={t.id} onClick={() => orders.handleHelpComplete(t.id)} className="bg-red-500/20 hover:bg-red-500/30 text-[10px] font-black text-white px-4 py-3 rounded-2xl border border-red-500/30 transition-all active:scale-95 shadow-xl shadow-red-500/20">
+                        Mesa {t.number} ✓
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <AnimatePresence>
               {cleaningTables.length > 0 && (
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex-1 bg-sky-500/10 border border-sky-500/20 rounded-[2.5rem] p-5 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
@@ -285,7 +308,16 @@ export default function WaiterDashboard() {
       </div>
 
       <AnimatePresence>
-        {alertModal && <AlertModal alertForm={alertForm} onClose={() => setAlertModal(false)} />}
+        {alertModal && (
+          <AlertModal 
+            {...alertForm} 
+            onSend={alertForm.handleSendAlert} 
+            onClose={() => {
+              setAlertModal(false);
+              alertForm.reset();
+            }} 
+          />
+        )}
       </AnimatePresence>
     </RestaurantThemeProvider>
   );

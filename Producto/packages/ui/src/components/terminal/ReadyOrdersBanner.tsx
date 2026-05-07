@@ -5,13 +5,13 @@ import { UtensilsCrossed, CheckCircle } from "lucide-react";
 
 type ReadyOrder = {
   id: string;
-  table_id: string | null;
-  tables: { number: number } | null;
-  order_items: { id: string; quantity: number; menu_items: { name: string } | null }[];
+  tableId: string | null;
+  table: { number: number } | null;
+  orderItems: { id: string; quantity: number; menu_items: { name: string } | null }[];
 };
 
 interface ReadyOrdersBannerProps {
-  orders: ReadyOrder[];
+  orders: any[]; // Usamos any[] temporalmente o el tipo Order si lo importamos
   onDeliver: (id: string) => void;
 }
 
@@ -34,8 +34,8 @@ export function ReadyOrdersBanner({ orders, onDeliver }: ReadyOrdersBannerProps)
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-black text-foreground text-lg tracking-tighter">Mesa {order.tables?.number ?? "—"}</p>
-                <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{order.order_items.length} ítem(s)</p>
+                <p className="font-black text-foreground text-lg tracking-tighter">Mesa {order.table?.number ?? "—"}</p>
+                <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{order.orderItems?.length ?? 0} ítem(s)</p>
               </div>
               <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-lg uppercase tracking-wider">
                 LISTO
@@ -43,14 +43,14 @@ export function ReadyOrdersBanner({ orders, onDeliver }: ReadyOrdersBannerProps)
             </div>
             
             <div className="space-y-1">
-              {order.order_items.slice(0, 3).map(item => (
+              {order.orderItems?.slice(0, 3).map((item: any) => (
                 <p key={item.id} className="text-xs text-foreground/60 truncate font-medium flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/40" />
                   {item.quantity}x {item.menu_items?.name}
                 </p>
               ))}
-              {order.order_items.length > 3 && (
-                <p className="text-[9px] text-muted-foreground italic">...y {order.order_items.length - 3} más</p>
+              {(order.orderItems?.length ?? 0) > 3 && (
+                <p className="text-[9px] text-muted-foreground italic">...y {(order.orderItems?.length ?? 0) - 3} más</p>
               )}
             </div>
 

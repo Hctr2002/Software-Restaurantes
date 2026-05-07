@@ -1,7 +1,7 @@
-# Manual Oficial de Integración Supabase — Ecosistema OLYMP-IA
+# Manual Oficial de Integración Supabase — Plataforma Menu Bites
 
-**Orquestador:** Swarm Zenith (00)
-**Versión:** 1.0 (Alineado con OLYMP-IA v2.3.0)
+**Orquestador:** Equipo de Desarrollo
+**Versión:** 1.0 (Versión estable 2.2.0)
 **Ecosistema:** Supabase (Database, Auth, Storage, Edge Functions)
 **Objetivo:** Establecer el procedimiento inquebrantable para la gestión y seguridad de Supabase, integrando las nuevas skills especializadas en el ciclo de vida del desarrollo.
 

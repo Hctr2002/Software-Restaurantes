@@ -87,7 +87,7 @@ export default function CashierPage() {
   }, [activeTab, groups, searchQuery]);
 
   const handleMarkDelivered = async (group: TableGroup) => {
-    const { success } = await markDelivered(group.orders.map(o => o.id), group.tableId, paymentReference, user?.id);
+    const { success } = await markDelivered(group.orders.map(o => o.id), group.tableId, paymentReference);
     if (success) {
       const receiptUrl = group.sessionId ? `/receipt/session/${group.sessionId}` : `/receipt/table/${group.tableId}`;
       window.open(`${receiptUrl}?rid=${user?.restaurantId}`, "_blank");
@@ -187,7 +187,16 @@ export default function CashierPage() {
         )}
  
         {alertModal && (
-          <AlertModal alertForm={alertForm} onClose={() => setAlertModal(false)} />
+          <AlertModal 
+            {...alertForm}
+            onTableNumChange={alertForm.setTableNum}
+            onMsgChange={alertForm.setAlertMsg}
+            onSend={alertForm.handleSendAlert}
+            onClose={() => {
+              setAlertModal(false);
+              alertForm.reset();
+            }} 
+          />
         )}
       </div>
     </RestaurantThemeProvider>

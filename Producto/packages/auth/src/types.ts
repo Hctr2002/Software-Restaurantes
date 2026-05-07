@@ -20,7 +20,7 @@ export type Category = {
   id: string;
   name: string;
   restaurantId: string;
-  isActive: boolean;
+  is_active: boolean;
 };
 
 export type MenuItem = {
@@ -29,8 +29,8 @@ export type MenuItem = {
   description: string | null;
   price: number;
   categoryId: string | null;
-  imageUrl: string | null;
-  isActive: boolean;
+  image_url: string | null;
+  is_active: boolean;
   restaurantId: string;
   categories?: { name: string } | null;
 };
@@ -57,9 +57,12 @@ export type OrderItem = {
   quantity: number;
   notes?: string | null;
   menuItem?: MenuItem | null;
+  menu_items?: MenuItem | null;
+  unit_price?: number;
+  menu_item_id?: string;
 };
 
-export type OrderStatus = 'PENDING' | 'VALIDATED' | 'PREPARING' | 'READY' | 'DELIVERED' | 'REJECTED';
+export type OrderStatus = 'PENDING' | 'VALIDATED' | 'PREPARING' | 'READY' | 'DELIVERED' | 'COMPLETED' | 'REJECTED';
 
 export type Order = {
   id: string;
@@ -76,10 +79,13 @@ export type Order = {
   preparingAt?: string | null;
   readyAt?: string | null;
   orderItems?: OrderItem[];
+  order_items?: OrderItem[];
   table?: TableRecord | null;
+  tables?: TableRecord | null;
+  users?: { email: string } | null;
 };
 
-export type AlertType = 'HELP' | 'BILL' | 'ORDER_READY' | 'TABLE_CLEAN';
+export type AlertType = 'HELP' | 'BILL' | 'ORDER_READY' | 'TABLE_CLEAN' | 'TABLE_ISSUE' | 'BILL_REQUEST' | 'STOCK_SHORTAGE' | 'HELP_REQUEST' | 'GENERAL';
 
 export type Alert = {
   id: string;
@@ -89,6 +95,10 @@ export type Alert = {
   message: string;
   isRead: boolean;
   createdAt: string;
+  created_at: string; // Used in AlertsPanel
+  user_email: string | null;
+  table_number?: string | number | null;
+  menu_item_id?: string | null;
 };
 
 export type StatsData = {
@@ -96,4 +106,23 @@ export type StatsData = {
   ingresos_mes: number;
   ticket_promedio: number;
   top_items: { name: string; count: number }[];
+};
+
+export type Inventory = {
+  id: string;
+  restaurantId: string;
+  name: string;
+  stock: number;
+  unit: string;
+  minStock: number | null;
+  updatedAt: string;
+};
+
+export type LocalUserRecord = {
+  id: string;
+  email: string;
+  role: Role;
+  restaurantId: string | null;
+  createdAt: string;
+  name?: string | null;
 };

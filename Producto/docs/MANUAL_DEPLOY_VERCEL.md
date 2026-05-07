@@ -1,7 +1,7 @@
-# Manual Oficial de Despliegue Vercel — Ecosistema OLYMP-IA
+# Manual Oficial de Despliegue Vercel — Ecosistema Menu Bites
 
 **Orquestador:** Swarm Zenith (00)
-**Versión:** 1.0 (Alineado con OLYMP-IA v2.3.0)
+**Versión:** 1.0 (Alineado con Menu Bites v2.3.0)
 **Arquitectura:** Monorepo (Turbo) Multi-Tenant por Slug
 **Objetivo:** Establecer el procedimiento inquebrantable para el despliegue a producción en Vercel, integrando las validaciones estéticas, de código y de seguridad obligatorias de la Constitución.
 
@@ -16,7 +16,7 @@ El sistema **Menu Bites** utiliza un enrutamiento multi-tenant basado en la URL 
 
 ---
 
-## 2. El Pipeline Gated de OLYMP-IA
+## 2. El Pipeline Gated de Menu Bites
 
 Todo despliegue a producción requiere la ejecución secuencial e inquebrantable de tres workflows globales. Ningún paso puede saltarse.
 
@@ -41,7 +41,7 @@ La culminación de la cadena de valor. Este flujo delega la orquestación de la 
 ## 3. Instrucciones Paso a Paso para el Despliegue
 
 ### Opción A: Despliegue Total vía CI/CD (Recomendado)
-Esta es la ruta "Zero Touch" que impone OLYMP-IA para producción.
+Esta es la ruta "Zero Touch" que impone Menu Bites para producción.
 
 1. Finalizar la rama `feature/*` asegurando que todos los conflictos estén resueltos.
 2. Ejecutar localmente el mandato `/quality_validation`. Resolver cualquier advertencia generada por las guías de diseño de Vercel.
@@ -49,7 +49,7 @@ Esta es la ruta "Zero Touch" que impone OLYMP-IA para producción.
 4. El webhook activará el flujo `/qa-review` en la nube.
 5. Al aprobarse (y tras el merge), se dispara el workflow `/deploy-prod`. Vercel detectará el *push* a la rama principal y construirá todas las aplicaciones del workspace (ej. `local-dashboard`, `customer-portal`) mapeándolas a sus respectivos dominios.
 
-### Opción B: Despliegue Agentic Manual (Terminal OLYMP-IA)
+### Opción B: Despliegue Agentic Manual (Terminal Menu Bites)
 Útil para despliegues de prueba (`Preview Environments`) directamente gestionados por el agente.
 
 1. **Contextualización**: Solicitar al agente: *"Ejecuta un despliegue de prueba del módulo `local-dashboard`"*

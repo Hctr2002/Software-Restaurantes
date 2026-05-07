@@ -16,8 +16,8 @@ const ALERT_OPTIONS: { type: AlertType; label: string }[] = [
 ];
 
 interface AlertModalProps {
-  alertType: AlertType;
-  setAlertType: (type: AlertType) => void;
+  alertType: any;
+  setAlertType: (type: any) => void;
   alertMsg: string;
   setAlertMsg: (msg: string) => void;
   tableNum: string;
@@ -118,7 +118,7 @@ export function AlertModal({
           </Button>
           <Button
             onClick={onSend}
-            disabled={!alertMsg.trim() || sendingAlert || alertSent}
+            disabled={!alertMsg?.trim() || sendingAlert || alertSent}
             className="flex-1 h-16 bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase text-[10px] tracking-[0.2em] shadow-xl shadow-yellow-500/20"
           >
             {alertSent ? "Enviado" : sendingAlert ? <Loader2 className="w-5 h-5 animate-spin" /> : "Emitir Alerta"}

@@ -1,12 +1,6 @@
 # Menu Bites — Sistema de Gestión Gastronómica Inteligente
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.0-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
-[![Turborepo](https://img.shields.io/badge/Turborepo-2.0-EF4444?style=for-the-badge&logo=turborepo&logoColor=white)](https://turbo.build/)
-[![Supabase](https://img.shields.io/badge/Supabase-Realtime-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
-[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-06B6D4?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
-
-**Menu Bites** es una plataforma SaaS multitenant de vanguardia diseñada para transformar la experiencia operativa en la industria gastronómica. Desde la administración centralizada hasta la interacción digital en mesa, el sistema ofrece una solución integral, rápida y reactiva en tiempo real.
+Menu Bites es una plataforma SaaS multitenant de vanguardia diseñada para transformar la experiencia operativa en la industria gastronómica. Desde la administración centralizada hasta la interacción digital en mesa, el sistema ofrece una solución integral, rápida y reactiva en tiempo real.
 
 ---
 
@@ -25,7 +19,7 @@ Olvídese de las recargas manuales. Gracias al **Realtime Sync Engine** basado e
 
 ### Diseño Premium & UX
 *   **Branding Dinámico:** Personalización total de colores y estilos para cada restaurante.
-*   **Interfaz Pro Max:** Animaciones fluidas con `framer-motion` y un diseño responsivo que se adapta a tablets, móviles y desktops.
+*   **Interfaz Pro Max:** Animaciones fluidas con framer-motion y un diseño responsivo que se adapta a tablets, móviles y desktops.
 *   **Web Push Notifications:** Notificaciones directas al dispositivo para alertas críticas.
 
 ---
@@ -39,6 +33,70 @@ graph LR
     B -->|Chef termina| C[Listo para Entrega]
     C -->|Caja procesa pago| D[Completado]
     style D fill:#10b981,color:#fff
+```
+
+### Arquitectura de Alertas (Realtime)
+```mermaid
+graph TD
+    subgraph "Cliente (Navegador)"
+        UI[AlertsPanel UI]
+        Hook[useAlerts Hook]
+        Audio[Audio Notificación]
+    end
+
+    subgraph "Infraestructura (Supabase)"
+        RT[Realtime Engine]
+        DB[(PostgreSQL)]
+    end
+
+    UI --> Hook
+    Hook -->|Suscripción| RT
+    RT -->|Evento de Tabla| Hook
+    Hook -->|Evento de Nuevo Item| UI
+    UI -->|Reproducir| Audio
+    Hook -->|Lectura PENDING| DB
+```
+
+### Proceso de Importación de Inventario
+```mermaid
+graph TD
+    Start[Inicio: Carga Archivo CSV] --> Validate{¿Formato Válido?}
+    Validate -- No --> Error[Feedback: Error de Formato]
+    Validate -- Sí --> Process[Procesamiento de Lotes]
+    Process --> Update[(Base de Datos)]
+    Update --> Sync[Sincronización Realtime]
+    Sync --> End[Fin: Inventario Actualizado]
+    
+    style Error fill:#ef4444,color:#fff
+    style Update fill:#3b82f6,color:#fff
+    style End fill:#10b981,color:#fff
+```
+
+### Estructura Modular del Local Dashboard (Clean Code)
+```mermaid
+graph TD
+    subgraph "Local Dashboard Page"
+        P[Page Orchestrator] --> S[LocalShell Layout]
+    end
+
+    subgraph "Modules"
+        S --> B[Branding Module]
+        S --> I[Inventory Module]
+        S --> R[Reports Module]
+        S --> A[Alerts System]
+    end
+
+    subgraph "Modular Components"
+        B --> B1[ColorLaboratory]
+        B --> B2[TypographyManager]
+        B --> B3[CorporateIdentity]
+        
+        A --> A1[useAlerts Hook]
+        A --> A2[AlertItem Component]
+        
+        R --> R1[useReportsData Hook]
+        R1 --> R2[reportUtils Helpers]
+    end
 ```
 
 ### Flujo de Datos Multi-tenant
@@ -128,7 +186,7 @@ graph TD
    ```
 
 3. Configurar variables de entorno:
-   Copie el archivo `.env.example` a `.env` en la raíz de `Producto` y rellene las credenciales de Supabase.
+   Copie el archivo `.env.example` a `.env` en la raíz de Producto y rellene las credenciales de Supabase.
 
 4. Iniciar el entorno de desarrollo:
    ```bash
@@ -138,7 +196,7 @@ graph TD
 ### Scripts Disponibles
 *   `npm run build`: Compila todas las aplicaciones para producción.
 *   `npm run lint`: Ejecuta el análisis estático de código.
-*   `npm run clean`: Limpia las cachés de build y `node_modules`.
+*   `npm run clean`: Limpia las cachés de build y node_modules.
 
 ---
 
@@ -148,13 +206,12 @@ El sistema implementa **Row Level Security (RLS)** a nivel de base de datos, gar
 ---
 
 ## Notas de Versión
-*   **v2.0 (Estable):** Implementación completa de sincronización en tiempo real y flujo E2E.
-*   **Próximamente:** Analíticas avanzadas, IA para optimización de inventario y soporte multilingüe nativo.
+*   **v2.2.0 (Estable):** Refactorización arquitectónica modular. Sistema de alertas de asistencia en mesa, optimización de sonidos realtime y analítica avanzada de tiempos de cocina.
+*   **v2.0 (Histórico):** Implementación completa de sincronización en tiempo real y flujo E2E.
 
 ---
 
-> [!TIP]
-> Para una guía técnica detallada sobre la infraestructura y el motor de sincronización, consulte el archivo [TECHNICAL_SAD.md](Documentacion/TECHNICAL_SAD.md).
+Para una guía técnica detallada sobre la infraestructura y el motor de sincronización, consulte el archivo [TECHNICAL_SAD.md](Documentacion/TECHNICAL_SAD.md).
 
 ---
-© 2026 Menu Bites. Todos los derechos reservados.
+© 2026 Menu Bites Team. Todos los derechos reservados.

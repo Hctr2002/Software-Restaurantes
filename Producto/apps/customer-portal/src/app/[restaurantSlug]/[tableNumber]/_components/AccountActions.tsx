@@ -1,6 +1,6 @@
 "use client";
 
-import { ClipboardList, Receipt, Loader2, ShoppingBag, ChevronRight } from "lucide-react";
+import { ClipboardList, Receipt, Loader2, ShoppingBag, ChevronRight, Bell } from "lucide-react";
 import { TableRecord } from "@menu-bites/auth";
 
 interface AccountActionsProps {
@@ -45,11 +45,11 @@ export function AccountActions({
         </div>
       )}
 
-      <div className="fixed bottom-8 right-6 z-50 animate-in slide-in-from-bottom-10 fade-in duration-500">
+      <div className="fixed bottom-8 right-6 z-50 flex flex-col gap-3 animate-in slide-in-from-bottom-10 fade-in duration-500">
         <button 
           onClick={onConfirmBill} 
           disabled={isRequestingBill || billRequested} 
-          className={`flex items-center gap-2 px-5 py-3 rounded-2xl shadow-2xl font-bold text-sm transition-all active:scale-95 ${
+          className={`flex items-center justify-center gap-2 px-6 py-3 rounded-2xl shadow-2xl font-bold text-sm transition-all active:scale-95 ${
             billRequested 
               ? 'bg-green-700/80 text-white cursor-default border border-green-500/30' 
               : 'bg-navy-light border border-sand/10 text-sand hover:bg-sand/10'
@@ -57,6 +57,14 @@ export function AccountActions({
         >
           {isRequestingBill ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Receipt className="w-4 h-4" aria-hidden="true" />}
           {billRequested ? 'Cuenta solicitada ✓' : 'Solicitar Cuenta'}
+        </button>
+
+        <button 
+          onClick={() => (window as any).handleCallWaiter?.()} 
+          className="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl shadow-2xl font-black text-sm bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-all active:scale-95"
+        >
+          <Bell className="w-4 h-4" />
+          Llamar Garzón
         </button>
       </div>
 

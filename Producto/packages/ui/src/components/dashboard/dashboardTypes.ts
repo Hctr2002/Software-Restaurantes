@@ -1,3 +1,5 @@
+import { Order as AuthOrder, OrderItem as AuthOrderItem, TableRecord as AuthTableRecord } from "@menu-bites/auth";
+
 export type StatsData = {
   ingresos_dia: number;
   ingresos_mes: number;
@@ -6,40 +8,15 @@ export type StatsData = {
   pedidos_dia?: number;
 };
 
-export type TableRecord = {
-  id: string;
-  number: number;
-  label: string | null;
-  status: string;
-  qrData?: string | null;
-  restaurant_id?: string;
-};
-
-export type OrderItem = {
-  id: string;
-  menuItemId: string;
-  unitPrice: number;
-  quantity: number;
-  menu_items?: { name: string } | null;
-};
-
-export type Order = {
-  id: string;
-  tableId?: string | null; // UI compatibility
-  table_id?: string | null; // Database compatibility
-  userId?: string | null;
-  user_id?: string | null;
-  status: string;
-  createdAt: string;
+export type TableRecord = AuthTableRecord;
+export type OrderItem = AuthOrderItem;
+export type Order = AuthOrder & {
+  // Alias de compatibilidad si son necesarios
   total_amount?: number;
   session_id?: string | null;
   validated_at?: string | null;
   preparing_at?: string | null;
   ready_at?: string | null;
-  table?: { number: number } | null;
-  tables?: { id: string; number: number } | null;
-  users?: { email: string } | null;
-  order_items?: OrderItem[];
 };
 
 export type TableGroup = {

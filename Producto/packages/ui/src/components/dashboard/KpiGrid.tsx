@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { Wallet, TrendingUp, ReceiptText, ClipboardList } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { formatPrice } from "../../lib/utils";
@@ -33,7 +33,7 @@ export function KpiCard({ icon, label, value, detail }: { icon: React.ReactNode;
 }
 
 export function KpiGrid({ stats, activeOrdersCount }: KpiGridProps) {
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, scale: 0.95 },
     show: { opacity: 1, scale: 1, transition: { type: "spring", stiffness: 300, damping: 20 } }
   };

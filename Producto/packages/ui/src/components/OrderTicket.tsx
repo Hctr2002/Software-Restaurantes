@@ -4,16 +4,7 @@
  import { cn } from "../lib/utils";
  import { Clock, CheckCircle2, PlayCircle, Utensils, AlertCircle } from "lucide-react";
  import { motion, AnimatePresence } from "framer-motion";
- 
- export type OrderStatus = "PENDING" | "VALIDATED" | "PREPARING" | "READY" | "DELIVERED";
- 
- interface OrderItem {
-   id: string;
-   quantity: number;
-   menuItem: {
-     name: string;
-   };
- }
+ import { OrderItem, OrderStatus } from "@menu-bites/auth";
  
  interface OrderTicketProps {
    id: string;

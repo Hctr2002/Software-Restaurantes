@@ -3,18 +3,12 @@
 import React from "react";
 import { CheckCircle, Hash } from "lucide-react";
 import { motion } from "framer-motion";
+import { TableRecord } from "@menu-bites/auth";
 
-export type TableStatus = "FREE" | "OCCUPIED" | "CLEANING";
-
-export interface TableRecord {
-  id: string;
-  number: number;
-  status: TableStatus;
-  bill_requested?: boolean;
-}
+export type TableStatus = "FREE" | "OCCUPIED" | "CLEANING" | "RESERVED";
 
 interface TableCardProps {
-  table: TableRecord;
+  table: TableRecord & { bill_requested?: boolean };
   isBillRequested: boolean;
   isReady: boolean;
   isPreparing: boolean;
@@ -28,17 +22,20 @@ const STATUS_STYLES: Record<TableStatus, string> = {
   FREE:     "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
   OCCUPIED: "bg-primary/10 border-primary/20 text-primary",
   CLEANING: "bg-sky-500/10 border-sky-500/20 text-sky-400",
+  RESERVED: "bg-amber-500/10 border-amber-500/20 text-amber-400",
 };
 
 const STATUS_TEXT: Record<TableStatus, string> = {
   FREE:     "text-emerald-400",
   OCCUPIED: "text-primary",
   CLEANING: "text-sky-400",
+  RESERVED: "text-amber-400",
 };
 
 export function TableCard({ table, isBillRequested, isReady, isPreparing, mergeMode, isSelectedForMerge, onSelect, onNavigate }: TableCardProps) {
-  const isCleaning = table.status === "CLEANING";
-  const isSelectable = mergeMode && table.status === "OCCUPIED";
+  const currentStatus = (table.status as TableStatus) || "FREE";
+  const isCleaning = currentStatus === "CLEANING";
+  const isSelectable = mergeMode && currentStatus === "OCCUPIED";
 
   const handleClick = () => {
     if (isSelectable) onSelect(table.id);
@@ -90,13 +87,13 @@ export function TableCard({ table, isBillRequested, isReady, isPreparing, mergeM
       <div className={`relative bg-card/40 border border-white/5 rounded-[2.5rem] p-6 flex flex-col items-center justify-center gap-4 transition-all cursor-pointer hover:bg-card/60 hover:border-white/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] ${
         isBillRequested ? "ring-2 ring-yellow-500/30" : ""
       } ${isReady ? "ring-2 ring-emerald-500/30" : ""} ${isPreparing && !isReady ? "ring-2 ring-primary/30" : ""}`}>
-        <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center border transition-all ${STATUS_STYLES[table.status]}`}>
+        <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center border transition-all ${STATUS_STYLES[currentStatus]}`}>
           <Hash className="w-8 h-8 font-black" />
         </div>
         <div className="text-center">
           <p className="text-2xl font-black tracking-tighter leading-none mb-1">{table.number}</p>
-          <p className={`text-[9px] font-black uppercase tracking-widest ${STATUS_TEXT[table.status]}`}>
-            {table.status}
+          <p className={`text-[9px] font-black uppercase tracking-widest ${STATUS_TEXT[currentStatus]}`}>
+            {currentStatus}
           </p>
         </div>
         {isReady && <div className="absolute -inset-0.5 bg-emerald-500/20 rounded-[2.6rem] blur animate-pulse -z-10" />}
