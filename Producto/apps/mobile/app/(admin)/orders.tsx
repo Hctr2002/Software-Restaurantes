@@ -50,7 +50,30 @@ export default function AdminOrdersScreen() {
 
   React.useEffect(() => {
     loadOrders();
-  }, [loadOrders]);
+
+    if (!restaurantId) return;
+
+    // Suscripción en tiempo real
+    const channel = supabase
+      .channel('admin-orders-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        () => {
+          loadOrders();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loadOrders, restaurantId]);
 
   const onRefresh = () => {
     setRefreshing(true);

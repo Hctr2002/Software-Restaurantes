@@ -73,7 +73,30 @@ export default function UsersScreen() {
 
   React.useEffect(() => {
     fetchProfiles(0, true);
-  }, [restaurantId]);
+
+    if (!restaurantId) return;
+
+    // Suscripción en tiempo real para la tabla de usuarios
+    const channel = supabase
+      .channel('admin-users-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'users',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        () => {
+          fetchProfiles(0, true);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [restaurantId, fetchProfiles]);
 
   // Handlers
   const onRefresh = () => {

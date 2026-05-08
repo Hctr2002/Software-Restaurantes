@@ -18,11 +18,14 @@ import {
   ClipboardList, 
   Bell, 
   User,
-  Menu as MenuIcon
+  Menu as MenuIcon,
+  Flame,
+  Timer
 } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import AdminKpiCard from '../../components/AdminKpiCard';
 import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabase';
 import AdminSideMenu from '../../components/AdminSideMenu';
 import { 
   fetchDashboardStats, 
@@ -72,7 +75,48 @@ export default function AdminDashboardScreen() {
 
   React.useEffect(() => {
     loadData();
-  }, [loadData]);
+
+    if (!restaurantId) return;
+
+    // Suscripción para cambios en pedidos (afecta estadísticas y pedidos recientes)
+    const ordersChannel = supabase
+      .channel('admin-dashboard-orders')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        () => {
+          loadData();
+        }
+      )
+      .subscribe();
+
+    // Suscripción para cambios en mesas
+    const tablesChannel = supabase
+      .channel('admin-dashboard-tables')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'tables',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        () => {
+          loadData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(ordersChannel);
+      supabase.removeChannel(tablesChannel);
+    };
+  }, [loadData, restaurantId]);
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -134,10 +178,74 @@ export default function AdminDashboardScreen() {
             <AdminKpiCard 
               icon={<ClipboardList size={16} color={MB_COLORS.brandAccent} />}
               label="Activos"
-              value={String(recentOrders.filter(o => o.status !== 'DELIVERED').length)}
+              value={String(stats?.activos ?? 0)}
               detail="Pendientes/Cocina"
               delay={400}
             />
+          </View>
+        </View>
+
+        {/* Live Flow & Metrics */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Métricas en Vivo</Text>
+        </View>
+        
+        <View style={styles.metricsContainer}>
+          <View style={styles.flowCard}>
+            <View style={styles.flowHeader}>
+              <View style={styles.iconContainer}>
+                <Flame size={14} color={MB_COLORS.brandAccent} />
+              </View>
+              <Text style={styles.flowTitle}>Flujo de Órdenes</Text>
+            </View>
+            <View style={styles.flowGrid}>
+              {[
+                { label: 'Pend.', count: stats?.flowCounts?.PENDING ?? 0, color: '#facc15' },
+                { label: 'Val.', count: stats?.flowCounts?.VALIDATED ?? 0, color: '#60a5fa' },
+                { label: 'Prep.', count: stats?.flowCounts?.PREPARING ?? 0, color: MB_COLORS.brandAccent },
+                { label: 'Listo', count: stats?.flowCounts?.READY ?? 0, color: '#10b981' },
+              ].map((item) => (
+                <View key={item.label} style={styles.flowItem}>
+                  <Text style={[styles.flowCount, { color: item.color }]}>{item.count}</Text>
+                  <Text style={styles.flowLabel}>{item.label}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.timerCard}>
+            <View style={styles.timerLayout}>
+              <View style={styles.flowHeader}>
+                <View style={[styles.iconContainer, { backgroundColor: 'rgba(251, 191, 36, 0.1)' }]}>
+                  <Timer size={14} color="#fbbf24" />
+                </View>
+                <Text style={styles.flowTitle}>Tiempo Promedio de hoy</Text>
+              </View>
+              
+              <View style={styles.timerContent}>
+                {stats?.avgCycleMin === null ? (
+                  <Text style={styles.emptyTimerText}>Sin datos hoy</Text>
+                ) : (
+                  <View style={styles.timerMain}>
+                    <View style={styles.timerValueRow}>
+                      <Text style={styles.timerValue}>{stats?.avgCycleMin}</Text>
+                      <Text style={styles.timerUnit}>min</Text>
+                    </View>
+                    <View style={[
+                      styles.timerBadge, 
+                      { backgroundColor: (stats?.avgCycleMin ?? 0) > 30 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)' }
+                    ]}>
+                      <Text style={[
+                        styles.timerBadgeText, 
+                        { color: (stats?.avgCycleMin ?? 0) > 30 ? '#ef4444' : '#10b981' }
+                      ]}>
+                        {(stats?.avgCycleMin ?? 0) > 30 ? 'LENTO' : 'ÓPTIMO'}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </View>
+            </View>
           </View>
         </View>
 
@@ -510,5 +618,109 @@ const styles = StyleSheet.create({
   },
   tableStatusOccupied: {
     color: MB_COLORS.brandAccent,
+  },
+  metricsContainer: {
+    flexDirection: 'column',
+    gap: MB_SPACING.md,
+    marginBottom: MB_SPACING.xl,
+  },
+  flowCard: {
+    backgroundColor: MB_COLORS.glass,
+    borderRadius: 24,
+    padding: MB_SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.03)',
+  },
+  timerCard: {
+    backgroundColor: MB_COLORS.glass,
+    borderRadius: 24,
+    padding: MB_SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.03)',
+  },
+  timerLayout: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  timerMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  flowHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 0,
+  },
+  iconContainer: {
+    padding: 6,
+    backgroundColor: 'rgba(254, 95, 85, 0.1)',
+    borderRadius: 10,
+  },
+  flowTitle: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  flowGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 12,
+  },
+  flowItem: {
+    flex: 1,
+    minWidth: '22%',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: 12,
+    padding: 8,
+    alignItems: 'center',
+  },
+  flowCount: {
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  flowLabel: {
+    fontSize: 8,
+    color: MB_COLORS.muted,
+    fontWeight: '800',
+    marginTop: 2,
+  },
+  timerContent: {
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  timerValueRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 2,
+  },
+  timerValue: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#fbbf24',
+  },
+  timerUnit: {
+    fontSize: 10,
+    color: MB_COLORS.muted,
+    fontWeight: '800',
+  },
+  timerBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  timerBadgeText: {
+    fontSize: 8,
+    fontWeight: '900',
+  },
+  emptyTimerText: {
+    fontSize: 10,
+    color: MB_COLORS.muted,
+    fontStyle: 'italic',
   },
 });

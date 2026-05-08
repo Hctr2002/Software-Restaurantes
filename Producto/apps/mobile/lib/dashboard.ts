@@ -5,6 +5,14 @@ export type DashboardStats = {
   ingresos_mes: number;
   ticket_promedio: number;
   pedidos_dia: number;
+  activos: number;
+  flowCounts: {
+    PENDING: number;
+    VALIDATED: number;
+    PREPARING: number;
+    READY: number;
+  };
+  avgCycleMin: number | null;
   top_items: { name: string; count: number }[];
 };
 
@@ -31,23 +39,32 @@ function monthStart() {
 export async function fetchDashboardStats(restaurantId: string): Promise<DashboardStats> {
   const now = new Date();
   
-  // Fetch delivered orders of today
-  const { data: todayOrders } = await supabase
+  // Fetch ALL orders of today for flow and cycle metrics
+  const { data: allTodayOrders } = await supabase
     .from('orders')
-    .select('id, order_items(unit_price, menu_items(name))')
+    .select('id, status, createdAt, ready_at, order_items(unit_price, menu_items(name))')
     .eq('restaurant_id', restaurantId)
-    .eq('status', 'DELIVERED')
     .gte('createdAt', dayStart());
 
-  // Fetch delivered orders of this month
+  // Fetch delivered/completed orders of this month (for revenue)
   const { data: monthOrders } = await supabase
     .from('orders')
     .select('id, order_items(unit_price)')
     .eq('restaurant_id', restaurantId)
-    .eq('status', 'DELIVERED')
+    .in('status', ['DELIVERED', 'COMPLETED'])
     .gte('createdAt', monthStart());
 
-  const ingresos_dia = (todayOrders ?? []).reduce((sum, order: any) => {
+  // Count all ACTIVE orders (not delivered/completed)
+  const { count: activosCount } = await supabase
+    .from('orders')
+    .select('*', { count: 'exact', head: true })
+    .eq('restaurant_id', restaurantId)
+    .not('status', 'in', '("DELIVERED","COMPLETED")');
+
+  // Filter today's successful orders for revenue
+  const todaySuccessful = (allTodayOrders ?? []).filter(o => ['DELIVERED', 'COMPLETED'].includes(o.status));
+
+  const ingresos_dia = todaySuccessful.reduce((sum, order: any) => {
     return sum + (order.order_items ?? []).reduce((s: number, item: any) => s + Number(item.unit_price ?? 0), 0);
   }, 0);
 
@@ -55,11 +72,27 @@ export async function fetchDashboardStats(restaurantId: string): Promise<Dashboa
     return sum + (order.order_items ?? []).reduce((s: number, item: any) => s + Number(item.unit_price ?? 0), 0);
   }, 0);
 
-  const count_dia = todayOrders?.length ?? 0;
+  const count_dia = todaySuccessful.length;
   const ticket_promedio = count_dia > 0 ? Math.round(ingresos_dia / count_dia) : 0;
 
+  // Flow Counts
+  const flowCounts = {
+    PENDING:   (allTodayOrders ?? []).filter(o => o.status === 'PENDING').length,
+    VALIDATED: (allTodayOrders ?? []).filter(o => o.status === 'VALIDATED').length,
+    PREPARING: (allTodayOrders ?? []).filter(o => o.status === 'PREPARING').length,
+    READY:     (allTodayOrders ?? []).filter(o => o.status === 'READY').length,
+  };
+
+  // Avg Cycle Time (Today)
+  const deliveredWithTime = (allTodayOrders ?? []).filter(o => (o.status === 'DELIVERED' || o.status === 'READY') && o.ready_at && o.createdAt);
+  const avgCycleMin = deliveredWithTime.length > 0
+    ? Math.round(deliveredWithTime.reduce((s, o) => {
+        return s + (new Date(o.ready_at!).getTime() - new Date(o.createdAt).getTime()) / 60000;
+      }, 0) / deliveredWithTime.length)
+    : null;
+
   const itemCount: Record<string, { name: string; count: number }> = {};
-  (todayOrders ?? []).forEach((order: any) => {
+  todaySuccessful.forEach((order: any) => {
     (order.order_items ?? []).forEach((item: any) => {
       const name = item.menu_items?.name;
       if (!name) return;
@@ -77,6 +110,9 @@ export async function fetchDashboardStats(restaurantId: string): Promise<Dashboa
     ingresos_mes,
     ticket_promedio,
     pedidos_dia: count_dia,
+    activos: activosCount ?? 0,
+    flowCounts,
+    avgCycleMin,
     top_items
   };
 }

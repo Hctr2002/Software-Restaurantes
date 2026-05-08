@@ -78,7 +78,46 @@ export default function MenuScreen() {
 
   React.useEffect(() => {
     fetchMenuData();
-  }, [fetchMenuData]);
+
+    if (!user?.id) return;
+
+    // Suscripción para cambios en productos
+    const menuChannel = supabase
+      .channel('admin-menu-items')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'menu_items'
+        },
+        () => {
+          fetchMenuData();
+        }
+      )
+      .subscribe();
+
+    // Suscripción para cambios en categorías
+    const categoriesChannel = supabase
+      .channel('admin-categories')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'categories'
+        },
+        () => {
+          fetchMenuData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(menuChannel);
+      supabase.removeChannel(categoriesChannel);
+    };
+  }, [fetchMenuData, user?.id]);
 
   const onRefresh = () => {
     setRefreshing(refreshing); // Dummy to satisfy lint if needed, but fetchMenuData handles it

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, 
 import { Users, AlertCircle, Edit2, Trash2, Plus, X } from 'lucide-react-native';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
+import { SUPERADMIN_API } from '../../lib/api';
 
 type UserRecord = {
   id: string;
@@ -28,29 +29,15 @@ export default function UsersTab() {
   const [formData, setFormData] = useState({ email: '', password: '', role: 'CLIENTE', restaurantId: '' as string | null });
   const [submitting, setSubmitting] = useState(false);
 
-  const getApiUrl = async () => {
-    let API_URL = 'http://10.122.168.197:3000';
-    try {
-      const Constants = await import('expo-constants');
-      const debuggerHost = Constants.default.expoConfig?.hostUri;
-      if (debuggerHost) {
-        const hostIp = debuggerHost.split(':')[0];
-        API_URL = `http://${hostIp}:3000`;
-      }
-    } catch (e) {}
-    return API_URL;
-  };
-
   const fetchData = async () => {
     try {
       setError(null);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No hay sesión activa");
-      const API_URL = await getApiUrl();
 
       const [usersRes, restRes] = await Promise.all([
-        fetch(`${API_URL}/api/admin/users`, { headers: { Authorization: `Bearer ${session.access_token}` } }),
-        fetch(`${API_URL}/api/admin/restaurants`, { headers: { Authorization: `Bearer ${session.access_token}` } })
+        fetch(`${SUPERADMIN_API}/api/admin/users`, { headers: { Authorization: `Bearer ${session.access_token}` } }),
+        fetch(`${SUPERADMIN_API}/api/admin/restaurants`, { headers: { Authorization: `Bearer ${session.access_token}` } })
       ]);
       
       const usersJson: any = await usersRes.json();
@@ -107,9 +94,8 @@ export default function UsersTab() {
     setSubmitting(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const API_URL = await getApiUrl();
       const method = editingId ? 'PUT' : 'POST';
-      const url = editingId ? `${API_URL}/api/admin/users/${editingId}` : `${API_URL}/api/admin/users`;
+      const url = editingId ? `${SUPERADMIN_API}/api/admin/users/${editingId}` : `${SUPERADMIN_API}/api/admin/users`;
 
       // Clean payload
       const payload: any = { ...formData };
@@ -153,8 +139,7 @@ export default function UsersTab() {
   const handleDelete = async (id: string) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const API_URL = await getApiUrl();
-      const res = await fetch(`${API_URL}/api/admin/users/${id}`, {
+      const res = await fetch(`${SUPERADMIN_API}/api/admin/users/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${session?.access_token}` }
       });
