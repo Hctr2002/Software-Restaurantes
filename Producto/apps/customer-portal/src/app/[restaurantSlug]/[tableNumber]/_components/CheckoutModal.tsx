@@ -11,6 +11,7 @@ interface CheckoutModalProps {
     data: TableRecord | null;
     loading: boolean;
     error: string | null;
+    orderError?: string | null;
   };
   onTableInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onPlaceOrder: () => void;
@@ -89,11 +90,10 @@ export function CheckoutModal({
         </div>
 
         {/* Mensaje de Error de Pedido */}
-        {/* @ts-ignore */}
         {table.orderError && (
           <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3 text-red-400 text-sm animate-in fade-in zoom-in">
             <AlertCircle className="w-5 h-5 flex-shrink-0" />
-            <p className="font-bold">{(table as any).orderError}</p>
+            <p className="font-bold">{table.orderError}</p>
           </div>
         )}
 

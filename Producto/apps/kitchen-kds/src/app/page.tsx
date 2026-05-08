@@ -165,7 +165,7 @@ export default function KitchenKDSPage() {
               <KDSColumn key={col.key} title={col.title} count={col.orders.length} icon={col.icon} active={col.active}>
                 {col.orders.map((order) => (
                   <TicketWrapper key={`${col.key}-${order.id}`} createdAt={order.createdAt} thresholds={settings.thresholds} status={order.status}>
-                    <OrderTicket id={order.id} tableNumber={order.table?.number} status={order.status} createdAt={order.createdAt} items={order.orderItems} onStatusChange={(s) => handleStatusChange(order.id, s)} />
+                    <OrderTicket id={order.id} tableNumber={order.table?.number ?? 0} status={order.status} createdAt={order.createdAt} items={order.orderItems || []} onStatusChange={(s) => handleStatusChange(order.id, s)} />
                   </TicketWrapper>
                 ))}
               </KDSColumn>

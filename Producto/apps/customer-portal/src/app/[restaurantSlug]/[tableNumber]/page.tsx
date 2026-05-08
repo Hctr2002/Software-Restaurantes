@@ -219,7 +219,7 @@ export default function MenuPage({
         />
       )}
 
-      {portal.order.lastId && currentTrackerStatus !== 'DELIVERED' && currentTrackerStatus !== 'COMPLETED' && currentTrackerStatus !== 'REJECTED' && (
+      {portal.order.lastId && currentTrackerStatus && currentTrackerStatus !== 'DELIVERED' && currentTrackerStatus !== 'COMPLETED' && currentTrackerStatus !== 'REJECTED' && (
         <OrderTracker status={currentTrackerStatus} />
       )}
 

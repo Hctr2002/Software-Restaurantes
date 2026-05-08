@@ -1,23 +1,11 @@
 "use client";
 
 import { ClipboardList, X } from "lucide-react";
-interface OrderItem {
-  quantity: number;
-  unitPrice: number;
-  menuItem: { name: string } | null;
-}
-
-interface TableOrder {
-  id: string;
-  status: string;
-  totalAmount: number;
-  createdAt: string;
-  orderItems: OrderItem[];
-}
+import { Order } from "@menu-bites/auth";
 
 interface Props {
   tableNumber: number;
-  orders: TableOrder[];
+  orders: Order[];
   onClose: () => void;
 }
 

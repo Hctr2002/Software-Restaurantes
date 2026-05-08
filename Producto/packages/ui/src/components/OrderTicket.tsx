@@ -8,7 +8,7 @@
  
  interface OrderTicketProps {
    id: string;
-   tableNumber: number;
+   tableNumber?: number | null;
    status: OrderStatus;
    createdAt: string;
    items: OrderItem[];
@@ -54,7 +54,7 @@
        <div className="flex justify-between items-start mb-6">
          <div className="flex items-center space-x-4">
            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 shadow-inner group">
-             <span className="text-3xl font-black text-foreground tracking-tighter">{tableNumber}</span>
+             <span className="text-3xl font-black text-foreground tracking-tighter">{tableNumber ?? "?"}</span>
            </div>
            <div>
              <p className="text-[10px] uppercase font-black tracking-[0.2em] text-foreground/30">Mesa</p>

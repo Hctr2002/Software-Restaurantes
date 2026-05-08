@@ -21,6 +21,7 @@ export type Category = {
   name: string;
   restaurantId: string;
   is_active: boolean;
+  isActive: boolean;
 };
 
 export type MenuItem = {
@@ -30,7 +31,9 @@ export type MenuItem = {
   price: number;
   categoryId: string | null;
   image_url: string | null;
+  imageUrl: string | null;
   is_active: boolean;
+  isActive: boolean;
   restaurantId: string;
   categories?: { name: string } | null;
 };

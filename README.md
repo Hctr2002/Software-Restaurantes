@@ -166,7 +166,7 @@ graph TD
 
 ### Stack Tecnológico
 
-* **Frontend:** React 19, Next.js 15, TailwindCSS v4, Framer Motion.
+* **Frontend:** React 19, Next.js 16, TailwindCSS v4, Framer Motion.
 * **Backend & DB:** Supabase (PostgreSQL, Auth, Realtime, Storage).
 * **ORM:** Prisma.
 * **Monorepo:** Turborepo, npm Workspaces.

@@ -2,8 +2,8 @@
 
 import { motion } from "framer-motion";
 import { Minus, Plus } from "lucide-react";
-import { getPublicImageUrl } from "@menu-bites/auth/utils";
-import type { MenuItem, CartItem } from "@/lib/tenant";
+import { getPublicImageUrl, MenuItem } from "@menu-bites/auth";
+import type { CartItem } from "@/lib/tenant";
 
 interface Props {
   item: MenuItem;

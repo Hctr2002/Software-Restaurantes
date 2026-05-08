@@ -140,10 +140,10 @@ erDiagram
 
 | Tecnología | Versión | Uso |
 |---|---|---|
-| **Next.js** | 14+ | App Router, SSR/CSR híbrido, middleware de Edge, API Routes |
-| **React** | 18+ | Motor de UI |
+| **Next.js** | 16+ | App Router, SSR/CSR híbrido, middleware de Edge, API Routes |
+| **React** | 19+ | Motor de UI |
 | **TypeScript** | 5+ | Seguridad de tipos en todo el monorepo |
-| **Tailwind CSS** | 3+ | Framework de estilos, glassmorphism, responsividad |
+| **Tailwind CSS** | 4+ | Framework de estilos, glassmorphism, responsividad |
 
 ### Backend y Servicios
 
@@ -467,6 +467,17 @@ Implementado en v2.2.0, este sistema permite la comunicación directa Cliente-Ga
 Se ha refinado el sistema de notificaciones para evitar bucles de sonido:
 - **Persistence Check:** El hook `useAlerts` ahora utiliza una referencia de conteo inicializada en `-1` para diferenciar la carga inicial (o navegación entre páginas) de la llegada de nuevas alertas reales.
 - **UI Non-Transparent:** Los paneles de alertas ahora utilizan fondos sólidos para garantizar legibilidad Pro Max sobre cualquier fondo de mapa o dashboard.
+
+### 7.10 Resiliencia en Tiempo de Construcción (Build-Time Resilience)
+
+A partir de la v2.2.0, se ha estandarizado un patrón de **inicialización perezosa (lazy initialization)** para el cliente `supabaseAdmin` en las API Routes. 
+
+**Problema:** La inicialización global de clientes administrativos en el scope superior de los archivos de ruta causaba fallos en el build de Vercel/Turbo cuando las variables de entorno (`SUPABASE_SERVICE_ROLE_KEY`) no estaban presentes durante la fase de análisis estático o generación de páginas estáticas.
+
+**Solución:** Los clientes `supabaseAdmin` deben instanciarse exclusivamente dentro del cuerpo de la función del handler (`GET`, `POST`, etc.). Esto garantiza que:
+- La aplicación compile sin errores incluso si las variables de entorno de servidor no están presentes en el entorno de build.
+- El cliente se cree solo cuando hay una solicitud real.
+- Se eviten fugas de memoria por instancias globales innecesarias en funciones serverless.
 
 ---
 

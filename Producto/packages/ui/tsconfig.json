@@ -15,7 +15,9 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@menu-bites/auth": ["../auth/src/index.ts"],
+      "@menu-bites/auth/*": ["../auth/src/*"]
     }
   },
   "include": ["src"],
