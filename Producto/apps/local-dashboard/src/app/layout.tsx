@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "@menu-bites/ui/styles/globals.css";
 import { cn } from "@menu-bites/ui/lib/utils";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Menu Bites | Panel Local",
@@ -13,7 +10,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className="dark">
-      <body className={cn(inter.className, "antialiased min-h-screen wow-gradient")}>
+      <body className={cn("font-sans antialiased min-h-screen wow-gradient")}>
         {children}
       </body>
     </html>

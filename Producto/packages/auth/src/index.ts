@@ -1,4 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr';
+import { AlertType } from './types';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
@@ -23,10 +24,20 @@ export const signOut = async () => {
   await supabase.auth.signOut();
 };
 
+const STATUS_TIMESTAMP: Record<string, string> = {
+  VALIDATED:  "validated_at",
+  PREPARING:  "preparing_at",
+  READY:      "ready_at",
+};
+
 export const updateOrderStatus = async (orderId: string, status: string) => {
+  const timestampField = STATUS_TIMESTAMP[status];
+  const payload: Record<string, unknown> = { status };
+  if (timestampField) payload[timestampField] = new Date().toISOString();
+
   const { data, error } = await supabase
     .from("orders")
-    .update({ status })
+    .update(payload)
     .eq("id", orderId)
     .select();
   return { data, error };
@@ -46,7 +57,7 @@ export const updateUserPassword = async (password: string) => {
   return { data, error };
 };
 
-export type AlertType = 'TABLE_ISSUE' | 'BILL_REQUEST' | 'STOCK_SHORTAGE' | 'HELP_REQUEST' | 'GENERAL';
+export * from "./types";
 
 export const sendAlert = async (params: {
   restaurantId: string;
@@ -95,3 +106,5 @@ export const getRestaurantTheme = async (restaurantId: string) => {
 };
 
 export * from "./hooks";
+export * from "./utils";
+export * from "./constants";

@@ -10,3 +10,9 @@ export * from "./components/ui/input";
 export * from "./components/ui/card";
 export * from "./lib/utils";
 export * from "./components/RestaurantThemeProvider";
+export * from "./components/SkeletonLoader";
+export * from "./components/dashboard";
+export * from "./components/terminal";
+export * from "./components/portal";
+
+// Rebuild trigger: 2026-05-07T05:28:00Z

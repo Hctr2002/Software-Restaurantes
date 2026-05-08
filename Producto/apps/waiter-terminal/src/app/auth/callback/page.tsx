@@ -1,24 +1,24 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import { useAuthStore } from "@menu-bites/store";
 import { Loader2 } from "lucide-react";
 
+const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL ?? "http://localhost:3000";
+
 export default function AuthCallback() {
-  const router = useRouter();
   const { setUser } = useAuthStore();
 
   useEffect(() => {
-    const hash        = window.location.hash.slice(1);
-    const params      = new URLSearchParams(hash);
+    const hash         = window.location.hash.slice(1);
+    const params       = new URLSearchParams(hash);
     const accessToken  = params.get("access_token");
     const refreshToken = params.get("refresh_token");
     const next         = params.get("next") ?? "/";
 
     if (!accessToken || !refreshToken) {
-      window.location.replace(process.env.NEXT_PUBLIC_AUTH_URL ?? "/");
+      window.location.replace(AUTH_URL);
       return;
     }
 
@@ -30,9 +30,9 @@ export default function AuthCallback() {
 
     supabase.auth
       .setSession({ access_token: accessToken, refresh_token: refreshToken })
-      .then(({ data }) => {
-        if (!data.session) {
-          window.location.replace(process.env.NEXT_PUBLIC_AUTH_URL ?? "/");
+      .then(({ data, error }) => {
+        if (error || !data.session) {
+          window.location.replace(AUTH_URL);
           return;
         }
         const { role, restaurant_id } = data.session.user.app_metadata;
@@ -42,8 +42,10 @@ export default function AuthCallback() {
           role,
           restaurantId: restaurant_id ?? "",
         });
-        window.history.replaceState(null, "", window.location.pathname);
-        router.replace(next);
+        window.location.replace(next);
+      })
+      .catch(() => {
+        window.location.replace(AUTH_URL);
       });
   }, []);
 

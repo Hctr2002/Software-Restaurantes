@@ -4,20 +4,11 @@
  import { cn } from "../lib/utils";
  import { Clock, CheckCircle2, PlayCircle, Utensils, AlertCircle } from "lucide-react";
  import { motion, AnimatePresence } from "framer-motion";
- 
- export type OrderStatus = "PENDING" | "PREPARING" | "READY" | "DELIVERED";
- 
- interface OrderItem {
-   id: string;
-   quantity: number;
-   menu_item: {
-     name: string;
-   };
- }
+ import { OrderItem, OrderStatus } from "@menu-bites/auth";
  
  interface OrderTicketProps {
    id: string;
-   tableNumber: number;
+   tableNumber?: number | null;
    status: OrderStatus;
    createdAt: string;
    items: OrderItem[];
@@ -47,7 +38,7 @@
        exit={{ opacity: 0, scale: 0.9 }}
        className={cn(
          "relative flex flex-col p-6 rounded-[2.5rem] border glass-premium transition-all duration-500 overflow-hidden",
-         status === "PENDING" && "border-white/5 bg-white/5 shadow-xl shadow-black/20",
+         (status === "PENDING" || status === "VALIDATED") && "border-white/5 bg-white/5 shadow-xl shadow-black/20",
          status === "PREPARING" && "border-primary/20 bg-primary/5 shadow-xl shadow-primary/5",
          status === "READY" && "border-emerald-500/20 bg-emerald-500/5 shadow-xl shadow-emerald-500/5",
          isDelayed && status !== "READY" && "ring-2 ring-destructive/40 bg-destructive/5 animate-pulse"
@@ -63,7 +54,7 @@
        <div className="flex justify-between items-start mb-6">
          <div className="flex items-center space-x-4">
            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 shadow-inner group">
-             <span className="text-3xl font-black text-foreground tracking-tighter">{tableNumber}</span>
+             <span className="text-3xl font-black text-foreground tracking-tighter">{tableNumber ?? "?"}</span>
            </div>
            <div>
              <p className="text-[10px] uppercase font-black tracking-[0.2em] text-foreground/30">Mesa</p>
@@ -91,53 +82,56 @@
                <span className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-xs font-black text-primary border border-primary/10">
                  {item.quantity}
                </span>
-               <span className="text-sm font-black text-foreground tracking-tight">{item.menu_item.name}</span>
+               <span className="text-sm font-black text-foreground tracking-tight">{item.menuItem?.name || item.menu_items?.name || "Plato sin nombre"}</span>
              </div>
              <Utensils className="w-4 h-4 text-foreground/10 group-hover:text-primary/40 transition-colors" />
            </motion.div>
          ))}
        </div>
- 
-       <div className="flex space-x-3">
-         <AnimatePresence mode="wait">
-           {status === "PENDING" && (
-             <motion.button 
-               key="btn-preparing"
-               initial={{ opacity: 0, y: 10 }}
-               animate={{ opacity: 1, y: 0 }}
-               exit={{ opacity: 0, y: -10 }}
-               whileHover={{ scale: 1.02 }}
-               whileTap={{ scale: 0.98 }}
-               onClick={() => onStatusChange("PREPARING")}
-               className="flex-1 py-4 bg-primary text-primary-foreground rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all flex items-center justify-center space-x-2"
-             >
-               <PlayCircle className="w-4 h-4" />
-               <span>Comenzar</span>
-             </motion.button>
-           )}
-           {status === "PREPARING" && (
-             <motion.button 
-               key="btn-ready"
-               initial={{ opacity: 0, y: 10 }}
-               animate={{ opacity: 1, y: 0 }}
-               exit={{ opacity: 0, y: -10 }}
-               whileHover={{ scale: 1.02 }}
-               whileTap={{ scale: 0.98 }}
-               onClick={() => onStatusChange("READY")}
-               className="flex-1 py-4 bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all flex items-center justify-center space-x-2"
-             >
-               <CheckCircle2 className="w-4 h-4" />
-               <span>Terminar</span>
-             </motion.button>
-           )}
-           {status === "READY" && (
-             <div className="flex-1 py-4 bg-white/5 border border-white/5 text-emerald-500 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center space-x-2">
-               <CheckCircle2 className="w-4 h-4" />
-               <span>Listo</span>
-             </div>
-           )}
-         </AnimatePresence>
-       </div>
+        {onStatusChange && (
+          <div className="pt-6 mt-6 border-t border-white/5">
+            <div className="flex space-x-3">
+              <AnimatePresence mode="wait">
+                {(status === "PENDING" || status === "VALIDATED") && (
+                  <motion.button 
+                    key="btn-preparing"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => onStatusChange("PREPARING")}
+                    className="flex-1 py-4 bg-primary text-primary-foreground rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all flex items-center justify-center space-x-2"
+                  >
+                    <PlayCircle className="w-4 h-4" />
+                    <span>Comenzar</span>
+                  </motion.button>
+                )}
+                {status === "PREPARING" && (
+                  <motion.button 
+                    key="btn-ready"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => onStatusChange("READY")}
+                    className="flex-1 py-4 bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all flex items-center justify-center space-x-2"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Terminar</span>
+                  </motion.button>
+                )}
+                {status === "READY" && (
+                  <div className="flex-1 py-4 bg-white/5 border border-white/5 text-emerald-500 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center space-x-2">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Listo</span>
+                  </div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        )}
      </motion.div>
    );
  };

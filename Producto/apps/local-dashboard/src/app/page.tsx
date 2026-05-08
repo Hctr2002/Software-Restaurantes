@@ -1,11 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
-import { useAuthStore } from "@menu-bites/store";
-import { supabase } from "@menu-bites/auth";
-import { Lock, ArrowRight, Loader2, Mail, Eye, EyeOff } from "lucide-react";
-import { cn, Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@menu-bites/ui";
+import React, { useState, useEffect } from "react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { 
+  Card, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription, 
+  CardContent, 
+  CardFooter,
+  Input,
+  Button
+} from "@menu-bites/ui";
+import { supabase } from "@menu-bites/auth";
+import { useAuthStore } from "@menu-bites/store";
 
 const ROLE_URLS: Record<string, string | undefined> = {
   SUPER_ADMIN: process.env.NEXT_PUBLIC_AUTH_URL,

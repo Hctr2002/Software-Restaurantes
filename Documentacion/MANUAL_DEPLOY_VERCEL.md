@@ -2,11 +2,38 @@
 
 **Proyecto:** Software-Restaurantes (Menu Bites)
 **Arquitectura:** Monorepo Turbo/npm · 6 apps Next.js · 1 app Expo
-**Versión:** 1.0.0 · Fecha: 2026-05-03
+**Versión:** 2.2.0 · Fecha: 2026-05-08
 
 ---
 
 ## Sección 0 — Resumen Ejecutivo
+
+### Flujo de Despliegue (Pipeline)
+
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#1e293b',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#0f172a',
+    'lineColor': '#6366f1',
+    'secondaryColor': '#10b981',
+    'tertiaryColor': '#f8fafc',
+    'fontFamily': 'Outfit, sans-serif'
+  }
+}}%%
+graph LR
+    classDef coreNode fill:#6366f1,stroke:#4f46e5,color:#fff,rx:10,ry:10;
+    classDef appNode fill:#f8fafc,stroke:#cbd5e1,color:#1e293b,rx:5,ry:5;
+
+    Commit[💻 Push to GitHub]:::coreNode --> Build[⚙️ Turbo Build]:::coreNode
+    Build --> A[📱 Admin Dashboard]:::appNode
+    Build --> B[🌐 Customer Portal]:::appNode
+    A --> C[Rest of Apps]:::appNode
+    B --> C
+    C --> Prod[🚀 Vercel Production]:::coreNode
+```
 
 ### Tabla de referencia rápida
 
@@ -675,6 +702,14 @@ Si el `vercel.json` existe pero el error persiste, verificar en Vercel UI → Se
 
 ---
 
+### Error 9: Build falla con "ReferenceError: supabaseAdmin is not defined"
+ 
+ **Causa:** El cliente administrativo de Supabase fue inicializado en el scope global del archivo de ruta, y al no estar presentes las variables de entorno en el pipeline de build (fase estática), la referencia falla.
+ 
+ **Solución:** Mover la inicialización de `supabaseAdmin` dentro del cuerpo del handler (`POST`, `GET`). Esto asegura que el cliente solo se instancie en tiempo de ejecución (runtime) cuando las variables inyectadas por Vercel están garantizadas.
+ 
+ ---
+
 ## Sección 11 — Checklist de Deploy Final
 
 ### Pre-deploy
@@ -727,19 +762,5 @@ npx turbo run build --filter=frontend
 ```
 
 El servidor de desarrollo local sigue funcionando igual con `npm run dev` desde `Producto/`. Los `vercel.json` solo afectan el contexto de Vercel, no el entorno local.
-
----
-
-## Apéndice B — Skills de referencia del proyecto
-
-El proyecto incluye skills técnicos que complementan este manual:
-
-| Skill | Ubicación | Uso |
-|-------|-----------|-----|
-| `deploy-to-vercel` | `Producto/skills/deploy-to-vercel/SKILL.md` | Procedimiento general de deploy |
-| `vercel-cli-with-tokens` | `Producto/skills/vercel-cli-with-tokens/SKILL.md` | Deploy con token sin login interactivo |
-| `dotenv` | `Producto/skills/dotenv/SKILL.md` | Gestión de variables de entorno |
-| `supabase` | `Producto/skills/supabase/SKILL.md` | Configuración y seguridad de Supabase |
-| `supabase-postgres-best-practices` | `Producto/skills/supabase-postgres-best-practices/SKILL.md` | Optimización de RLS y queries |
 
 ---

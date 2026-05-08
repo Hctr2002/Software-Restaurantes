@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 879.7085 470" width="879.7085" height="470" style="--bg:#1a1b26;--fg:#a9b1d6;--line:#3d59a1;--accent:#7aa2f7;--muted:#565f89;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="seq-arrow" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" />
+  </marker>
+  <marker id="seq-arrow-open" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polyline points="0 0, 8 2.5, 0 5" fill="none" stroke="var(--_arrow)" stroke-width="1" />
+  </marker>
+</defs>
+<line class="lifeline" data-actor="C" x1="91.06450000000001" y1="70" x2="91.06450000000001" y2="440" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="API" x1="240.5965" y1="70" x2="240.5965" y2="440" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="DB" x1="386.4235" y1="70" x2="386.4235" y2="440" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="RT" x1="538.1785" y1="70" x2="538.1785" y2="440" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="KDS" x1="686.2284999999999" y1="70" x2="686.2284999999999" y2="440" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<g class="message" data-from="C" data-to="API" data-label="POST /api/local/orders (Crear Pedido)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="91.06450000000001" y1="90" x2="240.5965" y2="90" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="165.8305" y="80" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">POST /api/local/orders (Crear Pedido)</text>
+</g>
+<g class="message" data-from="API" data-to="DB" data-label="Validar sesion y guardar orden" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="240.5965" y1="130" x2="386.4235" y2="130" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="313.51" y="120" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Validar sesion y guardar orden</text>
+</g>
+<g class="message" data-from="DB" data-to="RT" data-label="Disparar evento INSERT en orders" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="386.4235" y1="170" x2="538.1785" y2="170" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="462.301" y="160" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Disparar evento INSERT en orders</text>
+</g>
+<g class="message" data-from="RT" data-to="KDS" data-label="Notificacion instantanea" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="538.1785" y1="210" x2="686.2284999999999" y2="210" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="612.2035" y="200" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Notificacion instantanea</text>
+</g>
+<g class="message" data-from="KDS" data-to="KDS" data-label="Actualizar lista de tickets" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="686.2284999999999,250 716.2284999999999,250 716.2284999999999,270 686.2284999999999,270" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="724.2284999999999" y="260" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Actualizar lista de tickets</text>
+</g>
+<g class="message" data-from="KDS" data-to="DB" data-label="PUT orders/{id} (status: PREPARING)" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="686.2284999999999" y1="320" x2="386.4235" y2="320" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="536.326" y="310" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">PUT orders/{id} (status: PREPARING)</text>
+</g>
+<g class="message" data-from="DB" data-to="RT" data-label="Evento UPDATE en orders" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="386.4235" y1="360" x2="538.1785" y2="360" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="462.301" y="350" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Evento UPDATE en orders</text>
+</g>
+<g class="message" data-from="RT" data-to="C" data-label="Notificar cambio de estado" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="538.1785" y1="400" x2="91.06450000000001" y2="400" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="314.62149999999997" y="390" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">Notificar cambio de estado</text>
+</g>
+<g class="actor" data-id="C" data-label="Cliente/Garzon" data-type="participant">
+  <rect x="30.000000000000007" y="30" width="122.129" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="91.06450000000001" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">Cliente/Garzon</text>
+</g>
+<g class="actor" data-id="API" data-label="Next.js API" data-type="participant">
+  <rect x="192.129" y="30" width="96.93499999999999" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="240.5965" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">Next.js API</text>
+</g>
+<g class="actor" data-id="DB" data-label="Supabase DB" data-type="participant">
+  <rect x="329.06399999999996" y="30" width="114.719" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="386.4235" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">Supabase DB</text>
+</g>
+<g class="actor" data-id="RT" data-label="Realtime Hub" data-type="participant">
+  <rect x="483.783" y="30" width="108.79099999999998" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="538.1785" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">Realtime Hub</text>
+</g>
+<g class="actor" data-id="KDS" data-label="Kitchen KDS" data-type="participant">
+  <rect x="632.574" y="30" width="107.30899999999998" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="686.2284999999999" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">Kitchen KDS</text>
+</g>
+</svg>
