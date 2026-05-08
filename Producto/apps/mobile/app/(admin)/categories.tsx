@@ -37,7 +37,7 @@ export default function CategoriesScreen() {
     try {
       const { data, error } = await supabase
         .from('categories')
-        .select('id, name')
+        .select('id, name, is_active')
         .eq('restaurant_id', restaurantId)
         .order('name', { ascending: true });
 
@@ -111,17 +111,23 @@ export default function CategoriesScreen() {
     try {
       if (!restaurantId) return;
 
+      const payload = {
+        name: data.name,
+        is_active: data.is_active,
+        restaurant_id: restaurantId
+      };
+
       if (data.id) {
         const { error } = await supabase
           .from('categories')
-          .update({ name: data.name })
+          .update(payload)
           .eq('id', data.id);
         if (error) throw error;
         Alert.alert('Éxito', 'Categoría actualizada correctamente');
       } else {
         const { error } = await supabase
           .from('categories')
-          .insert({ name: data.name, restaurant_id: restaurantId });
+          .insert(payload);
         if (error) throw error;
         Alert.alert('Éxito', 'Categoría creada correctamente');
       }
@@ -163,14 +169,21 @@ export default function CategoriesScreen() {
   const renderCategory = ({ item, index }: { item: CategoryData, index: number }) => (
     <Animated.View entering={FadeInDown.delay(index * 50)}>
       <TouchableOpacity 
-        style={styles.categoryCard}
+        style={[styles.categoryCard, !item.is_active && styles.categoryCardInactive]}
         onPress={() => handleOpenEdit(item)}
       >
         <View style={styles.categoryInfo}>
-          <View style={styles.iconContainer}>
-            <Tag size={20} color={MB_COLORS.brandAccent} />
+          <View style={[styles.iconContainer, !item.is_active && styles.iconContainerInactive]}>
+            <Tag size={20} color={item.is_active ? MB_COLORS.brandAccent : MB_COLORS.muted} />
           </View>
-          <Text style={styles.categoryName}>{item.name}</Text>
+          <View>
+            <Text style={[styles.categoryName, !item.is_active && styles.categoryNameInactive]}>
+              {item.name}
+            </Text>
+            {!item.is_active && (
+              <Text style={styles.inactiveBadge}>DESACTIVADA</Text>
+            )}
+          </View>
         </View>
         <ChevronRight size={20} color={MB_COLORS.muted} />
       </TouchableOpacity>
@@ -313,6 +326,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.03)',
   },
+  categoryCardInactive: {
+    opacity: 0.6,
+    backgroundColor: 'rgba(255,255,255,0.02)',
+  },
   categoryInfo: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -326,12 +343,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  iconContainerInactive: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
   categoryName: {
     color: 'white',
     fontSize: 16,
     fontWeight: '800',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+  categoryNameInactive: {
+    color: MB_COLORS.muted,
+  },
+  inactiveBadge: {
+    color: MB_COLORS.brandAccent,
+    fontSize: 8,
+    fontWeight: '900',
+    marginTop: 2,
   },
   centered: {
     flex: 1,

@@ -18,6 +18,7 @@ import { MB_COLORS, MB_RADIUS, MB_SPACING } from '../constants/MB_Theme';
 export interface CategoryData {
   id: string;
   name: string;
+  is_active: boolean;
 }
 
 interface CategoryModalProps {
@@ -30,14 +31,17 @@ interface CategoryModalProps {
 
 export const CategoryModal = ({ visible, onClose, onSave, onDelete, category }: CategoryModalProps) => {
   const [name, setName] = React.useState('');
+  const [isActive, setIsActive] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [deleting, setDeleting] = React.useState(false);
 
   React.useEffect(() => {
     if (category) {
       setName(category.name);
+      setIsActive(category.is_active !== false); // Default to true if undefined
     } else {
       setName('');
+      setIsActive(true);
     }
   }, [category, visible]);
 
@@ -45,7 +49,11 @@ export const CategoryModal = ({ visible, onClose, onSave, onDelete, category }: 
     if (!name.trim()) return;
     setLoading(true);
     try {
-      await onSave({ name: name.trim(), id: category?.id });
+      await onSave({ 
+        name: name.trim(), 
+        is_active: isActive,
+        id: category?.id 
+      });
       onClose();
     } catch (err) {
       console.error(err);
@@ -96,6 +104,17 @@ export const CategoryModal = ({ visible, onClose, onSave, onDelete, category }: 
                     autoCapitalize="words"
                   />
                 </View>
+
+                <TouchableOpacity 
+                  style={styles.toggleContainer} 
+                  onPress={() => setIsActive(!isActive)}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.checkbox, isActive && styles.checkboxActive]}>
+                    {isActive && <View style={styles.checkboxInner} />}
+                  </View>
+                  <Text style={styles.toggleLabel}>Categoría Activa</Text>
+                </TouchableOpacity>
 
                 <TouchableOpacity 
                   style={[styles.saveButton, !name.trim() && { opacity: 0.5 }]} 
@@ -203,6 +222,39 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
     fontWeight: '900',
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    padding: 12,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: 12,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  checkboxActive: {
+    backgroundColor: MB_COLORS.brandAccent,
+    borderColor: MB_COLORS.brandAccent,
+  },
+  checkboxInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 2,
+    backgroundColor: 'white',
+  },
+  toggleLabel: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '700',
   },
   deleteButton: {
     flexDirection: 'row',

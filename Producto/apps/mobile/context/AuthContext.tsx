@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const value = {
+  const value = React.useMemo(() => ({
     session,
     user,
     role,
@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setRestaurantId(null);
       }
     },
-  };
+  }), [session, user, role, restaurantId, loading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
