@@ -75,7 +75,9 @@ export function AlertModal({
             Cerrar
           </Button>
           <Button
-            onClick={onSend}
+            onClick={() => {
+              onSend();
+            }}
             disabled={!alertMsg?.trim() || sendingAlert || alertSent}
             className="flex-1 h-14 bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase text-[10px] tracking-widest shadow-lg shadow-yellow-500/10"
           >

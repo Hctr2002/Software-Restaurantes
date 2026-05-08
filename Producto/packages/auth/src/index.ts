@@ -69,16 +69,29 @@ export const sendAlert = async (params: {
   menuItemId?: string;
   menuItemName?: string;
 }) => {
-  const { error } = await supabase.from('alerts').insert({
+  const payload = {
     restaurant_id:  params.restaurantId,
-    user_id:        params.userId        ?? null,
-    user_email:     params.userEmail     ?? null,
+    user_id:        params.userId || null,
+    user_email:     params.userEmail || null,
     type:           params.type,
     message:        params.message,
-    table_number:   params.tableNumber   ?? null,
-    menu_item_id:   params.menuItemId    ?? null,
-    menu_item_name: params.menuItemName  ?? null,
-  });
+    status:         'PENDING',
+    table_number:   params.tableNumber ?? null,
+    menu_item_id:   params.menuItemId || null,
+    menu_item_name: params.menuItemName || null,
+  };
+
+  const { error } = await supabase.from('alerts').insert(payload);
+  
+  if (error) {
+    console.error('[sendAlert] Error de Supabase:', {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code
+    });
+  }
+
   return { error };
 };
 

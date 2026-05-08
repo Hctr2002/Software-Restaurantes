@@ -88,7 +88,7 @@ export type Order = {
   users?: { email: string } | null;
 };
 
-export type AlertType = 'HELP' | 'BILL' | 'ORDER_READY' | 'TABLE_CLEAN' | 'TABLE_ISSUE' | 'BILL_REQUEST' | 'STOCK_SHORTAGE' | 'HELP_REQUEST' | 'GENERAL';
+export type AlertType = 'TABLE_ISSUE' | 'BILL_REQUEST' | 'STOCK_SHORTAGE' | 'HELP_REQUEST' | 'GENERAL';
 
 export type Alert = {
   id: string;
@@ -96,12 +96,14 @@ export type Alert = {
   tableId: string | null;
   type: AlertType;
   message: string;
-  isRead: boolean;
-  createdAt: string;
-  created_at: string; // Used in AlertsPanel
+  status: 'PENDING' | 'RESOLVED';
+  created_at: string;
+  resolved_at?: string | null;
+  resolved_by_email?: string | null;
   user_email: string | null;
   table_number?: string | number | null;
   menu_item_id?: string | null;
+  menu_item_name?: string | null;
 };
 
 export type StatsData = {
