@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { PendingOrder } from "../app/_components/PendingOrderCard";
+import type { Order } from "@menu-bites/auth";
 
-export function useWebPush(restaurantId: string | undefined, readyOrders: PendingOrder[]) {
+export function useWebPush(restaurantId: string | undefined, readyOrders: Order[]) {
   const prevCount = useRef(0);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export function useWebPush(restaurantId: string | undefined, readyOrders: Pendin
         fetch("/api/push/notify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ restaurantId, tableNumber: order.tables?.number }),
+          body: JSON.stringify({ restaurantId, tableNumber: order.table?.number }),
         }).catch(() => {});
       });
     }

@@ -22,6 +22,8 @@
 
 **`reviews`:** Calificaciones 1–5 del cliente tras el pago (Wave 5.3). RLS permite INSERT anónimo (cliente sin sesión) y SELECT autenticado por restaurant_id.
 
+**`0004_completed_status_validation` (Wave 6):** Introducción del estado `COMPLETED` como estado terminal post-pago. Actualización de la función `validate_order_transition` para permitir transiciones desde `READY` o `DELIVERED` hacia `COMPLETED`.
+
 ---
 
 ## 1. ARQUITECTURA MULTI-TENANT
@@ -105,6 +107,31 @@ WITH CHECK (
         WHERE id = auth.uid()
     )
 );
+
+### 2.3 Máquina de Estados Estricta (Triggers)
+
+Para garantizar la integridad del flujo de negocio, la base de datos implementa un trigger `tr_order_status_validation` que impide saltos de estado inválidos.
+
+```sql
+CREATE OR REPLACE FUNCTION validate_order_transition() RETURNS TRIGGER AS $$
+BEGIN
+    -- INSERT: Siempre debe ser PENDING
+    IF TG_OP = 'INSERT' AND NEW.status != 'PENDING' THEN 
+        RAISE EXCEPTION 'Un pedido nuevo debe comenzar en PENDING'; 
+    END IF;
+
+    -- UPDATE: Validar transiciones permitidas
+    CASE OLD.status
+        WHEN 'PENDING'   THEN IF NEW.status NOT IN ('VALIDATED', 'REJECTED') THEN RAISE EXCEPTION ...; END IF;
+        WHEN 'VALIDATED' THEN IF NEW.status NOT IN ('PREPARING', 'REJECTED') THEN RAISE EXCEPTION ...; END IF;
+        WHEN 'PREPARING' THEN IF NEW.status != 'READY' THEN RAISE EXCEPTION ...; END IF;
+        WHEN 'READY'     THEN IF NEW.status NOT IN ('DELIVERED', 'COMPLETED') THEN RAISE EXCEPTION ...; END IF;
+        WHEN 'DELIVERED' THEN IF NEW.status != 'COMPLETED' THEN RAISE EXCEPTION ...; END IF;
+        WHEN 'COMPLETED' THEN RAISE EXCEPTION 'No se puede cambiar el estado de un pedido ya COMPLETED';
+    END CASE;
+    RETURN NEW;
+END; $$ LANGUAGE plpgsql;
+```
 ```
 
 ### 2.3 Política para el menú público (Customer Portal — acceso anónimo)

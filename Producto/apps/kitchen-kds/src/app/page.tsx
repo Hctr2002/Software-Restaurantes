@@ -1,22 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+// Rebuild trigger: 2026-05-07T06:09:40Z
 import { useAuthStore } from "@menu-bites/store";
-import { supabase, useKitchenOrders, updateOrderStatus, signOut, getRestaurantTheme } from "@menu-bites/auth";
-import { OrderTicket, Button, RestaurantThemeProvider } from "@menu-bites/ui";
+import { useKitchenOrders, updateOrderStatus, signOut, useThemeSync } from "@menu-bites/auth";
+import { OrderTicket, Button, RestaurantThemeProvider, KDSColumn, TicketWrapper } from "@menu-bites/ui";
 import { ChefHat, Bell, Settings, LogOut, AlertTriangle, Activity } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 
-import { MOCK_ORDERS, type MockOrder } from "../lib/mock-orders";
+
 import { SettingsModal } from "./_components/SettingsModal";
-import { KDSColumn } from "./_components/KDSColumn";
 import { KDSStat } from "./_components/KDSStat";
-import { TicketWrapper } from "./_components/TicketWrapper";
 import { StockAlertModal } from "./_components/StockAlertModal";
 import { loadSettings, saveSettings, getTicketUrgency, DEFAULT_SETTINGS, type KDSSettings } from "../lib/kdsSettings";
 
-const MOCK_MODE     = process.env.NEXT_PUBLIC_MOCK_MODE === "true";
 const NEW_TICKET_SFX = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
 const CRITICAL_SFX   = "https://assets.mixkit.co/active_storage/sfx/2997/2997-preview.mp3";
 
@@ -24,15 +22,13 @@ function playSound(url: string) { new Audio(url).play().catch(() => {}); }
 
 export default function KitchenKDSPage() {
   const { user, logout: clearAuth } = useAuthStore();
-  const { orders: liveOrders, loading: liveLoading } = useKitchenOrders(MOCK_MODE ? undefined : user?.restaurantId);
-  const [mockOrders, setMockOrders] = useState<MockOrder[]>(MOCK_ORDERS);
+  const { orders: liveOrders, loading: liveLoading } = useKitchenOrders(user?.restaurantId);
   const [clearedOrders, setClearedOrders] = useState<Set<string>>(new Set());
   const [settings, setSettings] = useState<KDSSettings>(DEFAULT_SETTINGS);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  type Theme = Awaited<ReturnType<typeof getRestaurantTheme>>;
-  const [theme, setTheme] = useState<Theme>(null);
+  const theme = useThemeSync(user?.restaurantId, "kds");
   const [tick, setTick] = useState(0);
 
   const prevCount       = useRef(0);
@@ -40,27 +36,14 @@ export default function KitchenKDSPage() {
   const autoClearTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const router          = useRouter();
 
-  const rawOrders = MOCK_MODE ? mockOrders : liveOrders;
-  const orders    = rawOrders.filter((o) => !clearedOrders.has(o.id));
-  const loading   = MOCK_MODE ? false : liveLoading;
+  const orders    = liveOrders.filter((o) => !clearedOrders.has(o.id));
+  const loading   = liveLoading;
 
   useEffect(() => { loadSettings().then(setSettings); }, []);
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 30_000);
     return () => clearInterval(id);
   }, []);
-
-  useEffect(() => {
-    if (!user?.restaurantId) return;
-    const restaurantId = user.restaurantId;
-    getRestaurantTheme(restaurantId).then(setTheme);
-    const channel = supabase
-      .channel(`kds-theme-${restaurantId}`)
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "restaurant_themes", filter: `restaurant_id=eq.${restaurantId}` },
-        async (payload) => { if (payload.new.is_active) setTheme(await getRestaurantTheme(restaurantId)); })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [user?.restaurantId]);
 
   useEffect(() => {
     if (orders.length > prevCount.current && settings.sounds.newTicket) playSound(NEW_TICKET_SFX);
@@ -71,7 +54,7 @@ export default function KitchenKDSPage() {
     if (!settings.sounds.criticalAlert) return;
     orders.forEach((order) => {
       if (["VALIDATED", "READY", "DELIVERED"].includes(order.status)) return;
-      const urgency = getTicketUrgency(order.created_at, settings.thresholds);
+      const urgency = getTicketUrgency(order.createdAt, settings.thresholds);
       if (urgency === "red" && !criticalAlerted.current.has(order.id)) {
         criticalAlerted.current.add(order.id);
         playSound(CRITICAL_SFX);
@@ -81,14 +64,24 @@ export default function KitchenKDSPage() {
   }, [tick, orders.length, settings.sounds.criticalAlert, settings.thresholds]);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
-    if (MOCK_MODE) {
-      setMockOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status: newStatus as MockOrder["status"] } : o)));
-    } else {
-      await updateOrderStatus(orderId, newStatus);
-    }
-    if (newStatus === "READY" && settings.autoClear.enabled) {
-      const timer = setTimeout(() => setClearedOrders((prev) => new Set([...prev, orderId])), settings.autoClear.delaySeconds * 1000);
-      autoClearTimers.current.set(orderId, timer);
+    console.log(`[KDS] Intentando cambiar estado del pedido ${orderId} a ${newStatus}`);
+    
+    try {
+      const { error } = await updateOrderStatus(orderId, newStatus);
+      if (error) {
+        console.error(`[KDS] Error al actualizar estado en Supabase:`, error);
+        alert(`Error al actualizar el pedido: ${error.message}`);
+        return;
+      }
+      console.log(`[KDS] Estado actualizado exitosamente en Supabase`);
+
+      if (newStatus === "READY" && settings.autoClear.enabled) {
+        const timer = setTimeout(() => setClearedOrders((prev) => new Set([...prev, orderId])), settings.autoClear.delaySeconds * 1000);
+        autoClearTimers.current.set(orderId, timer);
+      }
+    } catch (err) {
+      console.error(`[KDS] Error inesperado en handleStatusChange:`, err);
+      alert("Ocurrió un error inesperado al procesar el cambio de estado.");
     }
   };
 
@@ -110,6 +103,12 @@ export default function KitchenKDSPage() {
   const pendingOrders   = orders.filter((o) => o.status === "VALIDATED");
   const preparingOrders = orders.filter((o) => o.status === "PREPARING");
   const readyOrders     = orders.filter((o) => o.status === "READY");
+
+  const columns = [
+    { key: "pending", title: "Pedidos Nuevos", orders: pendingOrders, icon: <Bell className="w-5 h-5 text-muted-foreground" />, active: false },
+    { key: "preparing", title: "Preparando", orders: preparingOrders, icon: <ChefHat className="w-5 h-5 text-primary" />, active: true },
+    { key: "ready", title: "Para Despacho", orders: readyOrders, icon: <Activity className="w-5 h-5 text-emerald-500" />, active: false },
+  ];
 
   if (loading) {
     return (
@@ -135,7 +134,7 @@ export default function KitchenKDSPage() {
               <div className="flex items-center space-x-3 text-[10px] font-black text-foreground/40 uppercase tracking-[0.3em] mt-1">
                 <span className="text-emerald-500 animate-pulse">● Live System</span>
                 <span>•</span>
-                <span>{MOCK_MODE ? "Demo Mode" : "Main Station"}</span>
+                <span>Main Station</span>
               </div>
             </div>
           </div>
@@ -146,7 +145,7 @@ export default function KitchenKDSPage() {
               <KDSStat label="En Fuego"  value={preparingOrders.length} color="text-primary" />
               <KDSStat label="Listos"    value={readyOrders.length} color="text-emerald-500" />
             </div>
-            <Button variant="outline" onClick={() => setAlertOpen(true)} disabled={MOCK_MODE}
+            <Button variant="outline" onClick={() => setAlertOpen(true)}
               className="rounded-2xl h-14 px-8 border-yellow-500/20 bg-yellow-500/5 text-yellow-500 hover:bg-yellow-500/10 hover:border-yellow-500/40 gap-3 font-black uppercase tracking-widest text-[10px]">
               <AlertTriangle className="w-5 h-5" />
               Alerta Stock
@@ -154,7 +153,7 @@ export default function KitchenKDSPage() {
             <Button variant="outline" size="icon" className="rounded-2xl w-14 h-14" onClick={() => setSettingsOpen(true)}>
               <Settings className="w-6 h-6 text-muted-foreground" />
             </Button>
-            <Button variant="destructive" size="icon" onClick={handleSignOut} disabled={isSigningOut || MOCK_MODE} className="rounded-2xl w-14 h-14 shadow-xl shadow-destructive/20">
+            <Button variant="destructive" size="icon" onClick={handleSignOut} disabled={isSigningOut} className="rounded-2xl w-14 h-14 shadow-xl shadow-destructive/20">
               <LogOut className="w-6 h-6" />
             </Button>
           </div>
@@ -162,29 +161,15 @@ export default function KitchenKDSPage() {
 
         <main className="flex-1 grid grid-cols-3 gap-6 overflow-hidden">
           <AnimatePresence mode="popLayout">
-            <KDSColumn key="pending" title="Pedidos Nuevos" count={pendingOrders.length} icon={<Bell className="w-5 h-5 text-muted-foreground" />}>
-              {pendingOrders.map((order) => (
-                <TicketWrapper key={`pending-${order.id}`} createdAt={order.createdAt} thresholds={settings.thresholds} status={order.status}>
-                  <OrderTicket id={order.id} tableNumber={order.table.number} status={order.status} createdAt={order.createdAt} items={order.items} onStatusChange={(s) => handleStatusChange(order.id, s)} />
-                </TicketWrapper>
-              ))}
-            </KDSColumn>
-
-            <KDSColumn key="preparing" title="Preparando" count={preparingOrders.length} icon={<ChefHat className="w-5 h-5 text-primary" />} active>
-              {preparingOrders.map((order) => (
-                <TicketWrapper key={`preparing-${order.id}`} createdAt={order.createdAt} thresholds={settings.thresholds} status={order.status}>
-                  <OrderTicket id={order.id} tableNumber={order.table.number} status={order.status} createdAt={order.createdAt} items={order.items} onStatusChange={(s) => handleStatusChange(order.id, s)} />
-                </TicketWrapper>
-              ))}
-            </KDSColumn>
-
-            <KDSColumn key="ready" title="Para Despacho" count={readyOrders.length} icon={<Activity className="w-5 h-5 text-emerald-500" />}>
-              {readyOrders.map((order) => (
-                <TicketWrapper key={`ready-${order.id}`} createdAt={order.createdAt} thresholds={settings.thresholds} status={order.status}>
-                  <OrderTicket id={order.id} tableNumber={order.table.number} status={order.status} createdAt={order.createdAt} items={order.items} onStatusChange={(s) => handleStatusChange(order.id, s)} />
-                </TicketWrapper>
-              ))}
-            </KDSColumn>
+            {columns.map((col) => (
+              <KDSColumn key={col.key} title={col.title} count={col.orders.length} icon={col.icon} active={col.active}>
+                {col.orders.map((order) => (
+                  <TicketWrapper key={`${col.key}-${order.id}`} createdAt={order.createdAt} thresholds={settings.thresholds} status={order.status}>
+                    <OrderTicket id={order.id} tableNumber={order.table?.number ?? 0} status={order.status} createdAt={order.createdAt} items={order.orderItems || []} onStatusChange={(s) => handleStatusChange(order.id, s)} />
+                  </TicketWrapper>
+                ))}
+              </KDSColumn>
+            ))}
           </AnimatePresence>
         </main>
 

@@ -140,10 +140,10 @@ erDiagram
 
 | Tecnología | Versión | Uso |
 |---|---|---|
-| **Next.js** | 14+ | App Router, SSR/CSR híbrido, middleware de Edge, API Routes |
-| **React** | 18+ | Motor de UI |
+| **Next.js** | 16+ | App Router, SSR/CSR híbrido, middleware de Edge, API Routes |
+| **React** | 19+ | Motor de UI |
 | **TypeScript** | 5+ | Seguridad de tipos en todo el monorepo |
-| **Tailwind CSS** | 3+ | Framework de estilos, glassmorphism, responsividad |
+| **Tailwind CSS** | 4+ | Framework de estilos, glassmorphism, responsividad |
 
 ### Backend y Servicios
 
@@ -224,7 +224,9 @@ stateDiagram-v2
     VALIDATED --> PREPARING : Cocina inicia preparacion (KDS)
     PREPARING --> READY : Cocina marca como listo (KDS)
     READY --> DELIVERED : Garzon entrega al cliente
-    DELIVERED --> [*]
+    READY --> COMPLETED : Pago directo (Caja)
+    DELIVERED --> COMPLETED : Pago realizado (Caja)
+    COMPLETED --> [*]
     REJECTED --> [*]
 ```
 
@@ -437,20 +439,47 @@ La función `updateOrderStatus()` en `@menu-bites/auth` escribe automáticamente
 
 | Transición | Campo escrito |
 |---|---|
-| `→ VALIDATED` | `validated_at` |
-| `→ PREPARING` | `preparing_at` |
-| `→ READY` | `ready_at` |
+| `→ VALIDATED` | `validatedAt` (antes `validated_at`) |
+| `→ PREPARING` | `preparingAt` (antes `preparing_at`) |
+| `→ READY` | `readyAt` (antes `ready_at`) |
+| `→ COMPLETED` | `updatedAt` (Snapshot final) |
 
-Estos timestamps habilitan el cálculo de KPIs operacionales sin instrumentación adicional.
+Estos timestamps habilitan el cálculo de KPIs operacionales (Kitchen Times) sin instrumentación adicional. Se ha garantizado la compatibilidad con el módulo de reportes mediante el uso de aliases en la API de analítica.
 
-### 6.3 Estrategia de Dominios
+### 7.7 Motor de Sincronización en Tiempo Real (Realtime Sync Engine)
 
-El sistema utiliza subrutas o subdominios para diferenciar organizaciones, orquestado mediante el middleware de Next.js:
+A partir de la Wave 8, el sistema abandonó las suscripciones manuales ad-hoc en favor de un motor centralizado en `@menu-bites/auth/hooks.ts` denominado `useRealtimeSync`.
 
-```
-app.menubites.com/{slug}/dashboard       → Local Dashboard del restaurante
-app.menubites.com/{slug}/kds             → Kitchen KDS
-app.menubites.com/{slug}/waiter          → Waiter Terminal
-app.menubites.com/{slug}/cashier         → Cashier Dashboard
-menu.menubites.com/{slug}                → Customer Portal (público)
-```
+#### Arquitectura de Reactividad:
+- **Hook `useRealtimeSync`**: Hook genérico que gestiona el ciclo de vida de la conexión (suscripción, manejo de errores, limpieza de canales y reconexión).
+- **Estrategia de Actualización**: Ante cualquier evento de Postgres (`INSERT`, `UPDATE`, `DELETE`) en las tablas configuradas, el motor dispara una función de refresco (`performFetch`) que invalida el estado local y sincroniza con la base de datos, garantizando consistencia absoluta sin recargas de página.
+- **Tablas Habilitadas**: `orders`, `tables`, `order_items`, `alerts`, `restaurant_themes`.
+
+### 7.8 Sistema de Asistencia en Mesa (Llamar Garzón)
+
+Implementado en v2.2.0, este sistema permite la comunicación directa Cliente-Garzón sin pasar por el panel administrativo central, optimizando el flujo de trabajo en sala:
+- **Trigger:** Botón en Customer Portal actualiza `tables.help_requested = true`.
+- **Notificación:** El `waiter-terminal` detecta el cambio vía Realtime y muestra una **Isla de Ayuda** (UI roja pulsante).
+- **Resolución:** El garzón limpia la solicitud directamente desde su terminal, sincronizando el estado global.
+
+### 7.9 Optimización de Alertas y Sonidos
+
+Se ha refinado el sistema de notificaciones para evitar bucles de sonido:
+- **Persistence Check:** El hook `useAlerts` ahora utiliza una referencia de conteo inicializada en `-1` para diferenciar la carga inicial (o navegación entre páginas) de la llegada de nuevas alertas reales.
+- **UI Non-Transparent:** Los paneles de alertas ahora utilizan fondos sólidos para garantizar legibilidad Pro Max sobre cualquier fondo de mapa o dashboard.
+
+### 7.10 Resiliencia en Tiempo de Construcción (Build-Time Resilience)
+
+A partir de la v2.2.0, se ha estandarizado un patrón de **inicialización perezosa (lazy initialization)** para el cliente `supabaseAdmin` en las API Routes. 
+
+**Problema:** La inicialización global de clientes administrativos en el scope superior de los archivos de ruta causaba fallos en el build de Vercel/Turbo cuando las variables de entorno (`SUPABASE_SERVICE_ROLE_KEY`) no estaban presentes durante la fase de análisis estático o generación de páginas estáticas.
+
+**Solución:** Los clientes `supabaseAdmin` deben instanciarse exclusivamente dentro del cuerpo de la función del handler (`GET`, `POST`, etc.). Esto garantiza que:
+- La aplicación compile sin errores incluso si las variables de entorno de servidor no están presentes en el entorno de build.
+- El cliente se cree solo cuando hay una solicitud real.
+- Se eviten fugas de memoria por instancias globales innecesarias en funciones serverless.
+
+---
+
+## 8. CONCLUSIÓN
+El sistema Menu Bites v2.2.0 se consolida como una arquitectura moderna, reactiva y resiliente, lista para escalar en entornos multitenant con alta concurrencia operativa.

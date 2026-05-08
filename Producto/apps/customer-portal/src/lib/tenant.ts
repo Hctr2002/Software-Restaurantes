@@ -5,7 +5,7 @@
  * El aislamiento multitenant se garantiza en este módulo.
  */
 
-import { supabase } from './supabase';
+import { supabase } from '@menu-bites/auth';
 import type { TenantRestaurant } from '@/context/TenantContext';
 
 // ─────────────────────────────────────────────

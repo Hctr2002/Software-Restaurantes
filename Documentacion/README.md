@@ -8,14 +8,15 @@
 
 | Documento | Propósito | Audiencia Principal |
 |---|---|---|
-| [TECHNICAL_SAD.md](TECHNICAL_SAD.md) | Arquitectura de software, stack tecnológico, flujos de datos, despliegue en Vercel | Arquitectos, desarrolladores senior |
-| [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) | ERDs por dominio, diccionario de datos completo, enums, constraints | Desarrolladores, analistas de datos |
-| [DATABASE_TECHNICAL.md](DATABASE_TECHNICAL.md) | RLS policies en SQL, roles de BD, índices, patrones de acceso, migraciones | Backend developers, DevOps |
-| [API_SPECIFICATION.md](API_SPECIFICATION.md) | Endpoints de todas las apps, payloads, respuestas, códigos HTTP | Desarrolladores frontend y backend |
-| [SECURITY_POSTURE.md](SECURITY_POSTURE.md) | Capas de seguridad, RBAC, gestión de secretos, protección contra ataques | Security engineers, revisores de PR |
-| [USER_MANUAL.md](USER_MANUAL.md) | Manual de uso de cada aplicación con flujos y diagramas | Product managers, QA, stakeholders |
-| [TEST_PLAN.md](TEST_PLAN.md) | Estrategia QA, pirámide de pruebas, criterios PASS/FAIL, checklist pre-release | QA engineers, tech leads |
-| [SUGGESTED_TESTS.md](SUGGESTED_TESTS.md) | Catálogo detallado de casos de prueba con criterios de aceptación por ID | QA engineers, desarrolladores |
+| [TECHNICAL_SAD.md](TECHNICAL_SAD.md) | Arquitectura de software, stack tecnológico, flujos de datos | Arquitectos, desarrolladores |
+| [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) | ERDs por dominio, diccionario de datos completo | Desarrolladores, analistas |
+| [DATABASE_TECHNICAL.md](DATABASE_TECHNICAL.md) | RLS policies, roles de BD, índices, migraciones | Backend, DevOps |
+| [API_SPECIFICATION.md](API_SPECIFICATION.md) | Endpoints de todas las apps, payloads, respuestas | Desarrolladores frontend/backend |
+| [SECURITY_POSTURE.md](SECURITY_POSTURE.md) | Capas de seguridad, RBAC, gestión de secretos | Security engineers |
+| [USER_MANUAL.md](USER_MANUAL.md) | Manual de uso de cada aplicación con flujos | Usuarios finales, QA |
+| [TEST_PLAN.md](TEST_PLAN.md) | Estrategia QA, criterios PASS/FAIL | QA engineers, tech leads |
+| [verificacion_entrega_1.md](verificacion_entrega_1.md) | Auditoría de cumplimiento vs Requerimientos Iniciales | Docentes, Auditores |
+| [mockups_wireframes_aprobacion.md](mockups_wireframes_aprobacion.md) | Acta de aprobación formal de diseño | Product Owner, UX |
 
 ---
 

@@ -1,5 +1,53 @@
+# OLYMP-IA & Agent Artifacts
+.adal/
+.agents/
+.aider-desk/
+.augment/
+.bob/
+.claude/
+.codeartsdoer/
+.codebuddy/
+.codemaker/
+.codestudio/
+.commandcode/
+.continue/
+.cortex/
+.crush/
+.devin/
+.factory/
+.forge/
+.goose/
+.iflow/
+.junie/
+.kilocode/
+.kiro/
+.kode/
+.mcpjam/
+.mux/
+.neovate/
+.openhands/
+.pi/
+.pochi/
+.qoder/
+.qwen/
+.roo/
+.rovodev/
+.tabnine/
+.trae/
+.vibe/
+.windsurf/
+.zencoder/
+
+# Project Specific
+cache/
+scratch/
+memoria.md
+color_proposals.html
+preview.html
+
 # macOS
 .DS_Store
+**/.DS_Store
 
 # Logs
 logs
@@ -45,7 +93,3 @@ jspm_packages/
 
 # others
 Entrega 1.pdf
-
-# macOS metadata files
-.DS_Store
-**/.DS_Store

@@ -1,4 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr';
+import { AlertType } from './types';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
@@ -56,7 +57,7 @@ export const updateUserPassword = async (password: string) => {
   return { data, error };
 };
 
-export type AlertType = 'TABLE_ISSUE' | 'BILL_REQUEST' | 'STOCK_SHORTAGE' | 'HELP_REQUEST' | 'GENERAL';
+export * from "./types";
 
 export const sendAlert = async (params: {
   restaurantId: string;

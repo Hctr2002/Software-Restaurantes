@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
     .from("orders")
     .select("id, order_items(id, unit_price, menu_items(name))")
     .eq("restaurant_id", restaurantId)
-    .eq("status", "DELIVERED")
+    .in("status", ["DELIVERED", "COMPLETED"])
     .gte("createdAt", dayStart(now));
 
   // Fetch delivered orders of this month
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     .from("orders")
     .select("id, order_items(id, unit_price)")
     .eq("restaurant_id", restaurantId)
-    .eq("status", "DELIVERED")
+    .in("status", ["DELIVERED", "COMPLETED"])
     .gte("createdAt", monthStart(now));
 
   // Calculate ingresos del día
