@@ -52,7 +52,7 @@ export function useRealtimeOrders(restaurantId: string | undefined, options: Rea
 
 export function useKitchenOrders(restaurantId: string | undefined) {
   return useRealtimeOrders(restaurantId, {
-    statuses: ["VALIDATED", "PREPARING", "READY"],
+    statuses: ["PENDING", "VALIDATED", "PREPARING", "READY"],
     ascending: true
   });
 }
