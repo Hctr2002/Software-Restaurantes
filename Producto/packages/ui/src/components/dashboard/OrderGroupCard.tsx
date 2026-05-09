@@ -102,7 +102,7 @@ export function OrderGroupCard({ group, index, isPending, onClick }: Props) {
       <div className="mt-auto pt-6 border-t border-white/5 space-y-4">
         <div className="flex justify-between items-end">
           <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total Cuenta</span>
-          <span className="text-2xl font-black text-emerald-400 tracking-tighter">{formatCLP(group.total)}</span>
+          <span className="text-2xl font-black text-emerald-400 tracking-tighter">{formatCLP(group.tipIncluded ? group.total * 1.1 : group.total)}</span>
         </div>
 
         {isPending ? (
@@ -128,7 +128,7 @@ export function orderTotal(order: Order): number {
   return (order.orderItems ?? []).reduce((s, i) => s + Number(i.unitPrice) * i.quantity, 0);
 }
 
-export function groupOrders(orders: Order[], billMap: Record<string, boolean>): TableGroup[] {
+export function groupOrders(orders: Order[], billMap: Record<string, boolean>, tipMap: Record<string, boolean> = {}): TableGroup[] {
   const map = new Map<string, TableGroup>();
   for (const order of orders) {
     const key = order.sessionId ?? order.tableId ?? order.id;
@@ -140,7 +140,8 @@ export function groupOrders(orders: Order[], billMap: Record<string, boolean>): 
         tableNumber:      order.table?.number ?? null,
         orders:           [],
         total:            0,
-        billRequested:    (order.tableId && billMap[order.tableId]) || false,
+        billRequested:    order.tableId ? (billMap[order.tableId] ?? false) : false,
+        tipIncluded:      order.tableId ? (tipMap[order.tableId] ?? false) : false,
         oldestCreatedAt:  order.createdAt,
       });
     }

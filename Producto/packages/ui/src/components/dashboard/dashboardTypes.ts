@@ -27,6 +27,7 @@ export type TableGroup = {
   orders: Order[];
   total: number;
   billRequested: boolean;
+  tipIncluded: boolean;
   oldestCreatedAt: string;
 };
 

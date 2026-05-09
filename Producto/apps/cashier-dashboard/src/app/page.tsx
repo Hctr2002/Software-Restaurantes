@@ -53,6 +53,7 @@ export default function CashierPage() {
   
   const alertForm = useAlertForm(user?.restaurantId, user?.id, user?.email);
   const [isSigningOut, setIsSigningOut] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
@@ -69,10 +70,14 @@ export default function CashierPage() {
     Object.fromEntries(tables.map((t) => [t.id, t.billRequested ?? false])), 
   [tables]);
 
+  const tipIncludedTables = useMemo(() => 
+    Object.fromEntries(tables.map((t) => [t.id, t.tip_included ?? false])), 
+  [tables]);
+
   const groups = useMemo(() => ({
-    pending: groupOrders(orders, billRequestedTables),
-    history: groupOrders(history, billRequestedTables)
-  }), [orders, history, billRequestedTables]);
+    pending: groupOrders(orders, billRequestedTables, tipIncludedTables),
+    history: groupOrders(history, billRequestedTables, tipIncludedTables)
+  }), [orders, history, billRequestedTables, tipIncludedTables]);
 
   const totals = useMemo(() => ({
     pending: groups.pending.reduce((s, g) => s + g.total, 0),
@@ -87,12 +92,46 @@ export default function CashierPage() {
   }, [activeTab, groups, searchQuery]);
 
   const handleMarkDelivered = async (group: TableGroup) => {
-    const { success } = await markDelivered(group.orders.map(o => o.id), group.tableId, paymentReference);
-    if (success) {
-      const receiptUrl = group.sessionId ? `/receipt/session/${group.sessionId}` : `/receipt/table/${group.tableId}`;
-      window.open(`${receiptUrl}?rid=${user?.restaurantId}`, "_blank");
+    try {
+      for (const order of group.orders) {
+        if (order.status === "DELIVERED" || order.status === "COMPLETED") continue;
+        
+        let currentStatus = order.status;
+        
+        if (currentStatus === "PENDING") {
+          await supabase.from("orders").update({ status: "VALIDATED" }).eq("id", order.id);
+          currentStatus = "VALIDATED";
+        }
+        if (currentStatus === "VALIDATED") {
+          await supabase.from("orders").update({ status: "PREPARING" }).eq("id", order.id);
+          currentStatus = "PREPARING";
+        }
+        if (currentStatus === "PREPARING") {
+          await supabase.from("orders").update({ status: "READY" }).eq("id", order.id);
+          currentStatus = "READY";
+        }
+        if (currentStatus === "READY") {
+          await supabase.from("orders").update({ status: "COMPLETED" }).eq("id", order.id);
+        }
+      }
+      
+      if (group.tableId) {
+        await supabase
+          .from("tables")
+          .update({ status: "CLEANING", bill_requested: false })
+          .eq("id", group.tableId);
+      }
+      
+      const receiptUrl = group.sessionId ? `/receipt/session/${group.sessionId}?rid=${user?.restaurantId}&tip=${group.tipIncluded}` : `/receipt/table/${group.tableId}?rid=${user?.restaurantId}&tip=${group.tipIncluded}`;
+      window.open(receiptUrl, "_blank");
       setSelectedGroup(null);
       setPaymentReference("");
+      refetch();
+    } catch (err: any) {
+      console.error("Error al procesar pago:", err?.message || JSON.stringify(err));
+      alert(`Error al cobrar: ${err?.message || "Revisa la consola"}`);
+    }
+  };
     }
   };
 
@@ -100,6 +139,7 @@ export default function CashierPage() {
     setIsSigningOut(true);
     try { await signOut(); } finally { clearAuth(); window.location.href = process.env.NEXT_PUBLIC_AUTH_URL ?? "/"; }
   };
+
 
   return (
     <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
