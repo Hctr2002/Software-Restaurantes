@@ -28,4 +28,4 @@ Se actualizaron los mapeos en `globals.css` para asegurar que las variables de b
 - **Estabilidad:** Resolución de regresiones en tipos de TypeScript.
 
 ---
-*Documento generado por Zenith bajo el estándar OLYMP-IA.*
+*Documento de arquitectura técnica para el sistema Menu Bites.*
