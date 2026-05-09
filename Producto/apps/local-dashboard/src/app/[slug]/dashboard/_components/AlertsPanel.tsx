@@ -45,6 +45,7 @@ export default function AlertsPanel() {
   // Activar audio mediante interacción de usuario
   const enableAudio = async () => {
     if (!audioRef.current) return;
+    const prevVolume = audioRef.current.volume;
     try {
       // Reproducimos un fragmento casi imperceptible para "desbloquear" el contexto de audio
       audioRef.current.volume = 0;
@@ -52,11 +53,12 @@ export default function AlertsPanel() {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       audioRef.current.volume = 1;
-      
+
       setAudioBlocked(false);
       setIsMuted(false);
     } catch (err) {
       console.error("Error al habilitar audio:", err);
+      audioRef.current.volume = prevVolume;
     }
   };
 
@@ -137,12 +139,14 @@ export default function AlertsPanel() {
                     onClick={() => setIsMuted(!isMuted)}
                     className={`p-3 rounded-2xl transition-all ${isMuted ? 'text-red-500 bg-red-500/10' : 'text-foreground/40 hover:text-foreground hover:bg-white/10'}`}
                     title={isMuted ? "Quitar silencio" : "Silenciar alertas"}
+                    aria-label={isMuted ? "Quitar silencio" : "Silenciar alertas"}
                   >
                     {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                   </button>
                   <button
                     onClick={() => setOpen(false)}
                     className="p-3 rounded-2xl text-foreground/40 hover:text-foreground hover:bg-white/10 transition-all"
+                    aria-label="Cerrar panel de alertas"
                   >
                     <X className="w-5 h-5" />
                   </button>

@@ -92,8 +92,8 @@ export type AlertType = 'TABLE_ISSUE' | 'BILL_REQUEST' | 'STOCK_SHORTAGE' | 'HEL
 
 export type Alert = {
   id: string;
-  restaurantId: string;
-  tableId: string | null;
+  restaurant_id: string;
+  table_id: string | null;
   type: AlertType;
   message: string;
   status: 'PENDING' | 'RESOLVED';

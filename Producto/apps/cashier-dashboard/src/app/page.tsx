@@ -116,11 +116,9 @@ export default function CashierPage() {
           onSearchChange={setSearchQuery}
           onSearchToggle={() => setIsSearchExpanded((p) => !p)}
           onAlertClick={() => {
-            console.log("Alert button clicked in header");
             setAlertModal(true);
           }}
           onRefresh={() => {
-            console.log("Refreshing data...");
             refetch();
           }}
           onSignOut={handleSignOut}
