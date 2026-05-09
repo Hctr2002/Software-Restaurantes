@@ -3,7 +3,7 @@
 import React from "react";
 import { Button, RestaurantThemeProvider } from "@menu-bites/ui";
 import { Monitor, Smartphone, Sparkles } from "lucide-react";
-import { hexToHslValues } from "./utils";
+import { hexToHslValues } from "@/lib/brandingUtils";
 
 /**
  * Propiedades del Simulador Live

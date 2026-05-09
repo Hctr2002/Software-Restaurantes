@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@menu-bites/store";
 import { useTables, signOut, supabase } from "@menu-bites/auth";
-import { RestaurantThemeProvider, CardSkeleton, Button, Badge } from "@menu-bites/ui";
+import { RestaurantThemeProvider, CardSkeleton, Button, Badge, PremiumHeader } from "@menu-bites/ui";
 import { AnimatePresence, motion } from "framer-motion";
 import { LayoutDashboard, Bell, LogOut, AlertTriangle, UtensilsCrossed, Sparkles, ChevronDown, RefreshCw, Receipt, Link2 } from "lucide-react";
 
@@ -76,42 +76,30 @@ export default function WaiterDashboard() {
     <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
       <div className="min-h-screen bg-background text-foreground pb-32 font-sans flex flex-col">
 
-        {/* Header */}
-        <header className="border-b border-border/10 px-6 py-5 flex items-center justify-between bg-card/40 backdrop-blur-2xl sticky top-0 z-40">
-          <div className="flex items-center gap-4">
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-primary/50 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000" />
-              <div className="relative w-10 h-10 bg-card border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl">
-                <UtensilsCrossed className="w-5 h-5 text-primary" />
+        <div className="p-4 lg:p-6 pb-0">
+          <PremiumHeader
+            title="Terminal"
+            accentTitle="Garzón"
+            icon={UtensilsCrossed}
+            statusSubLabel={`${user?.restaurantId?.split("-")[0] || "RESTAURANTE"} · EN LÍNEA`}
+            actions={
+              <div className="flex items-center gap-4">
+                <div className="flex items-center bg-white/5 rounded-2xl p-1 border border-white/5">
+                  <button onClick={() => setAlertModal(true)} className="p-2.5 rounded-xl text-yellow-500 hover:bg-yellow-500/10 transition-all active:scale-90" title="Nueva Alerta">
+                    <AlertTriangle className="w-4 h-4" />
+                  </button>
+                  <button onClick={handleSignOut} disabled={isSigningOut} className="p-2.5 rounded-xl text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-90" title="Salir">
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="hidden xl:flex flex-col items-end">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none mb-1">Usuario</p>
+                  <p className="text-xs font-black text-foreground/80 leading-none">{user?.email}</p>
+                </div>
               </div>
-            </div>
-            <div>
-              <h1 className="text-lg font-black tracking-tighter leading-none">
-                Terminal <span className="text-primary">Garzón</span>
-              </h1>
-              <div className="flex items-center gap-2 mt-1.5">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-                </span>
-                <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest opacity-60">
-                  {user?.restaurantId?.split("-")[0] || "RESTAURANTE"} · EN LÍNEA
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <p className="text-xs font-bold text-foreground/80 hidden sm:block mr-2">{user?.email}</p>
-            <div className="flex items-center bg-white/5 rounded-2xl p-1 border border-white/5">
-              <button onClick={() => setAlertModal(true)} className="p-2.5 rounded-xl text-yellow-500 hover:bg-yellow-500/10 transition-all active:scale-90" title="Nueva Alerta">
-                <AlertTriangle className="w-4 h-4" />
-              </button>
-              <button onClick={handleSignOut} disabled={isSigningOut} className="p-2.5 rounded-xl text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-90" title="Salir">
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </header>
+            }
+          />
+        </div>
 
         {/* Status Islands */}
         <div className="px-6 py-4 flex flex-col gap-3">

@@ -24,7 +24,7 @@ export function MenuSection({ categoryName, activeCategory, items, cart, onAdd, 
         initial="hidden" 
         animate="show" 
         variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06 } } }} 
-        className="grid grid-cols-1 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8"
       >
         {items.length > 0 ? (
           items.map((item) => (
