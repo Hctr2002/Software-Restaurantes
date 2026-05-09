@@ -11,8 +11,8 @@ export function useRealtimeAlerts(restaurantId: string | undefined) {
       .from("alerts")
       .select("*")
       .eq("restaurant_id", restaurantId)
-      .eq("isRead", false)
-      .order("createdAt", { ascending: false });
+      .eq("status", "PENDING")
+      .order("created_at", { ascending: false });
   }, [restaurantId]);
 
   const { data: alerts, loading, refetch } = useRealtimeSync<Alert[]>(
@@ -26,7 +26,7 @@ export function useRealtimeAlerts(restaurantId: string | undefined) {
 
 export function useAlertForm(restaurantId: string | undefined, userId?: string, userEmail?: string) {
   const [form, setForm] = useState({
-    type: "HELP" as AlertType,
+    type: "HELP_REQUEST" as AlertType,
     msg: "",
     table: "",
     sending: false,
@@ -43,12 +43,12 @@ export function useAlertForm(restaurantId: string | undefined, userId?: string, 
     });
     setForm(p => ({ ...p, sending: false, sent: !error }));
     if (!error) {
-      setTimeout(() => setForm({ type: "HELP", msg: "", table: "", sending: false, sent: false }), 1500);
+      setTimeout(() => setForm({ type: "HELP_REQUEST", msg: "", table: "", sending: false, sent: false }), 1500);
     }
     return !error;
   };
 
-  const reset = () => setForm({ type: "HELP", msg: "", table: "", sending: false, sent: false });
+  const reset = () => setForm({ type: "HELP_REQUEST", msg: "", table: "", sending: false, sent: false });
 
   return {
     alertType: form.type, setAlertType: (type: AlertType) => setForm(p => ({ ...p, type })),
