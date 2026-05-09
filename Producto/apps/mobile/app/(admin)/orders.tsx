@@ -53,9 +53,11 @@ export default function AdminOrdersScreen() {
 
     if (!restaurantId) return;
 
+    const channelSuffix = Math.random().toString(36).substring(7);
+
     // Suscripción en tiempo real
     const channel = supabase
-      .channel('admin-orders-realtime')
+      .channel(`admin-orders-realtime-${restaurantId}-${channelSuffix}`)
       .on(
         'postgres_changes',
         {
@@ -102,7 +104,13 @@ export default function AdminOrdersScreen() {
               <Text style={styles.timeText}>{timeAgo(item.createdAt)}</Text>
             </View>
             <View style={[styles.statusTag, { borderColor: getStatusColor(item.status) }]}>
-              <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>{item.status}</Text>
+              <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
+                {item.status === 'PENDING' ? 'PENDIENTE' : 
+                 item.status === 'VALIDATED' ? 'VALIDADO' :
+                 item.status === 'PREPARING' ? 'PREPARANDO' :
+                 item.status === 'READY' ? 'LISTO' : 
+                 item.status === 'DELIVERED' ? 'ENTREGADO' : item.status}
+              </Text>
             </View>
           </View>
           

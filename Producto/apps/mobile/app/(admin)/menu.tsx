@@ -81,9 +81,11 @@ export default function MenuScreen() {
 
     if (!user?.id) return;
 
+    const channelSuffix = Math.random().toString(36).substring(7);
+
     // Suscripción para cambios en productos
     const menuChannel = supabase
-      .channel('admin-menu-items')
+      .channel(`admin-menu-items-${user?.id}-${channelSuffix}`)
       .on(
         'postgres_changes',
         {
@@ -99,7 +101,7 @@ export default function MenuScreen() {
 
     // Suscripción para cambios en categorías
     const categoriesChannel = supabase
-      .channel('admin-categories')
+      .channel(`admin-categories-${user?.id}-${channelSuffix}`)
       .on(
         'postgres_changes',
         {

@@ -62,9 +62,11 @@ export default function TablesScreen() {
 
     if (!restaurantId) return;
 
+    const channelSuffix = Math.random().toString(36).substring(7);
+
     // Suscripción Realtime
     const channel = supabase
-      .channel('admin-tables-realtime')
+      .channel(`admin-tables-realtime-${restaurantId}-${channelSuffix}`)
       .on(
         'postgres_changes',
         {
@@ -190,6 +192,7 @@ export default function TablesScreen() {
       case 'FREE': return '#10b981';
       case 'OCCUPIED': return '#ef4444';
       case 'RESERVED': return '#f59e0b';
+      case 'CLEANING': return '#3b82f6';
       default: return MB_COLORS.muted;
     }
   };
@@ -205,7 +208,9 @@ export default function TablesScreen() {
             <TableIcon size={24} color={getStatusColor(item.status)} />
           </View>
           <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor(item.status)}20` }]}>
-            <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>{item.status}</Text>
+            <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
+              {item.status === 'FREE' ? 'LIBRE' : item.status === 'OCCUPIED' ? 'OCUPADA' : 'RESERVADA'}
+            </Text>
           </View>
         </View>
 

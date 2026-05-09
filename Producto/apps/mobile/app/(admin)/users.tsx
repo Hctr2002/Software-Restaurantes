@@ -76,9 +76,11 @@ export default function UsersScreen() {
 
     if (!restaurantId) return;
 
+    const channelSuffix = Math.random().toString(36).substring(7);
+
     // Suscripción en tiempo real para la tabla de usuarios
     const channel = supabase
-      .channel('admin-users-realtime')
+      .channel(`admin-users-realtime-${restaurantId}-${channelSuffix}`)
       .on(
         'postgres_changes',
         {

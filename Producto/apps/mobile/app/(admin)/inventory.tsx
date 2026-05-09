@@ -57,9 +57,11 @@ export default function InventoryScreen() {
 
     if (!restaurantId) return;
 
+    const channelSuffix = Math.random().toString(36).substring(7);
+
     // Realtime Subscription
     const channel = supabase
-      .channel('admin-inventory-realtime')
+      .channel(`admin-inventory-realtime-${restaurantId}-${channelSuffix}`)
       .on(
         'postgres_changes',
         {

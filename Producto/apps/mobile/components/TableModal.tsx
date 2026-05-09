@@ -22,7 +22,7 @@ export interface TableData {
   id: string;
   number: number;
   label: string;
-  status: 'FREE' | 'OCCUPIED' | 'RESERVED';
+  status: 'FREE' | 'OCCUPIED' | 'RESERVED' | 'CLEANING';
   qrData?: string;
 }
 
@@ -34,12 +34,12 @@ interface TableModalProps {
   table: TableData | null;
 }
 
-const STATUSES = ['FREE', 'OCCUPIED', 'RESERVED'];
+const STATUSES = ['FREE', 'OCCUPIED', 'RESERVED', 'CLEANING'];
 
 export const TableModal = ({ visible, onClose, onSave, onDelete, table }: TableModalProps) => {
   const [number, setNumber] = React.useState('');
   const [label, setLabel] = React.useState('');
-  const [status, setStatus] = React.useState<'FREE' | 'OCCUPIED' | 'RESERVED'>('FREE');
+  const [status, setStatus] = React.useState<'FREE' | 'OCCUPIED' | 'RESERVED' | 'CLEANING'>('FREE');
   const [loading, setLoading] = React.useState(false);
   const [deleting, setDeleting] = React.useState(false);
 
@@ -160,14 +160,15 @@ export const TableModal = ({ visible, onClose, onSave, onDelete, table }: TableM
                           status === s && s === 'FREE' && { borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)' },
                           status === s && s === 'OCCUPIED' && { borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)' },
                           status === s && s === 'RESERVED' && { borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)' },
+                          status === s && s === 'CLEANING' && { borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)' },
                         ]}
                         onPress={() => setStatus(s as any)}
                       >
                         <Text style={[
                           styles.statusBtnText, 
-                          status === s && { color: s === 'FREE' ? '#10b981' : s === 'OCCUPIED' ? '#ef4444' : '#f59e0b' }
+                          status === s && { color: s === 'FREE' ? '#10b981' : s === 'OCCUPIED' ? '#ef4444' : s === 'RESERVED' ? '#f59e0b' : '#3b82f6' }
                         ]}>
-                          {s}
+                          {s === 'FREE' ? 'LIBRE' : s === 'OCCUPIED' ? 'OCUPADA' : s === 'CLEANING' ? 'LIMPIEZA' : 'RESERVADA'}
                         </Text>
                       </TouchableOpacity>
                     ))}

@@ -138,7 +138,7 @@ export async function fetchRecentOrders(restaurantId: string): Promise<Dashboard
 export type TableData = {
   id: string;
   number: number | string;
-  status: 'FREE' | 'OCCUPIED' | 'RESERVED';
+  status: 'FREE' | 'OCCUPIED' | 'RESERVED' | 'CLEANING';
 };
 
 export async function fetchTables(restaurantId: string): Promise<TableData[]> {

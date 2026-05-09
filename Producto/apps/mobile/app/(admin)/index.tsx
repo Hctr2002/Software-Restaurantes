@@ -78,9 +78,11 @@ export default function AdminDashboardScreen() {
 
     if (!restaurantId) return;
 
+    const channelSuffix = Math.random().toString(36).substring(7);
+
     // Suscripción para cambios en pedidos (afecta estadísticas y pedidos recientes)
     const ordersChannel = supabase
-      .channel('admin-dashboard-orders')
+      .channel(`admin-dashboard-orders-${restaurantId}-${channelSuffix}`)
       .on(
         'postgres_changes',
         {
@@ -97,7 +99,7 @@ export default function AdminDashboardScreen() {
 
     // Suscripción para cambios en mesas
     const tablesChannel = supabase
-      .channel('admin-dashboard-tables')
+      .channel(`admin-dashboard-tables-${restaurantId}-${channelSuffix}`)
       .on(
         'postgres_changes',
         {
@@ -301,10 +303,13 @@ export default function AdminDashboardScreen() {
                   style={[
                     styles.tableStatusText, 
                     table.status === 'OCCUPIED' && styles.tableStatusOccupied,
-                    table.status === 'RESERVED' && { color: '#FFC107' }
+                    table.status === 'RESERVED' && { color: '#FFC107' },
+                    table.status === 'CLEANING' && { color: '#3b82f6' }
                   ]}
                 >
-                  {table.status === 'FREE' ? 'LIBRE' : table.status === 'OCCUPIED' ? 'USO' : 'RESV'}
+                  {table.status === 'FREE' ? 'LIBRE' : 
+                   table.status === 'OCCUPIED' ? 'OCUPADA' : 
+                   table.status === 'CLEANING' ? 'LIMPIEZA' : 'RESERVADA'}
                 </Text>
               </View>
             ))

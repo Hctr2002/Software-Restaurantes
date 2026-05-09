@@ -57,9 +57,11 @@ export default function CategoriesScreen() {
 
     if (!restaurantId) return;
 
+    const channelSuffix = Math.random().toString(36).substring(7);
+
     // Suscripción Realtime
     const channel = supabase
-      .channel('admin-categories-realtime')
+      .channel(`admin-categories-realtime-${restaurantId}-${channelSuffix}`)
       .on(
         'postgres_changes',
         {
