@@ -170,6 +170,7 @@ model Table {
   restaurantId String      @map("restaurant_id")
   helpRequested Boolean    @default(false) @map("help_requested")
   billRequested Boolean    @default(false) @map("bill_requested")
+  tipIncluded   Boolean    @default(false) @map("tip_included")
 
   restaurant Restaurant @relation(fields: [restaurantId], references: [id])
   orders     Order[]
