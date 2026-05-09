@@ -67,6 +67,12 @@ export default function KitchenKDSPage() {
     console.log(`[KDS] Intentando cambiar estado del pedido ${orderId} a ${newStatus}`);
     
     try {
+      const order = orders.find((o) => o.id === orderId);
+      if (order && order.status === "PENDING" && newStatus === "PREPARING") {
+        console.log(`[KDS] Pedido PENDING pasando a PREPARING. Marcando como VALIDATED primero.`);
+        await updateOrderStatus(orderId, "VALIDATED");
+      }
+
       const { error } = await updateOrderStatus(orderId, newStatus);
       if (error) {
         console.error(`[KDS] Error al actualizar estado en Supabase:`, error);
@@ -82,6 +88,7 @@ export default function KitchenKDSPage() {
     } catch (err) {
       console.error(`[KDS] Error inesperado en handleStatusChange:`, err);
       alert("Ocurrió un error inesperado al procesar el cambio de estado.");
+    }
     }
   };
 
@@ -100,7 +107,7 @@ export default function KitchenKDSPage() {
     }
   };
 
-  const pendingOrders   = orders.filter((o) => o.status === "VALIDATED");
+  const pendingOrders   = orders.filter((o) => o.status === "VALIDATED" || o.status === "PENDING");
   const preparingOrders = orders.filter((o) => o.status === "PREPARING");
   const readyOrders     = orders.filter((o) => o.status === "READY");
 
