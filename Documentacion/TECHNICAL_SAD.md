@@ -479,7 +479,15 @@ A partir de la v2.2.0, se ha estandarizado un patrón de **inicialización perez
 - El cliente se cree solo cuando hay una solicitud real.
 - Se eviten fugas de memoria por instancias globales innecesarias en funciones serverless.
 
+### 7.11 Refactorización UX/UI Pro Max (v2.3.0)
+
+En la Wave 9 se implementó una actualización profunda de la interfaz del portal de clientes centrada en la solidez visual y la eliminación de fricción operativa:
+
+- **Navegación Sólida:** Introducción de un flag `isSolid` en los encabezados premium para forzar opacidad total, resolviendo problemas de legibilidad en dispositivos móviles bajo condiciones de alta luminosidad.
+- **Flujo de Pedido Automatizado:** El portal ahora vincula automáticamente el pedido a la mesa mediante el parámetro `tableNumber` de la URL, eliminando el paso de entrada manual de mesa en el checkout.
+- **Arquitectura de Cierre de Ciclo:** Se optimizó la transición post-pedido. Al confirmar una orden, el modal de checkout se cierra instantáneamente mediante una promesa booleana, y al regresar al menú se invoca `resetOrder()` para limpiar el estado del rastreador, dejando la interfaz lista para nuevas interacciones.
+
 ---
 
 ## 8. CONCLUSIÓN
-El sistema Menu Bites v2.2.0 se consolida como una arquitectura moderna, reactiva y resiliente, lista para escalar en entornos multitenant con alta concurrencia operativa.
+El sistema Menu Bites v2.3.0 se consolida como una arquitectura moderna, reactiva y resiliente, lista para escalar en entornos multitenant con alta concurrencia operativa y con una experiencia de usuario optimizada para la eficiencia en sala.

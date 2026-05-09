@@ -19,10 +19,11 @@ Menu Bites es una plataforma SaaS multitenant de vanguardia diseñada para trans
 
 Olvídese de las recargas manuales. Gracias al **Realtime Sync Engine** basado en Supabase, cada cambio de estado (Pedido recibido -> En preparación -> Listo -> Pagado) se refleja instantáneamente en todos los dispositivos conectados.
 
-### Diseño Premium & UX
+### Diseño Premium & UX (v2.3.0 Pro Max)
 
 * **Branding Dinámico:** Personalización total de colores y estilos para cada restaurante.
-* **Interfaz Pro Max:** Animaciones fluidas con framer-motion y un diseño responsivo que se adapta a tablets, móviles y desktops.
+* **Interfaz Pro Max:** Navegación sólida unificada y animaciones fluidas con Framer Motion.
+* **Fricción Cero:** Flujo de pedido optimizado con detección automática de mesa por URL y autocompletado inteligente.
 * **Web Push Notifications:** Notificaciones directas al dispositivo para alertas críticas.
 
 ---
