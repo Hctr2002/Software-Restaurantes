@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
 import { formatCLP, formatDateTime } from "@menu-bites/auth";
+import { PrintControls } from "../../_components/PrintControls";
 
 import { ReceiptActions } from "./ReceiptActions";
 
@@ -17,10 +18,11 @@ export default async function ReceiptTablePage({
   searchParams,
 }: {
   params: Promise<{ tableId: string }>;
-  searchParams: Promise<{ rid?: string }>;
+  searchParams: Promise<{ rid?: string; tip?: string }>;
 }) {
   const { tableId } = await params;
-  const { rid: restaurantId } = await searchParams;
+  const { rid: restaurantId, tip } = await searchParams;
+  const isTipIncluded = tip === "true";
 
   if (!restaurantId) return notFound();
 
@@ -47,19 +49,20 @@ export default async function ReceiptTablePage({
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const { data: orders } = await db
+  const { data: orders, error } = await db
     .from("orders")
-    .select("id, status, createdAt, payment_reference, order_items(quantity, unit_price, menu_items(name))")
+    .select("id, status, createdAt, order_items(quantity, unit_price, menu_items(name))")
     .eq("table_id", tableId)
     .eq("restaurant_id", restaurantId)
-    .in("status", ["DELIVERED", "COMPLETED"])
     .gte("createdAt", today.toISOString())
     .order("createdAt", { ascending: true });
+
+  console.log("RECEIPT TABLE:", { tableId, restaurantId, count: orders?.length, error });
 
   const safeOrders = orders ?? [];
   const allItems   = safeOrders.flatMap((o: any) => o.order_items ?? []);
   const subtotal   = allItems.reduce((s: number, i: any) => s + Number(i.unit_price) * i.quantity, 0);
-  const tip        = subtotal * 0.1;
+  const tipAmount  = isTipIncluded ? subtotal * 0.1 : 0;
   const paymentRef = safeOrders.at(-1)?.payment_reference ?? null;
   const issuedAt   = safeOrders.at(-1)?.createdAt ?? new Date().toISOString();
 
@@ -74,7 +77,7 @@ export default async function ReceiptTablePage({
         body { font-family: 'Courier New', monospace; background: #f4f4f4; margin: 0; padding: 16px; }
       `}</style>
 
-      <ReceiptActions />
+      <PrintControls />
 
       <div className="receipt" style={{
         maxWidth: 380, margin: "16px auto", background: "#fff",
@@ -121,11 +124,13 @@ export default async function ReceiptTablePage({
 
         {/* Totals */}
         <div style={{ borderTop: "1px dashed #d1d5db", paddingTop: 12, marginBottom: 20 }}>
-          <Row label="Subtotal" value={formatCLP(subtotal)} />
-          <Row label="Propina sugerida (10%)" value={formatCLP(tip)} />
+          <Row label="NETO" value={formatCLP(Math.round(subtotal / 1.19))} />
+          <Row label="IVA" value={formatCLP(subtotal - Math.round(subtotal / 1.19))} />
+          <Row label="TOTAL CONSUMO" value={formatCLP(subtotal)} />
+          <Row label="Propina sugerida (10%)" value={formatCLP(tipAmount)} />
           <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 900, fontSize: 18, marginTop: 8 }}>
-            <span>TOTAL</span>
-            <span>{formatCLP(subtotal + tip)}</span>
+            <span>TOTAL + Propina</span>
+            <span>{formatCLP(subtotal + tipAmount)}</span>
           </div>
         </div>
 

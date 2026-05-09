@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
 import { formatCLP, formatDateTime } from "@menu-bites/auth";
+import { PrintControls } from "../../_components/PrintControls";
 
 function serviceClient() {
   return createClient(
@@ -15,10 +16,11 @@ export default async function ReceiptSessionPage({
   searchParams,
 }: {
   params: Promise<{ sessionId: string }>;
-  searchParams: Promise<{ rid?: string }>;
+  searchParams: Promise<{ rid?: string; tip?: string }>;
 }) {
   const { sessionId } = await params;
-  const { rid: restaurantId } = await searchParams;
+  const { rid: restaurantId, tip } = await searchParams;
+  const isTipIncluded = tip === "true";
 
   if (!restaurantId) return notFound();
 
@@ -30,16 +32,11 @@ export default async function ReceiptSessionPage({
     .eq("id", restaurantId)
     .single();
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
   const { data: orders } = await db
     .from("orders")
-    .select("id, status, createdAt, payment_reference, table_id, tables(number, label), order_items(quantity, unit_price, menu_items(name))")
+    .select("id, status, createdAt, table_id, tables(number, label), order_items(quantity, unit_price, menu_items(name))")
     .eq("session_id", sessionId)
     .eq("restaurant_id", restaurantId)
-    .eq("status", "DELIVERED")
-    .gte("createdAt", today.toISOString())
     .order("createdAt", { ascending: true });
 
   if (!orders || orders.length === 0) return notFound();
@@ -62,7 +59,7 @@ export default async function ReceiptSessionPage({
   const tableNums   = tableGroups.map((g) => `#${g.tableNumber}`).join(" + ");
   const allItems    = orders.flatMap((o: any) => o.order_items ?? []);
   const subtotal    = allItems.reduce((s: number, i: any) => s + Number(i.unit_price) * i.quantity, 0);
-  const tip         = subtotal * 0.1;
+  const tipAmount   = isTipIncluded ? subtotal * 0.1 : 0;
   const paymentRef  = orders.at(-1)?.payment_reference ?? null;
   const issuedAt    = orders.at(-1)?.createdAt ?? new Date().toISOString();
 
@@ -77,20 +74,7 @@ export default async function ReceiptSessionPage({
         body { font-family: 'Courier New', monospace; background: #f4f4f4; margin: 0; padding: 16px; }
       `}</style>
 
-      <div className="no-print" style={{ display: "flex", gap: 12, justifyContent: "center", padding: "16px 0 0" }}>
-        <button
-          onClick={() => window.print()}
-          style={{ padding: "8px 20px", background: "#10b981", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer", fontSize: 13 }}
-        >
-          Imprimir
-        </button>
-        <button
-          onClick={() => window.close()}
-          style={{ padding: "8px 20px", background: "#6b7280", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer", fontSize: 13 }}
-        >
-          Cerrar
-        </button>
-      </div>
+      <PrintControls />
 
       <div className="receipt" style={{
         maxWidth: 380, margin: "16px auto", background: "#fff",
@@ -136,11 +120,13 @@ export default async function ReceiptSessionPage({
 
         {/* Totals */}
         <div style={{ borderTop: "1px dashed #d1d5db", paddingTop: 12, marginBottom: 20 }}>
-          <Row label="Subtotal total" value={formatCLP(subtotal)} />
-          <Row label="Propina sugerida (10%)" value={formatCLP(tip)} />
+          <Row label="NETO" value={formatCLP(Math.round(subtotal / 1.19))} />
+          <Row label="IVA" value={formatCLP(subtotal - Math.round(subtotal / 1.19))} />
+          <Row label="TOTAL CONSUMO" value={formatCLP(subtotal)} />
+          <Row label="Propina sugerida (10%)" value={formatCLP(tipAmount)} />
           <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 900, fontSize: 18, marginTop: 8 }}>
-            <span>TOTAL</span>
-            <span>{formatCLP(subtotal + tip)}</span>
+            <span>TOTAL + Propina</span>
+            <span>{formatCLP(subtotal + tipAmount)}</span>
           </div>
         </div>
 
