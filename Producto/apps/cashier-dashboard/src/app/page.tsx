@@ -115,8 +115,12 @@ export default function CashierPage() {
           isSearchExpanded={isSearchExpanded}
           onSearchChange={setSearchQuery}
           onSearchToggle={() => setIsSearchExpanded((p) => !p)}
-          onAlertClick={() => setAlertModal(true)}
-          onRefresh={refetch}
+          onAlertClick={() => {
+            setAlertModal(true);
+          }}
+          onRefresh={() => {
+            refetch();
+          }}
           onSignOut={handleSignOut}
         />
 
@@ -191,7 +195,12 @@ export default function CashierPage() {
             {...alertForm}
             onTableNumChange={alertForm.setTableNum}
             onMsgChange={alertForm.setAlertMsg}
-            onSend={alertForm.handleSendAlert}
+            onSend={async () => {
+              const success = await alertForm.handleSendAlert();
+              if (success) {
+                setAlertModal(false);
+              }
+            }}
             onClose={() => {
               setAlertModal(false);
               alertForm.reset();

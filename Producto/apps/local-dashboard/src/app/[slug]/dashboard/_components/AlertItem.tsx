@@ -11,10 +11,6 @@ const TYPE_CONFIG: Record<AlertType, { label: string; variant: "danger" | "warni
   STOCK_SHORTAGE: { label: "Quiebre de Stock",   variant: "danger"  },
   HELP_REQUEST:   { label: "Ayuda Requerida",    variant: "info"    },
   GENERAL:        { label: "Mensaje",            variant: "neutral" },
-  HELP:           { label: "Ayuda",             variant: "info"    },
-  BILL:           { label: "Cuenta",            variant: "warning" },
-  ORDER_READY:    { label: "Pedido Listo",      variant: "neutral" },
-  TABLE_CLEAN:    { label: "Mesa Limpia",       variant: "neutral" },
 };
 
 interface AlertItemProps {
