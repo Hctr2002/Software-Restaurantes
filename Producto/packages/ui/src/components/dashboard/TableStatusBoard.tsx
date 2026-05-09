@@ -1,0 +1,70 @@
+"use client";
+
+import React from "react";
+import { motion } from "framer-motion";
+import { TableProperties } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { cn } from "../../lib/utils";
+import { TableRecord } from "./dashboardTypes";
+
+interface TableStatusBoardProps {
+  tables: TableRecord[] | any[];
+}
+
+export function TableStatusBoard({ tables }: TableStatusBoardProps) {
+  return (
+    <Card className="border-white/5 bg-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden group mt-6">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-3 text-white">
+          <div className="p-2 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform">
+            <TableProperties className="w-5 h-5 text-primary" />
+          </div>
+          Estado de Mesas
+        </CardTitle>
+        <CardDescription className="text-slate-500 font-medium">Distribución actual del salón</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {tables.length === 0 ? (
+          <p className="text-sm text-slate-500 italic">No hay mesas registradas.</p>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {tables.map((table) => (
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                key={table.id}
+                className={cn(
+                  "flex flex-col items-center justify-center p-6 rounded-[2rem] border text-center transition-all duration-300 shadow-lg",
+                  table.status === "FREE"      && "bg-emerald-500/10 border-emerald-500/20 shadow-emerald-500/5",
+                  table.status === "OCCUPIED"  && "bg-red-500/10 border-red-500/20 shadow-red-500/5",
+                  table.status === "RESERVED"  && "bg-amber-500/10 border-amber-500/20 shadow-amber-500/5",
+                  table.status === "CLEANING"  && "bg-sky-500/10 border-sky-500/20 shadow-sky-500/5",
+                  !["FREE","OCCUPIED","RESERVED","CLEANING"].includes(table.status) && "bg-white/5 border-white/10"
+                )}
+              >
+                <p className={cn(
+                  "text-3xl font-black tracking-tighter",
+                  table.status === "FREE"     && "text-emerald-400",
+                  table.status === "OCCUPIED" && "text-red-400",
+                  table.status === "RESERVED" && "text-amber-400",
+                  table.status === "CLEANING" && "text-sky-400",
+                )}>
+                  {table.number}
+                </p>
+                <span className={cn(
+                  "text-[10px] font-black uppercase mt-1 tracking-widest",
+                  table.status === "FREE"     && "text-emerald-600",
+                  table.status === "OCCUPIED" && "text-red-600",
+                  table.status === "RESERVED" && "text-amber-600",
+                  table.status === "CLEANING" && "text-sky-600",
+                )}>
+                  {table.status === "FREE" ? "Libre" : table.status === "OCCUPIED" ? "Uso" :
+                   table.status === "CLEANING" ? "Limpieza" : "Resv"}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

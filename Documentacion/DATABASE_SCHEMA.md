@@ -247,6 +247,7 @@ erDiagram
 | `PREPARING` | COCINA (KDS) | En proceso de preparación en cocina |
 | `READY` | COCINA (KDS) | Listo para ser retirado/entregado |
 | `DELIVERED` | GARZON | Entregado al cliente |
+| `COMPLETED` | CAJERO | Pago procesado exitosamente (Estado final) |
 | `REJECTED` | GARZON | Rechazado (ingrediente no disponible u otro motivo) |
 
 #### `TableStatus` — Estado de una Mesa
@@ -426,6 +427,18 @@ Almacena los endpoints VAPID del navegador para enviar notificaciones push al Ga
 | `user_id` | UUID FK → auth.users | Usuario suscrito (rol GARZON) |
 | `restaurant_id` | UUID | Tenant al que pertenece |
 | `subscription` | JSONB | Objeto de suscripción del browser: `{ endpoint, keys: { p256dh, auth } }` |
+| `created_at` | Timestamptz | |
+| `updated_at` | Timestamptz | |
+
+#### `kds_settings` (Configuración del KDS)
+
+Almacena preferencias personalizadas para el Kitchen Display System por restaurante.
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | UUID PK | |
+| `restaurant_id` | UUID UK | Tenant propietario (1:1) |
+| `settings` | JSONB | Configuración (umbrales de tiempo, sonidos, auto-limpieza) |
 | `created_at` | Timestamptz | |
 | `updated_at` | Timestamptz | |
 

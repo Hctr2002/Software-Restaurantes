@@ -171,7 +171,7 @@
     radial-gradient(circle at 90% 80%, hsl(var(--secondary) / 0.03) 0%, transparent 40%),
     hsl(var(--background));
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .wow-gradient::before {

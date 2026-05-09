@@ -2,7 +2,7 @@
 
 **Proyecto:** Software-Restaurantes (Menu Bites)
 **Arquitectura:** Monorepo Turbo/npm · 6 apps Next.js · 1 app Expo
-**Versión:** 1.0.0 · Fecha: 2026-05-03
+**Versión:** 2.2.0 · Fecha: 2026-05-08
 
 ---
 
@@ -701,6 +701,14 @@ Si el `vercel.json` existe pero el error persiste, verificar en Vercel UI → Se
 **Solución:** Confirmar `"outputDirectory": ".next"` en el `vercel.json` de la app afectada.
 
 ---
+
+### Error 9: Build falla con "ReferenceError: supabaseAdmin is not defined"
+ 
+ **Causa:** El cliente administrativo de Supabase fue inicializado en el scope global del archivo de ruta, y al no estar presentes las variables de entorno en el pipeline de build (fase estática), la referencia falla.
+ 
+ **Solución:** Mover la inicialización de `supabaseAdmin` dentro del cuerpo del handler (`POST`, `GET`). Esto asegura que el cliente solo se instancie en tiempo de ejecución (runtime) cuando las variables inyectadas por Vercel están garantizadas.
+ 
+ ---
 
 ## Sección 11 — Checklist de Deploy Final
 

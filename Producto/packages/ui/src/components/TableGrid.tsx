@@ -4,16 +4,16 @@ import React from "react";
 import { cn } from "../lib/utils";
 import { Users } from "lucide-react";
 
-export type TableStatus = "FREE" | "OCCUPIED" | "RESERVED";
+export type SimpleTableStatus = "FREE" | "OCCUPIED" | "RESERVED";
 
 interface TableCardProps {
   number: number;
-  status: TableStatus;
+  status: SimpleTableStatus;
   label?: string;
   onClick?: () => void;
 }
 
-export const TableCard = ({ number, status, label, onClick }: TableCardProps) => {
+export const TableGridItem = ({ number, status, label, onClick }: TableCardProps) => {
   const statusConfig = {
     FREE: "border-emerald-500/20 bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/10",
     OCCUPIED: "border-orange-500/20 bg-orange-500/5 text-orange-400 cursor-not-allowed opacity-80",

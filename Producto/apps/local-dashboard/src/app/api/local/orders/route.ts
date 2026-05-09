@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   let query = db
     .from("orders")
     .select(
-      "id, status, createdAt, validated_at, preparing_at, ready_at, tableId:table_id, userId:user_id, tables(number), users(email), order_items(id, menuItemId:menu_item_id, unitPrice:unit_price, quantity, menu_items(name, categoryId:category_id, categories(name)))"
+      "id, status, createdAt, validatedAt:validated_at, preparingAt:preparing_at, readyAt:ready_at, tableId:table_id, userId:user_id, tables(number), users(email), order_items(id, menuItemId:menu_item_id, unitPrice:unit_price, quantity, menu_items(name, categoryId:category_id, categories(name)))"
     )
     .eq("restaurant_id", restaurantId)
     .order("createdAt", { ascending: false })

@@ -75,8 +75,10 @@ export function AlertModal({
             Cerrar
           </Button>
           <Button
-            onClick={onSend}
-            disabled={!alertMsg.trim() || sendingAlert || alertSent}
+            onClick={() => {
+              onSend();
+            }}
+            disabled={!alertMsg?.trim() || sendingAlert || alertSent}
             className="flex-1 h-14 bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase text-[10px] tracking-widest shadow-lg shadow-yellow-500/10"
           >
             {alertSent ? "✓ Enviado" : sendingAlert ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enviar Alerta"}

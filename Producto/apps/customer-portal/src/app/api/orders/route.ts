@@ -2,13 +2,6 @@ import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 
-// Cliente admin con Service Role Key — corre SOLO en el servidor, nunca expuesto al browser
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
-
 interface OrderItemPayload {
   menu_item_id: string;
   quantity: number;
@@ -23,6 +16,11 @@ interface CreateOrderPayload {
 }
 
 export async function POST(req: NextRequest) {
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
   try {
     const body: CreateOrderPayload = await req.json();
     const { restaurant_id, table_id, total_amount, items } = body;

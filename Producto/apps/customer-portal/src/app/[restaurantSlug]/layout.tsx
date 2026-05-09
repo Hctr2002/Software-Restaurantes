@@ -17,7 +17,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { TenantProvider, type TenantRestaurant } from '@/context/TenantContext';
 import { getRestaurantBySlug, getThemeByRestaurant, type RestaurantTheme } from '@/lib/tenant';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@menu-bites/auth';
 import { RestaurantThemeProvider } from '@menu-bites/ui';
 
 export default function TenantLayout({ children }: { children: React.ReactNode }) {

@@ -1,8 +1,13 @@
 # Especificación Técnica de API — Sistema Menu Bites
 
-**Versión:** 2.0.0 | **Protocolo:** HTTPS | **Formato:** JSON | **Auth:** Supabase Auth (JWT en cookie HttpOnly)
+**Versión:** 2.2.0 | **Protocolo:** HTTPS | **Formato:** JSON | **Auth:** Supabase Auth (JWT en cookie HttpOnly)
 
 Esta documentación detalla los endpoints de la API interna del sistema Menu Bites, utilizada por las interfaces frontend para comunicarse con la capa de persistencia en Supabase.
+
+**Notas de Estabilización:**
+- Se ha optimizado la gestión de estados para evitar condiciones de carrera en el frontend.
+- Se han normalizado las respuestas de error en todos los endpoints locales.
+- Se recomienda el uso de las constantes de estado definidas en el SDK compartido.
 
 ---
 
@@ -566,3 +571,11 @@ Comprobante unificado para mesas fusionadas bajo un `session_id`.
 
 - **Auth:** Ninguna — acceso público filtrado por `restaurant_id`
 - **Renders:** HTML imprimible con desglose separado por mesa dentro de la sesión y total global
+
+---
+
+### 11.5 Estabilización de Build (Build-Safe Pattern)
+
+Se ha implementado un patrón de inicialización protegida en todos los endpoints de `customer-portal` (`/api/orders`, `/api/reviews`, `/api/help-request`, `/api/bill-request`) para garantizar la compatibilidad con los entornos de CI/CD de Vercel.
+
+**Garantía de Disponibilidad:** Los endpoints ahora manejan la ausencia de variables de entorno de servidor en tiempo de construcción, eliminando errores de referencia global y permitiendo un despliegue sin fricciones en el pipeline de Turborepo.

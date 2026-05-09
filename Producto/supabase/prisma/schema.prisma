@@ -26,6 +26,7 @@ enum OrderStatus {
   PREPARING
   READY
   DELIVERED
+  COMPLETED
   REJECTED
 }
 

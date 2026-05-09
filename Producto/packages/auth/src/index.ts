@@ -1,4 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr';
+import { AlertType } from './types';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
@@ -56,7 +57,7 @@ export const updateUserPassword = async (password: string) => {
   return { data, error };
 };
 
-export type AlertType = 'TABLE_ISSUE' | 'BILL_REQUEST' | 'STOCK_SHORTAGE' | 'HELP_REQUEST' | 'GENERAL';
+export * from "./types";
 
 export const sendAlert = async (params: {
   restaurantId: string;
@@ -68,16 +69,29 @@ export const sendAlert = async (params: {
   menuItemId?: string;
   menuItemName?: string;
 }) => {
-  const { error } = await supabase.from('alerts').insert({
+  const payload = {
     restaurant_id:  params.restaurantId,
-    user_id:        params.userId        ?? null,
-    user_email:     params.userEmail     ?? null,
+    user_id:        params.userId || null,
+    user_email:     params.userEmail || null,
     type:           params.type,
     message:        params.message,
-    table_number:   params.tableNumber   ?? null,
-    menu_item_id:   params.menuItemId    ?? null,
-    menu_item_name: params.menuItemName  ?? null,
-  });
+    status:         'PENDING',
+    table_number:   params.tableNumber ?? null,
+    menu_item_id:   params.menuItemId || null,
+    menu_item_name: params.menuItemName || null,
+  };
+
+  const { error } = await supabase.from('alerts').insert(payload);
+  
+  if (error) {
+    console.error('[sendAlert] Error de Supabase:', {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code
+    });
+  }
+
   return { error };
 };
 
