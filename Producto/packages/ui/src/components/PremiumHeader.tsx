@@ -14,8 +14,9 @@ interface PremiumHeaderProps {
   stats?: React.ReactNode;
   actions?: React.ReactNode;
   children?: React.ReactNode;
-  className?: string;
   variant?: "default" | "compact";
+  isSolid?: boolean;
+  className?: string;
 }
 
 export const PremiumHeader = ({
@@ -28,7 +29,8 @@ export const PremiumHeader = ({
   actions,
   children,
   className,
-  variant = "default"
+  variant = "default",
+  isSolid = false
 }: PremiumHeaderProps) => {
   const isCompact = variant === "compact";
 
@@ -37,12 +39,14 @@ export const PremiumHeader = ({
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       className={cn(
-        "glass-premium relative overflow-hidden transition-all duration-500 shadow-[0_20px_50px_rgba(0,0,0,0.3)]",
+        isSolid ? "bg-card" : "glass-premium transition-all duration-500",
+        "relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)]",
         "before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/5 before:to-transparent before:pointer-events-none",
         isCompact ? "rounded-[2rem] p-4 gap-4" : "rounded-[2.5rem] p-6 gap-6",
         "flex flex-row justify-between items-center",
         className
       )}
+      style={isSolid ? { backgroundColor: 'hsl(var(--card))', opacity: 1 } : undefined}
     >
       <div className="flex items-center space-x-4 lg:space-x-6 w-full lg:w-auto">
         <div 

@@ -184,7 +184,7 @@ export function useCustomerPortal(restaurantId: string | undefined, tableNumber?
   };
 
   const placeOrder = async () => {
-    if (!table.data || order.cart.length === 0 || !restaurantId) return;
+    if (!table.data || order.cart.length === 0 || !restaurantId) return false;
     setOrder(p => ({ ...p, placing: true, error: null }));
 
     try {
@@ -207,8 +207,10 @@ export function useCustomerPortal(restaurantId: string | undefined, tableNumber?
       if (!response.ok) throw new Error(result.error || "Error al procesar el pedido");
 
       setOrder(p => ({ ...p, lastId: result.id, cart: [], success: true }));
+      return true;
     } catch (err: any) {
       setOrder(p => ({ ...p, error: err.message }));
+      return false;
     } finally {
       setOrder(p => ({ ...p, placing: false }));
     }
@@ -228,6 +230,7 @@ export function useCustomerPortal(restaurantId: string | undefined, tableNumber?
     cartCount: totals.count,
     cartTotal: totals.total,
     placeOrder,
+    resetOrder: () => setOrder(p => ({ ...p, success: false, lastId: null, error: null })),
   };
 }
 

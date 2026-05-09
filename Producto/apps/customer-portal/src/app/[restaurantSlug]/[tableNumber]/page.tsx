@@ -58,11 +58,6 @@ export default function MenuPage({
   const [isCuentaOpen, setIsCuentaOpen]     = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    if (categories.length > 0 && !activeCategory) {
-      setActiveCategory(categories[0].id);
-    }
-  }, [categories, activeCategory]);
 
   const handleTableInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, ''); 
@@ -74,8 +69,8 @@ export default function MenuPage({
   };
 
   const handlePlaceOrder = async () => {
-    await portal.placeOrder();
-    if (portal.order.success) setIsCheckoutOpen(false);
+    const success = await portal.placeOrder();
+    if (success) setIsCheckoutOpen(false);
   };
 
   useEffect(() => {
@@ -172,69 +167,73 @@ export default function MenuPage({
           show={portal.order.success} 
           tableData={portal.table.data} 
           restaurantName={restaurant?.name || ''} 
-          onClose={() => portal.setOrderSuccess(false)} 
+          onClose={() => portal.resetOrder()} 
         />
 
-        {/* Premium Header Integration */}
-        <div className="p-4 lg:p-6 pb-0 sticky top-0 z-50 bg-background">
-          <PremiumHeader
-            title={restaurant?.name || ''}
-            icon={Store}
-            variant="compact"
-            statusLabel="En Servicio"
-            statusSubLabel={portal.table.data ? `Mesa ${portal.table.data.number}` : "Escanea tu mesa"}
+        {/* Bloque de Navegación Unificado Pro Max */}
+        <div className="sticky top-0 z-50 bg-background shadow-2xl border-b border-white/5">
+          <div className="p-4 lg:p-6 pb-2">
+            <PremiumHeader
+              title={restaurant?.name || ''}
+              icon={Store}
+              variant="compact"
+              statusLabel="En Servicio"
+              statusSubLabel={portal.table.data ? `Mesa ${portal.table.data.number}` : "Escanea tu mesa"}
+              isSolid
             className="border border-white/10"
-            actions={
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="rounded-2xl w-12 h-12 bg-white/5 border-white/10 text-muted-foreground hover:text-foreground transition-all"
-                >
-                  <Search className="w-5 h-5" />
-                </Button>
-                
-                <div className="relative">
-                  <motion.button 
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setIsCheckoutOpen(true)} 
-                    className="w-12 h-12 sm:w-14 sm:h-14 bg-primary rounded-2xl flex items-center justify-center shadow-xl shadow-primary/30 group relative overflow-hidden"
+              actions={
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="rounded-2xl w-12 h-12 bg-white/5 border-white/10 text-muted-foreground hover:text-foreground transition-all"
                   >
-                    <motion.div 
-                      className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
-                    />
-                    <ShoppingBag className="w-6 h-6 text-primary-foreground relative z-10" />
-                  </motion.button>
+                    <Search className="w-5 h-5" />
+                  </Button>
                   
-                  <AnimatePresence>
-                    {portal.cartCount > 0 && (
-                      <motion.span 
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0, opacity: 0 }}
-                        className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-[3px] border-background shadow-lg z-20"
-                      >
-                        {portal.cartCount}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
+                  <div className="relative">
+                    <motion.button 
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setIsCheckoutOpen(true)} 
+                      className="w-12 h-12 sm:w-14 sm:h-14 bg-primary rounded-2xl flex items-center justify-center shadow-xl shadow-primary/30 group relative overflow-hidden"
+                    >
+                      <motion.div 
+                        className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+                      />
+                      <ShoppingBag className="w-6 h-6 text-primary-foreground relative z-10" />
+                    </motion.button>
+                    
+                    <AnimatePresence>
+                      {portal.cartCount > 0 && (
+                        <motion.span 
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-[3px] border-background shadow-lg z-20"
+                        >
+                          {portal.cartCount}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
-              </div>
-            }
+              }
+            />
+          </div>
+          
+          <CategoryNav 
+            categories={categories} 
+            activeCategory={activeCategory} 
+            onSelectCategory={setActiveCategory} 
           />
         </div>
 
-        <CategoryNav 
-          categories={categories} 
-          activeCategory={activeCategory} 
-          onSelectCategory={setActiveCategory} 
-        />
-
         <MenuSection 
-          categoryName={categories.find((c) => c.id === activeCategory)?.name ?? 'Nuestros Platos'} 
+          categoryName={categories.find((c) => c.id === activeCategory)?.name ?? 'Carta Completa'} 
           activeCategory={activeCategory} 
-          items={items.filter((item) => item.categoryId === activeCategory)} 
+          categories={categories}
+          items={activeCategory ? items.filter((item) => item.categoryId === activeCategory) : items} 
           cart={portal.order.cart} 
           onAdd={portal.addToCart} 
           onDecrement={portal.removeFromCart} 
@@ -245,7 +244,6 @@ export default function MenuPage({
             cart={portal.order.cart} 
             cartTotal={portal.cartTotal} 
             table={{ ...portal.table, orderError: portal.order.error }} 
-            onTableInputChange={handleTableInputChange} 
             onPlaceOrder={handlePlaceOrder} 
             onClose={() => setIsCheckoutOpen(false)} 
             placing={portal.order.placing} 
