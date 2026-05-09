@@ -1,14 +1,14 @@
 "use client";
 
 import React from "react";
-import { CheckCircle, Hash } from "lucide-react";
+import { CheckCircle, Hash, Link2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { TableRecord } from "@menu-bites/auth";
 
 export type TableStatus = "FREE" | "OCCUPIED" | "CLEANING" | "RESERVED";
 
 interface TableCardProps {
-  table: TableRecord & { bill_requested?: boolean };
+  table: TableRecord & { bill_requested?: boolean; session_id?: string | null };
   isBillRequested: boolean;
   isReady: boolean;
   isPreparing: boolean;
@@ -16,6 +16,7 @@ interface TableCardProps {
   isSelectedForMerge: boolean;
   onSelect: (id: string) => void;
   onNavigate: (id: string) => void;
+  mergedTableNumbers?: number[];
 }
 
 const STATUS_STYLES: Record<TableStatus, string> = {
@@ -84,9 +85,21 @@ export function TableCard({ table, isBillRequested, isReady, isPreparing, mergeM
         )}
       </div>
 
-      <div className={`relative bg-card/40 border border-white/5 rounded-[2.5rem] p-6 flex flex-col items-center justify-center gap-4 transition-all cursor-pointer hover:bg-card/60 hover:border-white/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] ${
-        isBillRequested ? "ring-2 ring-yellow-500/30" : ""
-      } ${isReady ? "ring-2 ring-emerald-500/30" : ""} ${isPreparing && !isReady ? "ring-2 ring-primary/30" : ""}`}>
+      <div className={`relative bg-card/40 border rounded-[2.5rem] p-6 flex flex-col items-center justify-center gap-4 transition-all cursor-pointer hover:bg-card/60 hover:border-white/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] ${
+        isBillRequested ? "ring-2 ring-yellow-500/30 border-yellow-500/20" : 
+        isReady ? "ring-2 ring-emerald-500/30 border-emerald-500/20" : 
+        table.session_id ? "ring-2 ring-primary/40 border-primary/50 bg-primary/5" : "border-white/5"
+      }`}>
+        {table.session_id && (
+          <div 
+            className="absolute top-4 left-4 text-primary/60" 
+            title={mergedTableNumbers && mergedTableNumbers.length > 0 
+              ? `Fusionada con Mesa ${mergedTableNumbers.filter(n => n !== table.number).join(', ')}` 
+              : "Mesa Fusionada"}
+          >
+            <Link2 className="w-4 h-4" />
+          </div>
+        )}
         <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center border transition-all ${STATUS_STYLES[currentStatus]}`}>
           <Hash className="w-8 h-8 font-black" />
         </div>

@@ -6,7 +6,7 @@ import { useAuthStore } from "@menu-bites/store";
 import { useTables, signOut, supabase } from "@menu-bites/auth";
 import { RestaurantThemeProvider, CardSkeleton, Button, Badge, PremiumHeader } from "@menu-bites/ui";
 import { AnimatePresence, motion } from "framer-motion";
-import { LayoutDashboard, Bell, LogOut, AlertTriangle, UtensilsCrossed, Sparkles, ChevronDown, RefreshCw, Receipt, Link2 } from "lucide-react";
+import { LayoutDashboard, Bell, LogOut, AlertTriangle, UtensilsCrossed, Sparkles, ChevronDown, RefreshCw, Receipt, Link2, Link2Off } from "lucide-react";
 
 import { 
   PendingOrderCard, 
@@ -224,9 +224,18 @@ export default function WaiterDashboard() {
                       {merge.mergeMode ? "Selecciona 2+ mesas OCCUPIED para fusionar" : "Selecciona una mesa para tomar comandas"}
                     </p>
                   </div>
-                  <Button variant="outline" size="icon" onClick={merge.toggleMode} className={`rounded-xl w-11 h-11 shrink-0 transition-all ${merge.mergeMode ? "border-primary/40 text-primary bg-primary/10" : "border-border/20"}`}>
-                    <Link2 className="w-4 h-4" />
-                  </Button>
+                  <button 
+                    onClick={merge.toggleMode} 
+                    className={`relative flex items-center justify-center gap-2 px-6 py-3.5 rounded-[1.25rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all overflow-hidden group ${
+                      merge.mergeMode 
+                        ? "bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 hover:shadow-lg hover:shadow-red-500/10" 
+                        : "bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:shadow-lg hover:shadow-primary/10"
+                    }`}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
+                    {merge.mergeMode ? <Link2Off className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
+                    <span className="hidden sm:block">{merge.mergeMode ? "Cancelar Fusión" : "Fusionar Mesas"}</span>
+                  </button>
                 </div>
                 <TableMergeBar mergeMode={merge.mergeMode} selectedCount={merge.selectedForMerge.size} merging={merge.merging} mergeResult={merge.mergeResult} onToggleMode={merge.toggleMode} onConfirmMerge={merge.handleMergeTables} />
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
@@ -241,6 +250,11 @@ export default function WaiterDashboard() {
                       isSelectedForMerge={merge.selectedForMerge.has(table.id)}
                       onSelect={merge.toggleMergeSelect}
                       onNavigate={(id) => router.push(`/tables/${id}/menu`)}
+                      mergedTableNumbers={
+                        table.session_id 
+                          ? tables.filter(t => t.session_id === table.session_id).map(t => t.number)
+                          : undefined
+                      }
                     />
                   ))}
                 </div>

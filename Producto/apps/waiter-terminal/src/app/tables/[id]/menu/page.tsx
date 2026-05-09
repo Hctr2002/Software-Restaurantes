@@ -3,9 +3,10 @@
 import React, { useState, useMemo } from "react";
 import { useAuthStore } from "@menu-bites/store";
 import { useMenu, useTable, supabase } from "@menu-bites/auth";
-import { MenuItemCard, ProductSearchBar, CategoryTabs, Button } from "@menu-bites/ui";
+import { MenuItemCard, ProductSearchBar, CategoryTabs, Button, RestaurantThemeProvider } from "@menu-bites/ui";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronLeft, ShoppingBag, Send, Trash2, Loader2 } from "lucide-react";
+import { ChevronLeft, ShoppingBag, Send, Trash2, Loader2, Receipt } from "lucide-react";
+import { useThemeSync } from "@/hooks/useThemeSync";
 
 export default function TableMenuPage() {
   const params = useParams();
@@ -15,11 +16,14 @@ export default function TableMenuPage() {
 
   const { menu, categories, loading: menuLoading } = useMenu(user?.restaurantId);
   const { table, loading: tableLoading } = useTable(tableId);
+  const theme = useThemeSync(user?.restaurantId, "waiter");
   
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [cart, setCart] = useState<any[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [showBillModal, setShowBillModal] = useState(false);
+  const [requestingBill, setRequestingBill] = useState(false);
 
   const loading = menuLoading || tableLoading;
 
@@ -49,13 +53,22 @@ export default function TableMenuPage() {
     setSubmitting(true);
 
     try {
+      // 0. Obtener el session_id de la mesa actual para agrupar en mesas fusionadas
+      const { data: tableData } = await supabase
+        .from("tables")
+        .select("session_id")
+        .eq("id", tableId)
+        .single();
+
       // 1. Crear la orden
+      const orderId = crypto.randomUUID();
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
+          id: orderId,
           restaurant_id: user.restaurantId,
           table_id: tableId,
-          user_id: user.id,
+          session_id: tableData?.session_id || null,
           status: "PENDING", // Pasa a cocina para validación/preparación
           total_amount: total
         })
@@ -66,8 +79,10 @@ export default function TableMenuPage() {
 
       // 2. Insertar ítems
       const orderItems = cart.map((item) => ({
+        id: crypto.randomUUID(),
         order_id: order.id,
         menu_item_id: item.id,
+        restaurant_id: user.restaurantId,
         quantity: item.quantity,
         unit_price: item.price,
         restaurant_id: user.restaurantId
@@ -87,38 +102,79 @@ export default function TableMenuPage() {
 
       // 4. Éxito: volver al inicio
       router.push("/");
-    } catch (err) {
-      console.error("Error al enviar pedido:", err);
-      alert("Error al enviar a cocina. Inténtelo de nuevo.");
+    } catch (err: any) {
+      console.error("Error al enviar pedido:", err?.message || JSON.stringify(err));
+      alert(`Error al enviar a cocina: ${err?.message || 'Revisa la consola'}`);
     } finally {
       setSubmitting(false);
     }
   };
 
+  const handleRequestBill = async (includeTip: boolean) => {
+    if (!user?.restaurantId || requestingBill) return;
+    setRequestingBill(true);
+    try {
+      const { error } = await supabase
+        .from("tables")
+        .update({ bill_requested: true, tip_included: includeTip })
+        .eq("id", tableId);
+      
+      if (error) throw error;
+      router.push("/");
+    } catch (err) {
+      console.error("Error al pedir cuenta:", err);
+      alert("Error al solicitar la cuenta.");
+    } finally {
+      setRequestingBill(false);
+      setShowBillModal(false);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-navy">
-        <div className="w-16 h-16 border-4 border-white/5 border-t-brand-accent rounded-full animate-spin shadow-2xl shadow-brand-accent/20" />
-      </div>
+      <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
+        <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+          <div className="w-16 h-16 border-4 border-foreground/5 border-t-primary rounded-full animate-spin shadow-2xl shadow-primary/20" />
+        </div>
+      </RestaurantThemeProvider>
     );
   }
 
   return (
-    <div className="min-h-screen bg-navy bg-body-gradient text-white pb-32">
-      {/* Header con Back Button */}
-      <header className="glass-navy sticky top-0 z-50 p-5 flex items-center space-x-4">
-        <button
-          onClick={() => router.push("/")}
-          className="p-3 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all active:scale-95"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <div>
-          <h1 className="text-xl font-black tracking-tighter uppercase italic">
-            Mesa <span className="text-brand-accent">{table?.number ?? "..."}</span>
-          </h1>
-          <p className="text-[10px] text-sage uppercase font-black tracking-[0.2em] mt-0.5">Nuevo Pedido</p>
+    <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
+      <div className="min-h-screen bg-navy bg-body-gradient text-white pb-32">
+        {/* Header con Back Button y Pedir Cuenta */}
+        <header className="glass-navy sticky top-0 z-50 p-5 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => router.push("/")}
+              className="p-3 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all active:scale-95"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-xl font-black tracking-tighter uppercase italic">
+                Mesa <span className="text-brand-accent">{table?.number ?? "..."}</span>
+              </h1>
+              <p className="text-[10px] text-sage uppercase font-black tracking-[0.2em] mt-0.5">Nuevo Pedido</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowBillModal(true)}
+            className="flex items-center gap-2 px-4 py-3 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-2xl hover:bg-yellow-500/20 transition-all active:scale-95"
+          >
+            <Receipt className="w-4 h-4" />
+            <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Pedir Cuenta</span>
+          </button>
+        </header>
         </div>
+        <button
+          onClick={() => setShowBillModal(true)}
+          className="flex items-center gap-2 px-4 py-3 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-2xl hover:bg-yellow-500/20 transition-all active:scale-95"
+        >
+          <Receipt className="w-4 h-4" />
+          <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Pedir Cuenta</span>
+        </button>
       </header>
 
       <main className="space-y-6 pt-6">
@@ -199,6 +255,49 @@ export default function TableMenuPage() {
           </div>
         </div>
       )}
-    </div>
+
+      {/* Modal Pedir Cuenta */}
+      {showBillModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-xl" onClick={() => !requestingBill && setShowBillModal(false)} />
+          <div className="relative w-full max-w-sm bg-card border border-white/10 rounded-[3rem] p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 bg-yellow-500/10 rounded-[1.5rem] flex items-center justify-center border border-yellow-500/20 mx-auto">
+              <Receipt className="w-8 h-8 text-yellow-500" />
+            </div>
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl font-black tracking-tighter">Solicitar Cuenta</h2>
+              <p className="text-xs text-muted-foreground font-bold opacity-80">
+                ¿El cliente desea incluir el <span className="text-yellow-500 font-black">10% de propina</span> sugerida?
+              </p>
+            </div>
+            <div className="space-y-3 pt-4">
+              <Button
+                onClick={() => handleRequestBill(true)}
+                disabled={requestingBill}
+                className="w-full h-14 bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-[1.5rem]"
+              >
+                {requestingBill ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sí, incluir propina"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleRequestBill(false)}
+                disabled={requestingBill}
+                className="w-full h-14 border-white/10 hover:bg-white/5 font-black uppercase text-[10px] tracking-[0.2em] rounded-[1.5rem]"
+              >
+                {requestingBill ? <Loader2 className="w-4 h-4 animate-spin" /> : "No incluir propina"}
+              </Button>
+              <button
+                onClick={() => setShowBillModal(false)}
+                disabled={requestingBill}
+                className="w-full py-4 text-[10px] text-muted-foreground font-black uppercase tracking-widest hover:text-white transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      </div>
+    </RestaurantThemeProvider>
   );
 }
