@@ -73,7 +73,7 @@ sequenceDiagram
     participant SA as SUPER_ADMIN
     participant AD as Admin Dashboard
     participant DB as Supabase
-
+    
     SA->>AD: Crear restaurante (nombre, slug, plan)
     AD->>DB: INSERT en restaurants
     DB-->>AD: Restaurante creado con ID
@@ -96,7 +96,7 @@ Interfaz de control completo para el ADMIN de un restaurante. Accede por `/{slug
 - Ingresos del día y del mes con ticket promedio
 - Pedidos activos en cocina y sala
 
-**Flujo en Vivo (W4.2):** Widget con contadores en tiempo real de órdenes por estado:
+**Flujo en Vivo:** Widget con contadores en tiempo real de órdenes por estado:
 
 | Estado | Color | Quién actúa |
 |---|---|---|
@@ -105,9 +105,9 @@ Interfaz de control completo para el ADMIN de un restaurante. Accede por `/{slug
 | Preparando | Primario | Cocina trabajando |
 | Listo | Verde | Esperando ser servido |
 
-**Tiempo Promedio Hoy (W4.2):** Muestra el ciclo completo `created_at → ready_at` en minutos, basado en pedidos ya entregados del día. Indicador de rendimiento: Óptimo (< 15 min), Normal (15–30 min), Lento (> 30 min).
+**Tiempo Promedio Hoy:** Muestra el ciclo completo `created_at -> ready_at` en minutos, basado en pedidos ya entregados del día. Indicador de rendimiento: Óptimo (< 15 min), Normal (15–30 min), Lento (> 30 min).
 
-**Escalación de alertas (W4.3):** Si una o más órdenes llevan más de 3 minutos en estado `PENDING` sin que el garzón las valide, aparece un banner de alerta rojo con el número de mesa y el tiempo transcurrido. Se recalcula automáticamente cada 30 segundos.
+**Escalación de alertas:** Si una o más órdenes llevan más de 3 minutos en estado `PENDING` sin que el garzón las valide, aparece un banner de alerta rojo con el número de mesa y el tiempo transcurrido. Se recalcula automáticamente cada 30 segundos.
 
 **Estado de Mesas:** Grilla visual con colores por estado:
 - Verde (`FREE`), Rojo (`OCCUPIED`), Amarillo (`RESERVED`), Azul claro (`CLEANING`)
@@ -170,7 +170,7 @@ graph TD
 
 - **Mapeo de Planta:** Definición de mesas con número y etiqueta personalizada (ej: "Mesa VIP", "Terraza 1").
 - **Generador de QR:** Al crear una mesa se genera automáticamente un `qr_data` único. El QR apunta al Customer Portal con la mesa pre-seleccionada.
-- **Estado visual:** Color por estado de mesa (`FREE` → verde, `OCCUPIED` → rojo, `RESERVED` → amarillo).
+- **Estado visual:** Color por estado de mesa (`FREE` -> verde, `OCCUPIED` -> rojo, `RESERVED` -> amarillo).
 - **Alertas activas:** Indicadores visuales cuando `help_requested` o `bill_requested` están activos.
 
 ### 2.6 Inteligencia de Negocio (Reportes)
@@ -186,17 +186,17 @@ El sistema genera análisis exportables a Excel (`.xls` SpreadsheetML):
 
 **Filtros de período:** 7D, 14D, 30D, 90D o rango personalizado.
 
-**Heatmap de Tiempos de Cocina (W4.1):** Sección de análisis de tiempos operativos por categoría de plato:
+**Heatmap de Tiempos de Cocina:** Sección de análisis de tiempos operativos por categoría de plato:
 
 | Métrica | Cálculo | Significado |
 |---|---|---|
-| Tiempo de Validación | `validated_at − created_at` | Cuánto tarda el garzón en aprobar el pedido |
-| Tiempo de Cocina | `ready_at − validated_at` | Tiempo neto de preparación en cocina |
-| Tiempo Total | `ready_at − created_at` | Ciclo completo desde el pedido hasta estar listo |
+| Tiempo de Validación | `validated_at - created_at` | Cuánto tarda el garzón en aprobar el pedido |
+| Tiempo de Cocina | `ready_at - validated_at` | Tiempo neto de preparación en cocina |
+| Tiempo Total | `ready_at - created_at` | Ciclo completo desde el pedido hasta estar listo |
 
-Los tiempos se muestran como barras horizontales con código de color: verde (< 10 min), amarillo (10–20 min), rojo (> 20 min). Solo aparece para órdenes que tienen `validated_at` y `ready_at` registrados (disponibles desde Wave 1).
+Los tiempos se muestran como barras horizontales con código de color: verde (< 10 min), amarillo (10–20 min), rojo (> 20 min). Solo aparece para órdenes que tienen `validated_at` y `ready_at` registrados.
 
-> **Nota:** Los timestamps se escriben automáticamente al transicionar el estado de la orden. Órdenes creadas antes de Wave 1 no tendrán estos datos.
+> **Nota:** Los timestamps se escriben automáticamente al transicionar el estado de la orden.
 | Eficiencia de Mesas | Tiempo promedio de ocupación y rotación |
 | Reporte Consolidado | Resumen de cierre de caja para contabilidad |
 
@@ -241,8 +241,8 @@ La pantalla muestra columnas Kanban organizadas por estado del pedido:
 
 | Acción | Transición | Descripción |
 |---|---|---|
-| "Iniciar" | `VALIDATED → PREPARING` | El chef comienza a preparar el pedido |
-| "Listo" | `PREPARING → READY` | El pedido está terminado y listo para servir |
+| "Iniciar" | `VALIDATED -> PREPARING` | El chef comienza a preparar el pedido |
+| "Listo" | `PREPARING -> READY` | El pedido está terminado y listo para servir |
 
 > El KDS no puede rechazar pedidos ni marcarlos como `DELIVERED`. Esas acciones pertenecen al rol `GARZON`.
 
@@ -269,7 +269,7 @@ sequenceDiagram
     participant KDS as Pantalla Cocina
     participant Chef as Chef
     participant DB as Supabase DB
-
+    
     RT-->>KDS: Nuevo ticket (status: VALIDATED)
     KDS->>KDS: Muestra ticket en columna VALIDADOS
     Note over KDS: Temporizador inicia conteo
@@ -310,7 +310,7 @@ Vista en grilla del estado de todas las mesas con indicadores visuales en tiempo
 
 **Alertas automáticas con sonido:** Cuando el KDS marca una orden como READY, el terminal emite una alerta sonora para notificar al garzón que debe llevar el plato.
 
-**Sección "Limpieza pendiente":** Aparece automáticamente sobre el mapa de mesas cuando alguna mesa está en estado CLEANING. El garzón presiona "Mesa lista ✓" para marcarla como FREE una vez limpia.
+**Sección "Limpieza pendiente":** Aparece automáticamente sobre el mapa de mesas cuando alguna mesa está en estado CLEANING. El garzón presiona "Mesa lista" para marcarla como FREE una vez limpia.
 
 **Sección "Listos para servir":** Lista de órdenes en estado READY con el número de mesa correspondiente.
 
@@ -331,8 +331,8 @@ Acciones por pedido:
 2. Navega por el catálogo de menú organizado por categorías.
 3. Agrega items al carrito con quantity y extras opcionales.
 4. Puede añadir notas por item (ej: "sin gluten") y notas generales del pedido.
-5. Confirma el pedido → se crea con estado `PENDING`.
-6. El garzón valida disponibilidad y cambia a `VALIDATED` → el ticket aparece en el KDS.
+5. Confirma el pedido -> se crea con estado `PENDING`.
+6. El garzón valida disponibilidad y cambia a `VALIDATED` -> el ticket aparece en el KDS.
 
 ### 4.3 Gestión de Pedidos Activos
 
@@ -343,9 +343,9 @@ Acciones por pedido:
 
 | Acción | Transición | Cuándo usarla |
 |---|---|---|
-| "Confirmar pedido" | `PENDING → VALIDATED` | Después de verificar disponibilidad |
-| "Rechazar pedido" | `PENDING → REJECTED` | Item no disponible u otro motivo |
-| "Entregar" | `READY → DELIVERED` | Al llevar el pedido a la mesa |
+| "Confirmar pedido" | `PENDING -> VALIDATED` | Después de verificar disponibilidad |
+| "Rechazar pedido" | `PENDING -> REJECTED` | Item no disponible u otro motivo |
+| "Entregar" | `READY -> DELIVERED` | Al llevar el pedido a la mesa |
 
 ### 4.5 Flujo Completo de Atención
 
@@ -370,7 +370,7 @@ sequenceDiagram
     participant WT as Waiter Terminal
     participant KDS as Kitchen KDS
     participant C as Cliente
-
+    
     G->>WT: Selecciona mesa y toma pedido
     WT->>WT: Crea orden con status PENDING
     G->>WT: Valida disponibilidad de items
@@ -398,22 +398,22 @@ La vista principal muestra **tarjetas agrupadas por mesa** (o por sesión si las
 
 **Tarjeta de mesa normal:**
 ```
-Mesa 7 — CUENTA SOLICITADA 🔔
+Mesa 7 — CUENTA SOLICITADA
   2 pedidos consolidados
   Hace 12 min
-  ─────────────────────────────
+  -----------------------------
   2x Lomo Saltado      $28.000
   1x Postre             $8.000
-  ─────────────────────────────
+  -----------------------------
   Total Cuenta:        $36.000
   [Revisar y Cobrar]
 ```
 
 **Tarjeta de mesas fusionadas:**
 ```
-Mesas fusionadas 🔗
+Mesas fusionadas
   3 pedidos consolidados
-  ─────────────────────────────
+  -----------------------------
   TOTAL SESIÓN:        $74.000
   [Revisar y Cobrar]
 ```
@@ -426,16 +426,16 @@ Al hacer clic en "Revisar y Cobrar", se abre un panel lateral con el desglose co
 
 ```
 Mesa 7  |  2 Comandas consolidadas
-─────────────────────────────────────
+-------------------------------------
 Pedido 1:
   2x Lomo Saltado        $28.000
 Pedido 2:
   1x Postre               $8.000
-─────────────────────────────────────
+-------------------------------------
 Neto Consumo:            $36.000
 Propina sugerida (10%):   $3.600
 TOTAL FINAL:             $39.600
-─────────────────────────────────────
+-------------------------------------
 Ref. Pago: [______________]
 [Confirmar Pago y Liberar Mesa]
 ```
@@ -446,13 +446,13 @@ Los precios se toman del **snapshot** (`unit_price` en `order_items`), no del pr
 
 1. El cajero revisa el detalle consolidado de todos los pedidos.
 2. Ingresa la referencia de comprobante (número de voucher, transferencia, etc.).
-3. Confirma el cobro → el sistema ejecuta en secuencia:
-   - `orders.status → DELIVERED` para todos los pedidos del grupo.
-   - `table.status → CLEANING`: la mesa no queda libre inmediatamente; el garzón confirma la limpieza desde su terminal.
-   - `table.bill_requested → false`.
+3. Confirma el cobro -> el sistema ejecuta en secuencia:
+   - `orders.status -> DELIVERED` para todos los pedidos del grupo.
+   - `table.status -> CLEANING`: la mesa no queda libre inmediatamente; el garzón confirma la limpieza desde su terminal.
+   - `table.bill_requested -> false`.
 4. Se abre automáticamente el comprobante digital en una nueva pestaña.
 
-> **Ciclo completo de mesa:** `FREE → OCCUPIED → CLEANING → FREE`. El estado `CLEANING` garantiza que no se asignen clientes nuevos a una mesa que aún no fue preparada.
+> **Ciclo completo de mesa:** `FREE -> OCCUPIED -> CLEANING -> FREE`. El estado `CLEANING` garantiza que no se asignen clientes nuevos a una mesa que aún no fue preparada.
 
 ### 5.4 Comprobante Digital
 
@@ -493,7 +493,7 @@ sequenceDiagram
     participant CD as Cashier Dashboard
     participant DB as Supabase DB
     participant C as Cliente
-
+    
     C->>DB: bill_requested = true (vía Customer Portal)
     CD-->>Ca: Mesa 4 aparece en cola de cuentas
     Ca->>CD: Abre detalle de cuenta
@@ -543,7 +543,7 @@ sequenceDiagram
     participant QR as Codigo QR
     participant CP as Customer Portal
     participant DB as Supabase DB
-
+    
     C->>QR: Escanea con camara del telefono
     QR-->>CP: Abre URL con token en query param
     CP->>DB: GET /api/customer/table?qr={token}
@@ -564,7 +564,7 @@ sequenceDiagram
 
 1. El cliente agrega items al carrito con cantidad, extras y notas por item.
 2. Revisa el resumen del carrito con el total calculado.
-3. Confirma el pedido → `POST /api/customer/orders` con `restaurant_id` y `table_id` embebidos.
+3. Confirma el pedido -> `POST /api/customer/orders` con `restaurant_id` y `table_id` embebidos.
 4. El pedido aparece en el Local Dashboard y en el KDS como `PENDING`.
 
 ### 6.4 Tracker de Pedido en Tiempo Real
@@ -572,7 +572,7 @@ sequenceDiagram
 Inmediatamente después de confirmar, aparece una barra de progreso en la parte superior de la pantalla con el estado en tiempo real del último pedido realizado:
 
 ```
-[📋 Solicitado] › [✅ Confirmado] › [🔥 En preparación] › [🍽️ Listo]
+[Solicitado] -> [Confirmado] -> [En preparación] -> [Listo]
 ```
 
 El tracker usa Supabase Realtime para actualizarse sin recargar la página. Desaparece automáticamente cuando el pedido pasa a `DELIVERED`.
@@ -599,10 +599,10 @@ El panel muestra:
 
 Dos acciones disponibles que el cliente puede activar en cualquier momento:
 
-- **"Pedir asistencia":** Activa `help_requested = true` en la mesa → el garzón recibe alerta visual.
-- **"Solicitar Cuenta":** Activa `bill_requested = true` → badge en waiter terminal y cashier dashboard. El botón aparece como flotante (esquina inferior derecha) después del primer pedido confirmado.
+- **"Pedir asistencia":** Activa `help_requested = true` en la mesa -> el garzón recibe alerta visual.
+- **"Solicitar Cuenta":** Activa `bill_requested = true` -> badge en waiter terminal y cashier dashboard. El botón aparece como flotante (esquina inferior derecha) después del primer pedido confirmado.
 
-### 6.6 Rating Post-Pago (W5.3)
+### 6.6 Rating Post-Pago
 
 Cuando el cajero procesa el pago y la orden pasa a `DELIVERED`, el cliente ve automáticamente un modal de calificación:
 
@@ -613,7 +613,7 @@ Cuando el cajero procesa el pago y la orden pasa a `DELIVERED`, el cliente ve au
 
 El admin puede ver el promedio de calificaciones en el widget del Local Dashboard overview.
 
-### 6.7 Menú Fine Dining (W6.3)
+### 6.7 Menú Fine Dining
 
 Mejoras visuales al explorar el menú:
 
@@ -633,7 +633,7 @@ Cada restaurante ve su propio Customer Portal con identidad visual única.
 
 ---
 
-## GUÍA DE CONFIGURACIÓN: Web Push (W5.1)
+## GUÍA DE CONFIGURACIÓN: Web Push
 
 > Requiere HTTPS en producción. En desarrollo local las notificaciones se muestran solo cuando el tab está abierto.
 
@@ -647,8 +647,8 @@ npx web-push generate-vapid-keys
 El comando genera:
 
 ```
-Public Key:  BNxxx...  ← agregar a .env como NEXT_PUBLIC_VAPID_PUBLIC_KEY
-Private Key: xxx...    ← agregar a .env como VAPID_PRIVATE_KEY
+Public Key:  BNxxx...  (agregar a .env como NEXT_PUBLIC_VAPID_PUBLIC_KEY)
+Private Key: xxx...    (agregar a .env como VAPID_PRIVATE_KEY)
 ```
 
 ### Variables de entorno requeridas (waiter-terminal)
@@ -661,21 +661,21 @@ VAPID_EMAIL=mailto:tu@email.com
 
 ### Flujo completo
 
-1. Garzón abre el Terminal → el browser solicita permiso de notificaciones.
-2. Si acepta → la suscripción VAPID se guarda en `push_subscriptions` via `POST /api/push/subscribe`.
-3. Cuando el KDS mueve una orden a `READY` → el Waiter Terminal detecta el cambio via Realtime → llama `POST /api/push/notify`.
+1. Garzón abre el Terminal -> el browser solicita permiso de notificaciones.
+2. Si acepta -> la suscripción VAPID se guarda en `push_subscriptions` via `POST /api/push/subscribe`.
+3. Cuando el KDS mueve una orden a `READY` -> el Waiter Terminal detecta el cambio via Realtime -> llama `POST /api/push/notify`.
 4. El servidor envía Web Push a todas las suscripciones activas del restaurante.
 5. El Service Worker (`/sw.js`) muestra la notificación del OS aunque el tab esté cerrado.
 
 ---
 
-## GUÍA DE CONFIGURACIÓN: Fusión de Mesas (W5.2)
+## GUÍA DE CONFIGURACIÓN: Fusión de Mesas
 
 ### Flujo para el Garzón
 
-1. En el Terminal de Garzón, tab "Mesas" → presionar el ícono de fusión (🔗).
+1. En el Terminal de Garzón, tab "Mesas" -> presionar el ícono de fusión.
 2. El mapa entra en **modo selección**: solo mesas `OCCUPIED` son seleccionables.
-3. Hacer tap en 2 o más mesas → aparece un checkmark azul en cada una.
+3. Hacer tap en 2 o más mesas -> aparece un checkmark azul en cada una.
 4. Presionar "Fusionar N mesas seleccionadas".
 5. El sistema genera un `session_id` UUID compartido y lo asigna a todas las órdenes activas de esas mesas.
 6. En el Cashier Dashboard, esas órdenes aparecen como una sola tarjeta "Mesas fusionadas" con el total consolidado.
@@ -687,7 +687,7 @@ El `session_id` solo aplica a órdenes activas. Al pagar y cerrar la cuenta, el 
 
 ---
 
-## GUÍA: KDS Modo Offline (W6.1)
+## GUÍA: KDS Modo Offline
 
 El Kitchen KDS registra un Service Worker (`/sw.js`) al cargar. Estrategia de caché:
 
