@@ -108,8 +108,10 @@ export default function AdminDashboardScreen() {
           table: 'tables',
           filter: `restaurant_id=eq.${restaurantId}`
         },
-        () => {
-          loadData();
+        async () => {
+          // Solo refrescamos las mesas para ser más eficientes
+          const tablesData = await fetchTables(restaurantId);
+          setTables(tablesData);
         }
       )
       .subscribe();
@@ -281,38 +283,48 @@ export default function AdminDashboardScreen() {
           {tables.length === 0 ? (
             <Text style={styles.emptyText}>No hay mesas configuradas</Text>
           ) : (
-            tables.map((table) => (
-              <View 
-                key={table.id} 
-                style={[
-                  styles.tableCard, 
-                  table.status === 'OCCUPIED' && styles.tableOccupied,
-                  table.status === 'RESERVED' && { backgroundColor: 'rgba(255, 193, 7, 0.1)', borderColor: 'rgba(255, 193, 7, 0.2)' }
-                ]}
-              >
-                <Text 
+            tables.map((table) => {
+              const isOccupied = table.status === 'OCCUPIED';
+              const isReserved = table.status === 'RESERVED';
+              const isCleaning = table.status === 'CLEANING';
+              
+              let statusColor = '#729B79'; // FREE
+              let bgColor = 'rgba(114, 155, 121, 0.1)';
+              let borderColor = 'rgba(114, 155, 121, 0.2)';
+
+              if (isOccupied) {
+                statusColor = MB_COLORS.brandAccent;
+                bgColor = 'rgba(254, 95, 85, 0.1)';
+                borderColor = 'rgba(254, 95, 85, 0.2)';
+              } else if (isReserved) {
+                statusColor = '#FFC107';
+                bgColor = 'rgba(255, 193, 7, 0.1)';
+                borderColor = 'rgba(255, 193, 7, 0.2)';
+              } else if (isCleaning) {
+                statusColor = '#3b82f6';
+                bgColor = 'rgba(59, 130, 246, 0.1)';
+                borderColor = 'rgba(59, 130, 246, 0.2)';
+              }
+
+              return (
+                <View 
+                  key={table.id} 
                   style={[
-                    styles.tableNumber, 
-                    table.status === 'OCCUPIED' && styles.tableNumberOccupied,
-                    table.status === 'RESERVED' && { color: '#FFC107' }
+                    styles.tableCard, 
+                    { backgroundColor: bgColor, borderColor: borderColor }
                   ]}
                 >
-                  {table.number}
-                </Text>
-                <Text 
-                  style={[
-                    styles.tableStatusText, 
-                    table.status === 'OCCUPIED' && styles.tableStatusOccupied,
-                    table.status === 'RESERVED' && { color: '#FFC107' },
-                    table.status === 'CLEANING' && { color: '#3b82f6' }
-                  ]}
-                >
-                  {table.status === 'FREE' ? 'LIBRE' : 
-                   table.status === 'OCCUPIED' ? 'OCUPADA' : 
-                   table.status === 'CLEANING' ? 'LIMPIEZA' : 'RESERVADA'}
-                </Text>
-              </View>
-            ))
+                  <Text style={[styles.tableNumber, { color: statusColor }]}>
+                    {table.number}
+                  </Text>
+                  <Text style={[styles.tableStatusText, { color: statusColor }]}>
+                    {table.status === 'FREE' ? 'LIBRE' : 
+                     table.status === 'OCCUPIED' ? 'OCUPADA' : 
+                     table.status === 'CLEANING' ? 'LIMPIEZA' : 'RESERVADA'}
+                  </Text>
+                </View>
+              );
+            })
           )}
         </View>
 

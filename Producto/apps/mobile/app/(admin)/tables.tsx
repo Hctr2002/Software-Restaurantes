@@ -209,7 +209,9 @@ export default function TablesScreen() {
           </View>
           <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor(item.status)}20` }]}>
             <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
-              {item.status === 'FREE' ? 'LIBRE' : item.status === 'OCCUPIED' ? 'OCUPADA' : 'RESERVADA'}
+              {item.status === 'FREE' ? 'LIBRE' : 
+               item.status === 'OCCUPIED' ? 'OCUPADA' : 
+               item.status === 'CLEANING' ? 'LIMPIEZA' : 'RESERVADA'}
             </Text>
           </View>
         </View>

@@ -22,7 +22,8 @@ import {
   Palette, 
   BarChart2, 
   LogOut,
-  Store
+  Store,
+  Settings
 } from 'lucide-react-native';
 import Animated, { 
   FadeIn, 

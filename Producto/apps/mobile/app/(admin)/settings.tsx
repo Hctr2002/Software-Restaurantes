@@ -4,11 +4,14 @@ import { MB_COLORS, MB_RADIUS, MB_SPACING } from '../../constants/MB_Theme';
 import { useAuth } from '../../context/AuthContext';
 import { LogOut, User, Building2, Bell, Shield } from 'lucide-react-native';
 
+import { useRouter } from 'expo-router';
+
 export default function AdminSettingsScreen() {
   const { user, signOut } = useAuth();
+  const router = useRouter();
 
-  const SettingItem = ({ icon, label, sublabel }: { icon: React.ReactNode, label: string, sublabel?: string }) => (
-    <TouchableOpacity style={styles.settingItem}>
+  const SettingItem = ({ icon, label, sublabel, onPress }: { icon: React.ReactNode, label: string, sublabel?: string, onPress?: () => void }) => (
+    <TouchableOpacity style={styles.settingItem} onPress={onPress}>
       <View style={styles.iconContainer}>{icon}</View>
       <View style={styles.settingText}>
         <Text style={styles.settingLabel}>{label}</Text>
@@ -35,14 +38,33 @@ export default function AdminSettingsScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Local</Text>
-          <SettingItem icon={<Building2 size={20} color="white" />} label="Información del Local" sublabel="Nombre, dirección y contacto" />
-          <SettingItem icon={<Bell size={20} color="white" />} label="Notificaciones" sublabel="Alertas de pedidos y sistema" />
+          <SettingItem 
+            icon={<Building2 size={20} color="white" />} 
+            label="Información del Local" 
+            sublabel="Nombre, dirección y contacto" 
+            onPress={() => router.push('/(admin)/restaurant-info')}
+          />
+          <SettingItem 
+            icon={<Bell size={20} color="white" />} 
+            label="Notificaciones" 
+            sublabel="Alertas de pedidos y sistema" 
+            onPress={() => router.push('/(admin)/notifications')} 
+          />
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Cuenta</Text>
-          <SettingItem icon={<User size={20} color="white" />} label="Perfil de Usuario" />
-          <SettingItem icon={<Shield size={20} color="white" />} label="Seguridad" sublabel="Cambiar contraseña" />
+          <SettingItem 
+            icon={<User size={20} color="white" />} 
+            label="Perfil de Usuario" 
+            onPress={() => router.push('/(admin)/profile')}
+          />
+          <SettingItem 
+            icon={<Shield size={20} color="white" />} 
+            label="Seguridad" 
+            sublabel="Cambiar contraseña" 
+            onPress={() => router.push('/(admin)/security')}
+          />
         </View>
 
         <TouchableOpacity style={styles.signOutButton} onPress={signOut}>

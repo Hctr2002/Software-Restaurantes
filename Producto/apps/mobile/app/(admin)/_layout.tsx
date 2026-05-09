@@ -1,12 +1,48 @@
 import React from 'react';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, usePathname } from 'expo-router';
 import { TouchableOpacity, StyleSheet, View, Text } from 'react-native';
-import { Menu as MenuIcon, Bell } from 'lucide-react-native';
-import { MB_COLORS } from '../../constants/MB_Theme';
+import { Menu as MenuIcon, Bell, ShoppingBag } from 'lucide-react-native';
+import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import AdminSideMenu from '../../components/AdminSideMenu';
+import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabase';
+import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
 
 export default function AdminLayout() {
+  const { restaurantId } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
   const [menuVisible, setMenuVisible] = React.useState(false);
+  const [newOrder, setNewOrder] = React.useState<any | null>(null);
+
+  const isNotificationsPage = pathname.includes('notifications');
+
+  React.useEffect(() => {
+    if (!restaurantId) return;
+
+    const channelSuffix = Math.random().toString(36).substring(7);
+    const channel = supabase
+      .channel(`global-notifications-${restaurantId}-${channelSuffix}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'orders',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        (payload) => {
+          setNewOrder(payload.new);
+          // Auto-hide after 5 seconds
+          setTimeout(() => setNewOrder(null), 5000);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [restaurantId]);
 
   const HeaderLeft = () => (
     <TouchableOpacity 
@@ -17,15 +53,52 @@ export default function AdminLayout() {
     </TouchableOpacity>
   );
 
-  const HeaderRight = () => (
-    <TouchableOpacity style={styles.headerButton}>
-      <Bell color="white" size={20} />
-      <View style={styles.badge} />
-    </TouchableOpacity>
-  );
+  const HeaderRight = () => {
+    if (isNotificationsPage) return <View style={{ width: 40 }} />;
+    
+    return (
+      <TouchableOpacity 
+        style={styles.headerButton}
+        onPress={() => {
+          setNewOrder(null);
+          router.push('/(admin)/notifications');
+        }}
+      >
+        <Bell color={newOrder ? MB_COLORS.brandAccent : "white"} size={20} />
+        {newOrder && <View style={styles.badge} />}
+      </TouchableOpacity>
+    );
+  };
+
+  const OrderNotification = () => {
+    if (!newOrder) return null;
+    return (
+      <Animated.View 
+        entering={FadeInUp} 
+        exiting={FadeOutUp}
+        style={styles.notificationContainer}
+      >
+        <TouchableOpacity 
+          style={styles.notificationToast}
+          onPress={() => setNewOrder(null)}
+        >
+          <View style={styles.notifIcon}>
+            <ShoppingBag color="white" size={20} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.notifTitle}>¡NUEVO PEDIDO!</Text>
+            <Text style={styles.notifSub}>Revisa la sección de pedidos ahora</Text>
+          </View>
+          <TouchableOpacity onPress={() => setNewOrder(null)}>
+            <Text style={styles.closeNotif}>OK</Text>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  };
 
   return (
-    <>
+    <View style={{ flex: 1 }}>
       <Stack
         screenOptions={{
           headerStyle: {
@@ -53,13 +126,18 @@ export default function AdminLayout() {
         <Stack.Screen name="branding" options={{ title: 'Branding' }} />
         <Stack.Screen name="reports" options={{ title: 'Reportes' }} />
         <Stack.Screen name="settings" options={{ title: 'Ajustes' }} />
+        <Stack.Screen name="notifications" options={{ title: 'Notificaciones' }} />
+        <Stack.Screen name="profile" options={{ title: 'Perfil' }} />
+        <Stack.Screen name="security" options={{ title: 'Seguridad' }} />
       </Stack>
+
+      <OrderNotification />
 
       <AdminSideMenu 
         visible={menuVisible} 
         onClose={() => setMenuVisible(false)} 
       />
-    </>
+    </View>
   );
 }
 
@@ -80,4 +158,61 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: MB_COLORS.navy,
   },
+  notificationContainer: {
+    position: 'absolute',
+    top: 70, // Un poco más arriba, cerca del header
+    left: 16,
+    right: 16,
+    zIndex: 9999,
+  },
+  notificationToast: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#121B33', // Navy más oscuro y sólido
+    padding: 16,
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: MB_COLORS.brandAccent,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.5,
+    shadowRadius: 16,
+    elevation: 20,
+    gap: 16,
+  },
+  notifIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: MB_COLORS.brandAccent,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: MB_COLORS.brandAccent,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+  },
+  notifTitle: {
+    color: 'white',
+    fontSize: 15,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  notifSub: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 1,
+  },
+  closeNotif: {
+    color: 'white',
+    fontWeight: '900',
+    fontSize: 11,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+    overflow: 'hidden',
+  }
 });

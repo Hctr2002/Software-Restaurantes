@@ -7,25 +7,57 @@ import {
   TouchableOpacity, 
   ActivityIndicator,
   RefreshControl,
-  StatusBar
+  StatusBar,
+  ScrollView,
+  Alert
 } from 'react-native';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { formatCurrency, timeAgo } from '../../lib/dashboard';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { ShoppingBag, ChevronRight } from 'lucide-react-native';
+import { ShoppingBag, ChevronRight, Filter } from 'lucide-react-native';
+import OrderDetailModal, { OrderStatus } from '../../components/OrderDetailModal';
+
+const STATUS_FILTER = [
+  { label: 'TODOS', value: 'ALL' },
+  { label: 'PENDIENTES', value: 'PENDING' },
+  { label: 'VALIDADOS', value: 'VALIDATED' },
+  { label: 'COCINA', value: 'PREPARING' },
+  { label: 'LISTOS', value: 'READY' },
+  { label: 'ENTREGADOS', value: 'DELIVERED' },
+];
 
 export default function AdminOrdersScreen() {
   const { restaurantId } = useAuth();
+  // Pagination State
   const [orders, setOrders] = React.useState<any[]>([]);
+  const [filteredOrders, setFilteredOrders] = React.useState<any[]>([]);
+  const [page, setPage] = React.useState(0);
+  const [hasMore, setHasMore] = React.useState(true);
+  const [loadingMore, setLoadingMore] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [refreshing, setRefreshing] = React.useState(false);
+  const [statusFilter, setStatusFilter] = React.useState('ALL');
+  const PAGE_SIZE = 20;
+  
+  // Modal State
+  const [selectedOrder, setSelectedOrder] = React.useState<any | null>(null);
+  const [isModalVisible, setIsModalVisible] = React.useState(false);
+  const [updating, setUpdating] = React.useState(false);
 
-  const loadOrders = React.useCallback(async () => {
+  const loadOrders = React.useCallback(async (isRefresh = false, nextStatus = statusFilter) => {
     if (!restaurantId) return;
+    
+    const targetPage = isRefresh ? 0 : page;
+    const from = targetPage * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
     try {
-      const { data, error } = await supabase
+      if (isRefresh) setRefreshing(true);
+      else if (targetPage > 0) setLoadingMore(true);
+
+      let query = supabase
         .from('orders')
         .select(`
           id, 
@@ -33,23 +65,51 @@ export default function AdminOrdersScreen() {
           createdAt, 
           table_id,
           tables(number),
-          order_items(unit_price, quantity)
+          order_items(
+            id,
+            unit_price, 
+            quantity,
+            notes,
+            menu_items(name)
+          )
         `)
         .eq('restaurant_id', restaurantId)
-        .order('createdAt', { ascending: false });
+        .not('status', 'eq', 'REJECTED')
+        .order('createdAt', { ascending: false })
+        .range(from, to);
+
+      // Si hay un filtro de estado, aplicarlo en la consulta para mayor eficiencia
+      if (nextStatus !== 'ALL') {
+        query = query.eq('status', nextStatus);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
-      setOrders(data || []);
+      
+      const newOrders = data || [];
+      
+      if (isRefresh) {
+        setOrders(newOrders);
+        setFilteredOrders(newOrders);
+        setPage(0);
+      } else {
+        setOrders(prev => [...prev, ...newOrders]);
+        setFilteredOrders(prev => [...prev, ...newOrders]);
+      }
+      
+      setHasMore(newOrders.length === PAGE_SIZE);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
       setRefreshing(false);
+      setLoadingMore(false);
     }
-  }, [restaurantId]);
+  }, [restaurantId, page, statusFilter]);
 
   React.useEffect(() => {
-    loadOrders();
+    loadOrders(true);
 
     if (!restaurantId) return;
 
@@ -67,7 +127,7 @@ export default function AdminOrdersScreen() {
           filter: `restaurant_id=eq.${restaurantId}`
         },
         () => {
-          loadOrders();
+          loadOrders(true);
         }
       )
       .subscribe();
@@ -75,18 +135,63 @@ export default function AdminOrdersScreen() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [loadOrders, restaurantId]);
+  }, [restaurantId, statusFilter]);
+
+  const handleUpdateStatus = async (orderId: string, nextStatus: OrderStatus) => {
+    setUpdating(true);
+    try {
+      const updateData: any = { status: nextStatus };
+      
+      // Update timestamps based on status
+      if (nextStatus === 'VALIDATED') updateData.validated_at = new Date().toISOString();
+      if (nextStatus === 'PREPARING') updateData.preparing_at = new Date().toISOString();
+      if (nextStatus === 'READY') updateData.ready_at = new Date().toISOString();
+
+      const { error } = await supabase
+        .from('orders')
+        .update(updateData)
+        .eq('id', orderId);
+
+      if (error) throw error;
+      
+      setIsModalVisible(false);
+      loadOrders();
+    } catch (err: any) {
+      Alert.alert('Error', 'No se pudo actualizar el pedido');
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   const onRefresh = () => {
-    setRefreshing(true);
-    loadOrders();
+    loadOrders(true);
   };
+
+  const handleLoadMore = () => {
+    if (!loadingMore && hasMore) {
+      setPage(prev => prev + 1);
+      // El useEffect se encargará de disparar la carga al cambiar la página
+    }
+  };
+
+  const handleFilterChange = (filter: string) => {
+    setStatusFilter(filter);
+    setLoading(true);
+    loadOrders(true, filter);
+  };
+
+  React.useEffect(() => {
+    if (page > 0) {
+      loadOrders();
+    }
+  }, [page]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING': return '#FFD700';
+      case 'PENDING': return '#facc15';
+      case 'VALIDATED': return '#60a5fa';
       case 'PREPARING': return MB_COLORS.brandAccent;
-      case 'READY': return MB_COLORS.sage;
+      case 'READY': return '#10b981';
       case 'DELIVERED': return MB_COLORS.muted;
       default: return 'white';
     }
@@ -97,7 +202,13 @@ export default function AdminOrdersScreen() {
 
     return (
       <Animated.View entering={FadeInDown.delay(index * 50)}>
-        <TouchableOpacity style={styles.orderCard}>
+        <TouchableOpacity 
+          style={styles.orderCard}
+          onPress={() => {
+            setSelectedOrder(item);
+            setIsModalVisible(true);
+          }}
+        >
           <View style={styles.orderHeader}>
             <View>
               <Text style={styles.tableText}>Mesa {item.tables?.number ?? 'S/N'}</Text>
@@ -107,7 +218,7 @@ export default function AdminOrdersScreen() {
               <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
                 {item.status === 'PENDING' ? 'PENDIENTE' : 
                  item.status === 'VALIDATED' ? 'VALIDADO' :
-                 item.status === 'PREPARING' ? 'PREPARANDO' :
+                 item.status === 'PREPARING' ? 'EN COCINA' :
                  item.status === 'READY' ? 'LISTO' : 
                  item.status === 'DELIVERED' ? 'ENTREGADO' : item.status}
               </Text>
@@ -128,30 +239,67 @@ export default function AdminOrdersScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Pedidos</Text>
+        <View>
+          <Text style={styles.headerTitle}>Gestión de Pedidos</Text>
+          <Text style={styles.headerSubtitle}>{orders.length} órdenes registradas</Text>
+        </View>
         <ShoppingBag color={MB_COLORS.brandAccent} size={24} />
+      </View>
+
+      <View style={styles.filterContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
+          {STATUS_FILTER.map((f) => (
+            <TouchableOpacity 
+              key={f.value}
+              style={[styles.filterChip, statusFilter === f.value && styles.filterChipActive]}
+              onPress={() => handleFilterChange(f.value)}
+            >
+              <Text style={[styles.filterText, statusFilter === f.value && styles.filterTextActive]}>
+                {f.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
 
       {loading && !refreshing ? (
         <View style={styles.centered}>
           <ActivityIndicator color={MB_COLORS.brandAccent} />
+          <Text style={styles.loadingText}>Sincronizando comandas...</Text>
         </View>
       ) : (
         <FlatList
-          data={orders}
+          data={filteredOrders}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={MB_COLORS.brandAccent} />
           }
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={() => (
+            loadingMore ? (
+              <View style={styles.footerLoader}>
+                <ActivityIndicator color={MB_COLORS.brandAccent} />
+              </View>
+            ) : null
+          )}
           ListEmptyComponent={
             <View style={styles.centered}>
-              <Text style={styles.emptyText}>No hay pedidos registrados</Text>
+              <Text style={styles.emptyText}>No hay pedidos con este estado</Text>
             </View>
           }
         />
       )}
+
+      <OrderDetailModal
+        visible={isModalVisible}
+        order={selectedOrder}
+        onClose={() => setIsModalVisible(false)}
+        onUpdateStatus={handleUpdateStatus}
+        updating={updating}
+      />
     </View>
   );
 }
@@ -167,15 +315,49 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: MB_SPACING.lg,
     paddingTop: 60,
-    paddingBottom: MB_SPACING.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
+    paddingBottom: MB_SPACING.md,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 26,
     color: 'white',
     fontWeight: '900',
     letterSpacing: -0.5,
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    color: MB_COLORS.muted,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  filterContainer: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
+  },
+  filterScroll: {
+    paddingHorizontal: MB_SPACING.lg,
+    gap: 10,
+  },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  filterChipActive: {
+    backgroundColor: MB_COLORS.brandAccent,
+    borderColor: MB_COLORS.brandAccent,
+  },
+  filterText: {
+    color: MB_COLORS.muted,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  filterTextActive: {
+    color: 'white',
   },
   listContent: {
     padding: MB_SPACING.lg,
@@ -199,6 +381,8 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: '900',
+    fontStyle: 'italic',
+    textTransform: 'uppercase',
   },
   timeText: {
     color: MB_COLORS.muted,
@@ -213,8 +397,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   statusText: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '900',
+    letterSpacing: 0.5,
   },
   orderFooter: {
     flexDirection: 'row',
@@ -226,8 +411,9 @@ const styles = StyleSheet.create({
   totalLabel: {
     flex: 1,
     color: MB_COLORS.muted,
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
   },
   totalAmount: {
     color: 'white',
@@ -241,9 +427,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 40,
   },
+  loadingText: {
+    color: MB_COLORS.muted,
+    marginTop: 12,
+    fontSize: 12,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+  },
   emptyText: {
     color: MB_COLORS.muted,
     fontSize: 14,
     fontStyle: 'italic',
+  },
+  footerLoader: {
+    paddingVertical: 20,
+    alignItems: 'center',
   }
 });
+
