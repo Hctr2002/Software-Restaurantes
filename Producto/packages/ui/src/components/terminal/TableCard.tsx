@@ -33,7 +33,7 @@ const STATUS_TEXT: Record<TableStatus, string> = {
   RESERVED: "text-amber-400",
 };
 
-export function TableCard({ table, isBillRequested, isReady, isPreparing, mergeMode, isSelectedForMerge, onSelect, onNavigate }: TableCardProps) {
+export function TableCard({ table, isBillRequested, isReady, isPreparing, mergeMode, isSelectedForMerge, onSelect, onNavigate, mergedTableNumbers }: TableCardProps) {
   const currentStatus = (table.status as TableStatus) || "FREE";
   const isCleaning = currentStatus === "CLEANING";
   const isSelectable = mergeMode && currentStatus === "OCCUPIED";
