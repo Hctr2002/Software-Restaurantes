@@ -5,7 +5,7 @@ import CryptoJS from 'crypto-js';
 export interface UserIdentity {
   id: string;
   email: string;
-  role: 'SUPER_ADMIN' | 'ADMIN' | 'GARZON' | 'COCINA' | 'CAJERO' | 'CLIENTE';
+  role: 'SUPER_ADMIN' | 'ADMIN' | 'GARZON' | 'COCINA' | 'CAJERO' | 'CLIENTE' | 'BAR';
   restaurantId?: string;
   pushToken?: string;
   user_metadata?: any;

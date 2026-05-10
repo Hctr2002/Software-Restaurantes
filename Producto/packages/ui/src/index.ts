@@ -16,5 +16,3 @@ export * from "./components/terminal";
 export * from "./components/portal";
 export { PremiumHeader } from "./components/PremiumHeader";
 export { HeaderStat } from "./components/HeaderStat";
-
-// Rebuild trigger: 2026-05-07T05:28:00Z

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-// Rebuild trigger: 2026-05-07T06:09:40Z
 import { useAuthStore } from "@menu-bites/store";
 import { useBarOrders, updateOrderStatus, signOut, useThemeSync } from "@menu-bites/auth";
 import { OrderTicket, Button, RestaurantThemeProvider, KDSColumn, TicketWrapper, PremiumHeader, HeaderStat } from "@menu-bites/ui";
@@ -41,7 +40,6 @@ export default function BarDashboardPage() {
   const router          = useRouter();
 
   const orders    = liveOrders.filter((o) => !clearedOrders.has(o.id));
-  const loading   = liveLoading;
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
@@ -116,7 +114,7 @@ export default function BarDashboardPage() {
     { key: "ready", title: "Para Despacho", orders: readyOrders, icon: <Activity className="w-5 h-5 text-emerald-500" />, active: false },
   ];
 
-  if (!mounted || !user || loading) {
+  if (!mounted || !user || liveLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-primary shadow-2xl shadow-primary/20" />

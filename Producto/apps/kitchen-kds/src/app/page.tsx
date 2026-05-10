@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-// Rebuild trigger: 2026-05-09T20:36:10Z
 import { useAuthStore } from "@menu-bites/store";
 import { useKitchenOrders, updateOrderStatus, signOut, useThemeSync } from "@menu-bites/auth";
 import { OrderTicket, Button, RestaurantThemeProvider, KDSColumn, TicketWrapper, PremiumHeader, HeaderStat } from "@menu-bites/ui";

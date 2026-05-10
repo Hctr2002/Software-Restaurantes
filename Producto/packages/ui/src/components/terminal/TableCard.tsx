@@ -16,6 +16,7 @@ interface TableCardProps {
   isSelectedForMerge: boolean;
   onSelect: (id: string) => void;
   onNavigate: (id: string) => void;
+  orders?: any[];
 }
 
 const STATUS_STYLES: Record<TableStatus, string> = {
@@ -32,10 +33,14 @@ const STATUS_TEXT: Record<TableStatus, string> = {
   RESERVED: "text-amber-400",
 };
 
-export function TableCard({ table, isBillRequested, isReady, isPreparing, mergeMode, isSelectedForMerge, onSelect, onNavigate }: TableCardProps) {
+export function TableCard({ table, isBillRequested, isReady, isPreparing, mergeMode, isSelectedForMerge, onSelect, onNavigate, orders = [] }: TableCardProps) {
   const currentStatus = (table.status as TableStatus) || "FREE";
   const isCleaning = currentStatus === "CLEANING";
   const isSelectable = mergeMode && currentStatus === "OCCUPIED";
+
+  // Filtrar pedidos activos para esta mesa
+  const tableOrders = orders.filter(o => o.tableId === table.id && o.status !== 'COMPLETED' && o.status !== 'REJECTED');
+  const itemsCount = tableOrders.reduce((sum, o) => sum + (o.order_items?.length || o.orderItems?.length || 0), 0);
 
   const handleClick = () => {
     if (isSelectable) onSelect(table.id);
@@ -69,7 +74,7 @@ export function TableCard({ table, isBillRequested, isReady, isPreparing, mergeM
         )}
         {isPreparing && !isReady && (
           <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-primary text-primary-foreground text-[8px] font-black px-2 py-1 rounded-lg shadow-lg">
-            COCINA
+            PREPARANDO
           </motion.div>
         )}
         {isBillRequested && (
@@ -95,6 +100,11 @@ export function TableCard({ table, isBillRequested, isReady, isPreparing, mergeM
           <p className={`text-[9px] font-black uppercase tracking-widest ${STATUS_TEXT[currentStatus]}`}>
             {currentStatus}
           </p>
+          {itemsCount > 0 && (
+            <p className="text-[8px] font-bold text-muted-foreground mt-2 uppercase tracking-tight">
+              {itemsCount} ítem(s) en curso
+            </p>
+          )}
         </div>
         {isReady && <div className="absolute -inset-0.5 bg-emerald-500/20 rounded-[2.6rem] blur animate-pulse -z-10" />}
         {isBillRequested && <div className="absolute -inset-0.5 bg-yellow-500/20 rounded-[2.6rem] blur animate-pulse -z-10" />}
@@ -102,3 +112,4 @@ export function TableCard({ table, isBillRequested, isReady, isPreparing, mergeM
     </motion.div>
   );
 }
+
