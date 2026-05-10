@@ -79,8 +79,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'CSV vacío o inválido' }, { status: 400 });
   }
 
-  // Parsear columnas del header (case-insensitive)
-  const header = lines[0].split(',').map((h) => h.trim().toLowerCase().replace(/"/g, ''));
+  // Parsear columnas del header (case-insensitive, removiendo BOM de Excel)
+  const rawHeader = lines[0].charCodeAt(0) === 0xfeff ? lines[0].slice(1) : lines[0];
+  const header = rawHeader.split(',').map((h) => h.trim().toLowerCase().replace(/"/g, ''));
   const idIdx    = header.indexOf('id');
   const stockIdx = header.findIndex((h) => h === 'stock_actual' || h === 'stock');
 
@@ -142,26 +143,29 @@ export async function POST(req: NextRequest) {
 }
 
 function parseCsvLine(line: string): string[] {
+  // Remover BOM UTF-8 que Excel agrega al exportar CSV
+  const cleanLine = line.charCodeAt(0) === 0xfeff ? line.slice(1) : line;
+
   const result: string[] = [];
   let current = '';
   let inQuotes = false;
 
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
+  for (let i = 0; i < cleanLine.length; i++) {
+    const char = cleanLine[i];
     if (char === '"') {
-      if (inQuotes && line[i + 1] === '"') {
+      if (inQuotes && cleanLine[i + 1] === '"') {
         current += '"';
         i++;
       } else {
         inQuotes = !inQuotes;
       }
     } else if (char === ',' && !inQuotes) {
-      result.push(current);
+      result.push(current.trim());
       current = '';
     } else {
       current += char;
     }
   }
-  result.push(current);
+  result.push(current.trim());
   return result;
 }

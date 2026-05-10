@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Timer, Layers, Volume2, Wine, ShoppingBag, Package, X } from "lucide-react";
-import { supabase } from "@menu-bites/auth";
+import { supabase, logBarAction } from "@menu-bites/auth";
 import { cn } from "@menu-bites/ui";
 import type { KDSSettings } from "../../lib/kdsSettings";
 
@@ -29,11 +29,12 @@ const TABS_WITHOUT_SAVE: Tab[] = ["86items", "inventario"];
 interface Props {
   settings: KDSSettings;
   restaurantId: string | undefined;
+  userId: string | undefined;
   onSave: (s: KDSSettings) => void;
   onClose: () => void;
 }
 
-export function SettingsModal({ settings: initial, restaurantId, onSave, onClose }: Props) {
+export function SettingsModal({ settings: initial, restaurantId, userId, onSave, onClose }: Props) {
   const [tab, setTab] = useState<Tab>("86items");
   const [draft, setDraft] = useState<KDSSettings>(initial);
   const [menuItems, setMenuItems] = useState<{ id: string; name: string; is_active: boolean; category_id: string }[]>([]);
@@ -61,10 +62,16 @@ export function SettingsModal({ settings: initial, restaurantId, onSave, onClose
     });
   }, [restaurantId, tab]);
 
-  const toggle86 = async (item: { id: string; is_active: boolean }) => {
+  const toggle86 = async (item: { id: string; name: string; is_active: boolean }) => {
     const newActive = !item.is_active;
     setMenuItems((prev) => prev.map((m) => (m.id === item.id ? { ...m, is_active: newActive } : m)));
     await supabase.from("menu_items").update({ is_active: newActive }).eq("id", item.id);
+    if (restaurantId) {
+      logBarAction(restaurantId, userId, newActive ? 'STOCK_RESTORED' : 'STOCK_MARKED_OUT', {
+        itemId: item.id,
+        itemName: item.name,
+      });
+    }
   };
 
   const showSave = !TABS_WITHOUT_SAVE.includes(tab);

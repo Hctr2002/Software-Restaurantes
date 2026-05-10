@@ -11,6 +11,7 @@ import { AnimatePresence } from "framer-motion";
 
 import dynamic from "next/dynamic";
 import { StockAlertModal } from "./_components/StockAlertModal";
+import { SettingsErrorBoundary } from "./_components/ErrorBoundary";
 import { loadSettings, saveSettings, getTicketUrgency, DEFAULT_SETTINGS, type KDSSettings } from "../lib/kdsSettings";
 
 const SettingsModal = dynamic(
@@ -194,12 +195,15 @@ export default function BarDashboardPage() {
         </AnimatePresence>
 
         {settingsOpen && (
-          <SettingsModal
-            settings={settings}
-            restaurantId={user?.restaurantId}
-            onSave={handleSaveSettings}
-            onClose={() => setSettingsOpen(false)}
-          />
+          <SettingsErrorBoundary>
+            <SettingsModal
+              settings={settings}
+              restaurantId={user?.restaurantId}
+              userId={user?.id}
+              onSave={handleSaveSettings}
+              onClose={() => setSettingsOpen(false)}
+            />
+          </SettingsErrorBoundary>
         )}
       </div>
     </RestaurantThemeProvider>

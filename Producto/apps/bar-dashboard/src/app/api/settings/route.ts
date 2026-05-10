@@ -64,33 +64,16 @@ export async function POST(req: NextRequest) {
   const incomingSettings = await req.json();
   const db = serviceClient();
 
-  // 1. Obtener settings actuales para no borrar lo de Cocina
-  const { data: current } = await db
-    .from('kds_settings')
-    .select('settings')
-    .eq('restaurant_id', restaurantId)
-    .single();
-
-  const finalSettings = {
-    ...(current?.settings as any || {}),
-    BAR: incomingSettings
-  };
-
-  const { data, error } = await db
-    .from('kds_settings')
-    .upsert({
-      restaurant_id: restaurantId,
-      settings: finalSettings,
-      updated_at: new Date().toISOString(),
-    }, {
-      onConflict: 'restaurant_id'
-    })
-    .select()
-    .single();
+  // Upsert atómico via RPC: evita race condition si Cocina y Barra guardan simultáneamente
+  const { data, error } = await db.rpc('upsert_kds_settings_safe', {
+    p_restaurant_id: restaurantId,
+    p_station: 'BAR',
+    p_settings: incomingSettings,
+  });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(data.settings.BAR);
+  return NextResponse.json(data);
 }
