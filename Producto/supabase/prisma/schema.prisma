@@ -199,7 +199,7 @@ model Order {
   totalAmount  Decimal     @default(0) @map("total_amount") @db.Decimal(10, 2)
   notes        String?
   sessionId    String?     @map("session_id")
-  station      String?     @map("station") // "KITCHEN" | "BAR" — null for legacy mixed orders
+  station      StationType? @map("station")
   parentOrderId String?    @map("parent_order_id")
 
   // Legacy cross-station flags — kept for backward compat with old mixed orders

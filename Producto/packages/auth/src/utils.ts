@@ -12,7 +12,9 @@ export const mapMenuItem = (item: any): MenuItem => ({
 export const mapCategory = (cat: any): Category => ({
   ...cat,
   restaurantId: cat.restaurant_id,
-  isActive: cat.is_active
+  targetStation: cat.target_station,
+  isActive: cat.is_active,
+  is_active: cat.is_active,
 });
 
 export const mapTable = (t: any): TableRecord => ({

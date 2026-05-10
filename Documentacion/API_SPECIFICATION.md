@@ -729,12 +729,15 @@ El endpoint `GET /api/local/orders` ahora incluye los campos de estado dual-esta
 }
 ```
 
-### 13.3 `updateOrderStatus()` — Parámetro de Estación
+### 13.3 `updateOrderStatus()` — Firma Actual
 
-La función pública `updateOrderStatus(orderId, status, station?)` del paquete `@menu-bites/auth` acepta un tercer argumento opcional `station: 'KITCHEN' | 'BAR'`:
+La función pública `updateOrderStatus(orderId, status)` del paquete `@menu-bites/auth` actualiza directamente el campo `status` del pedido:
 
-- **Sin estación:** Actualiza `status` directamente (garzón, cajero).
-- **Con estación `KITCHEN` o `BAR`:** Actualiza solo los flags de esa estación y determina el status global comparando ambas estaciones.
+```ts
+updateOrderStatus(orderId: string, status: string): Promise<{ data, error }>
+```
 
-Esta lógica garantiza que un pedido mixto no pase a READY globalmente hasta que tanto cocina como barra hayan completado sus ítems.
+- **Cada pedido pertenece a una sola estación** (`station = 'KITCHEN' | 'BAR'`). No existe lógica de flags cruzados.
+- El garzón y el cajero llaman a esta función para avanzar el estado (VALIDATED → PREPARING → READY → DELIVERED → COMPLETED).
+- La máquina de estados está validada en BD por el trigger `tr_order_status_validation` (migración 0011).
 

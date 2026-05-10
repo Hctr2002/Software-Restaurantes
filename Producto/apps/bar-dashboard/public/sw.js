@@ -1,8 +1,8 @@
-// Service Worker — Kitchen KDS
+// Service Worker — Bar Dashboard
 // Estrategia: Cache-First para assets, Network-First para datos de órdenes
 // En modo offline muestra los últimos datos cacheados con banner de advertencia.
 
-const CACHE_NAME = 'kds-v1';
+const CACHE_NAME = 'bar-kds-v1';
 const ASSETS_TO_CACHE = ['/', '/login'];
 
 // Instalar: cachear assets principales

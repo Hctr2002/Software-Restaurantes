@@ -105,7 +105,7 @@ El middleware de Next.js valida el rol antes de que la solicitud llegue a la ló
 | `SUPER_ADMIN` | admin-dashboard (3000) | `sb-admin-session` | `/admin/*` — gestión global de la plataforma |
 | `ADMIN` | local-dashboard (3003) | `sb-local-session` | `/[slug]/dashboard/*` — panel completo del restaurante |
 | `GARZON` | waiter-terminal (3002) | `sb-waiter-session` | `/[slug]/waiter/*` — terminal de garzón |
-| `COCINA` | kitchen-kds (3001) | `sb-kitchen-session` | `/[slug]/kds/*` — Kitchen KDS |
+| `COCINA` | kitchen-kds (3001) | `sb-kds-session` | `/[slug]/kds/*` — Kitchen KDS |
 | `CAJERO` | cashier-dashboard (3004) | `sb-cashier-session` | `/[slug]/cashier/*` — terminal de caja |
 | `BAR` | bar-dashboard (3006) | `sb-bar-session` | `/*` — Bar KDS exclusivo |
 | `CLIENTE` | customer-portal (3005) | sin sesión (anon) | `/{slug}/*` — Customer Portal público |

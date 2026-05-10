@@ -94,21 +94,34 @@ export async function POST(req: NextRequest) {
     }
 
     // Obtener target_station de cada menu_item via su categoría (dos queries explícitas)
+    // Filtramos por restaurant_id para evitar que IDs de otros restaurantes sean resueltos
     const menuItemIds = items.map((i) => i.menu_item_id);
     const { data: menuItemRows, error: miError } = await db
       .from('menu_items')
       .select('id, category_id')
-      .in('id', menuItemIds);
+      .in('id', menuItemIds)
+      .eq('restaurant_id', restaurant_id);
 
     if (miError) {
       return NextResponse.json({ error: miError.message }, { status: 500 });
+    }
+
+    // Validar que todos los items existen y pertenecen al restaurante
+    if ((menuItemRows ?? []).length !== menuItemIds.length) {
+      const foundIds = new Set((menuItemRows ?? []).map((mi: any) => mi.id));
+      const invalid = menuItemIds.filter((id) => !foundIds.has(id));
+      return NextResponse.json(
+        { error: `Items no válidos o de otro restaurante: ${invalid.join(', ')}` },
+        { status: 400 }
+      );
     }
 
     const categoryIds = [...new Set((menuItemRows ?? []).map((mi: any) => mi.category_id).filter(Boolean))];
     const { data: categoryRows } = await db
       .from('categories')
       .select('id, target_station')
-      .in('id', categoryIds);
+      .in('id', categoryIds)
+      .eq('restaurant_id', restaurant_id);
 
     const categoryStationMap = new Map<string, 'KITCHEN' | 'BAR'>(
       (categoryRows ?? []).map((c: any) => [c.id, c.target_station as 'KITCHEN' | 'BAR'])
