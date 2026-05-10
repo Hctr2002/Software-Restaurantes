@@ -7,15 +7,16 @@
  import { OrderItem, OrderStatus } from "@menu-bites/auth";
  
  interface OrderTicketProps {
-   id: string;
-   tableNumber?: number | null;
-   status: OrderStatus;
-   createdAt: string;
-   items: OrderItem[];
-   onStatusChange: (newStatus: OrderStatus) => void;
- }
- 
- export const OrderTicket = ({ id, tableNumber, status, createdAt, items, onStatusChange }: OrderTicketProps) => {
+  id: string;
+  tableNumber?: number | null;
+  status: OrderStatus;
+  createdAt: string;
+  items: OrderItem[];
+  onStatusChange: (newStatus: OrderStatus) => void;
+  notes?: string | null;
+}
+
+export const OrderTicket = ({ id, tableNumber, status, createdAt, items, onStatusChange, notes }: OrderTicketProps) => {
    const [elapsed, setElapsed] = useState(0);
  
    useEffect(() => {
@@ -88,6 +89,14 @@
            </motion.div>
          ))}
        </div>
+
+        {notes && (
+          <div className="p-3 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 mb-4">
+            <p className="text-[9px] font-black uppercase tracking-wider text-yellow-500 mb-1">Nota:</p>
+            <p className="text-xs text-white/80">{notes}</p>
+          </div>
+        )}
+
         {onStatusChange && (
           <div className="pt-6 mt-6 border-t border-white/5">
             <div className="flex space-x-3">

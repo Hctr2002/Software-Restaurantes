@@ -23,6 +23,7 @@ export default function TableMenuPage() {
   const [submitting, setSubmitting] = useState(false);
   const [showBillModal, setShowBillModal] = useState(false);
   const [requestingBill, setRequestingBill] = useState(false);
+  const [orderNotes, setOrderNotes] = useState("");
 
   const loading = menuLoading || tableLoading;
 
@@ -69,7 +70,8 @@ export default function TableMenuPage() {
           table_id: tableId,
           session_id: tableData?.session_id || null,
           status: "PENDING", // Pasa a cocina para validación/preparación
-          total_amount: total
+          total_amount: total,
+          notes: orderNotes || null
         })
         .select()
         .single();
@@ -223,6 +225,16 @@ export default function TableMenuPage() {
               >
                 <Trash2 className="w-5 h-5" />
               </button>
+            </div>
+
+            <div className="mt-2 mb-2">
+              <input
+                type="text"
+                placeholder="Notas para la cocina (ej: sin sal, sin hielo)..."
+                value={orderNotes}
+                onChange={(e) => setOrderNotes(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white text-xs placeholder:text-white/20 focus:outline-none focus:border-sage/50"
+              />
             </div>
 
             <div className="flex space-x-3">
