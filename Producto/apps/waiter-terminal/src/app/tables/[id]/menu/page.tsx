@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { useAuthStore } from "@menu-bites/store";
 import { useMenu, useTable, supabase, useThemeSync } from "@menu-bites/auth";
-import { MenuItemCard, ProductSearchBar, CategoryTabs, Button, RestaurantThemeProvider } from "@menu-bites/ui";
+import { MenuItemCard, ProductSearchBar, CategoryTabs, Button, RestaurantThemeProvider, PremiumHeader } from "@menu-bites/ui";
 import { useParams, useRouter } from "next/navigation";
 import { ChevronLeft, ShoppingBag, Send, Trash2, Loader2, Receipt } from "lucide-react";
 
@@ -49,7 +49,11 @@ export default function TableMenuPage() {
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   const handleSubmitOrder = async () => {
-    if (!user?.restaurantId || cart.length === 0 || submitting) return;
+    if (!user?.restaurantId) {
+      alert("No se encontró el ID del restaurante en la sesión. ¿Estás logueado?");
+      return;
+    }
+    if (cart.length === 0 || submitting) return;
     setSubmitting(true);
 
     try {
@@ -111,7 +115,7 @@ export default function TableMenuPage() {
   };
 
   const handleRequestBill = async (includeTip: boolean) => {
-    if (!user?.restaurantId || requestingBill) return;
+    if (!user?.restaurantId || requestingBill || table?.status === 'FREE') return;
     setRequestingBill(true);
     try {
       const { error } = await supabase
@@ -143,30 +147,37 @@ export default function TableMenuPage() {
   return (
     <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
       <div className="min-h-screen bg-navy bg-body-gradient text-white pb-32">
-        {/* Header con Back Button y Pedir Cuenta */}
-        <header className="glass-navy sticky top-0 z-50 p-5 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => router.push("/")}
-              className="p-3 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all active:scale-95"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <h1 className="text-xl font-black tracking-tighter uppercase italic">
-                Mesa <span className="text-brand-accent">{table?.number ?? "..."}</span>
-              </h1>
-              <p className="text-[10px] text-sage uppercase font-black tracking-[0.2em] mt-0.5">Nuevo Pedido</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setShowBillModal(true)}
-            className="flex items-center gap-2 px-4 py-3 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-2xl hover:bg-yellow-500/20 transition-all active:scale-95"
-          >
-            <Receipt className="w-4 h-4" />
-            <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Pedir Cuenta</span>
-          </button>
-        </header>
+        {/* Header */}
+        <div className="px-4 py-4 sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-white/5">
+          <PremiumHeader
+            title={`Mesa ${table?.number ?? "..."}`}
+            statusLabel="Nuevo Pedido"
+            statusSubLabel="Terminal de Garzón"
+            icon={ShoppingBag}
+            variant="compact"
+            actions={
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => router.push("/")}
+                  className="p-3 text-white/40 hover:text-white bg-white/5 rounded-2xl hover:bg-white/10 transition-colors"
+                  title="Volver"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setShowBillModal(true)}
+                  disabled={table?.status === 'FREE'}
+                  className={`flex items-center gap-2 px-4 py-3 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-2xl hover:bg-yellow-500/20 transition-all active:scale-95 ${
+                    table?.status === 'FREE' ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  <Receipt className="w-4 h-4" />
+                  <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Pedir Cuenta</span>
+                </button>
+              </div>
+            }
+          />
+        </div>
 
         <main className="space-y-6 pt-6">
         <ProductSearchBar 
