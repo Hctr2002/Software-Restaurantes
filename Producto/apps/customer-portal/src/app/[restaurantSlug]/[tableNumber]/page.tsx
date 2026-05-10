@@ -46,7 +46,7 @@ export default function MenuPage({
   const [billRequested, setBillRequested]       = useState(false);
 
   const { status: currentTrackerStatus } = useCustomerOrderTracker(portal.order.lastId);
-  const { orders: tableOrders } = useTableOrders(portal.table.data?.id);
+  const { orders: tableOrders } = useTableOrders(portal.table.data?.id, portal.table.data?.session_id);
 
   const [showRating, setShowRating]       = useState(false);
   const [ratingOrderId, setRatingOrderId] = useState<string | null>(null);
