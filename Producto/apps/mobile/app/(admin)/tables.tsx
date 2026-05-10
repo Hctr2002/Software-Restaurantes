@@ -14,6 +14,7 @@ import {
 import { Table as TableIcon, Search, Plus, MapPin, ChevronRight, Hash } from 'lucide-react-native';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
+import { CUSTOMER_PORTAL_URL } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -144,9 +145,7 @@ export default function TablesScreen() {
           .single();
         
         const slug = rest?.slug || restaurantId;
-        // Usar la URL de producción o desarrollo según corresponda
-        const portalUrl = "https://menubites.vercel.app"; 
-        const qr_data = `${portalUrl}/${slug}/${data.number}`;
+        const qr_data = `${CUSTOMER_PORTAL_URL}/${slug}/${data.number}`;
 
         const { error } = await supabase
           .from('tables')

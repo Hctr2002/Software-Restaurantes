@@ -37,3 +37,8 @@ export const SUPERADMIN_API = getApiUrl(3000) || process.env.EXPO_PUBLIC_SUPERAD
  */
 export const LOCALADMIN_API = getApiUrl(3003) || process.env.EXPO_PUBLIC_LOCALADMIN_API_URL;
 
+/**
+ * URL for the Customer Portal (for QR generation)
+ */
+export const CUSTOMER_PORTAL_URL = getApiUrl(3005) || process.env.EXPO_PUBLIC_CUSTOMER_PORTAL_URL || 'https://menubites.vercel.app';
+

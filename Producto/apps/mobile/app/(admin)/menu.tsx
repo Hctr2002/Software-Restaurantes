@@ -23,8 +23,10 @@ import {
 } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
+import { useRouter } from 'expo-router';
 import MenuItemModal from '../../components/MenuItemModal';
 import { Buffer } from 'buffer';
+import { Alert } from 'react-native';
 
 const { width } = Dimensions.get('window');
 const COLUMN_COUNT = 2;
@@ -33,6 +35,7 @@ const ITEM_WIDTH = (width - 48) / COLUMN_COUNT;
 export default function MenuScreen() {
   const { user } = useAuth();
   const { colors } = useTheme();
+  const router = useRouter();
   const [items, setItems] = React.useState<any[]>([]);
   const [categories, setCategories] = React.useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = React.useState('all');
@@ -288,6 +291,17 @@ export default function MenuScreen() {
           <TouchableOpacity 
             style={[styles.addButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }]}
             onPress={() => {
+              if (categories.length === 0) {
+                Alert.alert(
+                  'No hay categorías',
+                  'Debes crear al menos una categoría antes de agregar productos.',
+                  [
+                    { text: 'Cancelar', style: 'cancel' },
+                    { text: 'Ir a Categorías', onPress: () => router.push('/(admin)/categories' as any) }
+                  ]
+                );
+                return;
+              }
               setEditingItem(null);
               setIsModalVisible(true);
             }}

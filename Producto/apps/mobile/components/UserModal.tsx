@@ -25,7 +25,7 @@ interface UserModalProps {
   user: UserProfile | null;
 }
 
-const ROLES = ["ADMIN", "GARZON", "COCINA", "CAJERO"];
+const ROLES = ["ADMIN", "GARZON", "COCINA", "CAJERO", "BAR"];
 
 export const UserModal = ({ visible, onClose, onSave, onDelete, user }: UserModalProps) => {
   const { colors } = useTheme();
