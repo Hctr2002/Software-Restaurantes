@@ -34,9 +34,11 @@ function InitialLayout() {
 
     const inAuthGroup = (segments[0] as string) === '(auth)';
     const inTabsGroup = (segments[0] as string) === '(tabs)';
+    const inMenuGroup = (segments[0] as string) === '[restaurantSlug]'; // Catch dynamic menu routes
+    const inScannerGroup = (segments[0] as string) === 'scanner';
 
-    if (!session && !inAuthGroup && !inTabsGroup) {
-      // Redirect to login if not authenticated and not in tabs/auth
+    if (!session && !inAuthGroup && !inTabsGroup && !inMenuGroup && !inScannerGroup) {
+      // Redirect to login if not authenticated and not in a public group
       router.replace('/(tabs)' as any);
     } else if (session) {
       // Determine the target group based on role
@@ -64,6 +66,8 @@ function InitialLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="(auth)" />
+      <Stack.Screen name="scanner/index" options={{ presentation: 'modal', title: 'Escanear QR' }} />
+      <Stack.Screen name="[restaurantSlug]/[tableNumber]/index" options={{ title: 'Menú' }} />
       <Stack.Screen name="(super-admin)" />
       <Stack.Screen name="(admin)" />
       <Stack.Screen name="(waiter)" options={{ headerShown: false }} />

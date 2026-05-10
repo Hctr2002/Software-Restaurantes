@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { QrCode, User, Utensils } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { MB_COLORS } from '../constants/MB_Theme';
@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function LandingHeader() {
   const router = useRouter();
-
   const insets = useSafeAreaInsets();
 
   return (
@@ -26,7 +25,7 @@ export default function LandingHeader() {
           <TouchableOpacity 
             activeOpacity={0.7}
             style={[styles.actionBtn, styles.qrBtn]}
-            onPress={() => {/* TODO: Open QR Scanner */}}
+            onPress={() => router.push('/scanner')}
           >
             <QrCode size={20} color="#10b981" />
           </TouchableOpacity>

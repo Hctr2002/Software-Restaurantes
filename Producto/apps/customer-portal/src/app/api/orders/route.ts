@@ -15,6 +15,42 @@ interface CreateOrderPayload {
   items: OrderItemPayload[];
 }
 
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const tableId = searchParams.get('table_id');
+
+  if (!tableId) {
+    return NextResponse.json({ error: 'table_id es requerido' }, { status: 400 });
+  }
+
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('orders')
+      .select(`
+        *,
+        items:order_items(*, menu_item:menu_items(name))
+      `)
+      .eq('table_id', tableId)
+      .not('status', 'in', '("REJECTED","COMPLETED")')
+      .order('createdAt', { ascending: false });
+
+    if (error) {
+      console.error('[api/orders] GET error:', error.message);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
+  } catch (err) {
+    return NextResponse.json({ error: 'Error interno' }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,33 +68,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verificar restaurante activo
-    const { data: restaurant, error: restError } = await supabaseAdmin
-      .from('restaurants')
-      .select('id')
-      .eq('id', restaurant_id)
-      .eq('status', 'ACTIVE')
-      .single();
-
-    if (restError || !restaurant) {
-      return NextResponse.json(
-        { error: 'Restaurante no encontrado o inactivo' },
-        { status: 404 }
-      );
-    }
-
-    // Generar UUID explícitamente — Prisma no pone DEFAULT en la columna id de la BD
+    // Generar UUID explícitamente
     const orderId = randomUUID();
 
     const { error: orderError } = await supabaseAdmin
       .from('orders')
       .insert({
-        id:           orderId,
+        id: orderId,
         restaurant_id,
-        table_id:     table_id || null,
-        status:       'PENDING',
+        table_id: table_id || null,
+        status: 'PENDING',
         total_amount,
-        notes:        'Pedido desde portal web',
+        notes: 'Pedido nuevo',
       });
 
     if (orderError) {
@@ -66,14 +87,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: orderError.message }, { status: 500 });
     }
 
-    // Crear los order_items con UUIDs explícitos
+    // Crear los order_items
     const orderItems = items.map((item) => ({
-      id:            randomUUID(),
-      order_id:      orderId,
-      menu_item_id:  item.menu_item_id,
+      id: randomUUID(),
+      order_id: orderId,
+      menu_item_id: item.menu_item_id,
       restaurant_id,
-      quantity:      item.quantity,
-      unit_price:    item.unit_price,
+      quantity: item.quantity,
+      unit_price: item.unit_price,
     }));
 
     const { error: itemsError } = await supabaseAdmin
@@ -85,7 +106,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: itemsError.message }, { status: 500 });
     }
 
-    // Marcar mesa como OCCUPIED al recibir el primer pedido
     if (table_id) {
       await supabaseAdmin
         .from('tables')
