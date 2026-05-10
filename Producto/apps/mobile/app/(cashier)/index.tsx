@@ -13,10 +13,12 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
-import { History, Clock, Search, Wallet, TrendingUp, X } from 'lucide-react-native';
+import { History, Clock, Search, Wallet, TrendingUp, X, AlertTriangle } from 'lucide-react-native';
 import { formatCurrency } from '../../lib/dashboard';
 import CashierOrderCard from './_components/CashierOrderCard';
 import PaymentModal from './_components/PaymentModal';
+import CashierAlertModal from './_components/CashierAlertModal';
+import { Alert } from 'react-native';
 import Animated, { FadeInUp, FadeInRight } from 'react-native-reanimated';
 
 type CashierTab = 'pending' | 'history';
@@ -49,7 +51,7 @@ function groupOrders(orders: any[], billMap: Record<string, boolean>): any[] {
 }
 
 export default function CashierDashboard() {
-  const { restaurantId } = useAuth();
+  const { restaurantId, user } = useAuth();
   const { colors } = useTheme();
   
   const [activeTab, setActiveTab] = useState<CashierTab>('pending');
@@ -64,6 +66,9 @@ export default function CashierDashboard() {
   const [selectedGroup, setSelectedGroup] = useState<any | null>(null);
   const [isPaymentVisible, setIsPaymentVisible] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const [isAlertVisible, setIsAlertVisible] = useState(false);
+  const [isSendingAlert, setIsSendingAlert] = useState(false);
 
   const fetchOrders = useCallback(async () => {
     if (!restaurantId) return;
@@ -140,10 +145,17 @@ export default function CashierDashboard() {
   const filteredGroups = useMemo(() => {
     const current = activeTab === 'pending' ? groups.pending : groups.history;
     if (!searchQuery) return current;
-    return current.filter(g => 
-      g.tableNumber?.toString().includes(searchQuery) || 
-      g.key.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    
+    const search = searchQuery.toLowerCase().trim();
+    
+    return current.filter(g => {
+      const displayLabel = (g.sessionId ? "Mesas fusionadas" : `Mesa ${g.tableNumber ?? "S/N"}`).toLowerCase();
+      const tableNumberStr = (g.tableNumber ?? '').toString().toLowerCase();
+      
+      return displayLabel.includes(search) || 
+             tableNumberStr.includes(search) ||
+             g.key.toLowerCase().includes(search);
+    });
   }, [activeTab, groups, searchQuery]);
 
   const handleProcessPayment = async (reference: string) => {
@@ -179,6 +191,34 @@ export default function CashierDashboard() {
     }
   };
 
+  const handleSendAlert = async (tableNum: string, message: string) => {
+    if (!restaurantId) return;
+    setIsSendingAlert(true);
+    try {
+      const { error } = await supabase
+        .from('alerts')
+        .insert({
+          restaurant_id: restaurantId,
+          user_id: user?.id,
+          user_email: user?.email,
+          type: 'HELP_REQUEST',
+          message: message,
+          table_number: tableNum ? parseInt(tableNum, 10) : null,
+          status: 'PENDING'
+        });
+      
+      if (error) throw error;
+      
+      Alert.alert('Alerta Enviada', 'El administrador ha sido notificado.');
+      setIsAlertVisible(false);
+    } catch (err) {
+      console.error('[Cashier] Alert error:', err);
+      Alert.alert('Error', 'No se pudo enviar la alerta.');
+    } finally {
+      setIsSendingAlert(false);
+    }
+  };
+
   const renderHeader = () => (
     <View style={[styles.header, { backgroundColor: colors.navy }]}>
       <View style={styles.headerTop}>
@@ -186,12 +226,20 @@ export default function CashierDashboard() {
           <Text style={[styles.headerTitle, { color: colors.text }]}>CAJA <Text style={{ color: colors.brandAccent }}>REGISTRADORA</Text></Text>
           <Text style={[styles.headerSub, { color: colors.muted }]}>CONTROL DE COBROS</Text>
         </View>
-        <TouchableOpacity 
-          style={[styles.searchToggle, { backgroundColor: colors.glass }]}
-          onPress={() => setShowSearch(!showSearch)}
-        >
-          <Search size={20} color={showSearch ? colors.brandAccent : colors.muted} />
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          <TouchableOpacity 
+            style={[styles.headerIconBtn, { backgroundColor: 'rgba(245, 158, 11, 0.1)', marginRight: 12 }]}
+            onPress={() => setIsAlertVisible(true)}
+          >
+            <AlertTriangle size={20} color="#f59e0b" />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.headerIconBtn, { backgroundColor: colors.glass }]}
+            onPress={() => setShowSearch(!showSearch)}
+          >
+            <Search size={20} color={showSearch ? colors.brandAccent : colors.muted} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {showSearch && (
@@ -306,6 +354,13 @@ export default function CashierDashboard() {
         onClose={() => setIsPaymentVisible(false)}
         onConfirm={handleProcessPayment}
       />
+
+      <CashierAlertModal 
+        visible={isAlertVisible}
+        isSending={isSendingAlert}
+        onClose={() => setIsAlertVisible(false)}
+        onSend={handleSendAlert}
+      />
     </View>
   );
 }
@@ -334,11 +389,15 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     marginTop: 2,
   },
-  searchToggle: {
+  headerIconBtn: {
     width: 44,
     height: 44,
     borderRadius: 14,
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerRight: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
   searchContainer: {

@@ -20,6 +20,7 @@ export interface CategoryData {
   id: string;
   name: string;
   is_active: boolean;
+  target_station: 'KITCHEN' | 'BAR';
 }
 
 interface CategoryModalProps {
@@ -34,16 +35,19 @@ export const CategoryModal = ({ visible, onClose, onSave, onDelete, category }: 
   const { colors } = useTheme();
   const [name, setName] = React.useState('');
   const [isActive, setIsActive] = React.useState(true);
+  const [station, setStation] = React.useState<'KITCHEN' | 'BAR'>('KITCHEN');
   const [loading, setLoading] = React.useState(false);
   const [deleting, setDeleting] = React.useState(false);
 
   React.useEffect(() => {
     if (category) {
       setName(category.name);
-      setIsActive(category.is_active !== false); // Default to true if undefined
+      setIsActive(category.is_active !== false);
+      setStation(category.target_station || 'KITCHEN');
     } else {
       setName('');
       setIsActive(true);
+      setStation('KITCHEN');
     }
   }, [category, visible]);
 
@@ -54,6 +58,7 @@ export const CategoryModal = ({ visible, onClose, onSave, onDelete, category }: 
       await onSave({ 
         name: name.trim(), 
         is_active: isActive,
+        target_station: station,
         id: category?.id 
       });
       onClose();
@@ -117,6 +122,30 @@ export const CategoryModal = ({ visible, onClose, onSave, onDelete, category }: 
                   </View>
                   <Text style={[styles.toggleLabel, { color: colors.text }]}>Categoría Activa</Text>
                 </TouchableOpacity>
+
+                <Text style={[styles.label, { color: colors.muted, marginTop: 20 }]}>Estación de Destino</Text>
+                <View style={styles.stationButtons}>
+                  <TouchableOpacity 
+                    style={[
+                      styles.stationButton, 
+                      { borderColor: colors.glassHeavy },
+                      station === 'KITCHEN' && { backgroundColor: colors.brandAccent, borderColor: colors.brandAccent }
+                    ]}
+                    onPress={() => setStation('KITCHEN')}
+                  >
+                    <Text style={[styles.stationButtonText, { color: station === 'KITCHEN' ? 'white' : colors.muted }]}>COCINA</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[
+                      styles.stationButton, 
+                      { borderColor: colors.glassHeavy },
+                      station === 'BAR' && { backgroundColor: '#3b82f6', borderColor: '#3b82f6' }
+                    ]}
+                    onPress={() => setStation('BAR')}
+                  >
+                    <Text style={[styles.stationButtonText, { color: station === 'BAR' ? 'white' : colors.muted }]}>BAR</Text>
+                  </TouchableOpacity>
+                </View>
 
                 <TouchableOpacity 
                   style={[styles.saveButton, { backgroundColor: colors.brandAccent }, !name.trim() && { opacity: 0.5 }]} 
@@ -270,5 +299,22 @@ const styles = StyleSheet.create({
     color: MB_COLORS.brandAccent,
     fontSize: 12,
     fontWeight: '800',
+  },
+  stationButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  stationButton: {
+    flex: 1,
+    height: 40,
+    borderRadius: 10,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stationButtonText: {
+    fontSize: 11,
+    fontWeight: '900',
   }
 });

@@ -140,10 +140,10 @@ export default function TableOrderScreen() {
       const { data: tableData } = await supabase.from('tables').select('*').eq('id', id).single();
       setTable(tableData);
 
-      // Fetch Categories
+      // Fetch Categories with target_station
       const { data: catData } = await supabase
         .from('categories')
-        .select('*')
+        .select('id, name, is_active, target_station')
         .eq('restaurant_id', restaurantId)
         .eq('is_active', true)
         .order('name');
@@ -226,37 +226,59 @@ export default function TableOrderScreen() {
     
     setIsPlacing(true);
     try {
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          restaurant_id: restaurantId,
-          table_id: id,
-          status: 'VALIDATED',
-          total_amount: cartTotal,
-          validated_at: new Date().toISOString()
-        })
-        .select()
-        .single();
+      // Map categories to stations
+      const categoryStationMap = new Map(
+        categories.map(cat => [cat.id, cat.target_station || 'KITCHEN'])
+      );
 
-      if (orderError) throw orderError;
+      // Group cart items by station
+      const itemsByStation: Record<string, any[]> = {};
+      cart.forEach(item => {
+        const station = categoryStationMap.get(item.category_id) || 'KITCHEN';
+        if (!itemsByStation[station]) itemsByStation[station] = [];
+        itemsByStation[station].push(item);
+      });
 
-      const orderItems = cart.map(item => ({
-        order_id: order.id,
-        menu_item_id: item.id,
-        quantity: item.quantity,
-        unit_price: item.price,
-        restaurant_id: restaurantId
-      }));
+      const orderIds: string[] = [];
 
-      const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
-      if (itemsError) throw itemsError;
+      for (const [station, items] of Object.entries(itemsByStation)) {
+        const stationTotal = items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+        
+        const { data: order, error: orderError } = await supabase
+          .from('orders')
+          .insert({
+            restaurant_id: restaurantId,
+            table_id: id,
+            status: 'VALIDATED',
+            total_amount: stationTotal,
+            station: station as any,
+            parent_order_id: orderIds[0] || null,
+            validated_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+
+        if (orderError) throw orderError;
+        orderIds.push(order.id);
+
+        const orderItems = items.map(item => ({
+          order_id: order.id,
+          menu_item_id: item.id,
+          quantity: item.quantity,
+          unit_price: item.price,
+          restaurant_id: restaurantId
+        }));
+
+        const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
+        if (itemsError) throw itemsError;
+      }
 
       await supabase.from('tables').update({ status: 'OCCUPIED' }).eq('id', id);
 
-      Alert.alert('Éxito', 'Comanda enviada a cocina');
+      Alert.alert('Éxito', 'Comanda enviada a preparación');
       setCart([]);
       setShowReview(false);
-      fetchData(); // Refresh to show the new order in consumption
+      fetchData(); 
 
     } catch (err) {
       console.error('Error sending order:', err);

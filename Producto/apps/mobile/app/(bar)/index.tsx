@@ -12,20 +12,20 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
-import { ChefHat, LogOut, AlertTriangle, Settings } from 'lucide-react-native';
-import KitchenOrderCard from './_components/KitchenOrderCard';
+import { Beer, LogOut, AlertTriangle, Settings } from 'lucide-react-native';
+import KitchenOrderCard from '../(kitchen)/_components/KitchenOrderCard';
 import OrderDetailModal, { OrderStatus } from '../../components/OrderDetailModal';
-import StockAlertModal from './_components/StockAlertModal';
-import KdsSettingsModal, { KdsSettings, DEFAULT_KDS_SETTINGS } from './_components/KdsSettingsModal';
+import StockAlertModal from '../(kitchen)/_components/StockAlertModal';
+import KdsSettingsModal, { KdsSettings, DEFAULT_KDS_SETTINGS } from '../(kitchen)/_components/KdsSettingsModal';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 
-type KitchenTab = 'Nuevos' | 'Cocinando' | 'Listos';
+type BarTab = 'Nuevos' | 'Preparando' | 'Listos';
 
-export default function KitchenDashboard() {
+export default function BarDashboard() {
   const { restaurantId, signOut } = useAuth();
   const { colors } = useTheme();
   
-  const [activeTab, setActiveTab] = useState<KitchenTab>('Nuevos');
+  const [activeTab, setActiveTab] = useState<BarTab>('Nuevos');
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -37,7 +37,7 @@ export default function KitchenDashboard() {
   const [isAlertVisible, setIsAlertVisible] = useState(false);
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
   
-  // KDS Settings
+  // Bar Settings (Using KDS settings for now as they are shared/similar)
   const [settings, setSettings] = useState<KdsSettings>(DEFAULT_KDS_SETTINGS);
   const [tick, setTick] = useState(0);
 
@@ -56,14 +56,14 @@ export default function KitchenDashboard() {
           )
         `)
         .eq('restaurant_id', restaurantId)
-        .eq('station', 'KITCHEN')
+        .eq('station', 'BAR')
         .in('status', ['VALIDATED', 'PREPARING', 'READY'])
         .order('createdAt', { ascending: true });
 
       if (error) throw error;
       setOrders(data || []);
     } catch (err) {
-      console.error('[Kitchen] Fetch error:', err);
+      console.error('[Bar] Fetch error:', err);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -74,7 +74,7 @@ export default function KitchenDashboard() {
     if (!restaurantId) return;
     try {
       const { data, error } = await supabase
-        .from('kds_settings')
+        .from('kds_settings') // Reusing kds_settings table or should we have bar_settings?
         .select('settings')
         .eq('restaurant_id', restaurantId)
         .single();
@@ -83,7 +83,7 @@ export default function KitchenDashboard() {
         setSettings({ ...DEFAULT_KDS_SETTINGS, ...data.settings });
       }
     } catch (err) {
-      console.error('[Kitchen] Settings fetch error:', err);
+      console.error('[Bar] Settings fetch error:', err);
     }
   }, [restaurantId]);
 
@@ -94,7 +94,7 @@ export default function KitchenDashboard() {
     if (!restaurantId) return;
 
     const channel = supabase
-      .channel(`kitchen-orders-realtime-${restaurantId}`)
+      .channel(`bar-orders-realtime-${restaurantId}`)
       .on(
         'postgres_changes',
         {
@@ -109,7 +109,6 @@ export default function KitchenDashboard() {
       )
       .subscribe();
 
-    // Re-render tick every 30s to update timers and auto-clear
     const interval = setInterval(() => setTick(t => t + 1), 30000);
 
     return () => {
@@ -134,13 +133,12 @@ export default function KitchenDashboard() {
       
       setIsDetailVisible(false);
     } catch (err) {
-      console.error('[Kitchen] Update error:', err);
+      console.error('[Bar] Update error:', err);
     } finally {
       setUpdating(false);
     }
   };
 
-  // Filter out auto-cleared orders
   const visibleOrders = orders.filter(order => {
     if (order.status === 'READY' && settings.autoClear.enabled) {
       const readyAt = order.ready_at ? new Date(order.ready_at).getTime() : 0;
@@ -154,14 +152,14 @@ export default function KitchenDashboard() {
 
   const filteredOrders = visibleOrders.filter(o => {
     if (activeTab === 'Nuevos') return o.status === 'VALIDATED';
-    if (activeTab === 'Cocinando') return o.status === 'PREPARING';
+    if (activeTab === 'Preparando') return o.status === 'PREPARING';
     if (activeTab === 'Listos') return o.status === 'READY';
     return false;
   });
 
-  const getTabCount = (tab: KitchenTab) => {
+  const getTabCount = (tab: BarTab) => {
     if (tab === 'Nuevos') return visibleOrders.filter(o => o.status === 'VALIDATED').length;
-    if (tab === 'Cocinando') return visibleOrders.filter(o => o.status === 'PREPARING').length;
+    if (tab === 'Preparando') return visibleOrders.filter(o => o.status === 'PREPARING').length;
     if (tab === 'Listos') return visibleOrders.filter(o => o.status === 'READY').length;
     return 0;
   };
@@ -169,11 +167,11 @@ export default function KitchenDashboard() {
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.headerTitleContainer}>
-        <View style={[styles.iconBox, { backgroundColor: colors.brandAccent }]}>
-          <ChefHat color="white" size={24} />
+        <View style={[styles.iconBox, { backgroundColor: '#3b82f6' }]}>
+          <Beer color="white" size={24} />
         </View>
         <View>
-          <Text style={[styles.title, { color: colors.text }]}>MONITOR <Text style={{ color: colors.brandAccent }}>KDS</Text></Text>
+          <Text style={[styles.title, { color: colors.text }]}>MONITOR <Text style={{ color: '#3b82f6' }}>BAR</Text></Text>
           <View style={styles.liveIndicator}>
             <View style={styles.dot} />
             <Text style={[styles.liveText, { color: colors.muted }]}>SISTEMA EN VIVO</Text>
@@ -202,12 +200,12 @@ export default function KitchenDashboard() {
 
   const renderTabs = () => (
     <View style={[styles.tabBar, { borderBottomColor: colors.glassHeavy }]}>
-      {(['Nuevos', 'Cocinando', 'Listos'] as KitchenTab[]).map((tab) => (
+      {(['Nuevos', 'Preparando', 'Listos'] as BarTab[]).map((tab) => (
         <TouchableOpacity 
           key={tab} 
           style={[
             styles.tab, 
-            activeTab === tab && { borderBottomColor: colors.brandAccent }
+            activeTab === tab && { borderBottomColor: '#3b82f6' }
           ]}
           onPress={() => setActiveTab(tab)}
         >
@@ -220,7 +218,7 @@ export default function KitchenDashboard() {
             </Text>
             <View style={[
               styles.badge, 
-              { backgroundColor: activeTab === tab ? colors.brandAccent : colors.glassHeavy }
+              { backgroundColor: activeTab === tab ? '#3b82f6' : colors.glassHeavy }
             ]}>
               <Text style={styles.badgeText}>{getTabCount(tab)}</Text>
             </View>
@@ -238,8 +236,8 @@ export default function KitchenDashboard() {
 
       {loading && !refreshing ? (
         <View style={styles.centered}>
-          <ActivityIndicator color={colors.brandAccent} size="large" />
-          <Text style={[styles.loadingText, { color: colors.muted }]}>Sincronizando cocina...</Text>
+          <ActivityIndicator color="#3b82f6" size="large" />
+          <Text style={[styles.loadingText, { color: colors.muted }]}>Sincronizando bar...</Text>
         </View>
       ) : (
         <FlatList
@@ -265,7 +263,7 @@ export default function KitchenDashboard() {
           )}
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchOrders(); }} tintColor={colors.brandAccent} />
+            <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchOrders(); }} tintColor="#3b82f6" />
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>

@@ -25,7 +25,8 @@ import {
   Store,
   Settings,
   ChefHat,
-  Wallet
+  Wallet,
+  Beer
 } from 'lucide-react-native';
 import Animated, { 
   FadeIn, 
@@ -120,6 +121,7 @@ export default function AdminSideMenu({ visible, onClose }: AdminSideMenuProps) 
             <NavItem icon={Users} label="Usuarios" path="/(admin)/users" />
             <NavItem icon={UtensilsCrossed} label="Menú" path="/(admin)/menu" />
             <NavItem icon={ChefHat} label="Cocina" path="/(kitchen)" />
+            <NavItem icon={Beer} label="Bar" path="/(bar)" />
             <NavItem icon={Wallet} label="Caja" path="/(cashier)" />
             <NavItem icon={Tag} label="Categorías" path="/(admin)/categories" />
             <NavItem icon={TableProperties} label="Mesas" path="/(admin)/tables" />

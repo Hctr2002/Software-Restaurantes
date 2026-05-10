@@ -39,7 +39,7 @@ export default function CategoriesScreen() {
     try {
       const { data, error } = await supabase
         .from('categories')
-        .select('id, name, is_active')
+        .select('id, name, is_active, target_station')
         .eq('restaurant_id', restaurantId)
         .order('name', { ascending: true });
 
@@ -118,6 +118,7 @@ export default function CategoriesScreen() {
       const payload = {
         name: data.name,
         is_active: data.is_active,
+        target_station: data.target_station,
         restaurant_id: restaurantId
       };
 
