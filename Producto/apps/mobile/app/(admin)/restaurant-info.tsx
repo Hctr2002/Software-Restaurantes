@@ -26,11 +26,7 @@ export default function RestaurantInfoScreen() {
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const [formData, setFormData] = React.useState({
-    name: '',
-    address: '',
-    phone: '',
-    email: '',
-    tax_percentage: '0'
+    name: ''
   });
 
   React.useEffect(() => {
@@ -49,11 +45,7 @@ export default function RestaurantInfoScreen() {
       if (error) throw error;
       if (data) {
         setFormData({
-          name: data.name || '',
-          address: data.address || '',
-          phone: data.phone || '',
-          email: data.email || '',
-          tax_percentage: String(data.tax_percentage || '0')
+          name: data.name || ''
         });
       }
     } catch (err) {
@@ -76,11 +68,7 @@ export default function RestaurantInfoScreen() {
       const { error } = await supabase
         .from('restaurants')
         .update({
-          name: formData.name,
-          address: formData.address,
-          phone: formData.phone,
-          email: formData.email,
-          tax_percentage: parseFloat(formData.tax_percentage) || 0
+          name: formData.name
         })
         .eq('id', restaurantId);
 
@@ -132,75 +120,6 @@ export default function RestaurantInfoScreen() {
               value={formData.name}
               onChangeText={(t) => setFormData({ ...formData, name: t })}
               placeholder="Ej: Burger House"
-              placeholderTextColor={colors.muted}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <View style={styles.labelRow}>
-              <MapPin size={14} color={colors.muted} />
-              <Text style={[styles.label, { color: colors.muted }]}>Dirección Física</Text>
-            </View>
-            <TextInput
-              style={[styles.input, styles.textArea, { backgroundColor: colors.glass, borderColor: colors.glassHeavy, color: colors.text }]}
-              value={formData.address}
-              onChangeText={(t) => setFormData({ ...formData, address: t })}
-              placeholder="Calle, Número, Ciudad"
-              placeholderTextColor={colors.muted}
-              multiline
-              numberOfLines={3}
-            />
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.muted }]}>CONTACTO</Text>
-
-          <View style={styles.inputGroup}>
-            <View style={styles.labelRow}>
-              <Phone size={14} color={colors.muted} />
-              <Text style={[styles.label, { color: colors.muted }]}>Teléfono de Atención</Text>
-            </View>
-            <TextInput
-              style={[styles.input, { backgroundColor: colors.glass, borderColor: colors.glassHeavy, color: colors.text }]}
-              value={formData.phone}
-              onChangeText={(t) => setFormData({ ...formData, phone: t })}
-              placeholder="+56 9 ..."
-              keyboardType="phone-pad"
-              placeholderTextColor={colors.muted}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <View style={styles.labelRow}>
-              <Mail size={14} color={colors.muted} />
-              <Text style={[styles.label, { color: colors.muted }]}>Email Público</Text>
-            </View>
-            <TextInput
-              style={[styles.input, { backgroundColor: colors.glass, borderColor: colors.glassHeavy, color: colors.text }]}
-              value={formData.email}
-              onChangeText={(t) => setFormData({ ...formData, email: t })}
-              placeholder="contacto@restaurante.com"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              placeholderTextColor={colors.muted}
-            />
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.muted }]}>CONFIGURACIÓN FISCAL</Text>
-          <View style={styles.inputGroup}>
-            <View style={styles.labelRow}>
-              <Percent size={14} color={colors.muted} />
-              <Text style={[styles.label, { color: colors.muted }]}>Impuesto / IVA (%)</Text>
-            </View>
-            <TextInput
-              style={[styles.input, { backgroundColor: colors.glass, borderColor: colors.glassHeavy, color: colors.text }]}
-              value={formData.tax_percentage}
-              onChangeText={(t) => setFormData({ ...formData, tax_percentage: t })}
-              placeholder="0.00"
-              keyboardType="numeric"
               placeholderTextColor={colors.muted}
             />
           </View>

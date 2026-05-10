@@ -166,7 +166,7 @@ export default function BrandingScreen() {
 
       const { error } = await supabase
         .from('restaurant_themes')
-        .upsert(payload, { onConflict: 'restaurant_id, is_active' });
+        .upsert(payload);
 
       if (error) throw error;
       
