@@ -44,11 +44,12 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
   'REJECTED': 'ANULADO'
 };
 
-export default function OrderDetailModal({ visible, onClose, order, onUpdateStatus, updating }: OrderDetailProps) {
+export default function OrderDetailModal({ visible, onClose, order, onUpdateStatus, updating, allowDelivery = true, allowCancel = true }: OrderDetailProps & { allowDelivery?: boolean, allowCancel?: boolean }) {
   const { colors } = useTheme();
   if (!order) return null;
 
   const nextStatus = NEXT_STATUS[order.status as OrderStatus];
+  const showActionButton = nextStatus && !(nextStatus === 'DELIVERED' && !allowDelivery);
   const total = (order.order_items || []).reduce((sum: number, it: any) => sum + (it.unit_price * it.quantity), 0);
 
   return (
@@ -121,7 +122,7 @@ export default function OrderDetailModal({ visible, onClose, order, onUpdateStat
 
           {/* Actions */}
           <View style={styles.footer}>
-            {nextStatus ? (
+            {showActionButton && nextStatus ? (
               <TouchableOpacity 
                 style={[styles.primaryAction, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }, updating && styles.disabledAction]}
                 onPress={() => onUpdateStatus(order.id, nextStatus)}
@@ -139,11 +140,13 @@ export default function OrderDetailModal({ visible, onClose, order, onUpdateStat
             ) : (
               <View style={styles.completedState}>
                 <CheckCircle2 size={24} color="#10b981" />
-                <Text style={[styles.completedText, { color: "#10b981" }]}>ORDEN FINALIZADA</Text>
+                <Text style={[styles.completedText, { color: "#10b981" }]}>
+                  {order.status === 'READY' ? 'PEDIDO LISTO' : 'ORDEN FINALIZADA'}
+                </Text>
               </View>
             )}
             
-            {!['DELIVERED', 'REJECTED'].includes(order.status) && (
+            {allowCancel && !['DELIVERED', 'REJECTED'].includes(order.status) && (
               <TouchableOpacity 
                 style={[styles.cancelAction, { borderColor: colors.glassHeavy }]}
                 onPress={() => onUpdateStatus(order.id, 'REJECTED')}

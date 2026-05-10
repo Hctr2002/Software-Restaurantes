@@ -23,7 +23,8 @@ import {
   BarChart2, 
   LogOut,
   Store,
-  Settings
+  Settings,
+  ChefHat
 } from 'lucide-react-native';
 import Animated, { 
   FadeIn, 
@@ -117,6 +118,7 @@ export default function AdminSideMenu({ visible, onClose }: AdminSideMenuProps) 
             <SectionTitle title="Gestión" />
             <NavItem icon={Users} label="Usuarios" path="/(admin)/users" />
             <NavItem icon={UtensilsCrossed} label="Menú" path="/(admin)/menu" />
+            <NavItem icon={ChefHat} label="Cocina" path="/(kitchen)" />
             <NavItem icon={Tag} label="Categorías" path="/(admin)/categories" />
             <NavItem icon={TableProperties} label="Mesas" path="/(admin)/tables" />
             <NavItem icon={ClipboardList} label="Pedidos" path="/(admin)/orders" />
