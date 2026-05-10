@@ -74,11 +74,15 @@ BEGIN
         WHEN 'PREPARING' THEN
             IF NEW.status != 'READY' THEN RAISE EXCEPTION 'Transición inválida: PREPARING -> %', NEW.status; END IF;
         WHEN 'READY' THEN
-            IF NEW.status NOT IN ('DELIVERED', 'COMPLETED') THEN RAISE EXCEPTION 'Transición inválida: READY -> %', NEW.status; END IF;
+            -- Un pedido listo puede ser entregado o pagado directamente
+            IF NEW.status NOT IN ('DELIVERED', 'COMPLETED', 'REJECTED') THEN RAISE EXCEPTION 'Transición inválida: READY -> %', NEW.status; END IF;
         WHEN 'DELIVERED' THEN
+            -- Un pedido entregado solo puede pasar a COMPLETED (pagado)
             IF NEW.status != 'COMPLETED' THEN RAISE EXCEPTION 'Transición inválida: DELIVERED -> %', NEW.status; END IF;
-        WHEN 'COMPLETED' THEN RAISE EXCEPTION 'No se puede cambiar el estado de un pedido ya COMPLETED';
-        WHEN 'REJECTED' THEN RAISE EXCEPTION 'No se puede cambiar el estado de un pedido ya REJECTED';
+        WHEN 'COMPLETED' THEN 
+            RAISE EXCEPTION 'No se puede cambiar el estado de un pedido ya COMPLETED';
+        WHEN 'REJECTED' THEN 
+            RAISE EXCEPTION 'No se puede cambiar el estado de un pedido ya REJECTED';
     END CASE;
 
     RETURN NEW;

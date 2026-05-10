@@ -19,4 +19,4 @@ export type {
 } from "@menu-bites/auth";
 
 export const ORDER_STATUSES = ["PENDING", "VALIDATED", "PREPARING", "READY", "DELIVERED", "COMPLETED", "REJECTED"];
-export const LOCAL_ROLES = ["ADMIN", "COCINA", "CAJERO", "GARZON"];
+export const LOCAL_ROLES = ["ADMIN", "COCINA", "CAJERO", "GARZON", "BAR"];

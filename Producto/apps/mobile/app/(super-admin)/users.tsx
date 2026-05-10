@@ -13,7 +13,7 @@ type UserRecord = {
   restaurant_id?: string | null;
 };
 
-const ROLES = ['SUPER_ADMIN', 'ADMIN', 'GARZON', 'COCINA', 'CAJERO', 'CLIENTE'];
+const ROLES = ['SUPER_ADMIN', 'ADMIN', 'GARZON', 'COCINA', 'CAJERO', 'CLIENTE', 'BAR'];
 
 export default function UsersTab() {
   const [users, setUsers] = useState<UserRecord[]>([]);

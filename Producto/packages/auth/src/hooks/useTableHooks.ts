@@ -8,7 +8,7 @@ import { useRealtimeSync } from "./useRealtimeSync";
 
 export function useTable(tableId: string | undefined) {
   const fetchFn = useCallback(async () => {
-    if (!tableId) return { data: null, error: "No table ID" };
+    if (!tableId) return { data: null, error: null };
     return supabase
       .from("tables")
       .select("*")
@@ -20,10 +20,10 @@ export function useTable(tableId: string | undefined) {
     undefined,
     "tables",
     fetchFn,
-    { 
+    {
       channelId: `table-${tableId}`,
-      filter: `id=eq.${tableId}`,
-      transform: mapTable
+      filter: tableId ? `id=eq.${tableId}` : undefined,
+      transform: (data: any) => data ? mapTable(data) : null,
     }
   );
 
@@ -32,6 +32,7 @@ export function useTable(tableId: string | undefined) {
 
 export function useTables(restaurantId: string | undefined) {
   const fetchFn = useCallback(async () => {
+    if (!restaurantId) return { data: [], error: null };
     return supabase
       .from("tables")
       .select("*")
@@ -43,7 +44,7 @@ export function useTables(restaurantId: string | undefined) {
     restaurantId, 
     "tables", 
     fetchFn,
-    { transform: mapTable }
+    { transform: (data: any) => Array.isArray(data) ? data.map(mapTable) : [] }
   );
 
   return { tables, loading, refetch };
@@ -67,10 +68,10 @@ export function useTableOrders(tableId: string | undefined) {
     undefined,
     "orders",
     fetchFn,
-    { 
-      channelId: `table-orders-${tableId}`,
-      filter: `table_id=eq.${tableId}`,
-      transform: mapOrder
+    {
+      channelId: `table-orders-${tableId ?? "none"}`,
+      filter: tableId ? `table_id=eq.${tableId}` : undefined,
+      transform: (data: any) => Array.isArray(data) ? data.map(mapOrder) : []
     }
   );
 

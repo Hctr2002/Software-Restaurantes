@@ -7,6 +7,7 @@ import { useRealtimeSync } from "./useRealtimeSync";
 
 export function useRealtimeAlerts(restaurantId: string | undefined) {
   const fetchFn = useCallback(async () => {
+    if (!restaurantId) return { data: [], error: null };
     return supabase
       .from("alerts")
       .select("*")

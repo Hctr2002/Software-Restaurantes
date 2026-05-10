@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@menu-bites/store";
 import { useTables, signOut, supabase } from "@menu-bites/auth";
-import { RestaurantThemeProvider, CardSkeleton, Button, Badge } from "@menu-bites/ui";
+import { RestaurantThemeProvider, CardSkeleton, Button, Badge, PremiumHeader } from "@menu-bites/ui";
 import { AnimatePresence, motion } from "framer-motion";
 import { LayoutDashboard, Bell, LogOut, AlertTriangle, UtensilsCrossed, Sparkles, ChevronDown, RefreshCw, Receipt, Link2 } from "lucide-react";
 
@@ -14,7 +14,8 @@ import {
   TableMergeBar, 
   AlertModal, 
   TableCard,
-  PreparingOrdersList
+  PreparingOrdersList,
+  TableOrdersModal
 } from "@menu-bites/ui";
 import { useRealtimeWaiterOrders as useWaiterOrders, useAlertForm, useThemeSync } from "@menu-bites/auth";
 import { useWebPush } from "../hooks/useWebPush";
@@ -42,6 +43,9 @@ export default function WaiterDashboard() {
   const [alertModal, setAlertModal] = useState(false);
   const [isIslandExpanded, setIsIslandExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<"mesas" | "pedidos">("mesas");
+  const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
+
+  const selectedTable = tables.find(t => t.id === selectedTableId) || null;
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -76,47 +80,35 @@ export default function WaiterDashboard() {
     <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
       <div className="min-h-screen bg-background text-foreground pb-32 font-sans flex flex-col">
 
-        {/* Header */}
-        <header className="border-b border-border/10 px-6 py-5 flex items-center justify-between bg-card/40 backdrop-blur-2xl sticky top-0 z-40">
-          <div className="flex items-center gap-4">
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-primary/50 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000" />
-              <div className="relative w-10 h-10 bg-card border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl">
-                <UtensilsCrossed className="w-5 h-5 text-primary" />
+        <div className="p-4 lg:p-6 pb-0">
+          <PremiumHeader
+            title="Terminal"
+            accentTitle="Garzón"
+            icon={UtensilsCrossed}
+            statusSubLabel={`${user?.restaurantId?.split("-")[0] || "RESTAURANTE"} · EN LÍNEA`}
+            actions={
+              <div className="flex items-center gap-4">
+                <div className="flex items-center bg-white/5 rounded-2xl p-1 border border-white/5">
+                  <button onClick={() => setAlertModal(true)} className="p-2.5 rounded-xl text-yellow-500 hover:bg-yellow-500/10 transition-all active:scale-90" title="Nueva Alerta">
+                    <AlertTriangle className="w-4 h-4" />
+                  </button>
+                  <button onClick={handleSignOut} disabled={isSigningOut} className="p-2.5 rounded-xl text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-90" title="Salir">
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="hidden xl:flex flex-col items-end">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none mb-1">Usuario</p>
+                  <p className="text-xs font-black text-foreground/80 leading-none">{user?.email}</p>
+                </div>
               </div>
-            </div>
-            <div>
-              <h1 className="text-lg font-black tracking-tighter leading-none">
-                Terminal <span className="text-primary">Garzón</span>
-              </h1>
-              <div className="flex items-center gap-2 mt-1.5">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-                </span>
-                <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest opacity-60">
-                  {user?.restaurantId?.split("-")[0] || "RESTAURANTE"} · EN LÍNEA
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <p className="text-xs font-bold text-foreground/80 hidden sm:block mr-2">{user?.email}</p>
-            <div className="flex items-center bg-white/5 rounded-2xl p-1 border border-white/5">
-              <button onClick={() => setAlertModal(true)} className="p-2.5 rounded-xl text-yellow-500 hover:bg-yellow-500/10 transition-all active:scale-90" title="Nueva Alerta">
-                <AlertTriangle className="w-4 h-4" />
-              </button>
-              <button onClick={handleSignOut} disabled={isSigningOut} className="p-2.5 rounded-xl text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-90" title="Salir">
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </header>
+            }
+          />
+        </div>
 
         {/* Status Islands */}
         <div className="px-6 py-4 flex flex-col gap-3">
           <AnimatePresence mode="popLayout">
-            {orders.readyOrders.length > 0 && (
+            {(orders.readyOrders.length > 0 || orders.partiallyReadyOrders.length > 0) && (
               <motion.div layout initial={{ height: 80, opacity: 0, y: -20 }} animate={{ height: isIslandExpanded ? "auto" : 80, opacity: 1, y: 0 }} exit={{ height: 0, opacity: 0 }} transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 className="relative overflow-hidden bg-emerald-500/10 border border-emerald-500/20 rounded-[2.5rem] p-4 flex flex-col">
                 <div className="flex items-center justify-between gap-4">
@@ -125,8 +117,10 @@ export default function WaiterDashboard() {
                       <Sparkles className="w-6 h-6 text-emerald-400" />
                     </motion.div>
                     <div>
-                      <h3 className="font-black text-sm text-emerald-400 uppercase tracking-widest leading-none mb-1.5">Cocina Despachando</h3>
-                      <p className="text-[10px] text-emerald-400/60 font-black uppercase tracking-widest">{orders.readyOrders.length} {orders.readyOrders.length === 1 ? "Plato listo" : "Platos listos"}</p>
+                      <h3 className="font-black text-sm text-emerald-400 uppercase tracking-widest leading-none mb-1.5">Aviso de Despacho</h3>
+                      <p className="text-[10px] text-emerald-400/60 font-black uppercase tracking-widest">
+                        {orders.readyOrders.length + orders.partiallyReadyOrders.length} Pedidos disponibles
+                      </p>
                     </div>
                   </div>
                   <button onClick={() => setIsIslandExpanded(!isIslandExpanded)} className="p-3 bg-white/5 rounded-2xl hover:bg-white/10 transition-all text-emerald-400">
@@ -136,7 +130,10 @@ export default function WaiterDashboard() {
                 <AnimatePresence>
                   {isIslandExpanded && (
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="pt-6 w-full">
-                      <ReadyOrdersBanner orders={orders.readyOrders} onDeliver={orders.handleDeliver} />
+                      <ReadyOrdersBanner 
+                        orders={[...orders.readyOrders, ...orders.partiallyReadyOrders]} 
+                        onDeliver={orders.handleDeliver} 
+                      />
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -252,7 +249,14 @@ export default function WaiterDashboard() {
                       mergeMode={merge.mergeMode}
                       isSelectedForMerge={merge.selectedForMerge.has(table.id)}
                       onSelect={merge.toggleMergeSelect}
-                      onNavigate={(id) => router.push(`/tables/${id}/menu`)}
+                      orders={orders.orders}
+                      onNavigate={(id) => {
+                        if (table.status === 'OCCUPIED' || table.status === 'RESERVED') {
+                          setSelectedTableId(id);
+                        } else {
+                          router.push(`/tables/${id}/menu`);
+                        }
+                      }}
                     />
                   ))}
                 </div>
@@ -262,10 +266,9 @@ export default function WaiterDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-4xl font-black tracking-tighter">Gestión de <span className="text-primary">Pedidos</span></h2>
-                    <p className="text-muted-foreground text-xs font-black uppercase tracking-widest opacity-60 mt-1">Validación y seguimiento de cocina</p>
+                    <p className="text-muted-foreground text-xs font-black uppercase tracking-widest opacity-60 mt-1">Validación y seguimiento de preparación</p>
                   </div>
                 </div>
-
                 {orders.pendingOrders.length > 0 && (
                   <div className="space-y-4">
                     <h3 className="text-sm font-black uppercase tracking-widest text-yellow-500/80 flex items-center gap-2">
@@ -279,11 +282,19 @@ export default function WaiterDashboard() {
                             <PendingOrderCard
                               order={order}
                               note={orders.notesByOrder[order.id] ?? ""}
+                              barNote={order.barSubOrderId ? (orders.notesByOrder[order.barSubOrderId] ?? "") : undefined}
                               processingId={orders.processingId}
                               savingNoteId={orders.savingNoteId}
                               onNoteChange={(id, val) => orders.setNotesByOrder((p) => ({ ...p, [id]: val }))}
                               onSaveNote={orders.handleSaveNote}
-                              onValidate={(order) => orders.handleValidate(order.id)}
+                              onBarNoteChange={(id, val) => orders.setNotesByOrder((p) => ({ ...p, [id]: val }))}
+                              onSaveBarNote={orders.handleSaveBarNote}
+                              onValidate={(order) => orders.handleValidate(
+                                order.id,
+                                orders.notesByOrder[order.id],
+                                order.barSubOrderId,
+                                order.barSubOrderId ? orders.notesByOrder[order.barSubOrderId] : undefined
+                              )}
                               onReject={(order) => orders.handleReject(order.id, order.tableId)}
                             />
                           </motion.div>
@@ -293,7 +304,7 @@ export default function WaiterDashboard() {
                   </div>
                 )}
 
-                {/* En Cocina (Unified Component) */}
+                {/* En Preparación (Unified Component) */}
                 <PreparingOrdersList orders={orders.preparingOrders} />
 
                 {orders.pendingOrders.length === 0 && orders.preparingOrders.length === 0 && (
@@ -316,6 +327,15 @@ export default function WaiterDashboard() {
               setAlertModal(false);
               alertForm.reset();
             }} 
+          />
+        )}
+        {selectedTableId && (
+          <TableOrdersModal
+            isOpen={!!selectedTableId}
+            onClose={() => setSelectedTableId(null)}
+            table={selectedTable}
+            orders={orders.orders}
+            onTakeOrder={(id) => router.push(`/tables/${id}/menu`)}
           />
         )}
       </AnimatePresence>

@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   const { restaurantId } = auth;
 
   const body = await req.json();
-  const { name, is_active } = body;
+  const { name, is_active, target_station } = body;
 
   if (!name?.trim()) {
     return NextResponse.json({ error: "El nombre es requerido" }, { status: 400 });
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   const db = createServiceClient();
   const { data, error } = await db
     .from("categories")
-    .insert({ name: name.trim(), is_active: is_active ?? true, restaurant_id: restaurantId })
+    .insert({ name: name.trim(), is_active: is_active ?? true, restaurant_id: restaurantId, target_station: target_station ?? "KITCHEN" })
     .select()
     .single();
 
