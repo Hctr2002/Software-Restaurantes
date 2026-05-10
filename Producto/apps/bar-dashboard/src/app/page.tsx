@@ -10,9 +10,14 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 
 
-import { SettingsModal } from "./_components/SettingsModal";
+import dynamic from "next/dynamic";
 import { StockAlertModal } from "./_components/StockAlertModal";
 import { loadSettings, saveSettings, getTicketUrgency, DEFAULT_SETTINGS, type KDSSettings } from "../lib/kdsSettings";
+
+const SettingsModal = dynamic(
+  () => import("./_components/SettingsModal").then((m) => ({ default: m.SettingsModal })),
+  { ssr: false }
+);
 
 const NEW_TICKET_SFX = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
 const CRITICAL_SFX   = "https://assets.mixkit.co/active_storage/sfx/2997/2997-preview.mp3";
@@ -71,7 +76,7 @@ export default function BarDashboardPage() {
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
-      const { error } = await updateOrderStatus(orderId, newStatus, 'BAR');
+      const { error } = await updateOrderStatus(orderId, newStatus);
       if (error) {
         alert(`Error al actualizar el pedido: ${error.message}`);
         return;

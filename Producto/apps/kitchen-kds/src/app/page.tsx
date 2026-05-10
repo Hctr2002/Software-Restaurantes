@@ -73,7 +73,7 @@ export default function KitchenKDSPage() {
     console.log(`[KDS] Intentando cambiar estado del pedido ${orderId} a ${newStatus}`);
     
     try {
-      const { error } = await updateOrderStatus(orderId, newStatus, 'KITCHEN');
+      const { error } = await updateOrderStatus(orderId, newStatus);
       if (error) {
         console.error(`[KDS] Error al actualizar estado en Supabase:`, error);
         alert(`Error al actualizar el pedido: ${error.message}`);

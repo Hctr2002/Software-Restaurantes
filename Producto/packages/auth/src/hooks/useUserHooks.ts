@@ -36,26 +36,44 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
 
   const handleValidate = async (orderId: string, note?: string) => {
     setProcessingId(orderId);
+    const order = orders.find((o) => o.id === orderId);
     if (note?.trim()) {
       await supabase.from("orders").update({ notes: note.trim() }).eq("id", orderId);
     }
-    await updateOrderStatus(orderId, "VALIDATED");
+    // Validate all PENDING sub-orders for the same table in one batch
+    if (order?.tableId) {
+      await supabase
+        .from("orders")
+        .update({ status: "VALIDATED", validated_at: new Date().toISOString() })
+        .eq("table_id", order.tableId)
+        .eq("status", "PENDING");
+    } else {
+      await updateOrderStatus(orderId, "VALIDATED");
+    }
     setProcessingId(null);
   };
 
   const handleReject = async (orderId: string, tableId?: string | null) => {
     setProcessingId(orderId);
-    await updateOrderStatus(orderId, "REJECTED");
-    if (tableId) {
+    const order = orders.find((o) => o.id === orderId);
+    const tid = tableId ?? order?.tableId;
+    if (tid) {
+      // Reject all PENDING/VALIDATED sub-orders for the same table
+      await supabase
+        .from("orders")
+        .update({ status: "REJECTED" })
+        .eq("table_id", tid)
+        .in("status", ["PENDING", "VALIDATED"]);
       const { data: remaining } = await supabase
         .from("orders")
         .select("id")
-        .eq("table_id", tableId)
-        .not("status", "in", '("REJECTED","DELIVERED")')
-        .neq("id", orderId);
+        .eq("table_id", tid)
+        .not("status", "in", '("REJECTED","DELIVERED","COMPLETED")');
       if (!remaining?.length) {
-        await supabase.from("tables").update({ status: "FREE" }).eq("id", tableId);
+        await supabase.from("tables").update({ status: "FREE" }).eq("id", tid);
       }
+    } else {
+      await updateOrderStatus(orderId, "REJECTED");
     }
     setProcessingId(null);
   };

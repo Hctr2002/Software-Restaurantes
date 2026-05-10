@@ -9,7 +9,6 @@ import { useRealtimeSync } from "./useRealtimeSync";
 export interface RealtimeOrdersOptions {
   statuses?: string[];
   limit?: number;
-  includeItems?: boolean;
   ascending?: boolean;
   station?: StationType;
 }
@@ -35,63 +34,41 @@ export function useRealtimeOrders(restaurantId: string | undefined, options: Rea
       query = query.in("status", statuses);
     }
 
-    // Si se especifica una estación, podríamos filtrar aquí o en el transform
-    // Para simplificar y mantener el tiempo real estable, filtraremos en el transform
-    // si es necesario, o podemos añadir un filtro post-fetch.
+    if (station) {
+      // Include both orders with explicit station AND legacy orders (station IS NULL)
+      query = query.or(`station.eq.${station},station.is.null`);
+    }
+
     return query;
-  }, [restaurantId, statusesStr, limit, ascending]);
+  }, [restaurantId, statusesStr, limit, ascending, station]);
 
   const { data: orders, loading, refetch } = useRealtimeSync<Order[]>(
     restaurantId,
     "orders",
     fetchFn,
-    { 
+    {
       channelId: `orders-${statusesStr}-${station || 'all'}`,
       transform: (data) => {
-        if (!Array.isArray(data)) {
-          console.warn(`[RealtimeOrders] Expected array but received:`, typeof data, data);
-          return [];
-        }
-
-        let mapped = data.map(mapOrder);
-        
-        if (station) {
-          const isKitchen = station === "KITCHEN";
-          return mapped.filter(order => {
-            const rawItems = order.order_items || [];
-            const hasStationItems = rawItems.some((item: any) =>
-              item.menu_items?.category?.target_station === station
-            );
-            if (!hasStationItems) return false;
-
-            // Calcular status independiente para esta estación
-            const stationReady     = isKitchen ? order.kitchenReady     : order.barReady;
-            const stationPreparing = isKitchen ? order.kitchenPreparing : order.barPreparing;
-
-            // PARCIAL: this station already delivered its portion — hide from its board
-            if (order.status === "PARCIAL" && !stationReady && !stationPreparing) return false;
-            if (stationReady) {
-              order.status = "READY";
-            } else if (stationPreparing) {
-              order.status = "PREPARING";
-            } else {
-              order.status = "VALIDATED";
-            }
-
-            // Filtrar items para que solo se vean los de esta estación
-            order.order_items = rawItems.filter((item: any) =>
-              item.menu_items?.category?.target_station === station
-            );
-            order.orderItems = (order.orderItems || []).filter((item: any) =>
-              item.menuItem?.category?.targetStation === station
-            );
-
-            return true;
-          });
-        }
-        
-        return mapped;
-      }
+        if (!Array.isArray(data)) return [];
+        return data.map(mapOrder).filter((order) => {
+          if (!station) return true;
+          // New orders: filter by explicit station field
+          if (order.station) return order.station === station;
+          // Legacy orders (station IS NULL): filter by item target_station
+          const rawItems = order.order_items || [];
+          return rawItems.some(
+            (item: any) => item.menu_items?.category?.target_station === station
+          );
+        }).map((order) => {
+          if (!station || order.station) return order;
+          // Legacy: filter items to only show this station's items
+          const rawItems = order.order_items || [];
+          order.order_items = rawItems.filter(
+            (item: any) => item.menu_items?.category?.target_station === station
+          );
+          return order;
+        });
+      },
     }
   );
 
@@ -100,17 +77,17 @@ export function useRealtimeOrders(restaurantId: string | undefined, options: Rea
 
 export function useKitchenOrders(restaurantId: string | undefined) {
   return useRealtimeOrders(restaurantId, {
-    statuses: ["VALIDATED", "PREPARING", "READY", "PARCIAL"],
+    statuses: ["VALIDATED", "PREPARING", "READY"],
     ascending: true,
-    station: 'KITCHEN'
+    station: "KITCHEN",
   });
 }
 
 export function useBarOrders(restaurantId: string | undefined) {
   return useRealtimeOrders(restaurantId, {
-    statuses: ["VALIDATED", "PREPARING", "READY", "PARCIAL"],
+    statuses: ["VALIDATED", "PREPARING", "READY"],
     ascending: true,
-    station: 'BAR'
+    station: "BAR",
   });
 }
 

@@ -34,6 +34,8 @@ export const mapOrder = (o: any): Order => ({
   validatedAt: o.validated_at,
   preparingAt: o.preparing_at,
   readyAt: o.ready_at,
+  station: o.station ?? null,
+  parentOrderId: o.parent_order_id ?? null,
   kitchenReady: o.kitchen_ready ?? o.kitchenReady ?? false,
   barReady: o.bar_ready ?? o.barReady ?? false,
   kitchenPreparing: o.kitchen_preparing ?? o.kitchenPreparing ?? false,

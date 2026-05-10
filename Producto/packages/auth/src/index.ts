@@ -1,5 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr';
-import { AlertType, StationType } from './types';
+import { AlertType } from './types';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
@@ -25,68 +25,22 @@ export const signOut = async () => {
 };
 
 const STATUS_TIMESTAMP: Record<string, string> = {
-  VALIDATED:  "validated_at",
-  PREPARING:  "preparing_at",
-  READY:      "ready_at",
+  VALIDATED: "validated_at",
+  PREPARING: "preparing_at",
+  READY:     "ready_at",
 };
 
-export const updateOrderStatus = async (orderId: string, status: string, station?: StationType) => {
+// Each order now belongs to a single station — direct status update, no cross-station logic.
+export const updateOrderStatus = async (orderId: string, status: string) => {
+  const payload: Record<string, unknown> = { status };
   const timestampField = STATUS_TIMESTAMP[status];
-  const payload: Record<string, unknown> = {};
   if (timestampField) payload[timestampField] = new Date().toISOString();
 
-  if (!station) {
-    // Sin estación: actualización directa del estado global (garzon, cajero, etc.)
-    payload.status = status;
-    const { data, error } = await supabase.from("orders").update(payload).eq("id", orderId).select();
-    return { data, error };
-  }
-
-  const isKitchen = station === "KITCHEN";
-  const preparingField = isKitchen ? "kitchen_preparing" : "bar_preparing";
-  const readyField     = isKitchen ? "kitchen_ready"     : "bar_ready";
-
-  if (status === "PREPARING") {
-    // Solo marca esta estación como en preparación; no toca la otra estación ni el status global.
-    payload[preparingField] = true;
-    payload.status = "PREPARING"; // el pedido global pasa a PREPARING si no lo estaba aún
-    const { data, error } = await supabase.from("orders").update(payload).eq("id", orderId).select();
-    return { data, error };
-  }
-
-  if (status === "READY") {
-    payload[readyField]     = true;
-    payload[preparingField] = false;
-
-    // Consultamos el estado actual para decidir si el pedido global ya puede ser READY
-    const { data: currentOrder } = await supabase
-      .from("orders")
-      .select("status, bar_ready, kitchen_ready, order_items(menu_items(category:categories(target_station)))")
-      .eq("id", orderId)
-      .single();
-
-    if (currentOrder) {
-      const items = currentOrder.order_items || [];
-      const otherStation = isKitchen ? "BAR" : "KITCHEN";
-      const hasOtherStationItems = items.some(
-        (item: any) => item.menu_items?.category?.target_station === otherStation
-      );
-      const otherStationReady = isKitchen ? currentOrder.bar_ready : currentOrder.kitchen_ready;
-      // If status is PARCIAL, the other station already delivered its portion — this one is now READY
-      const otherStationDone = currentOrder.status === "PARCIAL";
-
-      payload.status = (!hasOtherStationItems || otherStationReady || otherStationDone) ? "READY" : "PREPARING";
-    } else {
-      payload.status = "READY";
-    }
-
-    const { data, error } = await supabase.from("orders").update(payload).eq("id", orderId).select();
-    return { data, error };
-  }
-
-  // Cualquier otro estado (DELIVERED, COMPLETED, REJECTED): actualización directa
-  payload.status = status;
-  const { data, error } = await supabase.from("orders").update(payload).eq("id", orderId).select();
+  const { data, error } = await supabase
+    .from("orders")
+    .update(payload)
+    .eq("id", orderId)
+    .select();
   return { data, error };
 };
 

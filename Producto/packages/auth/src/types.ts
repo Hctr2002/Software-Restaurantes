@@ -78,6 +78,8 @@ export type Order = {
   status: OrderStatus;
   notes: string | null;
   totalAmount: number;
+  station: 'KITCHEN' | 'BAR' | null;
+  parentOrderId: string | null;
   barReady: boolean;
   kitchenReady: boolean;
   kitchenPreparing: boolean;

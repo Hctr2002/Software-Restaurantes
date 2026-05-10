@@ -199,12 +199,16 @@ model Order {
   totalAmount  Decimal     @default(0) @map("total_amount") @db.Decimal(10, 2)
   notes        String?
   sessionId    String?     @map("session_id")
+  station      String?     @map("station") // "KITCHEN" | "BAR" — null for legacy mixed orders
+  parentOrderId String?    @map("parent_order_id")
+
+  // Legacy cross-station flags — kept for backward compat with old mixed orders
   barReady        Boolean  @default(false) @map("bar_ready")
   kitchenReady    Boolean  @default(false) @map("kitchen_ready")
   kitchenPreparing Boolean @default(false) @map("kitchen_preparing")
   barPreparing    Boolean  @default(false) @map("bar_preparing")
 
-  // Timestamps de ciclo de vida para analytics de tiempos de cocina
+  // Timestamps de ciclo de vida para analytics
   validatedAt  DateTime?   @map("validated_at")  @db.Timestamptz(3)
   preparingAt  DateTime?   @map("preparing_at")  @db.Timestamptz(3)
   readyAt      DateTime?   @map("ready_at")      @db.Timestamptz(3)
@@ -219,6 +223,7 @@ model Order {
   @@unique([id, restaurantId])
   @@index([restaurantId])
   @@index([sessionId])
+  @@index([station])
   @@map("orders")
 }
 
