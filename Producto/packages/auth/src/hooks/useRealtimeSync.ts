@@ -17,8 +17,9 @@ export function useRealtimeSync<T>(
   const { channelId, filter, initialData = (['orders', 'tables', 'menu_items', 'categories', 'alerts'].includes(tableName) ? [] : null) as any, transform } = options;
   const [data, setData] = useState<T>(initialData);
   const [loading, setLoading] = useState(true);
+  // Incrementing this value forces the subscription effect to re-run (reconnect)
+  const [retryCount, setRetryCount] = useState(0);
 
-  // Keep transform in a ref so it never causes performFetch to be recreated
   const transformRef = useRef(transform);
   transformRef.current = transform;
 
@@ -37,7 +38,7 @@ export function useRealtimeSync<T>(
     } finally {
       setLoading(false);
     }
-  }, [fetchFn, tableName]); // transform removed from deps — stable via ref
+  }, [fetchFn, tableName]);
 
   useEffect(() => {
     const hasScope = restaurantId || filter;
@@ -50,18 +51,27 @@ export function useRealtimeSync<T>(
     const f = filter || (restaurantId ? `restaurant_id=eq.${restaurantId}` : undefined);
     if (!f) return;
 
-    const name = `${tableName}-sync-${restaurantId ?? "global"}${channelId ? `-${channelId}` : ""}`;
+    const name = `${tableName}-sync-${restaurantId ?? "global"}${channelId ? `-${channelId}` : ""}-r${retryCount}`;
     const channel = supabase.channel(name)
       .on("postgres_changes", { event: "*", schema: "public", table: tableName, filter: f },
         () => { performFetch(); })
       .subscribe((status) => {
         if (status === 'CHANNEL_ERROR') {
-          console.error(`[Realtime] Channel error on ${tableName}`);
+          console.error(`[Realtime] Channel error on ${tableName}, reconectando…`);
+          setTimeout(() => setRetryCount((c) => c + 1), 3000);
+        }
+        if (status === 'TIMED_OUT') {
+          console.warn(`[Realtime] Channel timeout on ${tableName}, reconectando…`);
+          setRetryCount((c) => c + 1);
+        }
+        if (status === 'CLOSED') {
+          console.warn(`[Realtime] Channel closed on ${tableName}, reconectando…`);
+          setTimeout(() => setRetryCount((c) => c + 1), 1000);
         }
       });
 
     return () => { supabase.removeChannel(channel); };
-  }, [restaurantId, performFetch, tableName, channelId, filter]);
+  }, [restaurantId, performFetch, tableName, channelId, filter, retryCount]);
 
   return { data, loading, setData, refetch: performFetch };
 }
