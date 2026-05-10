@@ -32,6 +32,7 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
   const pendingOrders = orders.filter((o) => o.status === "PENDING");
   const preparingOrders = orders.filter((o) => o.status === "VALIDATED" || o.status === "PREPARING");
   const readyOrders = orders.filter((o) => o.status === "READY");
+  const partiallyReadyOrders = orders.filter((o) => (o.barReady || o.kitchenReady) && o.status !== "READY" && o.status !== "DELIVERED");
 
   const handleValidate = async (orderId: string) => {
     setProcessingId(orderId);
@@ -85,6 +86,7 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
     pendingOrders,
     preparingOrders,
     readyOrders,
+    partiallyReadyOrders,
     tables,
     billRequestedTableIds,
     helpRequestedTableIds,

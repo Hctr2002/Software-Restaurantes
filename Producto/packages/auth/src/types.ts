@@ -1,6 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
-export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'GARZON' | 'COCINA' | 'CAJERO' | 'CLIENTE';
+export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'GARZON' | 'COCINA' | 'CAJERO' | 'CLIENTE' | 'BAR';
+export type StationType = 'KITCHEN' | 'BAR';
 
 export type User = {
   id: string;
@@ -20,6 +21,7 @@ export type Category = {
   id: string;
   name: string;
   restaurantId: string;
+  targetStation: StationType;
   is_active: boolean;
   isActive: boolean;
 };
@@ -76,6 +78,8 @@ export type Order = {
   status: OrderStatus;
   notes: string | null;
   totalAmount: number;
+  barReady: boolean;
+  kitchenReady: boolean;
   createdAt: string;
   updatedAt: string;
   validatedAt?: string | null;

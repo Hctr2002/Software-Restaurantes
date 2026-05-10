@@ -18,6 +18,12 @@ enum Role {
   COCINA
   CAJERO
   CLIENTE
+  BAR
+}
+
+enum StationType {
+  KITCHEN
+  BAR
 }
 
 enum OrderStatus {
@@ -89,7 +95,8 @@ model Category {
   id           String  @id @default(uuid())
   name         String
   restaurantId String  @map("restaurant_id")
-  isActive     Boolean @default(true) @map("is_active")
+  targetStation StationType @default(KITCHEN) @map("target_station")
+  isActive      Boolean     @default(true) @map("is_active")
 
   restaurant Restaurant @relation(fields: [restaurantId], references: [id])
   menuItems  MenuItem[]
@@ -191,6 +198,8 @@ model Order {
   totalAmount  Decimal     @default(0) @map("total_amount") @db.Decimal(10, 2)
   notes        String?
   sessionId    String?     @map("session_id")
+  barReady     Boolean     @default(false) @map("bar_ready")
+  kitchenReady Boolean     @default(false) @map("kitchen_ready")
 
   // Timestamps de ciclo de vida para analytics de tiempos de cocina
   validatedAt  DateTime?   @map("validated_at")  @db.Timestamptz(3)

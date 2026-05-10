@@ -116,7 +116,7 @@ export default function WaiterDashboard() {
         {/* Status Islands */}
         <div className="px-6 py-4 flex flex-col gap-3">
           <AnimatePresence mode="popLayout">
-            {orders.readyOrders.length > 0 && (
+            {(orders.readyOrders.length > 0 || orders.partiallyReadyOrders.length > 0) && (
               <motion.div layout initial={{ height: 80, opacity: 0, y: -20 }} animate={{ height: isIslandExpanded ? "auto" : 80, opacity: 1, y: 0 }} exit={{ height: 0, opacity: 0 }} transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 className="relative overflow-hidden bg-emerald-500/10 border border-emerald-500/20 rounded-[2.5rem] p-4 flex flex-col">
                 <div className="flex items-center justify-between gap-4">
@@ -125,8 +125,10 @@ export default function WaiterDashboard() {
                       <Sparkles className="w-6 h-6 text-emerald-400" />
                     </motion.div>
                     <div>
-                      <h3 className="font-black text-sm text-emerald-400 uppercase tracking-widest leading-none mb-1.5">Cocina Despachando</h3>
-                      <p className="text-[10px] text-emerald-400/60 font-black uppercase tracking-widest">{orders.readyOrders.length} {orders.readyOrders.length === 1 ? "Plato listo" : "Platos listos"}</p>
+                      <h3 className="font-black text-sm text-emerald-400 uppercase tracking-widest leading-none mb-1.5">Aviso de Despacho</h3>
+                      <p className="text-[10px] text-emerald-400/60 font-black uppercase tracking-widest">
+                        {orders.readyOrders.length + orders.partiallyReadyOrders.length} Pedidos disponibles
+                      </p>
                     </div>
                   </div>
                   <button onClick={() => setIsIslandExpanded(!isIslandExpanded)} className="p-3 bg-white/5 rounded-2xl hover:bg-white/10 transition-all text-emerald-400">
@@ -136,7 +138,10 @@ export default function WaiterDashboard() {
                 <AnimatePresence>
                   {isIslandExpanded && (
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="pt-6 w-full">
-                      <ReadyOrdersBanner orders={orders.readyOrders} onDeliver={orders.handleDeliver} />
+                      <ReadyOrdersBanner 
+                        orders={[...orders.readyOrders, ...orders.partiallyReadyOrders]} 
+                        onDeliver={orders.handleDeliver} 
+                      />
                     </motion.div>
                   )}
                 </AnimatePresence>

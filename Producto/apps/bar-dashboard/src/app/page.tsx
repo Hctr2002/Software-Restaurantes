@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 // Rebuild trigger: 2026-05-07T06:09:40Z
 import { useAuthStore } from "@menu-bites/store";
-import { useKitchenOrders, updateOrderStatus, signOut, useThemeSync } from "@menu-bites/auth";
+import { useBarOrders, updateOrderStatus, signOut, useThemeSync } from "@menu-bites/auth";
 import { OrderTicket, Button, RestaurantThemeProvider, KDSColumn, TicketWrapper } from "@menu-bites/ui";
-import { ChefHat, Bell, Settings, LogOut, AlertTriangle, Activity } from "lucide-react";
+import { GlassWater, Bell, Settings, LogOut, AlertTriangle, Activity } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 
@@ -20,9 +20,9 @@ const CRITICAL_SFX   = "https://assets.mixkit.co/active_storage/sfx/2997/2997-pr
 
 function playSound(url: string) { new Audio(url).play().catch(() => {}); }
 
-export default function KitchenKDSPage() {
+export default function BarDashboardPage() {
   const { user, logout: clearAuth } = useAuthStore();
-  const { orders: liveOrders, loading: liveLoading } = useKitchenOrders(user?.restaurantId);
+  const { orders: liveOrders, loading: liveLoading } = useBarOrders(user?.restaurantId);
   const [clearedOrders, setClearedOrders] = useState<Set<string>>(new Set());
   const [settings, setSettings] = useState<KDSSettings>(DEFAULT_SETTINGS);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -64,23 +64,18 @@ export default function KitchenKDSPage() {
   }, [tick, orders.length, settings.sounds.criticalAlert, settings.thresholds]);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
-    console.log(`[KDS] Intentando cambiar estado del pedido ${orderId} a ${newStatus}`);
-    
     try {
-      const { error } = await updateOrderStatus(orderId, newStatus, 'KITCHEN');
+      const { error } = await updateOrderStatus(orderId, newStatus, 'BAR');
       if (error) {
-        console.error(`[KDS] Error al actualizar estado en Supabase:`, error);
         alert(`Error al actualizar el pedido: ${error.message}`);
         return;
       }
-      console.log(`[KDS] Estado actualizado exitosamente en Supabase`);
-
+  
       if (newStatus === "READY" && settings.autoClear.enabled) {
         const timer = setTimeout(() => setClearedOrders((prev) => new Set([...prev, orderId])), settings.autoClear.delaySeconds * 1000);
         autoClearTimers.current.set(orderId, timer);
       }
     } catch (err) {
-      console.error(`[KDS] Error inesperado en handleStatusChange:`, err);
       alert("Ocurrió un error inesperado al procesar el cambio de estado.");
     }
   };
@@ -106,7 +101,7 @@ export default function KitchenKDSPage() {
 
   const columns = [
     { key: "pending", title: "Pedidos Nuevos", orders: pendingOrders, icon: <Bell className="w-5 h-5 text-muted-foreground" />, active: false },
-    { key: "preparing", title: "Preparando", orders: preparingOrders, icon: <ChefHat className="w-5 h-5 text-primary" />, active: true },
+    { key: "preparing", title: "En Barra", orders: preparingOrders, icon: <GlassWater className="w-5 h-5 text-primary" />, active: true },
     { key: "ready", title: "Para Despacho", orders: readyOrders, icon: <Activity className="w-5 h-5 text-emerald-500" />, active: false },
   ];
 
@@ -120,21 +115,21 @@ export default function KitchenKDSPage() {
 
   return (
     <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
-      <div className="min-h-screen wow-gradient text-foreground overflow-hidden flex flex-col p-4 lg:p-6 gap-6">
+      <div className="min-h-screen bar-gradient text-foreground overflow-hidden flex flex-col p-4 lg:p-6 gap-6">
 
-        <header className="glass-premium rounded-[2.5rem] p-6 flex justify-between items-center shadow-2xl">
+        <header className="glass-bar rounded-[2.5rem] p-6 flex justify-between items-center shadow-2xl">
           <div className="flex items-center space-x-6">
             <div className="w-16 h-16 bg-primary rounded-[1.5rem] flex items-center justify-center shadow-2xl shadow-primary/30">
-              <ChefHat className="text-primary-foreground w-8 h-8" />
+              <GlassWater className="text-primary-foreground w-8 h-8" />
             </div>
             <div>
               <h1 className="text-3xl font-black tracking-tighter uppercase italic leading-none">
-                Kitchen <span className="text-primary">Monitor</span>
+                Bar <span className="text-primary">Monitor</span>
               </h1>
               <div className="flex items-center space-x-3 text-[10px] font-black text-foreground/40 uppercase tracking-[0.3em] mt-1">
                 <span className="text-emerald-500 animate-pulse">● Live System</span>
                 <span>•</span>
-                <span>Main Station</span>
+                <span>Drink Station</span>
               </div>
             </div>
           </div>
@@ -142,7 +137,7 @@ export default function KitchenKDSPage() {
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-12 px-10 py-3 glass rounded-[2rem] border border-white/5 shadow-xl">
               <KDSStat label="Recibidos" value={pendingOrders.length} color="text-foreground/50" />
-              <KDSStat label="En Fuego"  value={preparingOrders.length} color="text-primary" />
+              <KDSStat label="En Barra"  value={preparingOrders.length} color="text-primary" />
               <KDSStat label="Listos"    value={readyOrders.length} color="text-emerald-500" />
             </div>
             <Button variant="outline" onClick={() => setAlertOpen(true)}
@@ -165,7 +160,7 @@ export default function KitchenKDSPage() {
               <KDSColumn key={col.key} title={col.title} count={col.orders.length} icon={col.icon} active={col.active}>
                 {col.orders.map((order) => (
                   <TicketWrapper key={`${col.key}-${order.id}`} createdAt={order.createdAt} thresholds={settings.thresholds} status={order.status}>
-                    <OrderTicket type="KITCHEN" id={order.id} tableNumber={order.table?.number ?? 0} status={order.status} createdAt={order.createdAt} items={order.orderItems || []} onStatusChange={(s) => handleStatusChange(order.id, s)} />
+                    <OrderTicket type="BAR" id={order.id} tableNumber={order.table?.number ?? 0} status={order.status} createdAt={order.createdAt} items={order.orderItems || []} onStatusChange={(s) => handleStatusChange(order.id, s)} />
                   </TicketWrapper>
                 ))}
               </KDSColumn>

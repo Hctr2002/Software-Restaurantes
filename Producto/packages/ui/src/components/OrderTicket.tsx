@@ -2,7 +2,7 @@
  
  import React, { useState, useEffect } from "react";
  import { cn } from "../lib/utils";
- import { Clock, CheckCircle2, PlayCircle, Utensils, AlertCircle } from "lucide-react";
+ import { Clock, CheckCircle2, PlayCircle, Utensils, AlertCircle, GlassWater } from "lucide-react";
  import { motion, AnimatePresence } from "framer-motion";
  import { OrderItem, OrderStatus } from "@menu-bites/auth";
  
@@ -13,9 +13,10 @@
    createdAt: string;
    items: OrderItem[];
    onStatusChange: (newStatus: OrderStatus) => void;
+   type?: 'KITCHEN' | 'BAR';
  }
  
- export const OrderTicket = ({ id, tableNumber, status, createdAt, items, onStatusChange }: OrderTicketProps) => {
+ export const OrderTicket = ({ id, tableNumber, status, createdAt, items, onStatusChange, type = 'KITCHEN' }: OrderTicketProps) => {
    const [elapsed, setElapsed] = useState(0);
  
    useEffect(() => {
@@ -37,7 +38,8 @@
        animate={{ opacity: 1, scale: 1 }}
        exit={{ opacity: 0, scale: 0.9 }}
        className={cn(
-         "relative flex flex-col p-6 rounded-[2.5rem] border glass-premium transition-all duration-500 overflow-hidden",
+         "relative flex flex-col p-6 rounded-[2.5rem] border transition-all duration-500 overflow-hidden",
+         type === 'BAR' ? "glass-bar" : "glass-premium",
          (status === "PENDING" || status === "VALIDATED") && "border-white/5 bg-white/5 shadow-xl shadow-black/20",
          status === "PREPARING" && "border-primary/20 bg-primary/5 shadow-xl shadow-primary/5",
          status === "READY" && "border-emerald-500/20 bg-emerald-500/5 shadow-xl shadow-emerald-500/5",
@@ -84,7 +86,11 @@
                </span>
                <span className="text-sm font-black text-foreground tracking-tight">{item.menuItem?.name || item.menu_items?.name || "Plato sin nombre"}</span>
              </div>
-             <Utensils className="w-4 h-4 text-foreground/10 group-hover:text-primary/40 transition-colors" />
+             {type === 'BAR' ? (
+                <GlassWater className="w-4 h-4 text-foreground/10 group-hover:text-primary/40 transition-colors" />
+              ) : (
+                <Utensils className="w-4 h-4 text-foreground/10 group-hover:text-primary/40 transition-colors" />
+              )}
            </motion.div>
          ))}
        </div>

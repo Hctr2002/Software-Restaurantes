@@ -1,5 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr';
-import { AlertType } from './types';
+import { AlertType, StationType } from './types';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
@@ -30,10 +30,41 @@ const STATUS_TIMESTAMP: Record<string, string> = {
   READY:      "ready_at",
 };
 
-export const updateOrderStatus = async (orderId: string, status: string) => {
+export const updateOrderStatus = async (orderId: string, status: string, station?: StationType) => {
   const timestampField = STATUS_TIMESTAMP[status];
   const payload: Record<string, unknown> = { status };
   if (timestampField) payload[timestampField] = new Date().toISOString();
+
+  // Si se proporciona una estación y el estado es READY, actualizamos el flag específico
+  if (station && status === "READY") {
+    const readyField = station === "BAR" ? "bar_ready" : "kitchen_ready";
+    payload[readyField] = true;
+
+    // Lógica inteligente: ¿Debería el pedido completo estar READY?
+    // Primero obtenemos el estado actual de la otra estación
+    const { data: currentOrder } = await supabase
+      .from("orders")
+      .select("bar_ready, kitchen_ready, order_items(menu_items(category:categories(target_station)))")
+      .eq("id", orderId)
+      .single();
+
+    if (currentOrder) {
+      const items = currentOrder.order_items || [];
+      const hasOtherStationItems = items.some((item: any) => 
+        item.menu_items?.category?.target_station !== station
+      );
+
+      const otherStationReady = station === "BAR" ? currentOrder.kitchen_ready : currentOrder.bar_ready;
+
+      // Si no tiene items de la otra estación, o la otra estación ya está lista
+      if (!hasOtherStationItems || otherStationReady) {
+        payload.status = "READY";
+      } else {
+        // El pedido sigue en PREPARING porque falta la otra estación
+        payload.status = "PREPARING";
+      }
+    }
+  }
 
   const { data, error } = await supabase
     .from("orders")
