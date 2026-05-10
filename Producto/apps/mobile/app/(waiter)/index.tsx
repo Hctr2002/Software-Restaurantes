@@ -32,6 +32,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import Animated, { FadeInDown, FadeInUp, Layout, FadeInLeft, SlideInDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
+import { BlurView } from 'expo-blur';
 import AlertModal from '../../components/AlertModal';
 
 const { width } = Dimensions.get('window');
@@ -105,10 +106,30 @@ const styles = StyleSheet.create({
   emptyText: { marginTop: 12, fontSize: 12, fontWeight: '800', textTransform: 'uppercase' },
   pulse: { opacity: 1 },
   actionBtnSmall: { width: 32, height: 32, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
-  mergeBar: { position: 'absolute', bottom: 20, left: 20, right: 20, backgroundColor: MB_COLORS.navy, borderRadius: 24, padding: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.5, shadowRadius: 20, elevation: 10, zIndex: 100 },
-  mergeBarText: { color: 'white', fontSize: 12, fontWeight: '900' },
-  mergeBtn: { backgroundColor: '#FE5F55', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 12 },
-  mergeBtnText: { color: 'white', fontSize: 10, fontWeight: '900', letterSpacing: 1 },
+  mergeBar: { 
+    position: 'absolute', 
+    bottom: 30, 
+    left: 16, 
+    right: 16, 
+    borderRadius: 28, 
+    overflow: 'hidden',
+    borderWidth: 1, 
+    borderColor: 'rgba(255,255,255,0.1)', 
+    zIndex: 100 
+  },
+  mergeBarBlur: {
+    padding: 16,
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+  },
+  mergeBarInfo: {
+    flex: 1,
+    marginRight: 10,
+  },
+  mergeBarText: { color: 'white', fontSize: 11, fontWeight: '900', letterSpacing: 0.5 },
+  mergeBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+  mergeBtnText: { color: 'white', fontSize: 9, fontWeight: '900', letterSpacing: 0.5 },
 });
 
 export default function WaiterDashboard() {
@@ -205,6 +226,16 @@ export default function WaiterDashboard() {
     return tableNums.length > 0 ? `Mesas: ${tableNums.join(', ')}` : 'Cargando...';
   }, [readyOrders]);
   
+  const mergedGroups = React.useMemo(() => {
+    const groups: Record<string, number> = {};
+    tables.forEach(t => {
+      if (t.current_session_id && t.status === 'OCCUPIED') {
+        groups[t.current_session_id] = (groups[t.current_session_id] || 0) + 1;
+      }
+    });
+    return groups;
+  }, [tables]);
+  
   const helpRequestedTables = tables.filter(t => t.help_requested);
   const billRequestedTables = tables.filter(t => t.bill_requested);
   const cleaningTables = tables.filter(t => t.status === 'CLEANING');
@@ -230,7 +261,13 @@ export default function WaiterDashboard() {
   };
 
   const handleTableClean = async (tableId: string) => {
-    await supabase.from('tables').update({ status: 'FREE', bill_requested: false }).eq('id', tableId);
+    await supabase.from('tables')
+      .update({ 
+        status: 'FREE', 
+        bill_requested: false,
+        current_session_id: null 
+      })
+      .eq('id', tableId);
     fetchData();
   };
 
@@ -255,14 +292,25 @@ export default function WaiterDashboard() {
     setMerging(true);
     try {
       const sessionId = Math.random().toString(36).substring(7);
-      const { error } = await supabase
+      
+      // 1. Actualizar pedidos activos
+      const { error: orderError } = await supabase
         .from('orders')
         .update({ session_id: sessionId })
         .in('table_id', selectedTables)
         .eq('restaurant_id', restaurantId)
         .not('status', 'in', '("DELIVERED","REJECTED")');
 
-      if (error) throw error;
+      if (orderError) throw orderError;
+
+      // 2. Actualizar las mesas para que compartan la misma sesión visualmente
+      const { error: tableError } = await supabase
+        .from('tables')
+        .update({ current_session_id: sessionId })
+        .in('id', selectedTables)
+        .eq('restaurant_id', restaurantId);
+
+      if (tableError) throw tableError;
       
       Alert.alert('Éxito', 'Mesas fusionadas correctamente');
       setMergeMode(false);
@@ -270,6 +318,41 @@ export default function WaiterDashboard() {
       fetchData();
     } catch (err) {
       Alert.alert('Error', 'No se pudieron fusionar las mesas');
+    } finally {
+      setMerging(false);
+    }
+  };
+
+  const handleUnmergeTables = async () => {
+    if (selectedTables.length === 0) return;
+    setMerging(true);
+    try {
+      // Para cada mesa seleccionada, le asignamos una sesión única (la separamos)
+      for (const tableId of selectedTables) {
+        const newSessionId = Math.random().toString(36).substring(7);
+        
+        // 1. Actualizar pedidos de esta mesa específica a la nueva sesión
+        await supabase
+          .from('orders')
+          .update({ session_id: newSessionId })
+          .eq('table_id', tableId)
+          .eq('restaurant_id', restaurantId)
+          .not('status', 'in', '("DELIVERED","REJECTED")');
+
+        // 2. Actualizar la mesa con su nueva sesión individual
+        await supabase
+          .from('tables')
+          .update({ current_session_id: newSessionId })
+          .eq('id', tableId)
+          .eq('restaurant_id', restaurantId);
+      }
+      
+      Alert.alert('Éxito', 'Mesas separadas correctamente');
+      setMergeMode(false);
+      setSelectedTables([]);
+      fetchData();
+    } catch (err) {
+      Alert.alert('Error', 'No se pudieron separar las mesas');
     } finally {
       setMerging(false);
     }
@@ -505,12 +588,20 @@ export default function WaiterDashboard() {
                     styles.tableCard, 
                     { backgroundColor: colors.glass, borderColor: colors.glassHeavy },
                     table.status === 'OCCUPIED' && { borderColor: colors.brandAccent + '40' },
+                    table.current_session_id && mergedGroups[table.current_session_id] > 1 && { backgroundColor: colors.brandAccent + '10', borderColor: colors.brandAccent + '80' },
                     selectedTables.includes(table.id) && { borderColor: '#FE5F55', backgroundColor: 'rgba(254, 95, 85, 0.1)' }
                   ]}
                   onPress={() => handleTablePress(table)}
                 >
                   <View style={[styles.tableHeader, { borderBottomColor: colors.glassHeavy }]}>
-                    <Text style={[styles.tableNumber, { color: colors.text }]}>{table.number}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Text style={[styles.tableNumber, { color: colors.text }]}>{table.number}</Text>
+                      {table.current_session_id && mergedGroups[table.current_session_id] > 1 && (
+                        <View style={{ backgroundColor: colors.brandAccent, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                          <Text style={{ color: 'white', fontSize: 8, fontWeight: '900' }}>FUSIÓN</Text>
+                        </View>
+                      )}
+                    </View>
                     <View style={[styles.statusDot, { backgroundColor: table.status === 'FREE' ? '#4CAF50' : '#FF9800' }]} />
                   </View>
                   
@@ -519,6 +610,11 @@ export default function WaiterDashboard() {
                       {table.status === 'FREE' ? 'LIBRE' : 'OCUPADA'}
                     </Text>
                     <View style={{ flexDirection: 'row', gap: 4 }}>
+                      {table.current_session_id && mergedGroups[table.current_session_id] > 1 && (
+                        <View style={[styles.tableIconBadge, { backgroundColor: colors.brandAccent + '20' }]}>
+                          <Link2 size={12} color={colors.brandAccent} />
+                        </View>
+                      )}
                       {table.bill_requested && (
                         <View style={styles.tableIconBadge}>
                           <Receipt size={14} color="#FFD700" />
@@ -591,22 +687,34 @@ export default function WaiterDashboard() {
       {/* Merge Mode Bar */}
       {mergeMode && (
         <Animated.View entering={SlideInDown} style={styles.mergeBar}>
-          <View>
-            <Text style={styles.mergeBarText}>FUSIONAR MESAS</Text>
-            <Text style={{ color: colors.muted, fontSize: 10 }}>{selectedTables.length} seleccionadas</Text>
-          </View>
-          <View style={{ flexDirection: 'row', gap: 10 }}>
-            <TouchableOpacity onPress={toggleMergeMode} style={{ padding: 10 }}>
-              <Text style={{ color: colors.muted, fontSize: 10, fontWeight: '800' }}>CANCELAR</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              onPress={handleMergeTables} 
-              style={[styles.mergeBtn, selectedTables.length < 2 && { opacity: 0.5 }]}
-              disabled={selectedTables.length < 2 || merging}
-            >
-              {merging ? <ActivityIndicator color="white" size="small" /> : <Text style={styles.mergeBtnText}>FUSIONAR</Text>}
-            </TouchableOpacity>
-          </View>
+          <BlurView intensity={80} tint="dark" style={styles.mergeBarBlur}>
+            <View style={styles.mergeBarInfo}>
+              <Text style={styles.mergeBarText}>GESTIÓN DE MESAS</Text>
+              <Text style={{ color: colors.muted, fontSize: 9, fontWeight: '700' }}>{selectedTables.length} seleccionadas</Text>
+            </View>
+            
+            <View style={{ flexDirection: 'row', gap: 6 }}>
+              <TouchableOpacity onPress={toggleMergeMode} style={{ padding: 8 }}>
+                <XCircle size={20} color={colors.muted} />
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                onPress={handleUnmergeTables} 
+                style={[styles.mergeBtn, { backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: colors.brandAccent + '40' }, selectedTables.length === 0 && { opacity: 0.3 }]}
+                disabled={selectedTables.length === 0 || merging}
+              >
+                <Text style={[styles.mergeBtnText, { color: colors.brandAccent }]}>SEPARAR</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                onPress={handleMergeTables} 
+                style={[styles.mergeBtn, { backgroundColor: colors.brandAccent }, selectedTables.length < 2 && { opacity: 0.3 }]}
+                disabled={selectedTables.length < 2 || merging}
+              >
+                {merging ? <ActivityIndicator color="white" size="small" /> : <Text style={styles.mergeBtnText}>FUSIONAR</Text>}
+              </TouchableOpacity>
+            </View>
+          </BlurView>
         </Animated.View>
       )}
       <AlertModal 
