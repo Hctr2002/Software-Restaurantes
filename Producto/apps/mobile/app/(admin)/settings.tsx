@@ -2,50 +2,55 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, StatusBar } from 'react-native';
 import { MB_COLORS, MB_RADIUS, MB_SPACING } from '../../constants/MB_Theme';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { LogOut, User, Building2, Bell, Shield } from 'lucide-react-native';
 
 import { useRouter } from 'expo-router';
 
 export default function AdminSettingsScreen() {
   const { user, signOut } = useAuth();
+  const { colors } = useTheme();
   const router = useRouter();
 
   const SettingItem = ({ icon, label, sublabel, onPress }: { icon: React.ReactNode, label: string, sublabel?: string, onPress?: () => void }) => (
-    <TouchableOpacity style={styles.settingItem} onPress={onPress}>
-      <View style={styles.iconContainer}>{icon}</View>
+    <TouchableOpacity 
+      style={[styles.settingItem, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]} 
+      onPress={onPress}
+    >
+      <View style={[styles.iconContainer, { backgroundColor: colors.glassHeavy }]}>{icon}</View>
       <View style={styles.settingText}>
-        <Text style={styles.settingLabel}>{label}</Text>
-        {sublabel && <Text style={styles.settingSublabel}>{sublabel}</Text>}
+        <Text style={[styles.settingLabel, { color: colors.text }]}>{label}</Text>
+        {sublabel && <Text style={[styles.settingSublabel, { color: colors.muted }]}>{sublabel}</Text>}
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.navy }]}>
       <StatusBar barStyle="light-content" />
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Configuración</Text>
+      <View style={[styles.header, { borderBottomColor: colors.glassHeavy }]}>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Configuración</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.profileCard}>
-          <View style={styles.avatar}>
+        <View style={[styles.profileCard, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
+          <View style={[styles.avatar, { backgroundColor: colors.brandAccent }]}>
             <Text style={styles.avatarText}>{user?.email?.[0].toUpperCase()}</Text>
           </View>
-          <Text style={styles.userEmail}>{user?.email}</Text>
-          <Text style={styles.userRole}>Administrador Local</Text>
+          <Text style={[styles.userEmail, { color: colors.text }]}>{user?.email}</Text>
+          <Text style={[styles.userRole, { color: colors.muted }]}>Administrador Local</Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Local</Text>
+          <Text style={[styles.sectionTitle, { color: colors.muted }]}>Local</Text>
           <SettingItem 
-            icon={<Building2 size={20} color="white" />} 
+            icon={<Building2 size={20} color={colors.text} />} 
             label="Información del Local" 
             sublabel="Nombre, dirección y contacto" 
             onPress={() => router.push('/(admin)/restaurant-info')}
           />
           <SettingItem 
-            icon={<Bell size={20} color="white" />} 
+            icon={<Bell size={20} color={colors.text} />} 
             label="Notificaciones" 
             sublabel="Alertas de pedidos y sistema" 
             onPress={() => router.push('/(admin)/notifications')} 
@@ -53,23 +58,26 @@ export default function AdminSettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Cuenta</Text>
+          <Text style={[styles.sectionTitle, { color: colors.muted }]}>Cuenta</Text>
           <SettingItem 
-            icon={<User size={20} color="white" />} 
+            icon={<User size={20} color={colors.text} />} 
             label="Perfil de Usuario" 
             onPress={() => router.push('/(admin)/profile')}
           />
           <SettingItem 
-            icon={<Shield size={20} color="white" />} 
+            icon={<Shield size={20} color={colors.text} />} 
             label="Seguridad" 
             sublabel="Cambiar contraseña" 
             onPress={() => router.push('/(admin)/security')}
           />
         </View>
 
-        <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
-          <LogOut size={20} color={MB_COLORS.brandAccent} />
-          <Text style={styles.signOutText}>Cerrar Sesión</Text>
+        <TouchableOpacity 
+          style={[styles.signOutButton, { borderColor: colors.brandAccent + '40', backgroundColor: colors.brandAccent + '10' }]} 
+          onPress={signOut}
+        >
+          <LogOut size={20} color={colors.brandAccent} />
+          <Text style={[styles.signOutText, { color: colors.brandAccent }]}>Cerrar Sesión</Text>
         </TouchableOpacity>
 
         <Text style={styles.versionText}>Versión 1.0.0 (Alpha)</Text>

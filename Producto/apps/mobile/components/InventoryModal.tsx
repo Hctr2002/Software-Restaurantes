@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { X, Package, Trash2, Hash, Ruler } from 'lucide-react-native';
 import { MB_COLORS, MB_RADIUS, MB_SPACING } from '../constants/MB_Theme';
+import { useTheme } from '../context/ThemeContext';
 
 export interface InventoryItemData {
   id: string;
@@ -34,6 +35,7 @@ interface InventoryModalProps {
 const UNITS = ["unidades", "kg", "g", "L", "mL", "porciones"];
 
 export const InventoryModal = ({ visible, onClose, onSave, onDelete, item }: InventoryModalProps) => {
+  const { colors } = useTheme();
   const [name, setName] = React.useState('');
   const [stock, setStock] = React.useState('');
   const [unit, setUnit] = React.useState(UNITS[0]);
@@ -91,55 +93,63 @@ export const InventoryModal = ({ visible, onClose, onSave, onDelete, item }: Inv
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <KeyboardAvoidingView 
               behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              style={styles.content}
+              style={[styles.content, { backgroundColor: colors.navy, borderColor: colors.glassHeavy }]}
             >
-              <View style={styles.header}>
-                <Text style={styles.title}>{item ? 'Editar Insumo' : 'Nuevo Insumo'}</Text>
+              <View style={[styles.header, { borderBottomColor: colors.glassHeavy }]}>
+                <Text style={[styles.title, { color: colors.text }]}>{item ? 'Editar Insumo' : 'Nuevo Insumo'}</Text>
                 <TouchableOpacity onPress={onClose}>
-                  <X size={20} color="white" />
+                  <X size={20} color={colors.text} />
                 </TouchableOpacity>
               </View>
 
               <ScrollView style={styles.form} bounces={false}>
-                <Text style={styles.label}>Nombre del Insumo</Text>
-                <View style={styles.inputContainer}>
-                  <Package size={16} color={MB_COLORS.muted} style={styles.inputIcon} />
+                <Text style={[styles.label, { color: colors.muted }]}>Nombre del Insumo</Text>
+                <View style={[styles.inputContainer, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
+                  <Package size={16} color={colors.muted} style={styles.inputIcon} />
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, { color: colors.text }]}
                     value={name}
                     onChangeText={setName}
                     placeholder="Ej. Harina, Tomates..."
-                    placeholderTextColor={MB_COLORS.muted}
+                    placeholderTextColor={colors.muted}
                     autoCapitalize="words"
                   />
                 </View>
 
                 <View style={styles.row}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.label}>Stock Actual</Text>
-                    <View style={styles.inputContainer}>
-                      <Hash size={16} color={MB_COLORS.muted} style={styles.inputIcon} />
+                    <Text style={[styles.label, { color: colors.muted }]}>Stock Actual</Text>
+                    <View style={[styles.inputContainer, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
+                      <Hash size={16} color={colors.muted} style={styles.inputIcon} />
                       <TextInput
-                        style={styles.input}
+                        style={[styles.input, { color: colors.text }]}
                         value={stock}
                         onChangeText={setStock}
                         placeholder="0.00"
-                        placeholderTextColor={MB_COLORS.muted}
+                        placeholderTextColor={colors.muted}
                         keyboardType="numeric"
                       />
                     </View>
                   </View>
                 </View>
 
-                <Text style={styles.label}>Unidad de Medida</Text>
+                <Text style={[styles.label, { color: colors.muted }]}>Unidad de Medida</Text>
                 <View style={styles.unitsGrid}>
                   {UNITS.map((u) => (
                     <TouchableOpacity 
                       key={u}
-                      style={[styles.unitChip, unit === u && styles.unitChipActive]}
+                      style={[
+                        styles.unitChip, 
+                        { backgroundColor: colors.glass, borderColor: colors.glassHeavy },
+                        unit === u && { backgroundColor: colors.brandAccent, borderColor: colors.brandAccent }
+                      ]}
                       onPress={() => setUnit(u)}
                     >
-                      <Text style={[styles.unitChipText, unit === u && styles.unitChipTextActive]}>
+                      <Text style={[
+                        styles.unitChipText, 
+                        { color: colors.muted },
+                        unit === u && { color: 'white' }
+                      ]}>
                         {u}
                       </Text>
                     </TouchableOpacity>
@@ -147,7 +157,7 @@ export const InventoryModal = ({ visible, onClose, onSave, onDelete, item }: Inv
                 </View>
 
                 <TouchableOpacity 
-                  style={[styles.saveButton, (!name.trim() || !stock) && { opacity: 0.5 }]} 
+                  style={[styles.saveButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }, (!name.trim() || !stock) && { opacity: 0.5 }]} 
                   onPress={handleSave}
                   disabled={loading || !name.trim() || !stock}
                 >
@@ -167,11 +177,11 @@ export const InventoryModal = ({ visible, onClose, onSave, onDelete, item }: Inv
                     disabled={deleting}
                   >
                     {deleting ? (
-                      <ActivityIndicator color={MB_COLORS.brandAccent} />
+                      <ActivityIndicator color={colors.brandAccent} />
                     ) : (
                       <>
-                        <Trash2 size={16} color={MB_COLORS.brandAccent} />
-                        <Text style={styles.deleteButtonText}>Eliminar Insumo</Text>
+                        <Trash2 size={16} color={colors.brandAccent} />
+                        <Text style={[styles.deleteButtonText, { color: colors.brandAccent }]}>Eliminar Insumo</Text>
                       </>
                     )}
                   </TouchableOpacity>

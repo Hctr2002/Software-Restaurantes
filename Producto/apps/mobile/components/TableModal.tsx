@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { X, Hash, Trash2, MapPin, Share as ShareIcon } from 'lucide-react-native';
 import { MB_COLORS, MB_RADIUS, MB_SPACING } from '../constants/MB_Theme';
+import { useTheme } from '../context/ThemeContext';
 
 export interface TableData {
   id: string;
@@ -37,6 +38,7 @@ interface TableModalProps {
 const STATUSES = ['FREE', 'OCCUPIED', 'RESERVED', 'CLEANING'];
 
 export const TableModal = ({ visible, onClose, onSave, onDelete, table }: TableModalProps) => {
+  const { colors } = useTheme();
   const [number, setNumber] = React.useState('');
   const [label, setLabel] = React.useState('');
   const [status, setStatus] = React.useState<'FREE' | 'OCCUPIED' | 'RESERVED' | 'CLEANING'>('FREE');
@@ -109,12 +111,12 @@ export const TableModal = ({ visible, onClose, onSave, onDelete, table }: TableM
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <KeyboardAvoidingView 
               behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              style={styles.content}
+              style={[styles.content, { backgroundColor: colors.navy, borderColor: colors.glassHeavy }]}
             >
-              <View style={styles.header}>
-                <Text style={styles.title}>{table ? `Mesa ${table.number}` : 'Nueva Mesa'}</Text>
+              <View style={[styles.header, { borderBottomColor: colors.glassHeavy }]}>
+                <Text style={[styles.title, { color: colors.text }]}>{table ? `Mesa ${table.number}` : 'Nueva Mesa'}</Text>
                 <TouchableOpacity onPress={onClose}>
-                  <X size={20} color="white" />
+                  <X size={20} color={colors.text} />
                 </TouchableOpacity>
               </View>
 
@@ -122,40 +124,41 @@ export const TableModal = ({ visible, onClose, onSave, onDelete, table }: TableM
                 <View style={styles.form}>
                   <View style={styles.row}>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.label}>Número</Text>
-                      <View style={styles.inputContainer}>
-                        <Hash size={16} color={MB_COLORS.muted} style={styles.inputIcon} />
+                      <Text style={[styles.label, { color: colors.muted }]}>Número</Text>
+                      <View style={[styles.inputContainer, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
+                        <Hash size={16} color={colors.muted} style={styles.inputIcon} />
                         <TextInput
-                          style={styles.input}
+                          style={[styles.input, { color: colors.text }]}
                           value={number}
                           onChangeText={setNumber}
                           placeholder="Ej. 1"
-                          placeholderTextColor={MB_COLORS.muted}
+                          placeholderTextColor={colors.muted}
                           keyboardType="number-pad"
                         />
                       </View>
                     </View>
                   </View>
 
-                  <Text style={[styles.label, { marginTop: 16 }]}>Ubicación / Etiqueta</Text>
-                  <View style={styles.inputContainer}>
-                    <MapPin size={16} color={MB_COLORS.muted} style={styles.inputIcon} />
+                  <Text style={[styles.label, { marginTop: 16, color: colors.muted }]}>Ubicación / Etiqueta</Text>
+                  <View style={[styles.inputContainer, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
+                    <MapPin size={16} color={colors.muted} style={styles.inputIcon} />
                     <TextInput
-                      style={styles.input}
+                      style={[styles.input, { color: colors.text }]}
                       value={label}
                       onChangeText={setLabel}
                       placeholder="Ej. Terraza, Piso 2..."
-                      placeholderTextColor={MB_COLORS.muted}
+                      placeholderTextColor={colors.muted}
                     />
                   </View>
 
-                  <Text style={[styles.label, { marginTop: 16 }]}>Estado de la Mesa</Text>
+                  <Text style={[styles.label, { marginTop: 16, color: colors.muted }]}>Estado de la Mesa</Text>
                   <View style={styles.statusGrid}>
                     {STATUSES.map((s) => (
                       <TouchableOpacity 
                         key={s}
                         style={[
                           styles.statusBtn, 
+                          { backgroundColor: colors.glass },
                           status === s && styles.statusBtnActive,
                           status === s && s === 'FREE' && { borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)' },
                           status === s && s === 'OCCUPIED' && { borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)' },
@@ -166,6 +169,7 @@ export const TableModal = ({ visible, onClose, onSave, onDelete, table }: TableM
                       >
                         <Text style={[
                           styles.statusBtnText, 
+                          { color: colors.muted },
                           status === s && { color: s === 'FREE' ? '#10b981' : s === 'OCCUPIED' ? '#ef4444' : s === 'RESERVED' ? '#f59e0b' : '#3b82f6' }
                         ]}>
                           {s === 'FREE' ? 'LIBRE' : s === 'OCCUPIED' ? 'OCUPADA' : s === 'CLEANING' ? 'LIMPIEZA' : 'RESERVADA'}
@@ -175,8 +179,8 @@ export const TableModal = ({ visible, onClose, onSave, onDelete, table }: TableM
                   </View>
 
                   {table && qrImageUrl && (
-                    <View style={styles.qrSection}>
-                      <Text style={styles.label}>Código QR</Text>
+                    <View style={[styles.qrSection, { borderTopColor: colors.glassHeavy }]}>
+                      <Text style={[styles.label, { color: colors.muted }]}>Código QR</Text>
                       <View style={styles.qrContainer}>
                         <View style={styles.qrWrapper}>
                           <Image 
@@ -185,19 +189,19 @@ export const TableModal = ({ visible, onClose, onSave, onDelete, table }: TableM
                           />
                         </View>
                         <TouchableOpacity 
-                          style={styles.shareQRButton} 
+                          style={[styles.shareQRButton, { backgroundColor: colors.brandAccent + '1A' }]} 
                           onPress={handleShareQR}
                         >
-                          <ShareIcon size={16} color={MB_COLORS.brandAccent} />
-                          <Text style={styles.shareQRText}>Compartir QR</Text>
+                          <ShareIcon size={16} color={colors.brandAccent} />
+                          <Text style={[styles.shareQRText, { color: colors.brandAccent }]}>Compartir QR</Text>
                         </TouchableOpacity>
-                        <Text style={styles.qrHint}>Escanea para abrir el menú digital de esta mesa</Text>
+                        <Text style={[styles.qrHint, { color: colors.muted }]}>Escanea para abrir el menú digital de esta mesa</Text>
                       </View>
                     </View>
                   )}
 
                   <TouchableOpacity 
-                    style={[styles.saveButton, !number.trim() && { opacity: 0.5 }]} 
+                    style={[styles.saveButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }, !number.trim() && { opacity: 0.5 }]} 
                     onPress={handleSave}
                     disabled={loading || !number.trim()}
                   >
@@ -217,11 +221,11 @@ export const TableModal = ({ visible, onClose, onSave, onDelete, table }: TableM
                       disabled={deleting}
                     >
                       {deleting ? (
-                        <ActivityIndicator color={MB_COLORS.brandAccent} />
+                        <ActivityIndicator color={colors.brandAccent} />
                       ) : (
                         <>
-                          <Trash2 size={16} color={MB_COLORS.brandAccent} />
-                          <Text style={styles.deleteButtonText}>Eliminar Mesa</Text>
+                          <Trash2 size={16} color={colors.brandAccent} />
+                          <Text style={[styles.deleteButtonText, { color: colors.brandAccent }]}>Eliminar Mesa</Text>
                         </>
                       )}
                     </TouchableOpacity>

@@ -15,10 +15,12 @@ import { Stack, useRouter } from 'expo-router';
 import { User, Mail, Save, ChevronLeft } from 'lucide-react-native';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 
 export default function ProfileScreen() {
   const { user } = useAuth();
+  const { colors } = useTheme();
   const router = useRouter();
   
   const [loading, setLoading] = React.useState(false);
@@ -49,51 +51,53 @@ export default function ProfileScreen() {
 
   return (
     <KeyboardAvoidingView 
-      style={styles.container} 
+      style={[styles.container, { backgroundColor: colors.navy }]} 
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <Stack.Screen options={{ 
         headerShown: true, 
         title: 'PERFIL',
+        headerStyle: { backgroundColor: colors.navy },
+        headerTintColor: colors.text,
         headerLeft: () => (
           <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 10 }}>
-            <ChevronLeft color="white" size={24} />
+            <ChevronLeft color={colors.text} size={24} />
           </TouchableOpacity>
         )
       }} />
       
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.avatarSection}>
-          <View style={styles.avatar}>
+          <View style={[styles.avatar, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }]}>
             <Text style={styles.avatarText}>{email?.[0].toUpperCase()}</Text>
           </View>
-          <Text style={styles.emailLabel}>{email}</Text>
+          <Text style={[styles.emailLabel, { color: colors.muted }]}>{email}</Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Información Personal</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Información Personal</Text>
           
           <View style={styles.inputGroup}>
             <View style={styles.labelRow}>
-              <User size={14} color={MB_COLORS.muted} />
-              <Text style={styles.label}>Nombre Completo</Text>
+              <User size={14} color={colors.muted} />
+              <Text style={[styles.label, { color: colors.muted }]}>Nombre Completo</Text>
             </View>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.glass, borderColor: colors.glassHeavy, color: colors.text }]}
               value={name}
               onChangeText={setName}
               placeholder="Tu nombre"
-              placeholderTextColor="rgba(255,255,255,0.2)"
+              placeholderTextColor={colors.muted}
             />
           </View>
 
           <View style={styles.inputGroup}>
             <View style={styles.labelRow}>
-              <Mail size={14} color={MB_COLORS.muted} />
-              <Text style={styles.label}>Correo Electrónico (No editable)</Text>
+              <Mail size={14} color={colors.muted} />
+              <Text style={[styles.label, { color: colors.muted }]}>Correo Electrónico (No editable)</Text>
             </View>
             <TextInput
-              style={[styles.input, styles.disabledInput, { color: "rgba(255,255,255,0.4)" }]}
+              style={[styles.input, styles.disabledInput, { backgroundColor: colors.glass + '80', color: colors.muted }]}
               value={email}
               editable={false}
             />
@@ -101,7 +105,7 @@ export default function ProfileScreen() {
         </View>
 
         <TouchableOpacity 
-          style={[styles.saveButton, loading && styles.disabledButton]}
+          style={[styles.saveButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }, loading && styles.disabledButton]}
           onPress={handleSave}
           disabled={loading}
         >

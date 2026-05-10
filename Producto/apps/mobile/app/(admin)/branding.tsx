@@ -26,19 +26,22 @@ import * as ImagePicker from 'expo-image-picker';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { PALETTE_TEMPLATES, PaletteTemplate } from '../../constants/Palettes';
 
-const FONTS = ['Outfit', 'Inter', 'Roboto', 'Montserrat', 'Playfair Display'];
+const TITLE_FONTS = [
+  'Outfit', 'Playfair Display', 'Cormorant Garamond', 'Cinzel', 
+  'Josefin Sans', 'Montserrat', 'Raleway', 'Bebas Neue', 'Abril Fatface', 'Roboto'
+];
 
-const COLOR_PRESETS = [
-  { name: 'MenuBites Red', primary: '#FE5F55', background: '#0B0D17' },
-  { name: 'Elegant Dark', primary: '#D4AF37', background: '#121212' },
-  { name: 'Ocean Fresh', primary: '#0077B6', background: '#F8F9FA' },
-  { name: 'Forest Bio', primary: '#2D6A4F', background: '#FFFFFF' },
+const BODY_FONTS = [
+  'Inter', 'Lato', 'Nunito', 'Poppins', 'DM Sans', 'Barlow', 'Source Sans 3', 'Roboto'
 ];
 
 export default function BrandingScreen() {
   const { restaurantId } = useAuth();
+  const { colors } = useTheme();
   
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
@@ -142,14 +145,24 @@ export default function BrandingScreen() {
       }
 
       const payload = {
-        ...theme,
+        name: theme.name || 'Personalizado',
+        palette_name: theme.palette_name,
+        primary_color: theme.primary_color,
+        secondary_color: theme.secondary_color,
+        background_color: theme.background_color,
+        accent_color: theme.accent_color,
+        text_color: theme.text_color,
+        card_background: theme.card_background,
+        font_title: theme.font_title,
+        font_body: theme.font_body,
+        font_accent: theme.font_accent || theme.font_title,
         logo_url: finalLogoUrl,
         restaurant_id: restaurantId,
-        updatedAt: new Date().toISOString()
+        is_active: true,
+        updated_at: new Date().toISOString()
       };
 
-      // Remove ID if it's a new theme object we just initialized
-      if (payload.id === undefined) delete payload.id;
+      if (theme.id) (payload as any).id = theme.id;
 
       const { error } = await supabase
         .from('restaurant_themes')
@@ -171,20 +184,61 @@ export default function BrandingScreen() {
     setTheme({ ...theme, [field]: value });
   };
 
-  const applyPreset = (preset: any) => {
+  const applyPreset = (preset: PaletteTemplate) => {
     setTheme({
       ...theme,
-      primary_color: preset.primary,
-      background_color: preset.background,
-      accent_color: preset.primary,
+      palette_name: preset.id,
+      primary_color: preset.primaryColor,
+      secondary_color: preset.secondaryColor,
+      background_color: preset.backgroundColor,
+      accent_color: preset.accentColor,
+      text_color: preset.textColor,
+      card_background: preset.cardBackground,
+      is_custom: false
     });
   };
 
+  const LivePreview = () => (
+    <View style={[styles.previewContainer, { backgroundColor: theme.background_color }]}>
+      <Text style={[styles.previewLabel, { color: theme.text_color, opacity: 0.5 }]}>VISTA PREVIA EN VIVO</Text>
+      
+      <View style={styles.previewContent}>
+        {/* KPI Mini Preview */}
+        <View style={[styles.previewKpi, { backgroundColor: theme.card_background }]}>
+          <View style={[styles.previewIcon, { backgroundColor: theme.primary_color + '20' }]}>
+            <Palette size={14} color={theme.primary_color} />
+          </View>
+          <View>
+            <Text style={[styles.previewKpiValue, { color: theme.text_color, fontFamily: theme.font_title }]}>$1.240.000</Text>
+            <Text style={[styles.previewKpiLabel, { color: theme.text_color, opacity: 0.6, fontFamily: theme.font_body }]}>Ventas de Hoy</Text>
+          </View>
+        </View>
+
+        {/* Product Card Mini Preview */}
+        <View style={[styles.previewCard, { backgroundColor: theme.card_background }]}>
+          <View style={styles.previewImagePlaceholder}>
+            <ImageIcon size={20} color={theme.text_color + '20'} />
+            <View style={[styles.previewBadge, { backgroundColor: theme.primary_color }]}>
+              <Text style={styles.previewBadgeText}>POPULAR</Text>
+            </View>
+          </View>
+          <View style={styles.previewCardInfo}>
+            <Text style={[styles.previewCardTitle, { color: theme.text_color, fontFamily: theme.font_title }]}>Pizza Napolitana</Text>
+            <Text style={[styles.previewCardPrice, { color: theme.primary_color, fontFamily: theme.font_title }]}>$12.900</Text>
+            <TouchableOpacity style={[styles.previewButton, { backgroundColor: theme.primary_color }]}>
+              <Text style={[styles.previewButtonText, { color: theme.backgroundColor }]}>ORDENAR</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+
   if (loading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator color={MB_COLORS.brandAccent} />
-        <Text style={styles.loadingText}>Cargando identidad...</Text>
+      <View style={[styles.centered, { backgroundColor: colors.navy }]}>
+        <ActivityIndicator color={colors.brandAccent} />
+        <Text style={[styles.loadingText, { color: colors.muted }]}>Cargando identidad...</Text>
       </View>
     );
   }
@@ -192,28 +246,36 @@ export default function BrandingScreen() {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.navy }]}
     >
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Branding</Text>
-        <Text style={styles.headerSubtitle}>Personaliza la experiencia visual</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Branding</Text>
+        <Text style={[styles.headerSubtitle, { color: colors.muted }]}>Personaliza la experiencia visual</Text>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Live Preview Section */}
+        <View style={styles.section}>
+          <LivePreview />
+        </View>
+
         {/* Presets */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Inspiración Rápida</Text>
+          <Text style={[styles.sectionTitle, { color: colors.muted }]}>Carrusel de Inspiración</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.presets}>
-            {COLOR_PRESETS.map((p, i) => (
+            {PALETTE_TEMPLATES.map((p) => (
               <TouchableOpacity 
-                key={i} 
-                style={styles.presetCard}
+                key={p.id} 
+                style={[styles.presetCard, theme.palette_name === p.id && styles.presetCardActive]}
                 onPress={() => applyPreset(p)}
               >
-                <View style={[styles.presetPreview, { backgroundColor: p.background }]}>
-                  <View style={[styles.presetCircle, { backgroundColor: p.primary }]} />
+                <View style={[styles.presetPreview, { backgroundColor: p.backgroundColor, borderColor: colors.glassHeavy }]}>
+                  <View style={styles.presetColorGrid}>
+                    <View style={[styles.presetCircle, { backgroundColor: p.primaryColor }]} />
+                    <View style={[styles.presetCircle, { backgroundColor: p.secondaryColor, marginLeft: -8 }]} />
+                  </View>
                 </View>
-                <Text style={styles.presetName}>{p.name}</Text>
+                <Text style={[styles.presetName, { color: colors.muted }]} numberOfLines={1}>{p.name}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -222,34 +284,34 @@ export default function BrandingScreen() {
         {/* Colors */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Palette size={18} color={MB_COLORS.brandAccent} />
-            <Text style={styles.sectionTitleText}>Paleta de Colores</Text>
+            <Palette size={18} color={colors.brandAccent} />
+            <Text style={[styles.sectionTitleText, { color: colors.text }]}>Paleta de Colores</Text>
           </View>
           
           <View style={styles.field}>
-            <Text style={styles.label}>Color Primario</Text>
-            <View style={styles.colorInputRow}>
-              <View style={[styles.colorPreview, { backgroundColor: theme.primary_color }]} />
+            <Text style={[styles.label, { color: colors.muted }]}>Color Primario</Text>
+            <View style={[styles.colorInputRow, { backgroundColor: colors.glass }]}>
+              <View style={[styles.colorPreview, { backgroundColor: theme.primary_color, borderColor: colors.glassHeavy }]} />
               <TextInput 
-                style={styles.input}
+                style={[styles.input, { color: colors.text }]}
                 value={theme.primary_color}
                 onChangeText={(v) => updateTheme('primary_color', v)}
                 placeholder="#000000"
-                placeholderTextColor={MB_COLORS.muted}
+                placeholderTextColor={colors.muted}
               />
             </View>
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.label}>Color de Fondo</Text>
-            <View style={styles.colorInputRow}>
-              <View style={[styles.colorPreview, { backgroundColor: theme.background_color }]} />
+            <Text style={[styles.label, { color: colors.muted }]}>Color de Fondo</Text>
+            <View style={[styles.colorInputRow, { backgroundColor: colors.glass }]}>
+              <View style={[styles.colorPreview, { backgroundColor: theme.background_color, borderColor: colors.glassHeavy }]} />
               <TextInput 
-                style={styles.input}
+                style={[styles.input, { color: colors.text }]}
                 value={theme.background_color}
                 onChangeText={(v) => updateTheme('background_color', v)}
                 placeholder="#000000"
-                placeholderTextColor={MB_COLORS.muted}
+                placeholderTextColor={colors.muted}
               />
             </View>
           </View>
@@ -258,19 +320,40 @@ export default function BrandingScreen() {
         {/* Fonts */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Type size={18} color={MB_COLORS.brandAccent} />
-            <Text style={styles.sectionTitleText}>Tipografía</Text>
+            <Type size={18} color={colors.brandAccent} />
+            <Text style={[styles.sectionTitleText, { color: colors.text }]}>Tipografía</Text>
           </View>
 
-          <Text style={styles.label}>Fuente de Títulos</Text>
+          <Text style={[styles.label, { color: colors.muted }]}>Fuente de Títulos</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.fontList}>
-            {FONTS.map((f) => (
+            {TITLE_FONTS.map((f) => (
               <TouchableOpacity 
                 key={f} 
-                style={[styles.fontChip, theme.font_title === f && styles.fontChipActive]}
+                style={[
+                  styles.fontChip, 
+                  { backgroundColor: colors.glass, borderColor: colors.glassHeavy },
+                  theme.font_title === f && { backgroundColor: colors.brandAccent, borderColor: colors.brandAccent }
+                ]}
                 onPress={() => updateTheme('font_title', f)}
               >
-                <Text style={[styles.fontChipText, theme.font_title === f && styles.fontChipTextActive]}>{f}</Text>
+                <Text style={[styles.fontChipText, { color: colors.muted }, theme.font_title === f && styles.fontChipTextActive, { fontFamily: f }]}>{f}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <Text style={[styles.label, { marginTop: 16, color: colors.muted }]}>Fuente de Cuerpo</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.fontList}>
+            {BODY_FONTS.map((f) => (
+              <TouchableOpacity 
+                key={f} 
+                style={[
+                  styles.fontChip, 
+                  { backgroundColor: colors.glass, borderColor: colors.glassHeavy },
+                  theme.font_body === f && { backgroundColor: colors.brandAccent, borderColor: colors.brandAccent }
+                ]}
+                onPress={() => updateTheme('font_body', f)}
+              >
+                <Text style={[styles.fontChipText, { color: colors.muted }, theme.font_body === f && styles.fontChipTextActive, { fontFamily: f }]}>{f}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -279,17 +362,17 @@ export default function BrandingScreen() {
         {/* Logo */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <ImageIcon size={18} color={MB_COLORS.brandAccent} />
-            <Text style={styles.sectionTitleText}>Logo del Restaurante</Text>
+            <ImageIcon size={18} color={colors.brandAccent} />
+            <Text style={[styles.sectionTitleText, { color: colors.text }]}>Logo del Restaurante</Text>
           </View>
 
-          <TouchableOpacity style={styles.logoUpload} onPress={handlePickImage}>
+          <TouchableOpacity style={[styles.logoUpload, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]} onPress={handlePickImage}>
             {(newLogoUri || theme.logo_url) ? (
               <Image source={{ uri: newLogoUri || theme.logo_url }} style={styles.logoImage} />
             ) : (
               <View style={styles.logoPlaceholder}>
-                <Upload size={32} color={MB_COLORS.muted} />
-                <Text style={styles.logoPlaceholderText}>Subir Logo</Text>
+                <Upload size={32} color={colors.muted} />
+                <Text style={[styles.logoPlaceholderText, { color: colors.muted }]}>Subir Logo</Text>
               </View>
             )}
             <View style={styles.logoEditOverlay}>
@@ -299,7 +382,7 @@ export default function BrandingScreen() {
         </View>
 
         <TouchableOpacity 
-          style={[styles.saveButton, saving && { opacity: 0.7 }]} 
+          style={[styles.saveButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }, saving && { opacity: 0.7 }]} 
           onPress={handleSave}
           disabled={saving}
         >
@@ -322,7 +405,7 @@ export default function BrandingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MB_COLORS.navy,
+    backgroundColor: '#0A1128',
   },
   header: {
     paddingHorizontal: MB_SPACING.lg,
@@ -337,7 +420,7 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     fontSize: 13,
-    color: MB_COLORS.muted,
+    color: 'rgba(255, 255, 255, 0.4)',
     fontWeight: '600',
     marginTop: 2,
   },
@@ -355,7 +438,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    color: MB_COLORS.muted,
+    color: 'rgba(255, 255, 255, 0.4)',
     fontSize: 10,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -375,6 +458,10 @@ const styles = StyleSheet.create({
   presetCard: {
     width: 100,
     alignItems: 'center',
+    opacity: 0.6,
+  },
+  presetCardActive: {
+    opacity: 1,
   },
   presetPreview: {
     width: 100,
@@ -389,9 +476,15 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.1)',
+  },
+  presetColorGrid: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   presetName: {
-    color: MB_COLORS.muted,
+    color: 'rgba(255, 255, 255, 0.4)',
     fontSize: 10,
     fontWeight: '700',
     marginTop: 6,
@@ -401,7 +494,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   label: {
-    color: MB_COLORS.muted,
+    color: 'rgba(255, 255, 255, 0.4)',
     fontSize: 10,
     fontWeight: '800',
     marginBottom: 8,
@@ -440,11 +533,11 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.1)',
   },
   fontChipActive: {
-    backgroundColor: MB_COLORS.brandAccent,
-    borderColor: MB_COLORS.brandAccent,
+    backgroundColor: '#FF3B30',
+    borderColor: '#FF3B30',
   },
   fontChipText: {
-    color: MB_COLORS.muted,
+    color: 'rgba(255, 255, 255, 0.4)',
     fontSize: 14,
     fontWeight: '700',
   },
@@ -473,7 +566,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   logoPlaceholderText: {
-    color: MB_COLORS.muted,
+    color: 'rgba(255, 255, 255, 0.4)',
     fontSize: 12,
     fontWeight: '800',
   },
@@ -493,7 +586,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
-    backgroundColor: MB_COLORS.brandAccent,
+    backgroundColor: '#FF3B30',
     marginHorizontal: MB_SPACING.lg,
     height: 56,
     borderRadius: 16,
@@ -508,14 +601,102 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: MB_COLORS.navy,
+    backgroundColor: '#0A1128',
   },
   loadingText: {
-    color: MB_COLORS.muted,
+    color: 'rgba(255, 255, 255, 0.4)',
     marginTop: 12,
     fontSize: 12,
     fontWeight: '800',
     textTransform: 'uppercase',
-  }
+  },
+  previewContainer: {
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    overflow: 'hidden',
+  },
+  previewLabel: {
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 1,
+    marginBottom: 16,
+  },
+  previewContent: {
+    gap: 12,
+  },
+  previewKpi: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 20,
+    gap: 16,
+  },
+  previewIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewKpiValue: {
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  previewKpiLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  previewCard: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    flexDirection: 'row',
+    padding: 12,
+    gap: 12,
+  },
+  previewImagePlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewBadge: {
+    position: 'absolute',
+    top: 6,
+    left: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  previewBadgeText: {
+    color: 'white',
+    fontSize: 7,
+    fontWeight: '900',
+  },
+  previewCardInfo: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: 4,
+  },
+  previewCardTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  previewCardPrice: {
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  previewButton: {
+    marginTop: 4,
+    paddingVertical: 6,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  previewButtonText: {
+    fontSize: 9,
+    fontWeight: '900',
+  },
 });
-

@@ -15,10 +15,12 @@ import { Stack, useRouter } from 'expo-router';
 import { Store, MapPin, Phone, Mail, Percent, Save, ChevronLeft } from 'lucide-react-native';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 
 export default function RestaurantInfoScreen() {
   const { restaurantId } = useAuth();
+  const { colors } = useTheme();
   const router = useRouter();
   
   const [loading, setLoading] = React.useState(true);
@@ -95,56 +97,56 @@ export default function RestaurantInfoScreen() {
 
   if (loading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator color={MB_COLORS.brandAccent} />
+      <View style={[styles.centered, { backgroundColor: colors.navy }]}>
+        <ActivityIndicator color={colors.brandAccent} />
       </View>
     );
   }
 
   return (
     <KeyboardAvoidingView 
-      style={styles.container} 
+      style={[styles.container, { backgroundColor: colors.navy }]} 
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <Stack.Screen options={{ headerShown: false }} />
       
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ChevronLeft color="white" size={24} />
+        <TouchableOpacity onPress={() => router.back()} style={[styles.backButton, { backgroundColor: colors.glass }]}>
+          <ChevronLeft color={colors.text} size={24} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Información del Local</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Información del Local</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>DATOS PRINCIPALES</Text>
+          <Text style={[styles.sectionTitle, { color: colors.muted }]}>DATOS PRINCIPALES</Text>
           
           <View style={styles.inputGroup}>
             <View style={styles.labelRow}>
-              <Store size={14} color={MB_COLORS.muted} />
-              <Text style={styles.label}>Nombre Comercial</Text>
+              <Store size={14} color={colors.muted} />
+              <Text style={[styles.label, { color: colors.muted }]}>Nombre Comercial</Text>
             </View>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.glass, borderColor: colors.glassHeavy, color: colors.text }]}
               value={formData.name}
               onChangeText={(t) => setFormData({ ...formData, name: t })}
               placeholder="Ej: Burger House"
-              placeholderTextColor="rgba(255,255,255,0.2)"
+              placeholderTextColor={colors.muted}
             />
           </View>
 
           <View style={styles.inputGroup}>
             <View style={styles.labelRow}>
-              <MapPin size={14} color={MB_COLORS.muted} />
-              <Text style={styles.label}>Dirección Física</Text>
+              <MapPin size={14} color={colors.muted} />
+              <Text style={[styles.label, { color: colors.muted }]}>Dirección Física</Text>
             </View>
             <TextInput
-              style={[styles.input, styles.textArea]}
+              style={[styles.input, styles.textArea, { backgroundColor: colors.glass, borderColor: colors.glassHeavy, color: colors.text }]}
               value={formData.address}
               onChangeText={(t) => setFormData({ ...formData, address: t })}
               placeholder="Calle, Número, Ciudad"
-              placeholderTextColor="rgba(255,255,255,0.2)"
+              placeholderTextColor={colors.muted}
               multiline
               numberOfLines={3}
             />
@@ -152,60 +154,60 @@ export default function RestaurantInfoScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>CONTACTO</Text>
+          <Text style={[styles.sectionTitle, { color: colors.muted }]}>CONTACTO</Text>
 
           <View style={styles.inputGroup}>
             <View style={styles.labelRow}>
-              <Phone size={14} color={MB_COLORS.muted} />
-              <Text style={styles.label}>Teléfono de Atención</Text>
+              <Phone size={14} color={colors.muted} />
+              <Text style={[styles.label, { color: colors.muted }]}>Teléfono de Atención</Text>
             </View>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.glass, borderColor: colors.glassHeavy, color: colors.text }]}
               value={formData.phone}
               onChangeText={(t) => setFormData({ ...formData, phone: t })}
               placeholder="+56 9 ..."
               keyboardType="phone-pad"
-              placeholderTextColor="rgba(255,255,255,0.2)"
+              placeholderTextColor={colors.muted}
             />
           </View>
 
           <View style={styles.inputGroup}>
             <View style={styles.labelRow}>
-              <Mail size={14} color={MB_COLORS.muted} />
-              <Text style={styles.label}>Email Público</Text>
+              <Mail size={14} color={colors.muted} />
+              <Text style={[styles.label, { color: colors.muted }]}>Email Público</Text>
             </View>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.glass, borderColor: colors.glassHeavy, color: colors.text }]}
               value={formData.email}
               onChangeText={(t) => setFormData({ ...formData, email: t })}
               placeholder="contacto@restaurante.com"
               keyboardType="email-address"
               autoCapitalize="none"
-              placeholderTextColor="rgba(255,255,255,0.2)"
+              placeholderTextColor={colors.muted}
             />
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>CONFIGURACIÓN FISCAL</Text>
+          <Text style={[styles.sectionTitle, { color: colors.muted }]}>CONFIGURACIÓN FISCAL</Text>
           <View style={styles.inputGroup}>
             <View style={styles.labelRow}>
-              <Percent size={14} color={MB_COLORS.muted} />
-              <Text style={styles.label}>Impuesto / IVA (%)</Text>
+              <Percent size={14} color={colors.muted} />
+              <Text style={[styles.label, { color: colors.muted }]}>Impuesto / IVA (%)</Text>
             </View>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.glass, borderColor: colors.glassHeavy, color: colors.text }]}
               value={formData.tax_percentage}
               onChangeText={(t) => setFormData({ ...formData, tax_percentage: t })}
               placeholder="0.00"
               keyboardType="numeric"
-              placeholderTextColor="rgba(255,255,255,0.2)"
+              placeholderTextColor={colors.muted}
             />
           </View>
         </View>
 
         <TouchableOpacity 
-          style={[styles.saveButton, saving && styles.disabledButton]}
+          style={[styles.saveButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }, saving && styles.disabledButton]}
           onPress={handleSave}
           disabled={saving}
         >

@@ -9,7 +9,7 @@ import {
   Dimensions,
   Pressable
 } from 'react-native';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../constants/MB_Theme';
+import { MB_SPACING, MB_RADIUS } from '../constants/MB_Theme';
 import { 
   X, 
   LayoutDashboard, 
@@ -32,6 +32,7 @@ import Animated, {
   SlideOutLeft 
 } from 'react-native-reanimated';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { useRouter, usePathname } from 'expo-router';
 
 const { width } = Dimensions.get('window');
@@ -43,6 +44,7 @@ interface AdminSideMenuProps {
 
 export default function AdminSideMenu({ visible, onClose }: AdminSideMenuProps) {
   const { user, signOut, role } = useAuth();
+  const { colors } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -55,22 +57,22 @@ export default function AdminSideMenu({ visible, onClose }: AdminSideMenuProps) 
     const isActive = pathname === path;
     return (
       <TouchableOpacity 
-        style={[styles.navItem, isActive && styles.navItemActive]} 
+        style={[styles.navItem, isActive && { backgroundColor: colors.brandAccent }]} 
         onPress={() => navigateTo(path)}
       >
-        <View style={[styles.iconBox, isActive && styles.iconBoxActive]}>
+        <View style={styles.iconBox}>
           <Icon 
-            color={isActive ? 'white' : MB_COLORS.muted}
+            color={isActive ? 'white' : colors.muted}
             size={20} 
           />
         </View>
-        <Text style={[styles.navLabel, isActive && styles.navLabelActive]}>{label}</Text>
+        <Text style={[styles.navLabel, isActive && { color: 'white' }, !isActive && { color: colors.muted }]}>{label}</Text>
       </TouchableOpacity>
     );
   };
 
   const SectionTitle = ({ title }: { title: string }) => (
-    <Text style={styles.sectionTitle}>{title}</Text>
+    <Text style={[styles.sectionTitle, { color: colors.muted }]}>{title}</Text>
   );
 
   return (
@@ -90,21 +92,21 @@ export default function AdminSideMenu({ visible, onClose }: AdminSideMenuProps) 
         <Animated.View 
           entering={SlideInLeft.duration(300)} 
           exiting={SlideOutLeft.duration(250)}
-          style={styles.menuContainer}
+          style={[styles.menuContainer, { backgroundColor: colors.navy }]}
         >
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.brandBox}>
-              <View style={styles.logoIcon}>
+              <View style={[styles.logoIcon, { backgroundColor: colors.brandAccent }]}>
                 <Store size={20} color="white" />
               </View>
               <View>
-                <Text style={styles.brandTitle}>MENU <Text style={{ color: MB_COLORS.brandAccent }}>BITES</Text></Text>
-                <Text style={styles.brandSub}>LOCAL HUB</Text>
+                <Text style={[styles.brandTitle, { color: colors.text }]}>MENU <Text style={{ color: colors.brandAccent }}>BITES</Text></Text>
+                <Text style={[styles.brandSub, { color: colors.muted }]}>LOCAL HUB</Text>
               </View>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <X color={MB_COLORS.muted} size={24} />
+              <X color={colors.text} size={24} />
             </TouchableOpacity>
           </View>
 
@@ -129,16 +131,19 @@ export default function AdminSideMenu({ visible, onClose }: AdminSideMenuProps) 
           <View style={styles.footer}>
             <View style={styles.userInfo}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{user?.email?.[0].toUpperCase()}</Text>
+                <Text style={[styles.avatarText, { color: colors.brandAccent }]}>{user?.email?.[0].toUpperCase()}</Text>
               </View>
               <View style={styles.userDetails}>
-                <Text style={styles.userEmail} numberOfLines={1}>{user?.email}</Text>
-                <Text style={styles.userRole}>{role}</Text>
+                <Text style={[styles.userEmail, { color: colors.text }]} numberOfLines={1}>{user?.email}</Text>
+                <Text style={[styles.userRole, { color: colors.brandAccent }]}>{role}</Text>
               </View>
             </View>
-            <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
-              <LogOut size={18} color={MB_COLORS.brandAccent} />
-              <Text style={styles.signOutText}>Cerrar Sesión</Text>
+            <TouchableOpacity 
+              style={[styles.signOutButton, { borderColor: colors.brandAccent + '30', backgroundColor: colors.glass }]} 
+              onPress={signOut}
+            >
+              <LogOut size={18} color={colors.brandAccent} />
+              <Text style={[styles.signOutText, { color: colors.text }]}>Cerrar Sesión</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>
@@ -162,7 +167,7 @@ const styles = StyleSheet.create({
   menuContainer: {
     width: width * 0.8,
     height: '100%',
-    backgroundColor: MB_COLORS.navy,
+    backgroundColor: '#0A1128', // Mantener base oscura o usar colors.navy
     borderRightWidth: 1,
     borderRightColor: 'rgba(255,255,255,0.05)',
     paddingTop: 60,
@@ -182,20 +187,18 @@ const styles = StyleSheet.create({
   logoIcon: {
     width: 40,
     height: 40,
-    backgroundColor: MB_COLORS.brandAccent,
+    backgroundColor: '#FE5F55', // Fallback
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   brandTitle: {
-    color: 'white',
     fontSize: 16,
     fontWeight: '900',
     letterSpacing: -0.5,
     fontStyle: 'italic',
   },
   brandSub: {
-    color: MB_COLORS.muted,
     fontSize: 9,
     fontWeight: '800',
     letterSpacing: 2,
@@ -209,7 +212,6 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   sectionTitle: {
-    color: MB_COLORS.muted,
     fontSize: 10,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -226,7 +228,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   navItemActive: {
-    backgroundColor: MB_COLORS.brandAccent,
+    // Handled dynamically
   },
   iconBox: {
     width: 32,
@@ -240,7 +242,6 @@ const styles = StyleSheet.create({
     // Icon color handled in component
   },
   navLabel: {
-    color: MB_COLORS.muted,
     fontSize: 14,
     fontWeight: '700',
   },
@@ -270,7 +271,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.1)',
   },
   avatarText: {
-    color: MB_COLORS.brandAccent,
     fontSize: 16,
     fontWeight: '900',
   },
@@ -278,12 +278,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   userEmail: {
-    color: 'white',
     fontSize: 13,
     fontWeight: '700',
   },
   userRole: {
-    color: MB_COLORS.brandAccent,
     fontSize: 10,
     fontWeight: '800',
     textTransform: 'uppercase',
@@ -298,7 +296,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(254, 95, 85, 0.2)',
   },
   signOutText: {
-    color: 'white',
     fontSize: 12,
     fontWeight: '800',
     textTransform: 'uppercase',

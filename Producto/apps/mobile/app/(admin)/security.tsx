@@ -14,10 +14,12 @@ import {
 import { Stack, useRouter } from 'expo-router';
 import { Lock, ShieldCheck, ChevronLeft } from 'lucide-react-native';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 
 export default function SecurityScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
   
   const [loading, setLoading] = React.useState(false);
   const [password, setPassword] = React.useState('');
@@ -54,62 +56,64 @@ export default function SecurityScreen() {
 
   return (
     <KeyboardAvoidingView 
-      style={styles.container} 
+      style={[styles.container, { backgroundColor: colors.navy }]} 
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <Stack.Screen options={{ 
         headerShown: true, 
         title: 'SEGURIDAD',
+        headerStyle: { backgroundColor: colors.navy },
+        headerTintColor: colors.text,
         headerLeft: () => (
           <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 10 }}>
-            <ChevronLeft color="white" size={24} />
+            <ChevronLeft color={colors.text} size={24} />
           </TouchableOpacity>
         )
       }} />
       
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.iconHeader}>
-          <View style={styles.shieldIcon}>
-            <ShieldCheck size={40} color="white" />
+          <View style={[styles.shieldIcon, { backgroundColor: colors.brandAccent + '20', borderColor: colors.brandAccent + '40' }]}>
+            <ShieldCheck size={40} color={colors.brandAccent} />
           </View>
-          <Text style={styles.headerTitle}>Cambiar Contraseña</Text>
-          <Text style={styles.headerSub}>Asegura el acceso a tu cuenta administrativa</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Cambiar Contraseña</Text>
+          <Text style={[styles.headerSub, { color: colors.muted }]}>Asegura el acceso a tu cuenta administrativa</Text>
         </View>
 
         <View style={styles.section}>
           <View style={styles.inputGroup}>
             <View style={styles.labelRow}>
-              <Lock size={14} color={MB_COLORS.muted} />
-              <Text style={styles.label}>Nueva Contraseña</Text>
+              <Lock size={14} color={colors.muted} />
+              <Text style={[styles.label, { color: colors.muted }]}>Nueva Contraseña</Text>
             </View>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.glass, borderColor: colors.glassHeavy, color: colors.text }]}
               value={password}
               onChangeText={setPassword}
               placeholder="Min. 6 caracteres"
-              placeholderTextColor="rgba(255,255,255,0.2)"
+              placeholderTextColor={colors.muted}
               secureTextEntry
             />
           </View>
 
           <View style={styles.inputGroup}>
             <View style={styles.labelRow}>
-              <Lock size={14} color={MB_COLORS.muted} />
-              <Text style={styles.label}>Confirmar Contraseña</Text>
+              <Lock size={14} color={colors.muted} />
+              <Text style={[styles.label, { color: colors.muted }]}>Confirmar Contraseña</Text>
             </View>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.glass, borderColor: colors.glassHeavy, color: colors.text }]}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               placeholder="Repite la contraseña"
-              placeholderTextColor="rgba(255,255,255,0.2)"
+              placeholderTextColor={colors.muted}
               secureTextEntry
             />
           </View>
         </View>
 
         <TouchableOpacity 
-          style={[styles.saveButton, loading && styles.disabledButton]}
+          style={[styles.saveButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }, loading && styles.disabledButton]}
           onPress={handleUpdatePassword}
           disabled={loading}
         >

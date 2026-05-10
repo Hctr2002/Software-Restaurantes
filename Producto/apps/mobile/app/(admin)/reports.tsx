@@ -7,7 +7,9 @@ import {
   TouchableOpacity, 
   ActivityIndicator,
   RefreshControl,
-  Dimensions
+  Dimensions,
+  TextInput,
+  Modal
 } from 'react-native';
 import { 
   BarChart3, 
@@ -25,6 +27,7 @@ import {
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { 
   daysAgoISO, 
   todayISO, 
@@ -36,7 +39,6 @@ import {
   formatShortDate 
 } from '../../lib/reportUtils';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { TextInput, Modal } from 'react-native';
 
 const PRESETS = [
   { label: '7D', days: 7 },
@@ -48,6 +50,7 @@ const PRESETS = [
 
 export default function AdminReportsScreen() {
   const { restaurantId } = useAuth();
+  const { colors } = useTheme();
   
   const [loading, setLoading] = React.useState(true);
   const [refreshing, setRefreshing] = React.useState(false);
@@ -173,23 +176,23 @@ export default function AdminReportsScreen() {
   const renderKPI = (title: string, value: string, icon: any, color: string, index: number) => (
     <Animated.View 
       entering={FadeInDown.delay(index * 100)}
-      style={[styles.kpiCard, { borderLeftColor: color }]}
+      style={[styles.kpiCard, { backgroundColor: colors.glass, borderLeftColor: color, borderColor: colors.glassHeavy }]}
     >
       <View style={styles.kpiHeader}>
         <View style={[styles.kpiIcon, { backgroundColor: color + '20' }]}>
           {icon}
         </View>
-        <Text style={styles.kpiTitle}>{title}</Text>
+        <Text style={[styles.kpiTitle, { color: colors.muted }]}>{title}</Text>
       </View>
-      <Text style={styles.kpiValue}>{value}</Text>
+      <Text style={[styles.kpiValue, { color: colors.text }]}>{value}</Text>
     </Animated.View>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.navy }]}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Análisis de Datos</Text>
-        <Text style={styles.headerSubtitle}>Desempeño y métricas del local</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Análisis de Datos</Text>
+        <Text style={[styles.headerSubtitle, { color: colors.muted }]}>Desempeño y métricas del local</Text>
       </View>
 
       <View style={styles.presetContainer}>
@@ -197,7 +200,11 @@ export default function AdminReportsScreen() {
           {PRESETS.map((p) => (
             <TouchableOpacity 
               key={p.label}
-              style={[styles.presetChip, preset === p.days && p.days !== 0 && styles.presetChipActive, preset === 0 && p.days === 0 && styles.presetChipActive]}
+              style={[
+                styles.presetChip, 
+                { backgroundColor: colors.glass, borderColor: colors.glassHeavy },
+                ((preset === p.days && p.days !== 0) || (preset === 0 && p.days === 0)) && { backgroundColor: colors.brandAccent, borderColor: colors.brandAccent }
+              ]}
               onPress={() => {
                 if (p.days === 0) {
                   setShowCustomModal(true);
@@ -206,7 +213,11 @@ export default function AdminReportsScreen() {
                 }
               }}
             >
-              <Text style={[styles.presetText, (preset === p.days || (preset === 0 && p.days === 0)) && styles.presetTextActive]}>
+              <Text style={[
+                styles.presetText, 
+                { color: colors.muted },
+                ((preset === p.days && p.days !== 0) || (preset === 0 && p.days === 0)) && { color: 'white' }
+              ]}>
                 {p.label}
               </Text>
             </TouchableOpacity>
@@ -214,8 +225,8 @@ export default function AdminReportsScreen() {
         </ScrollView>
         {preset === 0 && (
           <View style={styles.customDateDisplay}>
-            <CalendarIcon size={12} color={MB_COLORS.brandAccent} />
-            <Text style={styles.customDateDisplayText}>
+            <CalendarIcon size={12} color={colors.brandAccent} />
+            <Text style={[styles.customDateDisplayText, { color: colors.brandAccent }]}>
               {dateFrom} al {dateTo}
             </Text>
           </View>
@@ -224,38 +235,38 @@ export default function AdminReportsScreen() {
 
       <Modal visible={showCustomModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Rango Personalizado</Text>
+          <View style={[styles.modalContent, { backgroundColor: colors.navy, borderColor: colors.glassHeavy }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.glassHeavy }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Rango Personalizado</Text>
               <TouchableOpacity onPress={() => setShowCustomModal(false)}>
-                <X color="white" size={24} />
+                <X color={colors.text} size={24} />
               </TouchableOpacity>
             </View>
             
             <View style={styles.modalBody}>
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>DESDE (YYYY-MM-DD)</Text>
+                <Text style={[styles.inputLabel, { color: colors.muted }]}>DESDE (YYYY-MM-DD)</Text>
                 <TextInput 
-                  style={styles.dateInput}
+                  style={[styles.dateInput, { backgroundColor: colors.glass, color: colors.text }]}
                   value={dateFrom}
                   onChangeText={setDateFrom}
                   placeholder="2024-01-01"
-                  placeholderTextColor="rgba(255,255,255,0.2)"
+                  placeholderTextColor={colors.muted}
                 />
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>HASTA (YYYY-MM-DD)</Text>
+                <Text style={[styles.inputLabel, { color: colors.muted }]}>HASTA (YYYY-MM-DD)</Text>
                 <TextInput 
-                  style={styles.dateInput}
+                  style={[styles.dateInput, { backgroundColor: colors.glass, color: colors.text }]}
                   value={dateTo}
                   onChangeText={setDateTo}
                   placeholder="2024-01-07"
-                  placeholderTextColor="rgba(255,255,255,0.2)"
+                  placeholderTextColor={colors.muted}
                 />
               </View>
 
-              <TouchableOpacity style={styles.applyButton} onPress={handleApplyCustom}>
+              <TouchableOpacity style={[styles.applyButton, { backgroundColor: colors.brandAccent }]} onPress={handleApplyCustom}>
                 <Text style={styles.applyButtonText}>APLICAR RANGO</Text>
               </TouchableOpacity>
             </View>
@@ -267,7 +278,7 @@ export default function AdminReportsScreen() {
         style={styles.content}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={MB_COLORS.brandAccent} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brandAccent} />
         }
       >
         <View style={styles.kpiGrid}>
@@ -278,35 +289,35 @@ export default function AdminReportsScreen() {
 
         {loading ? (
           <View style={styles.loader}>
-            <ActivityIndicator color={MB_COLORS.brandAccent} />
-            <Text style={styles.loaderText}>Procesando datos...</Text>
+            <ActivityIndicator color={colors.brandAccent} />
+            <Text style={[styles.loaderText, { color: colors.muted }]}>Procesando datos...</Text>
           </View>
         ) : (
           <>
             {/* Daily Performance */}
             <Animated.View entering={FadeInDown.delay(300)} style={styles.section}>
               <View style={styles.sectionHeader}>
-                <TrendingUp size={18} color={MB_COLORS.brandAccent} />
-                <Text style={styles.sectionTitle}>Rendimiento Diario</Text>
+                <TrendingUp size={18} color={colors.brandAccent} />
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Rendimiento Diario</Text>
               </View>
-              <View style={styles.tableContainer}>
-                <View style={styles.tableHeaderRow}>
-                  <Text style={[styles.tableHead, { flex: 1.5 }]}>FECHA</Text>
-                  <Text style={styles.tableHead}>PEDS</Text>
-                  <Text style={[styles.tableHead, { flex: 2, textAlign: 'right' }]}>INGRESOS</Text>
+              <View style={[styles.tableContainer, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
+                <View style={[styles.tableHeaderRow, { borderBottomColor: colors.glassHeavy }]}>
+                  <Text style={[styles.tableHead, { flex: 1.5, color: colors.muted }]}>FECHA</Text>
+                  <Text style={[styles.tableHead, { color: colors.muted }]}>PEDS</Text>
+                  <Text style={[styles.tableHead, { flex: 2, textAlign: 'right', color: colors.muted }]}>INGRESOS</Text>
                 </View>
                 {stats.dailyReports.filter(r => r.orders > 0).length > 0 ? (
                   stats.dailyReports.filter(r => r.orders > 0).reverse().map((day, i) => (
-                    <View key={i} style={styles.tableRow}>
-                      <Text style={[styles.tableCell, { flex: 1.5, color: 'white' }]}>{formatShortDate(day.date)}</Text>
-                      <Text style={styles.tableCell}>{day.orders}</Text>
-                      <Text style={[styles.tableCell, { flex: 2, textAlign: 'right', color: MB_COLORS.brandAccent, fontWeight: '900' }]}>
+                    <View key={i} style={[styles.tableRow, { borderBottomColor: colors.glassHeavy }]}>
+                      <Text style={[styles.tableCell, { flex: 1.5, color: colors.text }]}>{formatShortDate(day.date)}</Text>
+                      <Text style={[styles.tableCell, { color: colors.muted }]}>{day.orders}</Text>
+                      <Text style={[styles.tableCell, { flex: 2, textAlign: 'right', color: colors.brandAccent, fontWeight: '900' }]}>
                         {formatCurrency(day.revenue)}
                       </Text>
                     </View>
                   ))
                 ) : (
-                  <Text style={styles.emptyText}>Sin ventas en este período</Text>
+                  <Text style={[styles.emptyText, { color: colors.muted }]}>Sin ventas en este período</Text>
                 )}
               </View>
             </Animated.View>
@@ -315,17 +326,17 @@ export default function AdminReportsScreen() {
             <Animated.View entering={FadeInDown.delay(400)} style={styles.section}>
               <View style={styles.sectionHeader}>
                 <Package size={18} color="#FF9800" />
-                <Text style={styles.sectionTitle}>Platos más Vendidos</Text>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Platos más Vendidos</Text>
               </View>
               {stats.topItems.length > 0 ? (
                 stats.topItems.map((item, i) => (
-                  <View key={i} style={styles.rankingItem}>
-                    <Text style={styles.rankingPos}>{i + 1}</Text>
+                  <View key={i} style={[styles.rankingItem, { backgroundColor: colors.glass }]}>
+                    <Text style={[styles.rankingPos, { color: colors.muted }]}>{i + 1}</Text>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.rankingName}>{item.name}</Text>
-                      <Text style={styles.rankingSub}>{item.count} unidades</Text>
+                      <Text style={[styles.rankingName, { color: colors.text }]}>{item.name}</Text>
+                      <Text style={[styles.rankingSub, { color: colors.muted }]}>{item.count} unidades</Text>
                     </View>
-                    <Text style={styles.rankingValue}>{formatCurrency(item.revenue)}</Text>
+                    <Text style={[styles.rankingValue, { color: colors.text }]}>{formatCurrency(item.revenue)}</Text>
                   </View>
                 ))
               ) : (
@@ -337,19 +348,19 @@ export default function AdminReportsScreen() {
             <Animated.View entering={FadeInDown.delay(450)} style={styles.section}>
               <View style={styles.sectionHeader}>
                 <LayoutGrid size={18} color="#00BCD4" />
-                <Text style={styles.sectionTitle}>Uso de Mesas</Text>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Uso de Mesas</Text>
               </View>
               {stats.tableReports.length > 0 ? (
                 stats.tableReports.map((tbl, i) => (
-                  <View key={i} style={styles.rankingItem}>
+                  <View key={i} style={[styles.rankingItem, { backgroundColor: colors.glass }]}>
                     <View style={styles.tableNumberCircle}>
                       <Text style={styles.tableNumberText}>{tbl.number}</Text>
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.rankingName}>Mesa {tbl.number}</Text>
-                      <Text style={styles.rankingSub}>{tbl.orders} servicios</Text>
+                      <Text style={[styles.rankingName, { color: colors.text }]}>Mesa {tbl.number}</Text>
+                      <Text style={[styles.rankingSub, { color: colors.muted }]}>{tbl.orders} servicios</Text>
                     </View>
-                    <Text style={styles.rankingValue}>{formatCurrency(tbl.revenue)}</Text>
+                    <Text style={[styles.rankingValue, { color: colors.text }]}>{formatCurrency(tbl.revenue)}</Text>
                   </View>
                 ))
               ) : (
@@ -361,17 +372,17 @@ export default function AdminReportsScreen() {
             <Animated.View entering={FadeInDown.delay(500)} style={styles.section}>
               <View style={styles.sectionHeader}>
                 <Users size={18} color="#9C27B0" />
-                <Text style={styles.sectionTitle}>Ranking de Equipo</Text>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Ranking de Equipo</Text>
               </View>
               {stats.topStaff.length > 0 ? (
                 stats.topStaff.map((person, i) => (
-                  <View key={i} style={styles.rankingItem}>
-                    <Text style={styles.rankingPos}>{i + 1}</Text>
+                  <View key={i} style={[styles.rankingItem, { backgroundColor: colors.glass }]}>
+                    <Text style={[styles.rankingPos, { color: colors.muted }]}>{i + 1}</Text>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.rankingName}>{person.email.split('@')[0]}</Text>
-                      <Text style={styles.rankingSub}>{person.orders} pedidos</Text>
+                      <Text style={[styles.rankingName, { color: colors.text }]}>{person.email.split('@')[0]}</Text>
+                      <Text style={[styles.rankingSub, { color: colors.muted }]}>{person.orders} pedidos</Text>
                     </View>
-                    <Text style={styles.rankingValue}>{formatCurrency(person.revenue)}</Text>
+                    <Text style={[styles.rankingValue, { color: colors.text }]}>{formatCurrency(person.revenue)}</Text>
                   </View>
                 ))
               ) : (
@@ -383,24 +394,24 @@ export default function AdminReportsScreen() {
             <Animated.View entering={FadeInDown.delay(600)} style={styles.section}>
               <View style={styles.sectionHeader}>
                 <Clock size={18} color="#E91E63" />
-                <Text style={styles.sectionTitle}>Tiempos de Cocina (Prom.)</Text>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Tiempos de Cocina (Prom.)</Text>
               </View>
               {stats.timingStats.length > 0 ? (
                 stats.timingStats.map((stat, i) => (
-                  <View key={i} style={styles.timingItem}>
-                    <Text style={styles.timingCat}>{stat.category}</Text>
+                  <View key={i} style={[styles.timingItem, { backgroundColor: colors.glass }]}>
+                    <Text style={[styles.timingCat, { color: colors.text }]}>{stat.category}</Text>
                     <View style={styles.timingBar}>
                       <View style={styles.timingStep}>
-                        <Text style={styles.timingStepLabel}>Validación</Text>
-                        <Text style={styles.timingStepValue}>{stat.validationMin}m</Text>
+                        <Text style={[styles.timingStepLabel, { color: colors.muted }]}>Validación</Text>
+                        <Text style={[styles.timingStepValue, { color: colors.text }]}>{stat.validationMin}m</Text>
                       </View>
                       <View style={styles.timingStep}>
-                        <Text style={styles.timingStepLabel}>Cocina</Text>
-                        <Text style={styles.timingStepValue}>{stat.kitchenMin}m</Text>
+                        <Text style={[styles.timingStepLabel, { color: colors.muted }]}>Cocina</Text>
+                        <Text style={[styles.timingStepValue, { color: colors.text }]}>{stat.kitchenMin}m</Text>
                       </View>
                       <View style={styles.timingStep}>
-                        <Text style={styles.timingStepLabel}>Total</Text>
-                        <Text style={[styles.timingStepValue, { color: MB_COLORS.brandAccent }]}>{stat.totalMin}m</Text>
+                        <Text style={[styles.timingStepLabel, { color: colors.muted }]}>Total</Text>
+                        <Text style={[styles.timingStepValue, { color: colors.brandAccent }]}>{stat.totalMin}m</Text>
                       </View>
                     </View>
                   </View>
@@ -420,7 +431,7 @@ export default function AdminReportsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MB_COLORS.navy,
+    backgroundColor: '#0A1128', // Fallback to Navy
   },
   header: {
     paddingHorizontal: MB_SPACING.lg,
@@ -435,7 +446,7 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     fontSize: 13,
-    color: MB_COLORS.muted,
+    color: 'rgba(255, 255, 255, 0.4)', // Fallback to Muted
     fontWeight: '600',
     marginTop: 2,
   },

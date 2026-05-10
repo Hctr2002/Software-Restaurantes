@@ -14,11 +14,13 @@ import { Package, Search, Plus, ChevronRight, AlertTriangle } from 'lucide-react
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { InventoryModal, InventoryItemData } from '../../components/InventoryModal';
 
 export default function InventoryScreen() {
   const { restaurantId } = useAuth();
+  const { colors } = useTheme();
   
   // States
   const [items, setItems] = React.useState<InventoryItemData[]>([]);
@@ -174,17 +176,17 @@ export default function InventoryScreen() {
   const renderItem = ({ item, index }: { item: InventoryItemData, index: number }) => (
     <Animated.View entering={FadeInDown.delay(index * 50)}>
       <TouchableOpacity 
-        style={styles.card}
+        style={[styles.card, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}
         onPress={() => handleOpenEdit(item)}
       >
         <View style={styles.itemInfo}>
-          <View style={[styles.iconContainer, isCritical(item.stock) && styles.iconContainerCritical]}>
-            <Package size={20} color={isCritical(item.stock) ? MB_COLORS.brandAccent : MB_COLORS.brandAccent} />
+          <View style={[styles.iconContainer, isCritical(item.stock) && styles.iconContainerCritical, { backgroundColor: isCritical(item.stock) ? 'rgba(255, 152, 0, 0.1)' : colors.brandAccent + '15' }]}>
+            <Package size={20} color={isCritical(item.stock) ? '#FF9800' : colors.brandAccent} />
           </View>
           <View>
-            <Text style={styles.itemName}>{item.name}</Text>
+            <Text style={[styles.itemName, { color: colors.text }]}>{item.name}</Text>
             <View style={styles.stockRow}>
-              <Text style={[styles.stockValue, isCritical(item.stock) && styles.stockValueCritical]}>
+              <Text style={[styles.stockValue, { color: colors.muted }, isCritical(item.stock) && styles.stockValueCritical]}>
                 {item.stock} {item.unit}
               </Text>
               {isCritical(item.stock) && (
@@ -196,38 +198,41 @@ export default function InventoryScreen() {
             </View>
           </View>
         </View>
-        <ChevronRight size={20} color={MB_COLORS.muted} />
+        <ChevronRight size={20} color={colors.muted} />
       </TouchableOpacity>
     </Animated.View>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.navy }]}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Inventario</Text>
-        <Text style={styles.headerSubtitle}>{items.length} insumos en stock</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Inventario</Text>
+        <Text style={[styles.headerSubtitle, { color: colors.muted }]}>{items.length} insumos en stock</Text>
       </View>
 
       <View style={styles.searchBox}>
-        <View style={styles.searchInputContainer}>
-          <Search size={18} color={MB_COLORS.muted} style={styles.searchIcon} />
+        <View style={[styles.searchInputContainer, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
+          <Search size={18} color={colors.muted} style={styles.searchIcon} />
           <TextInput
             placeholder="Buscar insumo..."
-            placeholderTextColor={MB_COLORS.muted}
-            style={styles.searchInput}
+            placeholderTextColor={colors.muted}
+            style={[styles.searchInput, { color: colors.text }]}
             value={searchQuery}
             onChangeText={handleSearch}
           />
         </View>
-        <TouchableOpacity style={styles.addButton} onPress={handleOpenCreate}>
+        <TouchableOpacity 
+          style={[styles.addButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }]} 
+          onPress={handleOpenCreate}
+        >
           <Plus size={24} color="white" />
         </TouchableOpacity>
       </View>
 
       {loading && !refreshing ? (
         <View style={styles.centered}>
-          <ActivityIndicator color={MB_COLORS.brandAccent} />
-          <Text style={styles.loadingText}>Verificando existencias...</Text>
+          <ActivityIndicator color={colors.brandAccent} />
+          <Text style={[styles.loadingText, { color: colors.muted }]}>Verificando existencias...</Text>
         </View>
       ) : (
         <FlatList
@@ -237,12 +242,12 @@ export default function InventoryScreen() {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={MB_COLORS.brandAccent} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brandAccent} />
           }
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Package size={48} color={MB_COLORS.glassHeavy} />
-              <Text style={styles.emptyText}>No hay insumos registrados</Text>
+              <Package size={48} color={colors.glassHeavy} />
+              <Text style={[styles.emptyText, { color: colors.muted }]}>No hay insumos registrados</Text>
             </View>
           }
         />

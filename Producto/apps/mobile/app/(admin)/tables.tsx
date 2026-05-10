@@ -15,6 +15,7 @@ import { Table as TableIcon, Search, Plus, MapPin, ChevronRight, Hash } from 'lu
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { TableModal, TableData } from '../../components/TableModal';
 
@@ -24,6 +25,7 @@ const ITEM_WIDTH = (width - 48) / COLUMN_COUNT;
 
 export default function TablesScreen() {
   const { restaurantId } = useAuth();
+  const { colors } = useTheme();
   
   // States
   const [tables, setTables] = React.useState<TableData[]>([]);
@@ -200,7 +202,7 @@ export default function TablesScreen() {
   const renderTable = ({ item, index }: { item: TableData, index: number }) => (
     <Animated.View entering={FadeInDown.delay(index * 50)}>
       <TouchableOpacity 
-        style={styles.tableCard}
+        style={[styles.tableCard, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}
         onPress={() => handleOpenEdit(item)}
       >
         <View style={styles.tableHeader}>
@@ -217,40 +219,43 @@ export default function TablesScreen() {
         </View>
 
         <View style={styles.tableInfo}>
-          <Text style={styles.tableNumber}>Mesa {item.number}</Text>
+          <Text style={[styles.tableNumber, { color: colors.text }]}>Mesa {item.number}</Text>
           <View style={styles.labelRow}>
-            <MapPin size={10} color={MB_COLORS.muted} />
-            <Text style={styles.tableLabel} numberOfLines={1}>{item.label || 'Principal'}</Text>
+            <MapPin size={10} color={colors.muted} />
+            <Text style={[styles.tableLabel, { color: colors.muted }]} numberOfLines={1}>{item.label || 'Principal'}</Text>
           </View>
         </View>
 
-        <View style={styles.tableFooter}>
-          <Text style={styles.footerText}>Ver detalles</Text>
-          <ChevronRight size={14} color={MB_COLORS.muted} />
+        <View style={[styles.tableFooter, { borderTopColor: colors.glassHeavy }]}>
+          <Text style={[styles.footerText, { color: colors.muted }]}>Ver detalles</Text>
+          <ChevronRight size={14} color={colors.muted} />
         </View>
       </TouchableOpacity>
     </Animated.View>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.navy }]}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>Gestión de Mesas</Text>
-          <Text style={styles.headerSubtitle}>{tables.length} mesas en el salón</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Gestión de Mesas</Text>
+          <Text style={[styles.headerSubtitle, { color: colors.muted }]}>{tables.length} mesas en el salón</Text>
         </View>
-        <TouchableOpacity style={styles.addButton} onPress={handleOpenCreate}>
+        <TouchableOpacity 
+          style={[styles.addButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }]} 
+          onPress={handleOpenCreate}
+        >
           <Plus size={24} color="white" />
         </TouchableOpacity>
       </View>
 
       <View style={styles.searchBox}>
-        <View style={styles.searchInputContainer}>
-          <Search size={18} color={MB_COLORS.muted} style={styles.searchIcon} />
+        <View style={[styles.searchInputContainer, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
+          <Search size={18} color={colors.muted} style={styles.searchIcon} />
           <TextInput
             placeholder="Buscar por número o ubicación..."
-            placeholderTextColor={MB_COLORS.muted}
-            style={styles.searchInput}
+            placeholderTextColor={colors.muted}
+            style={[styles.searchInput, { color: colors.text }]}
             value={searchQuery}
             onChangeText={handleSearch}
             keyboardType="default"
@@ -260,8 +265,8 @@ export default function TablesScreen() {
 
       {loading && !refreshing ? (
         <View style={styles.centered}>
-          <ActivityIndicator color={MB_COLORS.brandAccent} />
-          <Text style={styles.loadingText}>Organizando el salón...</Text>
+          <ActivityIndicator color={colors.brandAccent} />
+          <Text style={[styles.loadingText, { color: colors.muted }]}>Organizando el salón...</Text>
         </View>
       ) : (
         <FlatList
@@ -273,12 +278,12 @@ export default function TablesScreen() {
           columnWrapperStyle={styles.columnWrapper}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={MB_COLORS.brandAccent} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brandAccent} />
           }
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <TableIcon size={64} color="rgba(255,255,255,0.05)" />
-              <Text style={styles.emptyText}>No hay mesas configuradas</Text>
+              <TableIcon size={64} color={colors.glassHeavy} />
+              <Text style={[styles.emptyText, { color: colors.muted }]}>No hay mesas configuradas</Text>
             </View>
           }
         />

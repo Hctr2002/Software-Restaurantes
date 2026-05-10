@@ -13,6 +13,7 @@ import { X, Clock, ShoppingBag, Hash, ChevronRight, CheckCircle2 } from 'lucide-
 import { BlurView } from 'expo-blur';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../constants/MB_Theme';
+import { useTheme } from '../context/ThemeContext';
 import { formatCurrency, timeAgo } from '../lib/dashboard';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -44,6 +45,7 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
 };
 
 export default function OrderDetailModal({ visible, onClose, order, onUpdateStatus, updating }: OrderDetailProps) {
+  const { colors } = useTheme();
   if (!order) return null;
 
   const nextStatus = NEXT_STATUS[order.status as OrderStatus];
@@ -61,59 +63,59 @@ export default function OrderDetailModal({ visible, onClose, order, onUpdateStat
         
         <Animated.View 
           entering={FadeInUp.springify()} 
-          style={styles.modalContent}
+          style={[styles.modalContent, { backgroundColor: colors.navy, borderTopColor: colors.glassHeavy }]}
         >
           {/* Header */}
-          <View style={styles.header}>
+          <View style={[styles.header, { borderBottomColor: colors.glassHeavy }]}>
             <View style={styles.headerInfo}>
-              <View style={styles.tableBadge}>
-                <Text style={styles.tableText}>MESA {order.tables?.number ?? 'S/N'}</Text>
+              <View style={[styles.tableBadge, { backgroundColor: colors.text }]}>
+                <Text style={[styles.tableText, { color: colors.navy }]}>MESA {order.tables?.number ?? 'S/N'}</Text>
               </View>
-              <Text style={styles.orderId}>ID: {order.id.slice(0, 8).toUpperCase()}</Text>
+              <Text style={[styles.orderId, { color: colors.muted }]}>ID: {order.id.slice(0, 8).toUpperCase()}</Text>
             </View>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <X size={20} color={MB_COLORS.muted} />
+            <TouchableOpacity onPress={onClose} style={[styles.closeButton, { backgroundColor: colors.glass }]}>
+              <X size={20} color={colors.muted} />
             </TouchableOpacity>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollBody}>
             {/* Status Card */}
-            <View style={styles.statusSection}>
+            <View style={[styles.statusSection, { backgroundColor: colors.glass }]}>
               <View style={styles.statusRow}>
-                <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(order.status) }]} />
-                <Text style={[styles.statusLabel, { color: getStatusColor(order.status) }]}>
+                <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(order.status, colors) }]} />
+                <Text style={[styles.statusLabel, { color: getStatusColor(order.status, colors) }]}>
                   {STATUS_LABELS[order.status as OrderStatus] || order.status}
                 </Text>
               </View>
               <View style={styles.timeRow}>
-                <Clock size={12} color={MB_COLORS.muted} />
-                <Text style={styles.timeText}>{timeAgo(order.createdAt)}</Text>
+                <Clock size={12} color={colors.muted} />
+                <Text style={[styles.timeText, { color: colors.muted }]}>{timeAgo(order.createdAt)}</Text>
               </View>
             </View>
 
             {/* Items List */}
-            <Text style={styles.sectionTitle}>PRODUCTOS</Text>
+            <Text style={[styles.sectionTitle, { color: colors.muted }]}>PRODUCTOS</Text>
             <View style={styles.itemsContainer}>
               {order.order_items?.map((item: any, idx: number) => (
-                <View key={idx} style={styles.itemRow}>
+                <View key={idx} style={[styles.itemRow, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
                   <View style={styles.itemMain}>
-                    <View style={styles.quantityBox}>
-                      <Text style={styles.quantityText}>{item.quantity}x</Text>
+                    <View style={[styles.quantityBox, { backgroundColor: colors.brandAccent + '1A' }]}>
+                      <Text style={[styles.quantityText, { color: colors.brandAccent }]}>{item.quantity}x</Text>
                     </View>
                     <View>
-                      <Text style={styles.itemName}>{item.menu_items?.name}</Text>
-                      {item.notes && <Text style={styles.itemNotes}>{item.notes}</Text>}
+                      <Text style={[styles.itemName, { color: colors.text }]}>{item.menu_items?.name}</Text>
+                      {item.notes && <Text style={[styles.itemNotes, { color: colors.muted }]}>{item.notes}</Text>}
                     </View>
                   </View>
-                  <Text style={styles.itemPrice}>{formatCurrency(item.unit_price * item.quantity)}</Text>
+                  <Text style={[styles.itemPrice, { color: colors.text }]}>{formatCurrency(item.unit_price * item.quantity)}</Text>
                 </View>
               ))}
             </View>
 
             {/* Total Card */}
-            <View style={styles.totalCard}>
-              <Text style={styles.totalLabel}>TOTAL A PAGAR</Text>
-              <Text style={styles.totalValue}>{formatCurrency(total)}</Text>
+            <View style={[styles.totalCard, { backgroundColor: colors.brandAccent + '1A', borderColor: colors.brandAccent + '33' }]}>
+              <Text style={[styles.totalLabel, { color: colors.brandAccent }]}>TOTAL A PAGAR</Text>
+              <Text style={[styles.totalValue, { color: colors.text }]}>{formatCurrency(total)}</Text>
             </View>
           </ScrollView>
 
@@ -121,7 +123,7 @@ export default function OrderDetailModal({ visible, onClose, order, onUpdateStat
           <View style={styles.footer}>
             {nextStatus ? (
               <TouchableOpacity 
-                style={[styles.primaryAction, updating && styles.disabledAction]}
+                style={[styles.primaryAction, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }, updating && styles.disabledAction]}
                 onPress={() => onUpdateStatus(order.id, nextStatus)}
                 disabled={updating}
               >
@@ -136,18 +138,18 @@ export default function OrderDetailModal({ visible, onClose, order, onUpdateStat
               </TouchableOpacity>
             ) : (
               <View style={styles.completedState}>
-                <CheckCircle2 size={24} color={MB_COLORS.sage} />
-                <Text style={styles.completedText}>ORDEN FINALIZADA</Text>
+                <CheckCircle2 size={24} color="#10b981" />
+                <Text style={[styles.completedText, { color: "#10b981" }]}>ORDEN FINALIZADA</Text>
               </View>
             )}
             
             {!['DELIVERED', 'REJECTED'].includes(order.status) && (
               <TouchableOpacity 
-                style={styles.cancelAction}
+                style={[styles.cancelAction, { borderColor: colors.glassHeavy }]}
                 onPress={() => onUpdateStatus(order.id, 'REJECTED')}
                 disabled={updating}
               >
-                <Text style={styles.cancelText}>ANULAR PEDIDO</Text>
+                <Text style={[styles.cancelText, { color: colors.muted }]}>ANULAR PEDIDO</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -157,14 +159,14 @@ export default function OrderDetailModal({ visible, onClose, order, onUpdateStat
   );
 }
 
-const getStatusColor = (status: string) => {
+const getStatusColor = (status: string, colors: any) => {
   switch (status) {
     case 'PENDING': return '#facc15';
     case 'VALIDATED': return '#60a5fa';
-    case 'PREPARING': return MB_COLORS.brandAccent;
+    case 'PREPARING': return colors.brandAccent;
     case 'READY': return '#10b981';
-    case 'DELIVERED': return MB_COLORS.muted;
-    default: return 'white';
+    case 'DELIVERED': return colors.muted;
+    default: return colors.text;
   }
 };
 

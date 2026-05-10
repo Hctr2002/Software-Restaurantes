@@ -2,14 +2,16 @@ import React from 'react';
 import { Stack, useRouter, usePathname } from 'expo-router';
 import { TouchableOpacity, StyleSheet, View, Text } from 'react-native';
 import { Menu as MenuIcon, Bell, ShoppingBag } from 'lucide-react-native';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import AdminSideMenu from '../../components/AdminSideMenu';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
 
 export default function AdminLayout() {
   const { restaurantId } = useAuth();
+  const { colors } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const [menuVisible, setMenuVisible] = React.useState(false);
@@ -49,7 +51,7 @@ export default function AdminLayout() {
       onPress={() => setMenuVisible(true)} 
       style={styles.headerButton}
     >
-      <MenuIcon color={MB_COLORS.brandAccent} size={24} />
+      <MenuIcon color={colors.brandAccent} size={24} />
     </TouchableOpacity>
   );
 
@@ -64,8 +66,8 @@ export default function AdminLayout() {
           router.push('/(admin)/notifications');
         }}
       >
-        <Bell color={newOrder ? MB_COLORS.brandAccent : "white"} size={20} />
-        {newOrder && <View style={styles.badge} />}
+        <Bell color={newOrder ? colors.brandAccent : "white"} size={20} />
+        {newOrder && <View style={[styles.badge, { backgroundColor: colors.brandAccent, borderColor: colors.navy }]} />}
       </TouchableOpacity>
     );
   };
@@ -79,10 +81,10 @@ export default function AdminLayout() {
         style={styles.notificationContainer}
       >
         <TouchableOpacity 
-          style={styles.notificationToast}
+          style={[styles.notificationToast, { borderColor: colors.brandAccent }]}
           onPress={() => setNewOrder(null)}
         >
-          <View style={styles.notifIcon}>
+          <View style={[styles.notifIcon, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }]}>
             <ShoppingBag color="white" size={20} />
           </View>
           <View style={{ flex: 1 }}>
@@ -102,7 +104,7 @@ export default function AdminLayout() {
       <Stack
         screenOptions={{
           headerStyle: {
-            backgroundColor: MB_COLORS.navy,
+            backgroundColor: colors.navy,
           },
           headerShadowVisible: false,
           headerTintColor: 'white',
@@ -154,13 +156,11 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: MB_COLORS.brandAccent,
     borderWidth: 2,
-    borderColor: MB_COLORS.navy,
   },
   notificationContainer: {
     position: 'absolute',
-    top: 70, // Un poco más arriba, cerca del header
+    top: 70, 
     left: 16,
     right: 16,
     zIndex: 9999,
@@ -168,11 +168,10 @@ const styles = StyleSheet.create({
   notificationToast: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#121B33', // Navy más oscuro y sólido
+    backgroundColor: '#121B33', 
     padding: 16,
     borderRadius: 24,
     borderWidth: 2,
-    borderColor: MB_COLORS.brandAccent,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.5,
@@ -184,10 +183,8 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: MB_COLORS.brandAccent,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: MB_COLORS.brandAccent,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 8,

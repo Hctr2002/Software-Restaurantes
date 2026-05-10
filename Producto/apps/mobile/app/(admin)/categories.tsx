@@ -14,11 +14,13 @@ import { Tag, Search, Plus, ChevronRight } from 'lucide-react-native';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { CategoryModal, CategoryData } from '../../components/CategoryModal';
 
 export default function CategoriesScreen() {
   const { restaurantId } = useAuth();
+  const { colors } = useTheme();
   
   // States
   const [categories, setCategories] = React.useState<CategoryData[]>([]);
@@ -171,54 +173,57 @@ export default function CategoriesScreen() {
   const renderCategory = ({ item, index }: { item: CategoryData, index: number }) => (
     <Animated.View entering={FadeInDown.delay(index * 50)}>
       <TouchableOpacity 
-        style={[styles.categoryCard, !item.is_active && styles.categoryCardInactive]}
+        style={[styles.categoryCard, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }, !item.is_active && styles.categoryCardInactive]}
         onPress={() => handleOpenEdit(item)}
       >
         <View style={styles.categoryInfo}>
-          <View style={[styles.iconContainer, !item.is_active && styles.iconContainerInactive]}>
-            <Tag size={20} color={item.is_active ? MB_COLORS.brandAccent : MB_COLORS.muted} />
+          <View style={[styles.iconContainer, { backgroundColor: item.is_active ? colors.brandAccent + '15' : colors.glassHeavy }]}>
+            <Tag size={20} color={item.is_active ? colors.brandAccent : colors.muted} />
           </View>
           <View>
-            <Text style={[styles.categoryName, !item.is_active && styles.categoryNameInactive]}>
+            <Text style={[styles.categoryName, { color: colors.text }, !item.is_active && { color: colors.muted }]}>
               {item.name}
             </Text>
             {!item.is_active && (
-              <Text style={styles.inactiveBadge}>DESACTIVADA</Text>
+              <Text style={[styles.inactiveBadge, { color: colors.brandAccent }]}>DESACTIVADA</Text>
             )}
           </View>
         </View>
-        <ChevronRight size={20} color={MB_COLORS.muted} />
+        <ChevronRight size={20} color={colors.muted} />
       </TouchableOpacity>
     </Animated.View>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.navy }]}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Categorías</Text>
-        <Text style={styles.headerSubtitle}>{categories.length} categorías registradas</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Categorías</Text>
+        <Text style={[styles.headerSubtitle, { color: colors.muted }]}>{categories.length} categorías registradas</Text>
       </View>
 
       <View style={styles.searchBox}>
-        <View style={styles.searchInputContainer}>
-          <Search size={18} color={MB_COLORS.muted} style={styles.searchIcon} />
+        <View style={[styles.searchInputContainer, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
+          <Search size={18} color={colors.muted} style={styles.searchIcon} />
           <TextInput
             placeholder="Buscar categoría..."
-            placeholderTextColor={MB_COLORS.muted}
-            style={styles.searchInput}
+            placeholderTextColor={colors.muted}
+            style={[styles.searchInput, { color: colors.text }]}
             value={searchQuery}
             onChangeText={handleSearch}
           />
         </View>
-        <TouchableOpacity style={styles.addButton} onPress={handleOpenCreate}>
+        <TouchableOpacity 
+          style={[styles.addButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }]} 
+          onPress={handleOpenCreate}
+        >
           <Plus size={24} color="white" />
         </TouchableOpacity>
       </View>
 
       {loading && !refreshing ? (
         <View style={styles.centered}>
-          <ActivityIndicator color={MB_COLORS.brandAccent} />
-          <Text style={styles.loadingText}>Cargando categorías...</Text>
+          <ActivityIndicator color={colors.brandAccent} />
+          <Text style={[styles.loadingText, { color: colors.muted }]}>Cargando categorías...</Text>
         </View>
       ) : (
         <FlatList
@@ -228,12 +233,12 @@ export default function CategoriesScreen() {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={MB_COLORS.brandAccent} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brandAccent} />
           }
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Tag size={48} color={MB_COLORS.glassHeavy} />
-              <Text style={styles.emptyText}>No se encontraron categorías</Text>
+              <Tag size={48} color={colors.glassHeavy} />
+              <Text style={[styles.emptyText, { color: colors.muted }]}>No se encontraron categorías</Text>
             </View>
           }
         />
@@ -253,7 +258,7 @@ export default function CategoriesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MB_COLORS.navy,
+    backgroundColor: '#0A1128',
   },
   header: {
     paddingHorizontal: MB_SPACING.lg,
@@ -268,7 +273,7 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     fontSize: 13,
-    color: MB_COLORS.muted,
+    color: 'rgba(255, 255, 255, 0.4)',
     fontWeight: '600',
     marginTop: 2,
   },
@@ -283,7 +288,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: MB_COLORS.glass,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 16,
     paddingHorizontal: 12,
     height: 48,
@@ -302,11 +307,11 @@ const styles = StyleSheet.create({
   addButton: {
     width: 48,
     height: 48,
-    backgroundColor: MB_COLORS.brandAccent,
+    backgroundColor: '#FE5F55',
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: MB_COLORS.brandAccent,
+    shadowColor: '#FE5F55',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -321,8 +326,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: MB_COLORS.glass,
-    borderRadius: MB_RADIUS.lg,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 20,
     padding: MB_SPACING.md,
     marginBottom: MB_SPACING.sm,
     borderWidth: 1,
@@ -356,10 +361,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   categoryNameInactive: {
-    color: MB_COLORS.muted,
+    color: 'rgba(255, 255, 255, 0.4)',
   },
   inactiveBadge: {
-    color: MB_COLORS.brandAccent,
+    color: '#FE5F55',
     fontSize: 8,
     fontWeight: '900',
     marginTop: 2,
@@ -370,7 +375,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    color: MB_COLORS.muted,
+    color: 'rgba(255, 255, 255, 0.4)',
     marginTop: 12,
     fontSize: 12,
     fontWeight: '800',
@@ -382,7 +387,7 @@ const styles = StyleSheet.create({
     marginTop: 100,
   },
   emptyText: {
-    color: MB_COLORS.muted,
+    color: 'rgba(255, 255, 255, 0.4)',
     fontSize: 14,
     fontWeight: '700',
     marginTop: 16,

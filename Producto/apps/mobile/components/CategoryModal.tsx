@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { X, Tag, Trash2 } from 'lucide-react-native';
 import { MB_COLORS, MB_RADIUS, MB_SPACING } from '../constants/MB_Theme';
+import { useTheme } from '../context/ThemeContext';
 
 export interface CategoryData {
   id: string;
@@ -30,6 +31,7 @@ interface CategoryModalProps {
 }
 
 export const CategoryModal = ({ visible, onClose, onSave, onDelete, category }: CategoryModalProps) => {
+  const { colors } = useTheme();
   const [name, setName] = React.useState('');
   const [isActive, setIsActive] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
@@ -82,42 +84,42 @@ export const CategoryModal = ({ visible, onClose, onSave, onDelete, category }: 
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <KeyboardAvoidingView 
               behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              style={styles.content}
+              style={[styles.content, { backgroundColor: colors.navy, borderColor: colors.glassHeavy }]}
             >
-              <View style={styles.header}>
-                <Text style={styles.title}>{category ? 'Editar Categoría' : 'Nueva Categoría'}</Text>
+              <View style={[styles.header, { borderBottomColor: colors.glassHeavy }]}>
+                <Text style={[styles.title, { color: colors.text }]}>{category ? 'Editar Categoría' : 'Nueva Categoría'}</Text>
                 <TouchableOpacity onPress={onClose}>
-                  <X size={20} color="white" />
+                  <X size={20} color={colors.text} />
                 </TouchableOpacity>
               </View>
 
               <View style={styles.form}>
-                <Text style={styles.label}>Nombre de la Categoría</Text>
-                <View style={styles.inputContainer}>
-                  <Tag size={16} color={MB_COLORS.muted} style={styles.inputIcon} />
+                <Text style={[styles.label, { color: colors.muted }]}>Nombre de la Categoría</Text>
+                <View style={[styles.inputContainer, { backgroundColor: colors.glass }]}>
+                  <Tag size={16} color={colors.muted} style={styles.inputIcon} />
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, { color: colors.text }]}
                     value={name}
                     onChangeText={setName}
                     placeholder="Ej. Bebidas, Postres..."
-                    placeholderTextColor={MB_COLORS.muted}
+                    placeholderTextColor={colors.muted}
                     autoCapitalize="words"
                   />
                 </View>
 
                 <TouchableOpacity 
-                  style={styles.toggleContainer} 
+                  style={[styles.toggleContainer, { backgroundColor: colors.glass }]} 
                   onPress={() => setIsActive(!isActive)}
                   activeOpacity={0.7}
                 >
-                  <View style={[styles.checkbox, isActive && styles.checkboxActive]}>
+                  <View style={[styles.checkbox, isActive && { backgroundColor: colors.brandAccent, borderColor: colors.brandAccent }]}>
                     {isActive && <View style={styles.checkboxInner} />}
                   </View>
-                  <Text style={styles.toggleLabel}>Categoría Activa</Text>
+                  <Text style={[styles.toggleLabel, { color: colors.text }]}>Categoría Activa</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity 
-                  style={[styles.saveButton, !name.trim() && { opacity: 0.5 }]} 
+                  style={[styles.saveButton, { backgroundColor: colors.brandAccent }, !name.trim() && { opacity: 0.5 }]} 
                   onPress={handleSave}
                   disabled={loading || !name.trim()}
                 >
@@ -137,11 +139,11 @@ export const CategoryModal = ({ visible, onClose, onSave, onDelete, category }: 
                     disabled={deleting}
                   >
                     {deleting ? (
-                      <ActivityIndicator color={MB_COLORS.brandAccent} />
+                      <ActivityIndicator color={colors.brandAccent} />
                     ) : (
                       <>
-                        <Trash2 size={16} color={MB_COLORS.brandAccent} />
-                        <Text style={styles.deleteButtonText}>Eliminar Categoría</Text>
+                        <Trash2 size={16} color={colors.brandAccent} />
+                        <Text style={[styles.deleteButtonText, { color: colors.brandAccent }]}>Eliminar Categoría</Text>
                       </>
                     )}
                   </TouchableOpacity>

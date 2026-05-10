@@ -10,7 +10,7 @@ import {
   RefreshControl,
   ActivityIndicator
 } from 'react-native';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { 
   TrendingUp, 
   Wallet, 
@@ -25,6 +25,7 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import AdminKpiCard from '../../components/AdminKpiCard';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 import AdminSideMenu from '../../components/AdminSideMenu';
 import { 
@@ -40,6 +41,7 @@ import {
 
 export default function AdminDashboardScreen() {
   const { restaurantId } = useAuth();
+  const { colors } = useTheme();
   const router = useRouter();
   const [refreshing, setRefreshing] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
@@ -129,22 +131,22 @@ export default function AdminDashboardScreen() {
 
   if (loading && !refreshing) {
     return (
-      <View style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" color={MB_COLORS.brandAccent} />
-        <Text style={styles.loadingText}>Sincronizando Local...</Text>
+      <View style={[styles.container, styles.centered, { backgroundColor: colors.navy }]}>
+        <ActivityIndicator size="large" color={colors.brandAccent} />
+        <Text style={[styles.loadingText, { color: colors.muted }]}>Sincronizando Local...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.navy }]}>
       <StatusBar barStyle="light-content" />
       
       <ScrollView 
         showsVerticalScrollIndicator={false} 
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={MB_COLORS.brandAccent} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brandAccent} />
         }
       >
         {error && (
@@ -157,14 +159,14 @@ export default function AdminDashboardScreen() {
         <View style={styles.kpiGrid}>
           <View style={styles.kpiColumn}>
             <AdminKpiCard 
-              icon={<Wallet size={16} color={MB_COLORS.brandAccent} />}
+              icon={<Wallet size={16} color={colors.brandAccent} />}
               label="Ingresos Hoy"
               value={formatCurrency(stats?.ingresos_dia ?? 0)}
               detail={`${stats?.pedidos_dia ?? 0} pedidos`}
               delay={100}
             />
             <AdminKpiCard 
-              icon={<ReceiptText size={16} color={MB_COLORS.brandAccent} />}
+              icon={<ReceiptText size={16} color={colors.brandAccent} />}
               label="Ticket Prom."
               value={formatCurrency(stats?.ticket_promedio ?? 0)}
               detail="Promedio hoy"
@@ -173,14 +175,14 @@ export default function AdminDashboardScreen() {
           </View>
           <View style={styles.kpiColumn}>
             <AdminKpiCard 
-              icon={<TrendingUp size={16} color={MB_COLORS.brandAccent} />}
+              icon={<TrendingUp size={16} color={colors.brandAccent} />}
               label="Este Mes"
               value={formatCurrency(stats?.ingresos_mes ?? 0)}
               detail="Ventas acumuladas"
               delay={200}
             />
             <AdminKpiCard 
-              icon={<ClipboardList size={16} color={MB_COLORS.brandAccent} />}
+              icon={<ClipboardList size={16} color={colors.brandAccent} />}
               label="Activos"
               value={String(stats?.activos ?? 0)}
               detail="Pendientes/Cocina"
@@ -195,10 +197,10 @@ export default function AdminDashboardScreen() {
         </View>
         
         <View style={styles.metricsContainer}>
-          <View style={styles.flowCard}>
+          <View style={[styles.flowCard, { backgroundColor: colors.glass }]}>
             <View style={styles.flowHeader}>
-              <View style={styles.iconContainer}>
-                <Flame size={14} color={MB_COLORS.brandAccent} />
+              <View style={[styles.iconContainer, { backgroundColor: colors.brandAccent + '1A' }]}>
+                <Flame size={14} color={colors.brandAccent} />
               </View>
               <Text style={styles.flowTitle}>Flujo de Órdenes</Text>
             </View>
@@ -206,18 +208,18 @@ export default function AdminDashboardScreen() {
               {[
                 { label: 'Pend.', count: stats?.flowCounts?.PENDING ?? 0, color: '#facc15' },
                 { label: 'Val.', count: stats?.flowCounts?.VALIDATED ?? 0, color: '#60a5fa' },
-                { label: 'Prep.', count: stats?.flowCounts?.PREPARING ?? 0, color: MB_COLORS.brandAccent },
+                { label: 'Prep.', count: stats?.flowCounts?.PREPARING ?? 0, color: colors.brandAccent },
                 { label: 'Listo', count: stats?.flowCounts?.READY ?? 0, color: '#10b981' },
               ].map((item) => (
                 <View key={item.label} style={styles.flowItem}>
                   <Text style={[styles.flowCount, { color: item.color }]}>{item.count}</Text>
-                  <Text style={styles.flowLabel}>{item.label}</Text>
+                  <Text style={[styles.flowLabel, { color: colors.muted }]}>{item.label}</Text>
                 </View>
               ))}
             </View>
           </View>
 
-          <View style={styles.timerCard}>
+          <View style={[styles.timerCard, { backgroundColor: colors.glass }]}>
             <View style={styles.timerLayout}>
               <View style={styles.flowHeader}>
                 <View style={[styles.iconContainer, { backgroundColor: 'rgba(251, 191, 36, 0.1)' }]}>
@@ -257,7 +259,7 @@ export default function AdminDashboardScreen() {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Top Items Hoy</Text>
         </View>
-        <View style={styles.glassCard}>
+        <View style={[styles.glassCard, { backgroundColor: colors.glass }]}>
           {!stats?.top_items?.length ? (
             <Text style={styles.emptyText}>Sin pedidos hoy</Text>
           ) : (
@@ -267,8 +269,8 @@ export default function AdminDashboardScreen() {
                   <Text style={styles.itemRank}>#{i + 1}</Text>
                   <Text style={styles.itemName}>{item.name}</Text>
                 </View>
-                <View style={styles.itemBadge}>
-                  <Text style={styles.itemCountText}>{item.count} UNID.</Text>
+                <View style={[styles.itemBadge, { backgroundColor: colors.brandAccent + '1A' }]}>
+                  <Text style={[styles.itemCountText, { color: colors.brandAccent }]}>{item.count} UNID.</Text>
                 </View>
               </View>
             ))
@@ -293,9 +295,9 @@ export default function AdminDashboardScreen() {
               let borderColor = 'rgba(114, 155, 121, 0.2)';
 
               if (isOccupied) {
-                statusColor = MB_COLORS.brandAccent;
-                bgColor = 'rgba(254, 95, 85, 0.1)';
-                borderColor = 'rgba(254, 95, 85, 0.2)';
+                statusColor = colors.brandAccent;
+                bgColor = colors.brandAccent + '1A';
+                borderColor = colors.brandAccent + '33';
               } else if (isReserved) {
                 statusColor = '#FFC107';
                 bgColor = 'rgba(255, 193, 7, 0.1)';
@@ -332,22 +334,22 @@ export default function AdminDashboardScreen() {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Pedidos Recientes</Text>
           <TouchableOpacity onPress={() => router.push('/(admin)/orders')}>
-            <Text style={styles.seeAll}>Ver todo</Text>
+            <Text style={[styles.seeAll, { color: colors.brandAccent }]}>Ver todo</Text>
           </TouchableOpacity>
         </View>
 
-        <Animated.View entering={FadeInDown.delay(500)} style={styles.activityCard}>
+        <Animated.View entering={FadeInDown.delay(500)} style={[styles.activityCard, { backgroundColor: colors.glass }]}>
           {recentOrders.length === 0 ? (
             <Text style={styles.emptyText}>No hay pedidos recientes</Text>
           ) : (
             recentOrders.map((order, i) => (
               <View key={order.id} style={[styles.activityItem, i === recentOrders.length - 1 && { borderBottomWidth: 0 }]}>
                 <View style={styles.activityInfo}>
-                  <Text style={styles.activityTitle}>Mesa {order.table_number}</Text>
-                  <Text style={styles.activityTime}>{timeAgo(order.createdAt)}</Text>
+                  <Text style={[styles.activityTitle, { color: 'white' }]}>Mesa {order.table_number}</Text>
+                  <Text style={[styles.activityTime, { color: colors.muted }]}>{timeAgo(order.createdAt)}</Text>
                 </View>
-                <View style={[styles.statusBadge, order.status === 'DELIVERED' && styles.statusDelivered]}>
-                  <Text style={styles.statusText}>{order.status}</Text>
+                <View style={[styles.statusBadge, order.status === 'DELIVERED' && styles.statusDelivered, { backgroundColor: colors.brandAccent + '1A' }]}>
+                  <Text style={[styles.statusText, { color: colors.brandAccent }]}>{order.status}</Text>
                 </View>
               </View>
             ))
@@ -362,14 +364,13 @@ export default function AdminDashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MB_COLORS.navy,
+    backgroundColor: '#0A1128',
   },
   centered: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   loadingText: {
-    color: MB_COLORS.muted,
     marginTop: 12,
     fontSize: 12,
     fontWeight: '900',
@@ -386,7 +387,7 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: 12,
-    color: MB_COLORS.muted,
+    color: 'rgba(255,255,255,0.4)',
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -405,7 +406,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: MB_COLORS.glassHeavy,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -418,9 +419,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: MB_COLORS.brandAccent,
     borderWidth: 2,
-    borderColor: MB_COLORS.navy,
   },
   scrollContent: {
     paddingHorizontal: MB_SPACING.lg,
@@ -435,7 +434,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(254, 95, 85, 0.2)',
   },
   errorText: {
-    color: MB_COLORS.brandAccent,
     fontSize: 12,
     fontWeight: '700',
     textAlign: 'center',
@@ -462,12 +460,11 @@ const styles = StyleSheet.create({
   },
   seeAll: {
     fontSize: 12,
-    color: MB_COLORS.brandAccent,
     fontWeight: '800',
     textTransform: 'uppercase',
   },
   activityCard: {
-    backgroundColor: MB_COLORS.glass,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: MB_RADIUS.xl,
     padding: MB_SPACING.md,
     borderWidth: 1,
@@ -475,7 +472,7 @@ const styles = StyleSheet.create({
     marginBottom: MB_SPACING.xl,
   },
   emptyText: {
-    color: MB_COLORS.muted,
+    color: 'rgba(255,255,255,0.4)',
     fontSize: 12,
     textAlign: 'center',
     paddingVertical: 20,
@@ -498,7 +495,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   activityTime: {
-    color: MB_COLORS.muted,
+    color: 'rgba(255,255,255,0.4)',
     fontSize: 11,
     fontWeight: '600',
     marginTop: 2,
@@ -533,7 +530,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 20,
-    backgroundColor: MB_COLORS.glassHeavy,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
@@ -541,12 +538,12 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.05)',
   },
   quickLabel: {
-    color: MB_COLORS.muted,
+    color: 'rgba(255,255,255,0.4)',
     fontSize: 11,
     fontWeight: '700',
   },
   glassCard: {
-    backgroundColor: MB_COLORS.glass,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: MB_RADIUS.xl,
     padding: MB_SPACING.md,
     borderWidth: 1,
@@ -567,7 +564,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   itemRank: {
-    color: MB_COLORS.muted,
+    color: 'rgba(255,255,255,0.4)',
     fontSize: 10,
     fontWeight: '900',
     backgroundColor: 'rgba(255,255,255,0.05)',
@@ -583,13 +580,11 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   itemBadge: {
-    backgroundColor: 'rgba(254, 95, 85, 0.1)',
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 8,
   },
   itemCountText: {
-    color: MB_COLORS.brandAccent,
     fontSize: 9,
     fontWeight: '900',
   },
@@ -602,39 +597,25 @@ const styles = StyleSheet.create({
   tableCard: {
     width: '30%',
     aspectRatio: 1,
-    backgroundColor: 'rgba(114, 155, 121, 0.1)',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(114, 155, 121, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 4,
   },
-  tableOccupied: {
-    backgroundColor: 'rgba(254, 95, 85, 0.1)',
-    borderColor: 'rgba(254, 95, 85, 0.2)',
-  },
   tableNumber: {
     fontSize: 22,
     fontWeight: '900',
-    color: '#729B79',
     textAlign: 'center',
     includeFontPadding: false,
-  },
-  tableNumberOccupied: {
-    color: MB_COLORS.brandAccent,
   },
   tableStatusText: {
     fontSize: 8,
     fontWeight: '900',
-    color: '#729B79',
     marginTop: 2,
     letterSpacing: 0.5,
     textAlign: 'center',
     textTransform: 'uppercase',
-  },
-  tableStatusOccupied: {
-    color: MB_COLORS.brandAccent,
   },
   metricsContainer: {
     flexDirection: 'column',
@@ -642,14 +623,14 @@ const styles = StyleSheet.create({
     marginBottom: MB_SPACING.xl,
   },
   flowCard: {
-    backgroundColor: MB_COLORS.glass,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 24,
     padding: MB_SPACING.md,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.03)',
   },
   timerCard: {
-    backgroundColor: MB_COLORS.glass,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 24,
     padding: MB_SPACING.md,
     borderWidth: 1,
@@ -673,7 +654,6 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     padding: 6,
-    backgroundColor: 'rgba(254, 95, 85, 0.1)',
     borderRadius: 10,
   },
   flowTitle: {
@@ -703,7 +683,7 @@ const styles = StyleSheet.create({
   },
   flowLabel: {
     fontSize: 8,
-    color: MB_COLORS.muted,
+    color: 'rgba(255,255,255,0.4)',
     fontWeight: '800',
     marginTop: 2,
   },
@@ -723,7 +703,7 @@ const styles = StyleSheet.create({
   },
   timerUnit: {
     fontSize: 10,
-    color: MB_COLORS.muted,
+    color: 'rgba(255,255,255,0.4)',
     fontWeight: '800',
   },
   timerBadge: {
@@ -737,7 +717,7 @@ const styles = StyleSheet.create({
   },
   emptyTimerText: {
     fontSize: 10,
-    color: MB_COLORS.muted,
+    color: 'rgba(255,255,255,0.4)',
     fontStyle: 'italic',
   },
 });

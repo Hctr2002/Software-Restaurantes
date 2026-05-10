@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useAuth, AuthProvider } from '../context/AuthContext';
+import { RestaurantThemeProvider } from '../context/ThemeContext';
 import { useRouter, useSegments } from 'expo-router';
 
 export {
@@ -85,9 +86,11 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <ThemeProvider value={DarkTheme}>
-        <InitialLayout />
-      </ThemeProvider>
+      <RestaurantThemeProvider>
+        <ThemeProvider value={DarkTheme}>
+          <InitialLayout />
+        </ThemeProvider>
+      </RestaurantThemeProvider>
     </AuthProvider>
   );
 }

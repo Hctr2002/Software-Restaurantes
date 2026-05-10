@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { 
   Plus, 
   Search, 
@@ -31,6 +32,7 @@ const ITEM_WIDTH = (width - 48) / COLUMN_COUNT;
 
 export default function MenuScreen() {
   const { user } = useAuth();
+  const { colors } = useTheme();
   const [items, setItems] = React.useState<any[]>([]);
   const [categories, setCategories] = React.useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = React.useState('all');
@@ -232,43 +234,43 @@ export default function MenuScreen() {
   const renderProduct = ({ item, index }: { item: any, index: number }) => (
     <Animated.View 
       entering={FadeInDown.delay(index * 100).duration(500)}
-      style={styles.productCard}
+      style={[styles.productCard, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}
     >
-      <View style={styles.imageContainer}>
+      <View style={[styles.imageContainer, { backgroundColor: colors.glassHeavy }]}>
         {item.image_url ? (
           <Image source={{ uri: item.image_url }} style={styles.productImage} />
         ) : (
           <View style={[styles.productImage, styles.placeholderImage]}>
-            <Package size={32} color="rgba(255,255,255,0.1)" />
+            <Package size={32} color={colors.muted + '40'} />
           </View>
         )}
         <View style={styles.badgeContainer}>
-          <View style={[styles.statusBadge, { backgroundColor: item.is_active ? '#10b981' : '#6b7280' }]}>
+          <View style={[styles.statusBadge, { backgroundColor: item.is_active ? colors.brandAccent : colors.muted }]}>
             <Text style={styles.statusText}>{item.is_active ? 'ACTIVO' : 'PAUSADO'}</Text>
           </View>
         </View>
       </View>
 
       <View style={styles.productInfo}>
-        <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
-        <Text style={styles.productCategory}>{item.categories?.name || 'General'}</Text>
-        <Text style={styles.productPrice}>${item.price.toLocaleString()}</Text>
+        <Text style={[styles.productName, { color: colors.text }]} numberOfLines={1}>{item.name}</Text>
+        <Text style={[styles.productCategory, { color: colors.muted }]}>{item.categories?.name || 'General'}</Text>
+        <Text style={[styles.productPrice, { color: colors.brandAccent }]}>${item.price.toLocaleString()}</Text>
         
         <View style={styles.cardActions}>
           <TouchableOpacity 
-            style={styles.actionButton}
+            style={[styles.actionButton, { backgroundColor: colors.glassHeavy }]}
             onPress={() => {
               setEditingItem(item);
               setIsModalVisible(true);
             }}
           >
-            <Edit2 size={16} color="#fff" />
+            <Edit2 size={16} color={colors.text} />
           </TouchableOpacity>
           <TouchableOpacity 
-            style={[styles.actionButton, { backgroundColor: item.is_active ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)' }]}
+            style={[styles.actionButton, { backgroundColor: item.is_active ? colors.brandAccent + '20' : colors.muted + '20' }]}
             onPress={() => handleToggleActive(item)}
           >
-            <Power size={16} color={item.is_active ? '#10b981' : '#ef4444'} />
+            <Power size={16} color={item.is_active ? colors.brandAccent : colors.muted} />
           </TouchableOpacity>
         </View>
       </View>
@@ -276,30 +278,30 @@ export default function MenuScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      <BlurView intensity={80} tint="dark" style={styles.header}>
+    <View style={[styles.container, { backgroundColor: colors.navy }]}>
+      <BlurView intensity={80} tint="dark" style={[styles.header, { borderBottomColor: colors.glassHeavy }]}>
         <View style={styles.headerTop}>
           <View>
-            <Text style={styles.title}>Carta / Menú</Text>
-            <Text style={styles.subtitle}>{items.length} productos registrados</Text>
+            <Text style={[styles.title, { color: colors.text }]}>Carta / Menú</Text>
+            <Text style={[styles.subtitle, { color: colors.muted }]}>{items.length} productos registrados</Text>
           </View>
           <TouchableOpacity 
-            style={styles.addButton}
+            style={[styles.addButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }]}
             onPress={() => {
               setEditingItem(null);
               setIsModalVisible(true);
             }}
           >
-            <Plus size={24} color="#000" />
+            <Plus size={24} color="white" />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.searchContainer}>
-          <Search size={20} color="rgba(255,255,255,0.4)" style={styles.searchIcon} />
+        <View style={[styles.searchContainer, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
+          <Search size={20} color={colors.muted} style={styles.searchIcon} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: colors.text }]}
             placeholder="Buscar plato o ingrediente..."
-            placeholderTextColor="rgba(255,255,255,0.4)"
+            placeholderTextColor={colors.muted}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -316,12 +318,14 @@ export default function MenuScreen() {
               onPress={() => setSelectedCategory(item.id)}
               style={[
                 styles.categoryTab,
-                selectedCategory === item.id && styles.categoryTabActive
+                { backgroundColor: colors.glass, borderColor: colors.glassHeavy },
+                selectedCategory === item.id && { backgroundColor: colors.brandAccent, borderColor: colors.brandAccent }
               ]}
             >
               <Text style={[
                 styles.categoryTabText,
-                selectedCategory === item.id && styles.categoryTabTextActive
+                { color: colors.muted },
+                selectedCategory === item.id && { color: 'white' }
               ]}>
                 {item.name}
               </Text>
@@ -338,13 +342,13 @@ export default function MenuScreen() {
         contentContainerStyle={styles.listContent}
         columnWrapperStyle={styles.columnWrapper}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brandAccent} />
         }
         ListEmptyComponent={
           !loading ? (
             <View style={styles.emptyState}>
-              <Package size={64} color="rgba(255,255,255,0.1)" />
-              <Text style={styles.emptyText}>No se encontraron platos</Text>
+              <Package size={64} color={colors.glassHeavy} />
+              <Text style={[styles.emptyText, { color: colors.muted }]}>No se encontraron platos</Text>
             </View>
           ) : null
         }

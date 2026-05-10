@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 import { formatCurrency, timeAgo } from '../../lib/dashboard';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -30,6 +31,7 @@ const STATUS_FILTER = [
 
 export default function AdminOrdersScreen() {
   const { restaurantId } = useAuth();
+  const { colors } = useTheme();
   // Pagination State
   const [orders, setOrders] = React.useState<any[]>([]);
   const [filteredOrders, setFilteredOrders] = React.useState<any[]>([]);
@@ -190,10 +192,10 @@ export default function AdminOrdersScreen() {
     switch (status) {
       case 'PENDING': return '#facc15';
       case 'VALIDATED': return '#60a5fa';
-      case 'PREPARING': return MB_COLORS.brandAccent;
+      case 'PREPARING': return colors.brandAccent;
       case 'READY': return '#10b981';
-      case 'DELIVERED': return MB_COLORS.muted;
-      default: return 'white';
+      case 'DELIVERED': return colors.muted;
+      default: return colors.text;
     }
   };
 
@@ -203,7 +205,7 @@ export default function AdminOrdersScreen() {
     return (
       <Animated.View entering={FadeInDown.delay(index * 50)}>
         <TouchableOpacity 
-          style={styles.orderCard}
+          style={[styles.orderCard, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}
           onPress={() => {
             setSelectedOrder(item);
             setIsModalVisible(true);
@@ -211,8 +213,8 @@ export default function AdminOrdersScreen() {
         >
           <View style={styles.orderHeader}>
             <View>
-              <Text style={styles.tableText}>Mesa {item.tables?.number ?? 'S/N'}</Text>
-              <Text style={styles.timeText}>{timeAgo(item.createdAt)}</Text>
+              <Text style={[styles.tableText, { color: colors.text }]}>Mesa {item.tables?.number ?? 'S/N'}</Text>
+              <Text style={[styles.timeText, { color: colors.muted }]}>{timeAgo(item.createdAt)}</Text>
             </View>
             <View style={[styles.statusTag, { borderColor: getStatusColor(item.status) }]}>
               <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
@@ -225,10 +227,10 @@ export default function AdminOrdersScreen() {
             </View>
           </View>
           
-          <View style={styles.orderFooter}>
-            <Text style={styles.totalLabel}>Total Orden</Text>
-            <Text style={styles.totalAmount}>{formatCurrency(total)}</Text>
-            <ChevronRight size={16} color={MB_COLORS.muted} />
+          <View style={[styles.orderFooter, { borderTopColor: colors.glassHeavy }]}>
+            <Text style={[styles.totalLabel, { color: colors.muted }]}>Total Orden</Text>
+            <Text style={[styles.totalAmount, { color: colors.text }]}>{formatCurrency(total)}</Text>
+            <ChevronRight size={16} color={colors.muted} />
           </View>
         </TouchableOpacity>
       </Animated.View>
@@ -236,25 +238,33 @@ export default function AdminOrdersScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.navy }]}>
       <StatusBar barStyle="light-content" />
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>Gestión de Pedidos</Text>
-          <Text style={styles.headerSubtitle}>{orders.length} órdenes registradas</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Gestión de Pedidos</Text>
+          <Text style={[styles.headerSubtitle, { color: colors.muted }]}>{orders.length} órdenes registradas</Text>
         </View>
-        <ShoppingBag color={MB_COLORS.brandAccent} size={24} />
+        <ShoppingBag color={colors.brandAccent} size={24} />
       </View>
 
-      <View style={styles.filterContainer}>
+      <View style={[styles.filterContainer, { borderBottomColor: colors.glassHeavy }]}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
           {STATUS_FILTER.map((f) => (
             <TouchableOpacity 
               key={f.value}
-              style={[styles.filterChip, statusFilter === f.value && styles.filterChipActive]}
+              style={[
+                styles.filterChip, 
+                { backgroundColor: colors.glass, borderColor: colors.glassHeavy },
+                statusFilter === f.value && { backgroundColor: colors.brandAccent, borderColor: colors.brandAccent }
+              ]}
               onPress={() => handleFilterChange(f.value)}
             >
-              <Text style={[styles.filterText, statusFilter === f.value && styles.filterTextActive]}>
+              <Text style={[
+                styles.filterText, 
+                { color: colors.muted },
+                statusFilter === f.value && { color: 'white' }
+              ]}>
                 {f.label}
               </Text>
             </TouchableOpacity>
@@ -264,8 +274,8 @@ export default function AdminOrdersScreen() {
 
       {loading && !refreshing ? (
         <View style={styles.centered}>
-          <ActivityIndicator color={MB_COLORS.brandAccent} />
-          <Text style={styles.loadingText}>Sincronizando comandas...</Text>
+          <ActivityIndicator color={colors.brandAccent} />
+          <Text style={[styles.loadingText, { color: colors.muted }]}>Sincronizando comandas...</Text>
         </View>
       ) : (
         <FlatList
@@ -274,20 +284,20 @@ export default function AdminOrdersScreen() {
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={MB_COLORS.brandAccent} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brandAccent} />
           }
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.5}
           ListFooterComponent={() => (
             loadingMore ? (
               <View style={styles.footerLoader}>
-                <ActivityIndicator color={MB_COLORS.brandAccent} />
+                <ActivityIndicator color={colors.brandAccent} />
               </View>
             ) : null
           )}
           ListEmptyComponent={
             <View style={styles.centered}>
-              <Text style={styles.emptyText}>No hay pedidos con este estado</Text>
+              <Text style={[styles.emptyText, { color: colors.muted }]}>No hay pedidos con este estado</Text>
             </View>
           }
         />

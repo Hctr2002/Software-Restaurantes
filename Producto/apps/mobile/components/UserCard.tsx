@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { ChevronRight, Mail, Shield } from 'lucide-react-native';
 import { MB_COLORS, MB_RADIUS, MB_SPACING } from '../constants/MB_Theme';
+import { useTheme } from '../context/ThemeContext';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 export type UserProfile = {
@@ -28,31 +29,33 @@ const getRoleBadgeColor = (role: string) => {
 };
 
 export const UserCard = ({ user, index, onPress }: UserCardProps) => {
+  const { colors } = useTheme();
+
   return (
     <Animated.View 
       entering={FadeInDown.delay(index * 50).duration(400)}
-      style={styles.card}
+      style={[styles.card, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}
     >
-      <View style={styles.avatar}>
-        <Text style={styles.avatarText}>{user.email[0].toUpperCase()}</Text>
+      <View style={[styles.avatar, { backgroundColor: colors.glassHeavy, borderColor: colors.glassHeavy }]}>
+        <Text style={[styles.avatarText, { color: colors.text }]}>{user.email[0].toUpperCase()}</Text>
       </View>
       
       <View style={styles.info}>
-        <Text style={styles.email} numberOfLines={1}>{user.email}</Text>
+        <Text style={[styles.email, { color: colors.text }]} numberOfLines={1}>{user.email}</Text>
         <View style={styles.row}>
           <View style={[styles.badge, { backgroundColor: getRoleBadgeColor(user.role) + '15' }]}>
             <Text style={[styles.badgeText, { color: getRoleBadgeColor(user.role) }]}>
               {user.role}
             </Text>
           </View>
-          <Text style={styles.date}>
+          <Text style={[styles.date, { color: colors.muted }]}>
             {new Date(user.createdAt).toLocaleDateString()}
           </Text>
         </View>
       </View>
 
       <TouchableOpacity onPress={() => onPress(user)} style={styles.action}>
-        <ChevronRight size={18} color={MB_COLORS.muted} />
+        <ChevronRight size={18} color={colors.muted} />
       </TouchableOpacity>
     </Animated.View>
   );

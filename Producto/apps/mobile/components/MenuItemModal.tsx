@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { X, ImagePlus, Check, ChevronDown, Trash2 } from 'lucide-react-native';
 import { MB_COLORS } from '../constants/MB_Theme';
+import { useTheme } from '../context/ThemeContext';
 import * as ImagePicker from 'expo-image-picker';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Alert } from 'react-native';
@@ -36,6 +37,7 @@ export default function MenuItemModal({
   item, 
   categories 
 }: MenuItemModalProps) {
+  const { colors } = useTheme();
   const [name, setName] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [price, setPrice] = React.useState('');
@@ -139,11 +141,11 @@ export default function MenuItemModal({
       <View style={styles.overlay}>
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.content}
+          style={[styles.content, { backgroundColor: colors.navy }]}
         >
-          <View style={styles.header}>
+          <View style={[styles.header, { borderBottomColor: colors.glassHeavy }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.title}>
+              <Text style={[styles.title, { color: colors.text }]}>
                 {item ? 'Editar Plato' : 'Nuevo Plato'}
               </Text>
               {item && (
@@ -151,70 +153,74 @@ export default function MenuItemModal({
                   onPress={handleDelete}
                   style={styles.deleteButtonHeader}
                 >
-                  <Trash2 color="#ef4444" size={18} />
+                  <Trash2 color={colors.brandAccent} size={18} />
                 </TouchableOpacity>
               )}
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <X color="#fff" size={24} />
+              <X color={colors.text} size={24} />
             </TouchableOpacity>
           </View>
 
           <ScrollView style={styles.form} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-            <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+            <TouchableOpacity style={[styles.imagePicker, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]} onPress={pickImage}>
               {newImageUri || imageUrl ? (
                 <Image source={{ uri: newImageUri || imageUrl }} style={styles.previewImage} />
               ) : (
                 <View style={styles.imagePlaceholder}>
-                  <ImagePlus color="rgba(255,255,255,0.3)" size={32} />
-                  <Text style={styles.imagePlaceholderText}>Añadir Imagen</Text>
+                  <ImagePlus color={colors.muted} size={32} />
+                  <Text style={[styles.imagePlaceholderText, { color: colors.muted }]}>Añadir Imagen</Text>
                 </View>
               )}
               {(newImageUri || imageUrl) && (
                 <View style={styles.imageOverlay}>
-                  <ImagePlus color="#fff" size={20} />
+                  <ImagePlus color="white" size={20} />
                 </View>
               )}
             </TouchableOpacity>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Nombre del Plato</Text>
+              <Text style={[styles.label, { color: colors.muted }]}>Nombre del Plato</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.glass, borderColor: colors.glassHeavy, color: colors.text }]}
                 value={name}
                 onChangeText={setName}
                 placeholder="Ej. Hamburguesa Especial"
-                placeholderTextColor="rgba(255,255,255,0.2)"
+                placeholderTextColor={colors.muted}
               />
             </View>
 
             <View style={styles.row}>
               <View style={[styles.inputGroup, { flex: 1 }]}>
-                <Text style={styles.label}>Precio</Text>
+                <Text style={[styles.label, { color: colors.muted }]}>Precio</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { backgroundColor: colors.glass, borderColor: colors.glassHeavy, color: colors.text }]}
                   value={price}
                   onChangeText={setPrice}
                   placeholder="0.00"
                   keyboardType="numeric"
-                  placeholderTextColor="rgba(255,255,255,0.2)"
+                  placeholderTextColor={colors.muted}
                 />
               </View>
 
               <View style={[styles.inputGroup, { flex: 1.5, marginLeft: 12 }]}>
-                <Text style={styles.label}>Categoría</Text>
+                <Text style={[styles.label, { color: colors.muted }]}>Categoría</Text>
                 <TouchableOpacity 
-                  style={[styles.pickerContainer, showCategoryPicker && styles.pickerContainerActive]}
+                  style={[
+                    styles.pickerContainer, 
+                    { backgroundColor: colors.glass, borderColor: colors.glassHeavy },
+                    showCategoryPicker && { borderColor: colors.brandAccent }
+                  ]}
                   onPress={() => setShowCategoryPicker(!showCategoryPicker)}
                 >
-                  <Text style={[styles.pickerText, !categoryId && { color: 'rgba(255,255,255,0.2)' }]}>
+                  <Text style={[styles.pickerText, { color: colors.text }, !categoryId && { color: colors.muted }]}>
                     {categories.find(c => c.id === categoryId)?.name || 'Seleccionar...'}
                   </Text>
-                  <ChevronDown color={showCategoryPicker ? MB_COLORS.brandAccent : "rgba(255,255,255,0.4)"} size={16} />
+                  <ChevronDown color={showCategoryPicker ? colors.brandAccent : colors.muted} size={16} />
                 </TouchableOpacity>
 
                 {showCategoryPicker && (
-                  <Animated.View entering={FadeInDown.duration(200)} style={styles.dropdownList}>
+                  <Animated.View entering={FadeInDown.duration(200)} style={[styles.dropdownList, { backgroundColor: colors.navy, borderColor: colors.glassHeavy }]}>
                     <ScrollView style={{ maxHeight: 200 }} nestedScrollEnabled keyboardShouldPersistTaps="handled">
                       {categories.map(cat => (
                         <TouchableOpacity 
@@ -223,12 +229,20 @@ export default function MenuItemModal({
                             setCategoryId(cat.id);
                             setShowCategoryPicker(false);
                           }}
-                          style={[styles.dropdownItem, categoryId === cat.id && styles.dropdownItemActive]}
+                          style={[
+                            styles.dropdownItem, 
+                            { borderBottomColor: colors.glassHeavy },
+                            categoryId === cat.id && { backgroundColor: colors.brandAccent }
+                          ]}
                         >
-                          <Text style={[styles.dropdownItemText, categoryId === cat.id && styles.dropdownItemTextActive]}>
+                          <Text style={[
+                            styles.dropdownItemText, 
+                            { color: colors.text },
+                            categoryId === cat.id && { color: 'white', fontWeight: '800' }
+                          ]}>
                             {cat.name}
                           </Text>
-                          {categoryId === cat.id && <Check size={14} color="#000" />}
+                          {categoryId === cat.id && <Check size={14} color="white" />}
                         </TouchableOpacity>
                       ))}
                     </ScrollView>
@@ -238,44 +252,44 @@ export default function MenuItemModal({
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Descripción</Text>
+              <Text style={[styles.label, { color: colors.muted }]}>Descripción</Text>
               <TextInput
-                style={[styles.input, styles.textArea]}
+                style={[styles.input, styles.textArea, { backgroundColor: colors.glass, borderColor: colors.glassHeavy, color: colors.text }]}
                 value={description}
                 onChangeText={setDescription}
                 placeholder="Describe los ingredientes o preparación..."
-                placeholderTextColor="rgba(255,255,255,0.2)"
+                placeholderTextColor={colors.muted}
                 multiline
                 numberOfLines={3}
               />
             </View>
 
-            <View style={styles.statusContainer}>
+            <View style={[styles.statusContainer, { backgroundColor: colors.glass }]}>
               <View>
-                <Text style={styles.statusTitle}>Disponibilidad</Text>
-                <Text style={styles.statusSub}>¿Está el plato listo para la venta?</Text>
+                <Text style={[styles.statusTitle, { color: colors.text }]}>Disponibilidad</Text>
+                <Text style={[styles.statusSub, { color: colors.muted }]}>¿Está el plato listo para la venta?</Text>
               </View>
               <Switch
                 value={isActive}
                 onValueChange={setIsActive}
-                trackColor={{ false: '#333', true: '#10b981' }}
-                thumbColor={isActive ? '#fff' : '#f4f3f4'}
+                trackColor={{ false: colors.glassHeavy, true: colors.brandAccent }}
+                thumbColor={isActive ? 'white' : '#f4f3f4'}
               />
             </View>
           </ScrollView>
 
-          <View style={styles.footer}>
+          <View style={[styles.footer, { borderTopColor: colors.glassHeavy }]}>
             <TouchableOpacity 
-              style={styles.saveButton}
+              style={[styles.saveButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }]}
               onPress={handleSave}
               disabled={loading || !name || !price || !categoryId}
             >
               {loading ? (
-                <ActivityIndicator color="#000" />
+                <ActivityIndicator color="white" />
               ) : (
                 <>
-                  <Check color="#000" size={20} style={{ marginRight: 8 }} />
-                  <Text style={styles.saveButtonText}>Guardar Plato</Text>
+                  <Check color="white" size={20} style={{ marginRight: 8 }} />
+                  <Text style={[styles.saveButtonText, { color: 'white' }]}>Guardar Plato</Text>
                 </>
               )}
             </TouchableOpacity>

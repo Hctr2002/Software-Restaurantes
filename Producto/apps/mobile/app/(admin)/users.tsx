@@ -14,11 +14,13 @@ import { Users, Search, Plus } from 'lucide-react-native';
 import { MB_COLORS, MB_SPACING } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { UserCard, UserProfile } from '../../components/UserCard';
 import { UserModal } from '../../components/UserModal';
 
 export default function UsersScreen() {
   const { restaurantId } = useAuth();
+  const { colors } = useTheme();
   
   // States
   const [profiles, setProfiles] = React.useState<UserProfile[]>([]);
@@ -210,27 +212,30 @@ export default function UsersScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.navy }]}>
       <View style={styles.searchBox}>
-        <View style={styles.searchInputContainer}>
-          <Search size={18} color={MB_COLORS.muted} style={styles.searchIcon} />
+        <View style={[styles.searchInputContainer, { backgroundColor: colors.glass }]}>
+          <Search size={18} color={colors.muted} style={styles.searchIcon} />
           <TextInput
             placeholder="Buscar por correo o rol..."
-            placeholderTextColor={MB_COLORS.muted}
-            style={styles.searchInput}
+            placeholderTextColor={colors.muted}
+            style={[styles.searchInput, { color: colors.text }]}
             value={searchQuery}
             onChangeText={handleSearch}
           />
         </View>
-        <TouchableOpacity style={styles.addButton} onPress={handleOpenCreate}>
+        <TouchableOpacity 
+          style={[styles.addButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }]} 
+          onPress={handleOpenCreate}
+        >
           <Plus size={24} color="white" />
         </TouchableOpacity>
       </View>
 
       {loading && !refreshing ? (
         <View style={styles.centered}>
-          <ActivityIndicator color={MB_COLORS.brandAccent} />
-          <Text style={styles.loadingText}>Sincronizando equipo...</Text>
+          <ActivityIndicator color={colors.brandAccent} />
+          <Text style={[styles.loadingText, { color: colors.muted }]}>Sincronizando equipo...</Text>
         </View>
       ) : (
         <FlatList
@@ -246,19 +251,19 @@ export default function UsersScreen() {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={MB_COLORS.brandAccent} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brandAccent} />
           }
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
           ListFooterComponent={
             loadingMore ? (
-              <ActivityIndicator color={MB_COLORS.brandAccent} style={{ marginVertical: 20 }} />
+              <ActivityIndicator color={colors.brandAccent} style={{ marginVertical: 20 }} />
             ) : null
           }
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Users size={48} color={MB_COLORS.glassHeavy} />
-              <Text style={styles.emptyText}>No se encontraron usuarios</Text>
+              <Users size={48} color={colors.glassHeavy} />
+              <Text style={[styles.emptyText, { color: colors.muted }]}>No se encontraron usuarios</Text>
             </View>
           }
         />

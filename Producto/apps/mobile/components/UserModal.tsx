@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { X, Mail, Lock, Shield, Trash2, Eye, EyeOff } from 'lucide-react-native';
 import { MB_COLORS, MB_RADIUS, MB_SPACING } from '../constants/MB_Theme';
+import { useTheme } from '../context/ThemeContext';
 import { UserProfile } from './UserCard';
 
 interface UserModalProps {
@@ -27,6 +28,7 @@ interface UserModalProps {
 const ROLES = ["ADMIN", "GARZON", "COCINA", "CAJERO"];
 
 export const UserModal = ({ visible, onClose, onSave, onDelete, user }: UserModalProps) => {
+  const { colors } = useTheme();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [showPassword, setShowPassword] = React.useState(false);
@@ -81,40 +83,40 @@ export const UserModal = ({ visible, onClose, onSave, onDelete, user }: UserModa
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <KeyboardAvoidingView 
               behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              style={styles.content}
+              style={[styles.content, { backgroundColor: colors.navy, borderColor: colors.glassHeavy }]}
             >
-              <View style={styles.header}>
-                <Text style={styles.title}>{user ? 'Editar Usuario' : 'Nuevo Usuario'}</Text>
+              <View style={[styles.header, { borderBottomColor: colors.glassHeavy }]}>
+                <Text style={[styles.title, { color: colors.text }]}>{user ? 'Editar Usuario' : 'Nuevo Usuario'}</Text>
                 <TouchableOpacity onPress={onClose}>
-                  <X size={20} color="white" />
+                  <X size={20} color={colors.text} />
                 </TouchableOpacity>
               </View>
 
               <View style={styles.form}>
-                <Text style={styles.label}>Email</Text>
-                <View style={styles.inputContainer}>
-                  <Mail size={16} color={MB_COLORS.muted} style={styles.inputIcon} />
+                <Text style={[styles.label, { color: colors.muted }]}>Email</Text>
+                <View style={[styles.inputContainer, { backgroundColor: colors.glass }]}>
+                  <Mail size={16} color={colors.muted} style={styles.inputIcon} />
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, { color: colors.text }]}
                     value={email}
                     onChangeText={setEmail}
                     placeholder="ejemplo@restaurante.com"
-                    placeholderTextColor={MB_COLORS.muted}
+                    placeholderTextColor={colors.muted}
                     autoCapitalize="none"
                     keyboardType="email-address"
-                    editable={!user} // Email usually not editable in Auth
+                    editable={!user} 
                   />
                 </View>
 
-                <Text style={styles.label}>{user ? 'Nueva Contraseña (Opcional)' : 'Contraseña'}</Text>
-                <View style={styles.inputContainer}>
-                  <Lock size={16} color={MB_COLORS.muted} style={styles.inputIcon} />
+                <Text style={[styles.label, { color: colors.muted }]}>{user ? 'Nueva Contraseña (Opcional)' : 'Contraseña'}</Text>
+                <View style={[styles.inputContainer, { backgroundColor: colors.glass }]}>
+                  <Lock size={16} color={colors.muted} style={styles.inputIcon} />
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, { color: colors.text }]}
                     value={password}
                     onChangeText={setPassword}
                     placeholder="••••••••"
-                    placeholderTextColor={MB_COLORS.muted}
+                    placeholderTextColor={colors.muted}
                     secureTextEntry={!showPassword}
                   />
                   <TouchableOpacity 
@@ -122,14 +124,14 @@ export const UserModal = ({ visible, onClose, onSave, onDelete, user }: UserModa
                     style={styles.eyeButton}
                   >
                     {showPassword ? (
-                      <EyeOff size={18} color={MB_COLORS.muted} />
+                      <EyeOff size={18} color={colors.muted} />
                     ) : (
-                      <Eye size={18} color={MB_COLORS.muted} />
+                      <Eye size={18} color={colors.muted} />
                     )}
                   </TouchableOpacity>
                 </View>
 
-                <Text style={styles.label}>Rol</Text>
+                <Text style={[styles.label, { color: colors.muted }]}>Rol</Text>
                 <View style={styles.rolesRow}>
                   {ROLES.map((r) => (
                     <TouchableOpacity 
@@ -137,19 +139,21 @@ export const UserModal = ({ visible, onClose, onSave, onDelete, user }: UserModa
                       onPress={() => setRole(r)}
                       style={[
                         styles.roleButton,
-                        role === r && styles.roleButtonActive
+                        { backgroundColor: colors.glass },
+                        role === r && { backgroundColor: colors.brandAccent + '15', borderColor: colors.brandAccent + '30' }
                       ]}
                     >
                       <Text style={[
                         styles.roleButtonText,
-                        role === r && styles.roleButtonTextActive
+                        { color: colors.muted },
+                        role === r && { color: colors.brandAccent }
                       ]}>{r}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
 
                 <TouchableOpacity 
-                  style={styles.saveButton} 
+                  style={[styles.saveButton, { backgroundColor: colors.brandAccent }]} 
                   onPress={handleSave}
                   disabled={loading}
                 >
@@ -169,11 +173,11 @@ export const UserModal = ({ visible, onClose, onSave, onDelete, user }: UserModa
                     disabled={deleting}
                   >
                     {deleting ? (
-                      <ActivityIndicator color={MB_COLORS.brandAccent} />
+                      <ActivityIndicator color={colors.brandAccent} />
                     ) : (
                       <>
-                        <Trash2 size={16} color={MB_COLORS.brandAccent} />
-                        <Text style={styles.deleteButtonText}>Eliminar Usuario</Text>
+                        <Trash2 size={16} color={colors.brandAccent} />
+                        <Text style={[styles.deleteButtonText, { color: colors.brandAccent }]}>Eliminar Usuario</Text>
                       </>
                     )}
                   </TouchableOpacity>
@@ -195,7 +199,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   content: {
-    backgroundColor: MB_COLORS.navy,
+    backgroundColor: '#0A1128',
     borderRadius: 24,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
@@ -218,7 +222,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   label: {
-    color: MB_COLORS.muted,
+    color: 'rgba(255, 255, 255, 0.4)',
     fontSize: 10,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -264,15 +268,15 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(254, 95, 85, 0.2)',
   },
   roleButtonText: {
-    color: MB_COLORS.muted,
+    color: 'rgba(255, 255, 255, 0.4)',
     fontSize: 11,
     fontWeight: '800',
   },
   roleButtonTextActive: {
-    color: MB_COLORS.brandAccent,
+    color: '#FE5F55',
   },
   saveButton: {
-    backgroundColor: MB_COLORS.brandAccent,
+    backgroundColor: '#FE5F55',
     height: 50,
     borderRadius: 12,
     justifyContent: 'center',
@@ -293,7 +297,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   deleteButtonText: {
-    color: MB_COLORS.brandAccent,
+    color: '#FE5F55',
     fontSize: 12,
     fontWeight: '800',
   }
