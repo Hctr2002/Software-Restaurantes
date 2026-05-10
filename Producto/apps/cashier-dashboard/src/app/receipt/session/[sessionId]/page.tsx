@@ -51,7 +51,7 @@ export default async function ReceiptSessionPage({
 
   const { data: orders } = await db
     .from("orders")
-    .select("id, status, createdAt, table_id, payment_reference, tables(number, label), order_items(quantity, unit_price, menu_items(name))")
+    .select("id, status, createdAt, table_id, tables(number, label), order_items(quantity, unit_price, menu_items(name))")
     .eq("session_id", sessionId)
     .eq("restaurant_id", restaurantId)
     .order("createdAt", { ascending: true });
@@ -77,7 +77,7 @@ export default async function ReceiptSessionPage({
   const allItems    = orders.flatMap((o: any) => o.order_items ?? []);
   const subtotal    = allItems.reduce((s: number, i: any) => s + Number(i.unit_price) * i.quantity, 0);
   const tipAmount   = isTipIncluded ? subtotal * 0.1 : 0;
-  const paymentRef  = orders.at(-1)?.payment_reference ?? null;
+  const paymentRef  = null; // orders.at(-1)?.payment_reference ?? null;
   const issuedAt    = orders.at(-1)?.createdAt ?? new Date().toISOString();
 
   return (
@@ -122,7 +122,7 @@ export default async function ReceiptSessionPage({
           return (
             <div key={gi} style={{ marginBottom: 16 }}>
               <p style={{ fontSize: 10, color: "#4b5563", fontWeight: 700, marginBottom: 8, letterSpacing: 1 }}>
-                — MESA {group.tableNumber}{group.label ? ` (${group.label})` : ""} —
+                — MESA {group.tableNumber} —
               </p>
 
               {/* Header de columnas */}

@@ -50,31 +50,38 @@ export default async function ReceiptTablePage({
   // Fetch table info
   const { data: table } = await db
     .from("tables")
-    .select("number, label")
+    .select("number, label, current_session_id, restaurant_id")
     .eq("id", tableId)
-    .eq("restaurant_id", restaurantId)
     .single();
 
   if (!table) return notFound();
+
+  const actualRestaurantId = table.restaurant_id;
 
   // Fetch restaurant info
   const { data: restaurant } = await db
     .from("restaurants")
     .select("name")
-    .eq("id", restaurantId)
+    .eq("id", actualRestaurantId)
     .single();
 
-  // Fetch orders for this table
+  // Fetch orders for this table or session
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const { data: orders, error } = await db
+  let query = db
     .from("orders")
-    .select("id, status, createdAt, payment_reference, order_items(quantity, unit_price, menu_items(name))")
-    .eq("table_id", tableId)
-    .eq("restaurant_id", restaurantId)
-    .gte("createdAt", today.toISOString())
-    .order("createdAt", { ascending: true });
+    .select("id, status, createdAt, order_items(quantity, unit_price, menu_items(name))")
+    .eq("restaurant_id", actualRestaurantId)
+    .gte("createdAt", today.toISOString());
+
+  if (table.current_session_id) {
+    query = query.eq("session_id", table.current_session_id);
+  } else {
+    query = query.eq("table_id", tableId);
+  }
+
+  const { data: orders, error } = await query.order("createdAt", { ascending: true });
 
   console.log("RECEIPT TABLE:", { tableId, restaurantId, count: orders?.length, error });
 
@@ -82,7 +89,7 @@ export default async function ReceiptTablePage({
   const consolidatedItems = consolidateItems(safeOrders);
   const subtotal        = consolidatedItems.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
   const tipAmount       = isTipIncluded ? subtotal * 0.1 : 0;
-  const paymentRef      = safeOrders.at(-1)?.payment_reference ?? null;
+  const paymentRef      = null;
   const issuedAt        = safeOrders.at(-1)?.createdAt ?? new Date().toISOString();
 
   return (
@@ -114,7 +121,7 @@ export default async function ReceiptTablePage({
 
         {/* Meta */}
         <div style={{ borderTop: "1px dashed #d1d5db", borderBottom: "1px dashed #d1d5db", padding: "12px 0", marginBottom: 20 }}>
-          <Row label="Mesa" value={`#${table.number}${table.label ? ` — ${table.label}` : ""}`} />
+          <Row label="Mesa" value={`#${table.number}`} />
           <Row label="Fecha" value={formatDateTime(issuedAt)} />
           {paymentRef && <Row label="Ref. pago" value={paymentRef} />}
         </div>
