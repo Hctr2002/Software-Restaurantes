@@ -50,44 +50,54 @@ export default function TableMenuPage() {
     setSubmitting(true);
 
     try {
-      // 1. Crear la orden
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          restaurant_id: user.restaurantId,
-          table_id: tableId,
-          status: "VALIDATED",
-          validated_at: new Date().toISOString(),
-          total_amount: total,
-          notes: orderNote.trim() || null
-        })
-        .select()
-        .single();
+      // Map each category to its station
+      const categoryStationMap = new Map<string, 'KITCHEN' | 'BAR'>(
+        categories.map((cat: any) => [cat.id, (cat.target_station ?? 'KITCHEN') as 'KITCHEN' | 'BAR'])
+      );
+      // Map each menu item to its station via category
+      const itemStationMap = new Map<string, 'KITCHEN' | 'BAR'>(
+        menu.map((item) => [item.id, categoryStationMap.get(item.categoryId ?? '') ?? 'KITCHEN'])
+      );
 
-      if (orderError) throw orderError;
+      const kitchenItems = cart.filter((i) => itemStationMap.get(i.id) === 'KITCHEN');
+      const barItems     = cart.filter((i) => itemStationMap.get(i.id) === 'BAR');
 
-      // 2. Insertar ítems
-      const orderItems = cart.map((item) => ({
-        order_id: order.id,
-        menu_item_id: item.id,
-        quantity: item.quantity,
-        unit_price: item.price,
-        restaurant_id: user.restaurantId
-      }));
+      const createSubOrder = async (items: typeof cart, station: 'KITCHEN' | 'BAR', parentId?: string) => {
+        const stationTotal = items.reduce((acc, i) => acc + i.price * i.quantity, 0);
+        const { data: order, error: orderError } = await supabase
+          .from("orders")
+          .insert({
+            restaurant_id: user.restaurantId,
+            table_id: tableId,
+            status: "VALIDATED",
+            validated_at: new Date().toISOString(),
+            total_amount: items.length === cart.length ? total : stationTotal,
+            station,
+            parent_order_id: parentId ?? null,
+            notes: orderNote.trim() || null
+          })
+          .select()
+          .single();
+        if (orderError) throw orderError;
 
-      const { error: itemsError } = await supabase
-        .from("order_items")
-        .insert(orderItems);
+        const { error: itemsError } = await supabase.from("order_items").insert(
+          items.map((item) => ({
+            order_id: order.id,
+            menu_item_id: item.id,
+            quantity: item.quantity,
+            unit_price: item.price,
+            restaurant_id: user.restaurantId
+          }))
+        );
+        if (itemsError) throw itemsError;
+        return order.id as string;
+      };
 
-      if (itemsError) throw itemsError;
+      const orderIds: string[] = [];
+      if (kitchenItems.length > 0) orderIds.push(await createSubOrder(kitchenItems, 'KITCHEN'));
+      if (barItems.length > 0)     orderIds.push(await createSubOrder(barItems, 'BAR', orderIds[0] ?? undefined));
 
-      // 3. Marcar mesa como OCUPADA
-      await supabase
-        .from("tables")
-        .update({ status: "OCCUPIED" })
-        .eq("id", tableId);
-
-      // 4. Éxito: volver al inicio
+      await supabase.from("tables").update({ status: "OCCUPIED" }).eq("id", tableId);
       router.push("/");
     } catch (err: any) {
       console.error("Error al enviar pedido:", err?.message || err?.code || JSON.stringify(err));

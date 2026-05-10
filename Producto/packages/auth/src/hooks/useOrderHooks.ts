@@ -61,11 +61,17 @@ export function useRealtimeOrders(restaurantId: string | undefined, options: Rea
           );
         }).map((order) => {
           if (!station || order.station) return order;
-          // Legacy: filter items to only show this station's items
-          const rawItems = order.order_items || [];
-          order.order_items = rawItems.filter(
+          // Legacy null-station order: filter both raw and mapped items to this station only
+          const rawItems = (order as any).order_items || [];
+          const filteredRaw = rawItems.filter(
             (item: any) => item.menu_items?.category?.target_station === station
           );
+          (order as any).order_items = filteredRaw;
+          order.orderItems = (order.orderItems || []).filter((item: any) => {
+            const s = item.menuItem?.category?.targetStation
+              ?? (item as any).menu_items?.category?.target_station;
+            return s === station;
+          });
           return order;
         });
       },
