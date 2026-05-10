@@ -42,6 +42,16 @@
 
 ---
 
+## Estado del Sistema
+
+| Versión | Fecha | Cambios principales |
+|---|---|---|
+| v2.4.0 | 2026-05-10 | Bar Dashboard (rol BAR, puerto 3006); arquitectura dual-estación KITCHEN/BAR; campo `target_station` en categorías; `kds_settings` polimórfico; `bar_ready`/`bar_preparing` en órdenes |
+| v2.3.0 | anterior | Refactor UX/UI Pro Max; flujo de pedido automatizado; motor de marca dinámica |
+| v2.0.0 | anterior | Monorepo multitenant completo; RLS; Realtime; Web Push |
+
+---
+
 ## Fuente de Verdad
 
 El archivo `Producto/supabase/prisma/schema.prisma` es la fuente de verdad absoluta para tipos, nombres de campos y relaciones. Ante cualquier discrepancia entre este índice y el schema, el schema prevalece.

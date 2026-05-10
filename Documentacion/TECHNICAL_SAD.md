@@ -1,5 +1,5 @@
 # Documento de Arquitectura de Software (SAD) — Menu Bites
-**Versión:** 2.0.0 | **Alcance:** Arquitectura técnica, patrones de diseño e infraestructura del sistema de gestión de restaurantes Menu Bites.
+**Versión:** 2.4.0 | **Alcance:** Arquitectura técnica, patrones de diseño e infraestructura del sistema de gestión de restaurantes Menu Bites.
 
 ---
 
@@ -24,15 +24,16 @@ El proyecto utiliza una arquitectura de monorepo gestionada con **Turborepo** y 
 
 #### Aplicaciones (`apps/`):
 
-| App | Rol | Usuario Destino |
-|---|---|---|
-| `admin-dashboard` | Panel de administración global de la plataforma SaaS | SUPER_ADMIN |
-| `local-dashboard` | Panel operativo por restaurante: menú, pedidos, reportes, branding | ADMIN |
-| `kitchen-kds` | Pantalla de cocina para gestión de tickets en tiempo real | COCINA |
-| `waiter-terminal` | Terminal móvil para toma de pedidos y gestión de mesas | GARZON |
-| `cashier-dashboard` | Panel de caja para cierre de cuentas y cobro | CAJERO |
-| `customer-portal` | Portal web del cliente final, accedido vía código QR de mesa | CLIENTE |
-| `mobile` | Aplicación móvil (en desarrollo) | GARZON / CLIENTE |
+| App | Puerto Dev | Rol | Usuario Destino |
+|---|---|---|---|
+| `admin-dashboard` | 3000 | SUPER_ADMIN | Panel de administración global de la plataforma SaaS |
+| `local-dashboard` | 3003 | ADMIN | Panel operativo por restaurante: menú, pedidos, reportes, branding |
+| `kitchen-kds` | 3001 | COCINA | Pantalla de cocina para gestión de tickets en tiempo real |
+| `waiter-terminal` | 3002 | GARZON | Terminal móvil para toma de pedidos y gestión de mesas |
+| `cashier-dashboard` | 3004 | CAJERO | Panel de caja para cierre de cuentas y cobro |
+| `customer-portal` | 3005 | CLIENTE | Portal web del cliente final, accedido vía código QR de mesa |
+| `bar-dashboard` | 3006 | BAR | KDS dedicado para la estación de barra (bebidas y cócteles) |
+| `mobile` | — | GARZON / CLIENTE | Aplicación móvil (en desarrollo) |
 
 #### Paquetes Compartidos (`packages/`):
 
@@ -72,6 +73,7 @@ graph TD
         A --> F[cashier-dashboard]:::appNode
         A --> G[customer-portal]:::appNode
         A --> H[mobile]:::appNode
+        A --> I[bar-dashboard]:::appNode
 
         P[Packages]:::rootNode --> UI["@menu-bites/ui"]:::pkgNode
         P --> AUTH["@menu-bites/auth"]:::pkgNode
@@ -90,6 +92,8 @@ graph TD
         E -.->|usa| AUTH
         F -.->|usa| AUTH
         G -.->|usa| AUTH
+        I -.->|usa| UI
+        I -.->|usa| AUTH
     end
 ```
 
@@ -332,8 +336,9 @@ flowchart LR
     BUILD --> APP4[waiter-terminal.vercel.app]:::appNode
     BUILD --> APP5[cashier-dashboard.vercel.app]:::appNode
     BUILD --> APP6[customer-portal.vercel.app]:::appNode
+    BUILD --> APP7[bar-dashboard.vercel.app]:::appNode
 
-    APP1 & APP2 & APP3 & APP4 & APP5 & APP6 -->|HTTPS + Supabase JS SDK| SUPA[(Supabase Cloud)]:::infraNode
+    APP1 & APP2 & APP3 & APP4 & APP5 & APP6 & APP7 -->|HTTPS + Supabase JS SDK| SUPA[(Supabase Cloud)]:::infraNode
 
     SUPA --> PG[PostgreSQL + RLS]:::infraNode
     SUPA --> AUTH[Auth Service]:::infraNode
@@ -479,7 +484,153 @@ A partir de la v2.2.0, se ha estandarizado un patrón de **inicialización perez
 - El cliente se cree solo cuando hay una solicitud real.
 - Se eviten fugas de memoria por instancias globales innecesarias en funciones serverless.
 
+### 7.11 Refactorización UX/UI Pro Max (v2.3.0)
+
+En la Wave 9 se implementó una actualización profunda de la interfaz del portal de clientes centrada en la solidez visual y la eliminación de fricción operativa:
+
+- **Navegación Sólida:** Introducción de un flag `isSolid` en los encabezados premium para forzar opacidad total, resolviendo problemas de legibilidad en dispositivos móviles bajo condiciones de alta luminosidad.
+- **Flujo de Pedido Automatizado:** El portal ahora vincula automáticamente el pedido a la mesa mediante el parámetro `tableNumber` de la URL, eliminando el paso de entrada manual de mesa en el checkout.
+- **Arquitectura de Cierre de Ciclo:** Se optimizó la transición post-pedido. Al confirmar una orden, el modal de checkout se cierra instantáneamente mediante una promesa booleana, y al regresar al menú se invoca `resetOrder()` para limpiar el estado del rastreador, dejando la interfaz lista para nuevas interacciones.
+
+---
+
+### 7.12 Integración Bar KDS y Arquitectura Dual-Estación (v2.4.0)
+
+#### 7.12.1 Nueva App: Bar Dashboard
+
+Se incorporó `apps/bar-dashboard` (puerto 3006) como estación KDS dedicada para personal de barra (`role: BAR`). Replica el patrón de `kitchen-kds` adaptado para bebidas y cócteles.
+
+**Características técnicas:**
+- Cookie de sesión aislada: `sb-bar-session` (mismo patrón de aislamiento que las demás apps)
+- Proxy de autenticación en `src/proxy.ts` que valida exclusivamente el rol `BAR`
+- Interfaz de tres columnas: **Pedidos Nuevos** (VALIDATED) → **En Barra** (PREPARING) → **Para Despacho** (READY)
+- Sistema de alertas sonoras con dos SFX: nuevo ticket y alerta crítica
+- Auto-despacho configurable: los tickets READY se ocultan automáticamente tras un delay configurado
+- Modal `StockAlertModal` para reportar quiebres de stock (`type: STOCK_SHORTAGE`) a la tabla `alerts`
+- `PremiumHeader` con estadísticas en tiempo real (contador por columna)
+
+#### 7.12.2 Enrutamiento Dual-Estación de Pedidos
+
+El modelo de pedidos fue extendido para soportar preparación independiente en Cocina y Barra. Un pedido mixto (que contiene ítems de ambas estaciones) no pasa a READY globalmente hasta que ambas estaciones hayan completado sus ítems.
+
+**Nuevas columnas en tabla `orders`:**
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `kitchen_preparing` | `boolean` | La cocina está preparando sus ítems |
+| `kitchen_ready` | `boolean` | La cocina completó sus ítems |
+| `bar_preparing` | `boolean` | La barra está preparando sus ítems |
+| `bar_ready` | `boolean` | La barra completó sus ítems |
+
+**Lógica de transición de estado (función `updateOrderStatus` en `@menu-bites/auth`):**
+
+```
+Al marcar READY en Barra:
+  bar_ready = true
+  bar_preparing = false
+  Si el pedido NO tiene ítems de Cocina → status global = READY
+  Si el pedido tiene ítems de Cocina Y kitchen_ready = true → status global = READY
+  De lo contrario → status global = PREPARING (cocina aún trabaja)
+```
+
+**Filtrado de ítems por estación:** El hook `useRealtimeOrders()` acepta un parámetro `station: StationType` ('KITCHEN' | 'BAR'). Al pasar la estación:
+1. Filtra los ítems del pedido para mostrar solo los de esa estación (`category.target_station === station`).
+2. Calcula el estado virtual del pedido para esa estación usando los flags `kitchen_ready`/`bar_ready`.
+3. Excluye pedidos que no tengan ítems de la estación solicitada.
+
+#### 7.12.3 Campo `target_station` en Categorías
+
+La tabla `categories` incorpora el campo `target_station: StationType` (valores: `'KITCHEN'` | `'BAR'`). Este campo determina a qué estación KDS se enrutan los ítems de cada categoría.
+
+| Categoría | target_station | Ejemplo |
+|---|---|---|
+| Entradas, Fondos, Postres | `KITCHEN` | Pizza, Ensalada, Tiramisú |
+| Bebidas, Cócteles, Jugos | `BAR` | Mojito, Agua Mineral, Pisco Sour |
+
+#### 7.12.4 Sistema de Configuración KDS (`kds_settings`)
+
+Se creó la tabla `kds_settings` con un diseño de **JSON polimórfico por estación** que evita colisiones entre Cocina y Barra compartiendo una sola fila por restaurante:
+
+```json
+{
+  "KITCHEN": {
+    "thresholds": { "yellow": 10, "red": 20 },
+    "categoryTimes": [{ "name": "Pizza", "minutes": 15 }],
+    "sounds": { "newTicket": true, "criticalAlert": true },
+    "autoClear": { "enabled": false, "delaySeconds": 30 }
+  },
+  "BAR": {
+    "thresholds": { "yellow": 5, "red": 12 },
+    "categoryTimes": [{ "name": "Cócteles", "minutes": 8 }],
+    "sounds": { "newTicket": true, "criticalAlert": true },
+    "autoClear": { "enabled": true, "delaySeconds": 20 }
+  }
+}
+```
+
+**API Routes:**
+- `GET /api/settings` → Lee `kds_settings.settings.BAR` (o `KITCHEN` según la app)
+- `POST /api/settings` → Hace upsert solo en la clave de estación correspondiente, preservando la config de la otra estación
+
+**Modal de configuración (Bar Dashboard) — 6 pestañas:**
+
+| Pestaña | Función |
+|---|---|
+| Sin Stock (86items) | Marcar/desmarcar ítems de barra sin disponibilidad (escribe `is_active` en `menu_items`) |
+| Tiempos por Bebida | Definir tiempos objetivo por categoría de bebida |
+| Alertas de Tiempo | Configurar umbrales de urgencia (amarillo/rojo en minutos) |
+| Notificaciones | Activar/desactivar sonidos de nuevo ticket y alerta crítica |
+| Auto-despacho | Habilitar ocultado automático de tickets READY tras N segundos |
+| Inventario | Vista de stock actual de insumos de barra |
+
+#### 7.12.5 Función `sendAlert()` en `@menu-bites/auth`
+
+Nueva función exportada del paquete `auth` para insertar registros en la tabla `alerts`:
+
+```typescript
+sendAlert({
+  restaurantId: string,
+  userId?: string,
+  userEmail?: string,
+  type: AlertType,          // 'STOCK_SHORTAGE' | 'HELP_REQUEST' | ...
+  message: string,
+  tableNumber?: number,
+  menuItemId?: string,
+  menuItemName?: string,
+})
+```
+
+Utilizada por el `StockAlertModal` del bar-dashboard para notificar al ADMIN sobre quiebres de stock en la barra.
+
+#### 7.12.6 Hooks Especializados en `@menu-bites/auth`
+
+| Hook | Descripción |
+|---|---|
+| `useBarOrders(restaurantId)` | Órdenes filtradas por estación BAR; calcula status virtual por estación |
+| `useKitchenOrders(restaurantId)` | Órdenes filtradas por estación KITCHEN (refactorizado) |
+| `useRealtimeOrders(restaurantId, options)` | Base genérica; acepta `station`, `statuses`, `limit`, `ascending` |
+
+---
+
+### 7.13 Resolución de Incidencia: Auth Callback 404 (Turbopack Cache)
+
+**Síntoma:** `GET /auth/callback 404` al intentar hacer login con usuario ADMIN en `local-dashboard`.
+
+**Causa raíz:** El servidor de desarrollo de Next.js con Turbopack mantiene un caché compilado en `.next/`. Cuando se realizan cambios en archivos de ruta o se agregan nuevas páginas, Turbopack puede no detectar el cambio automáticamente, dejando el manifiesto de rutas desactualizado y retornando 404 para rutas que sí existen en el código fuente.
+
+**Solución aplicada:** Reinicio del servidor de desarrollo (`npm run dev` desde `Producto/`), lo que fuerza la recompilación completa del grafo de módulos en Turbopack.
+
+**Patrón de resolución para incidencias similares:**
+```bash
+# Desde Producto/
+turbo dev --filter=local-dashboard   # Reinicio limpio
+# O si persiste:
+rm -rf apps/local-dashboard/.next && turbo dev --filter=local-dashboard
+```
+
+**Nota arquitectónica:** La ruta `auth/callback/page.tsx` existe en todas las apps y maneja tokens de sesión Supabase en el hash de la URL (`#access_token=...`). El middleware de cada app (`src/proxy.ts`) tiene un bypass explícito para `/auth/callback` que permite el paso sin validación de sesión.
+
 ---
 
 ## 8. CONCLUSIÓN
-El sistema Menu Bites v2.2.0 se consolida como una arquitectura moderna, reactiva y resiliente, lista para escalar en entornos multitenant con alta concurrencia operativa.
+El sistema Menu Bites v2.4.0 incorpora una arquitectura dual-estación completa que permite la operación simultánea e independiente de Cocina y Barra sobre el mismo flujo de pedidos. La adición de `bar-dashboard` completa el ecosistema de aplicaciones operativas, con siete apps productivas que cubren todos los roles del sistema: SUPER_ADMIN, ADMIN, GARZON, COCINA, CAJERO, BAR y CLIENTE.

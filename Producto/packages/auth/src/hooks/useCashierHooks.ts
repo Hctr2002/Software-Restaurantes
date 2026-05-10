@@ -11,6 +11,7 @@ export function useCashierOrders(restaurantId: string | undefined) {
   const [isProcessing, setIsProcessing] = useState(false);
   
   const fetchFn = useCallback(async () => {
+    if (!restaurantId) return { data: null, error: null };
     const { data, error } = await supabase
       .from("orders")
       .select(`*, table:tables(number), order_items(*, menu_items(name))`)
@@ -40,20 +41,35 @@ export function useCashierOrders(restaurantId: string | undefined) {
     fetchFn, 
     { 
       channelId: "cashier-orders",
-      transform: mapOrder
+      transform: (data: any) => Array.isArray(data) ? data.map(mapOrder) : []
     }
   );
 
   const markDelivered = async (orderIds: string[], tableId: string | null, reference: string) => {
     setIsProcessing(true);
     try {
+      // Obtenemos los pedidos actuales para verificar sus estados antes de actualizar
+      const { data: currentOrders } = await supabase
+        .from("orders")
+        .select("id, status")
+        .in("id", orderIds);
+
+      const validOrderIds = (currentOrders || [])
+        .filter(o => o.status !== "COMPLETED" && o.status !== "REJECTED")
+        .map(o => o.id);
+
+      if (validOrderIds.length === 0) {
+        // Si no hay pedidos válidos para actualizar, salimos exitosamente (ya están en estado terminal)
+        return { success: true };
+      }
+
       const { error: oErr } = await supabase
         .from("orders")
         .update({ 
           status: "COMPLETED", 
           notes: reference ? `Ref: ${reference}` : "Pagado en Caja",
         })
-        .in("id", orderIds);
+        .in("id", validOrderIds);
       if (oErr) throw oErr;
 
       if (tableId) {

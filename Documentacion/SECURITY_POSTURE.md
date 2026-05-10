@@ -100,16 +100,17 @@ const role = session?.user?.app_metadata?.role;
 
 El middleware de Next.js valida el rol antes de que la solicitud llegue a la lógica de negocio:
 
-| Rol | Acceso permitido |
-|---|---|
-| `SUPER_ADMIN` | `/admin/*` — gestión global de la plataforma |
-| `ADMIN` | `/[slug]/dashboard/*` — panel completo del restaurante |
-| `GARZON` | `/[slug]/waiter/*` — terminal de garzón |
-| `COCINA` | `/[slug]/kds/*` — Kitchen KDS |
-| `CAJERO` | `/[slug]/cashier/*` — terminal de caja |
-| `CLIENTE` | `/{slug}/*` — Customer Portal público |
+| Rol | App | Cookie de sesión | Acceso permitido |
+|---|---|---|---|
+| `SUPER_ADMIN` | admin-dashboard (3000) | `sb-admin-session` | `/admin/*` — gestión global de la plataforma |
+| `ADMIN` | local-dashboard (3003) | `sb-local-session` | `/[slug]/dashboard/*` — panel completo del restaurante |
+| `GARZON` | waiter-terminal (3002) | `sb-waiter-session` | `/[slug]/waiter/*` — terminal de garzón |
+| `COCINA` | kitchen-kds (3001) | `sb-kds-session` | `/[slug]/kds/*` — Kitchen KDS |
+| `CAJERO` | cashier-dashboard (3004) | `sb-cashier-session` | `/[slug]/cashier/*` — terminal de caja |
+| `BAR` | bar-dashboard (3006) | `sb-bar-session` | `/*` — Bar KDS exclusivo |
+| `CLIENTE` | customer-portal (3005) | sin sesión (anon) | `/{slug}/*` — Customer Portal público |
 
-Cualquier intento de acceder a una ruta fuera del alcance del rol resulta en una redirección a `/unauthorized` o a la ruta asignada al rol.
+Cada app valida el rol en su `src/proxy.ts` (middleware edge). Un usuario BAR que intente acceder al kitchen-kds será redirigido al `NEXT_PUBLIC_AUTH_URL` central. La aislación de sesiones por cookie nominada (`sb-{app}-session`) garantiza que múltiples apps en `localhost` no compartan tokens de sesión.
 
 ### 3.3 Flujo de Autenticación
 

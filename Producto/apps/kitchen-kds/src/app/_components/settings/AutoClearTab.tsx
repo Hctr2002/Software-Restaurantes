@@ -14,22 +14,22 @@ export function AutoClearTab({ draft, onChange }: Props) {
 
   return (
     <div className="space-y-4">
-      <p className="text-white/40 text-sm">Las comandas marcadas como "Listo" desaparecen automáticamente.</p>
-      <div className="flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5">
+      <p className="text-foreground/40 text-sm">Las comandas marcadas como "Listo" desaparecen automáticamente.</p>
+      <div className="flex items-center justify-between p-5 bg-foreground/5 rounded-2xl border border-foreground/5">
         <div>
-          <p className="text-white font-semibold text-sm">Activar auto-borrado</p>
-          <p className="text-white/40 text-xs mt-0.5">Elimina comandas listas tras el tiempo configurado</p>
+          <p className="text-foreground font-semibold text-sm">Activar auto-borrado</p>
+          <p className="text-foreground/40 text-xs mt-0.5">Elimina comandas listas tras el tiempo configurado</p>
         </div>
-        <button onClick={() => toggleEnabled(!draft.autoClear.enabled)} className={cn("w-12 h-6 rounded-full transition-all relative flex-shrink-0", draft.autoClear.enabled ? "bg-primary" : "bg-white/10")}>
-          <span className={cn("absolute top-1 w-4 h-4 rounded-full bg-white transition-all", draft.autoClear.enabled ? "left-7" : "left-1")} />
+        <button onClick={() => toggleEnabled(!draft.autoClear.enabled)} className={cn("w-12 h-6 rounded-full transition-all relative flex-shrink-0", draft.autoClear.enabled ? "bg-primary" : "bg-foreground/10")}>
+          <span className={cn("absolute top-1 w-4 h-4 rounded-full bg-background transition-all", draft.autoClear.enabled ? "left-7" : "left-1")} />
         </button>
       </div>
       {draft.autoClear.enabled && (
-        <div className="p-5 bg-white/5 rounded-2xl border border-white/5 space-y-3">
-          <label className="text-white/60 text-xs uppercase tracking-widest font-bold">Tiempo de espera</label>
+        <div className="p-5 bg-foreground/5 rounded-2xl border border-foreground/5 space-y-3">
+          <label className="text-foreground/60 text-xs uppercase tracking-widest font-bold">Tiempo de espera</label>
           <div className="flex items-center space-x-4">
             <input type="range" min={5} max={300} step={5} value={draft.autoClear.delaySeconds} onChange={(e) => setDelay(Number(e.target.value))} className="flex-1 accent-primary" />
-            <span className="text-white font-black text-lg w-16 text-right">{draft.autoClear.delaySeconds}s</span>
+            <span className="text-foreground font-black text-lg w-16 text-right">{draft.autoClear.delaySeconds}s</span>
           </div>
         </div>
       )}

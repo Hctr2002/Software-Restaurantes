@@ -10,6 +10,12 @@ datasource db {
   schemas   = ["auth", "public"]
 }
 
+enum StationType {
+  KITCHEN
+  BAR
+  @@schema("public")
+}
+
 model Restaurant {
   id                   String               @id @default(uuid())
   name                 String
@@ -62,7 +68,8 @@ model User {
 model Category {
   id           String     @id @default(dbgenerated("(gen_random_uuid())::text"))
   name         String
-  restaurantId String     @map("restaurant_id")
+  restaurantId String      @map("restaurant_id")
+  targetStation StationType @default(KITCHEN) @map("target_station")
   isActive     Boolean    @default(true) @map("is_active")
   createdAt    DateTime   @default(now()) @db.Timestamptz(3)
   updatedAt    DateTime   @default(now()) @updatedAt @db.Timestamptz(3)
@@ -168,23 +175,27 @@ model Order {
   status       OrderStatus @default(PENDING)
   totalAmount  Decimal     @default(0) @map("total_amount") @db.Decimal(10, 2)
   notes        String?
-  createdAt    DateTime    @default(now()) @db.Timestamptz(3)
-  updatedAt    DateTime    @default(now()) @updatedAt @db.Timestamptz(3)
-  user_id      String?
-  validatedAt  DateTime?   @map("validated_at") @db.Timestamptz(6)
-  preparingAt  DateTime?   @map("preparing_at") @db.Timestamptz(6)
-  readyAt      DateTime?   @map("ready_at") @db.Timestamptz(6)
-  sessionId    String?     @map("session_id") @db.Uuid
-  orderItems   OrderItem[]
-  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
-  tables       Table?      @relation(fields: [tableId], references: [id], onUpdate: NoAction)
-  users        User?       @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  sessionId    String?     @map("session_id")
+  station      StationType? @map("station")
+  parentOrderId String?    @map("parent_order_id")
 
-  @@unique([id, restaurantId])
-  @@index([restaurantId])
-  @@index([restaurantId], map: "idx_orders_restaurant_id")
-  @@index([sessionId], map: "idx_orders_session_id")
-  @@index([user_id], map: "idx_orders_user_id")
+  // Legacy cross-station flags — kept for backward compat with old mixed orders
+  barReady        Boolean  @default(false) @map("bar_ready")
+  kitchenReady    Boolean  @default(false) @map("kitchen_ready")
+  kitchenPreparing Boolean @default(false) @map("kitchen_preparing")
+  barPreparing    Boolean  @default(false) @map("bar_preparing")
+
+  // Timestamps de ciclo de vida para analytics
+  validatedAt  DateTime?   @map("validated_at")  @db.Timestamptz(3)
+  preparingAt  DateTime?   @map("preparing_at")  @db.Timestamptz(3)
+  readyAt      DateTime?   @map("ready_at")      @db.Timestamptz(3)
+
+  table      Table?      @relation(fields: [tableId, restaurantId], references: [id, restaurantId])
+  restaurant Restaurant  @relation(fields: [restaurantId], references: [id])
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
   @@map("orders")
   @@schema("public")
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createServiceClient, ensureServiceConfig } from "@/lib/localApi";
 
-const VALID_STATUSES = ["PENDING", "VALIDATED", "PREPARING", "READY", "DELIVERED", "CANCELLED", "REJECTED"];
+const VALID_STATUSES = ["PENDING", "VALIDATED", "PREPARING", "READY", "DELIVERED", "COMPLETED", "CANCELLED", "REJECTED"];
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const cfg = ensureServiceConfig();
