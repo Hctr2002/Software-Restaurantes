@@ -145,6 +145,7 @@ export const getRestaurantTheme = async (restaurantId: string) => {
     cardBackground: data.card_background,
     fontTitle: data.font_title,
     fontBody: data.font_body,
+    fontAccent: data.font_accent,
     logoUrl: data.logo_url,
   };
 };

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { PALETTE_TEMPLATES } from "@/lib/constants/palettes";
-import { loadGoogleFonts } from "../app/[slug]/dashboard/settings/branding/_components/utils";
+import { loadGoogleFonts } from "@/lib/brandingUtils";
 
 export function useBranding() {
   const params = useParams();

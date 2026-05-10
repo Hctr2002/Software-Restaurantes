@@ -12,12 +12,15 @@ import { useTenant } from '@/context/TenantContext';
 import { 
   OrderTracker, 
   RatingModal, 
-  CuentaSheet 
+  CuentaSheet,
+  PremiumHeader, 
+  Button,
+  RestaurantThemeProvider
 } from '@menu-bites/ui';
-import { Loader2 } from "lucide-react";
+import { Loader2, Store, ShoppingBag, Search } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Módulos extraídos para cumplir con el límite de 400 líneas
-import { MenuHeader } from "./_components/MenuHeader";
 import { CategoryNav } from "./_components/CategoryNav";
 import { MenuSection } from "./_components/MenuSection";
 import { CheckoutModal } from "./_components/CheckoutModal";
@@ -36,6 +39,7 @@ export default function MenuPage({
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const portal = useCustomerPortal(restaurant?.id, params.tableNumber);
+  const theme = useThemeSync(restaurant?.id);
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isRequestingBill, setIsRequestingBill] = useState(false);
@@ -43,7 +47,6 @@ export default function MenuPage({
 
   const { status: currentTrackerStatus } = useCustomerOrderTracker(portal.order.lastId);
   const { orders: tableOrders } = useTableOrders(portal.table.data?.id);
-  useThemeSync(restaurant?.id);
 
   const [showRating, setShowRating]       = useState(false);
   const [ratingOrderId, setRatingOrderId] = useState<string | null>(null);
@@ -55,11 +58,6 @@ export default function MenuPage({
   const [isCuentaOpen, setIsCuentaOpen]     = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    if (categories.length > 0 && !activeCategory) {
-      setActiveCategory(categories[0].id);
-    }
-  }, [categories, activeCategory]);
 
   const handleTableInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, ''); 
@@ -71,8 +69,8 @@ export default function MenuPage({
   };
 
   const handlePlaceOrder = async () => {
-    await portal.placeOrder();
-    if (portal.order.success) setIsCheckoutOpen(false);
+    const success = await portal.placeOrder();
+    if (success) setIsCheckoutOpen(false);
   };
 
   useEffect(() => {
@@ -163,86 +161,134 @@ export default function MenuPage({
   }
 
   return (
-    <div className="min-h-screen pb-32">
-      <ConfirmationOverlay 
-        show={portal.order.success} 
-        tableData={portal.table.data} 
-        restaurantName={restaurant?.name || ''} 
-        onClose={() => portal.setOrderSuccess(false)} 
-      />
-
-      <MenuHeader 
-        restaurantName={restaurant?.name || ''} 
-        tableData={portal.table.data} 
-        cartCount={portal.cartCount} 
-        onOpenCheckout={() => setIsCheckoutOpen(true)} 
-      />
-
-      <CategoryNav 
-        categories={categories} 
-        activeCategory={activeCategory} 
-        onSelectCategory={setActiveCategory} 
-      />
-
-      <MenuSection 
-        categoryName={categories.find((c) => c.id === activeCategory)?.name ?? 'Nuestros Platos'} 
-        activeCategory={activeCategory} 
-        items={items.filter((item) => item.categoryId === activeCategory)} 
-        cart={portal.order.cart} 
-        onAdd={portal.addToCart} 
-        onDecrement={portal.removeFromCart} 
-      />
-
-      {isCheckoutOpen && (
-        <CheckoutModal 
-          cart={portal.order.cart} 
-          cartTotal={portal.cartTotal} 
-          table={{ ...portal.table, orderError: portal.order.error }} 
-          onTableInputChange={handleTableInputChange} 
-          onPlaceOrder={handlePlaceOrder} 
-          onClose={() => setIsCheckoutOpen(false)} 
-          placing={portal.order.placing} 
-        />
-      )}
-
-      {showRating && (
-        <RatingModal 
+    <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
+      <div className="min-h-screen wow-gradient text-foreground pb-32">
+        <ConfirmationOverlay 
+          show={portal.order.success} 
+          tableData={portal.table.data} 
           restaurantName={restaurant?.name || ''} 
-          stars={stars} 
-          comment={ratingComment} 
-          submitting={ratingSubmitting} 
-          done={ratingDone} 
-          onStarsChange={setStars} 
-          onCommentChange={setRatingComment} 
-          onSubmit={handleSubmitRating} 
-          onSkip={() => setShowRating(false)} 
+          onClose={() => portal.resetOrder()} 
         />
-      )}
 
-      {portal.order.lastId && currentTrackerStatus && currentTrackerStatus !== 'DELIVERED' && currentTrackerStatus !== 'COMPLETED' && currentTrackerStatus !== 'REJECTED' && (
-        <OrderTracker status={currentTrackerStatus} />
-      )}
+        {/* Bloque de Navegación Unificado Pro Max */}
+        <div className="sticky top-0 z-50 bg-background shadow-2xl border-b border-white/5">
+          <div className="p-4 lg:p-6 pb-2">
+            <PremiumHeader
+              title={restaurant?.name || ''}
+              icon={Store}
+              variant="compact"
+              statusLabel="En Servicio"
+              statusSubLabel={portal.table.data ? `Mesa ${portal.table.data.number}` : "Escanea tu mesa"}
+              isSolid
+            className="border border-white/10"
+              actions={
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="rounded-2xl w-12 h-12 bg-white/5 border-white/10 text-muted-foreground hover:text-foreground transition-all"
+                  >
+                    <Search className="w-5 h-5" />
+                  </Button>
+                  
+                  <div className="relative">
+                    <motion.button 
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setIsCheckoutOpen(true)} 
+                      className="w-12 h-12 sm:w-14 sm:h-14 bg-primary rounded-2xl flex items-center justify-center shadow-xl shadow-primary/30 group relative overflow-hidden"
+                    >
+                      <motion.div 
+                        className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+                      />
+                      <ShoppingBag className="w-6 h-6 text-primary-foreground relative z-10" />
+                    </motion.button>
+                    
+                    <AnimatePresence>
+                      {portal.cartCount > 0 && (
+                        <motion.span 
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-[3px] border-background shadow-lg z-20"
+                        >
+                          {portal.cartCount}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              }
+            />
+          </div>
+          
+          <CategoryNav 
+            categories={categories} 
+            activeCategory={activeCategory} 
+            onSelectCategory={setActiveCategory} 
+          />
+        </div>
 
-      {isCuentaOpen && portal.table.data && (
-        <CuentaSheet 
-          tableNumber={portal.table.data.number} 
-          orders={tableOrders} 
-          onClose={() => setIsCuentaOpen(false)} 
+        <MenuSection 
+          categoryName={categories.find((c) => c.id === activeCategory)?.name ?? 'Carta Completa'} 
+          activeCategory={activeCategory} 
+          categories={categories}
+          items={activeCategory ? items.filter((item) => item.categoryId === activeCategory) : items} 
+          cart={portal.order.cart} 
+          onAdd={portal.addToCart} 
+          onDecrement={portal.removeFromCart} 
         />
-      )}
 
-      <AccountActions 
-        tableData={portal.table.data} 
-        tableOrdersCount={tableOrders.length} 
-        cartCount={portal.cartCount} 
-        cartTotal={portal.cartTotal} 
-        billRequested={billRequested} 
-        isRequestingBill={isRequestingBill} 
-        isCheckoutOpen={isCheckoutOpen} 
-        onOpenCuenta={() => setIsCuentaOpen(true)} 
-        onOpenCheckout={() => setIsCheckoutOpen(true)} 
-        onConfirmBill={handleRequestBill} 
-      />
-    </div>
+        {isCheckoutOpen && (
+          <CheckoutModal 
+            cart={portal.order.cart} 
+            cartTotal={portal.cartTotal} 
+            table={{ ...portal.table, orderError: portal.order.error }} 
+            onPlaceOrder={handlePlaceOrder} 
+            onClose={() => setIsCheckoutOpen(false)} 
+            placing={portal.order.placing} 
+          />
+        )}
+
+        {showRating && (
+          <RatingModal 
+            restaurantName={restaurant?.name || ''} 
+            stars={stars} 
+            comment={ratingComment} 
+            submitting={ratingSubmitting} 
+            done={ratingDone} 
+            onStarsChange={setStars} 
+            onCommentChange={setRatingComment} 
+            onSubmit={handleSubmitRating} 
+            onSkip={() => setShowRating(false)} 
+          />
+        )}
+
+        {portal.order.lastId && currentTrackerStatus && currentTrackerStatus !== 'DELIVERED' && currentTrackerStatus !== 'COMPLETED' && currentTrackerStatus !== 'REJECTED' && (
+          <OrderTracker status={currentTrackerStatus} />
+        )}
+
+        {isCuentaOpen && portal.table.data && (
+          <CuentaSheet 
+            tableNumber={portal.table.data.number} 
+            orders={tableOrders} 
+            onClose={() => setIsCuentaOpen(false)} 
+          />
+        )}
+
+        <AccountActions 
+          tableData={portal.table.data} 
+          tableOrdersCount={tableOrders.length} 
+          cartCount={portal.cartCount} 
+          cartTotal={portal.cartTotal} 
+          billRequested={billRequested} 
+          isRequestingBill={isRequestingBill} 
+          isCheckoutOpen={isCheckoutOpen} 
+          onOpenCuenta={() => setIsCuentaOpen(true)} 
+          onOpenCheckout={() => setIsCheckoutOpen(true)} 
+          onConfirmBill={handleRequestBill} 
+        />
+      </div>
+    </RestaurantThemeProvider>
   );
 }
