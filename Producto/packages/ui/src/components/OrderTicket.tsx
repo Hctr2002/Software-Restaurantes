@@ -37,100 +37,122 @@
        initial={{ opacity: 0, scale: 0.9 }}
        animate={{ opacity: 1, scale: 1 }}
        exit={{ opacity: 0, scale: 0.9 }}
+       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
        className={cn(
-         "relative flex flex-col p-6 rounded-[2.5rem] border transition-all duration-500 overflow-hidden",
+         "relative flex flex-col p-8 rounded-[2.5rem] border transition-all duration-700 overflow-hidden",
          type === 'BAR' ? "glass-bar" : "glass-premium",
-         (status === "PENDING" || status === "VALIDATED") && "border-white/5 bg-white/5 shadow-xl shadow-black/20",
-         status === "PREPARING" && "border-primary/20 bg-primary/5 shadow-xl shadow-primary/5",
-         status === "READY" && "border-emerald-500/20 bg-emerald-500/5 shadow-xl shadow-emerald-500/5",
-         isDelayed && status !== "READY" && "ring-2 ring-destructive/40 bg-destructive/5 animate-pulse"
+         (status === "PENDING" || status === "VALIDATED") && "border-white/10 bg-white/5 shadow-2xl shadow-black/40",
+         status === "PREPARING" && (type === 'BAR' ? "border-purple-500/30 bg-purple-500/10 shadow-2xl shadow-purple-500/10" : "border-primary/30 bg-primary/10 shadow-2xl shadow-primary/10"),
+         status === "READY" && "border-emerald-500/30 bg-emerald-500/10 shadow-2xl shadow-emerald-500/10",
+         isDelayed && status !== "READY" && "ring-2 ring-destructive/50 bg-destructive/10 animate-pulse"
        )}
      >
+       {/* Bloom effect */}
+       <div className={cn(
+         "absolute -top-24 -right-24 w-48 h-48 blur-[100px] rounded-full pointer-events-none opacity-20 transition-colors duration-1000",
+         status === "PREPARING" ? (type === 'BAR' ? "bg-purple-500" : "bg-primary") : 
+         status === "READY" ? "bg-emerald-500" : "bg-white"
+       )} />
+
        {isDelayed && status !== "READY" && (
-         <div className="absolute top-0 right-0 bg-destructive text-destructive-foreground px-4 py-1 rounded-bl-2xl flex items-center gap-1 z-10">
-           <AlertCircle className="w-3 h-3" />
-           <span className="text-[9px] font-black uppercase tracking-tighter">Retrasado</span>
+         <div className="absolute top-0 right-0 bg-destructive text-destructive-foreground px-6 py-1.5 rounded-bl-[1.5rem] flex items-center gap-2 z-10 shadow-lg">
+           <AlertCircle className="w-3.5 h-3.5" />
+           <span className="text-[10px] font-black uppercase tracking-widest">Retrasado</span>
          </div>
        )}
  
-       <div className="flex justify-between items-start mb-6">
-         <div className="flex items-center space-x-4">
-           <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 shadow-inner group">
-             <span className="text-3xl font-black text-foreground tracking-tighter">{tableNumber ?? "?"}</span>
+       <div className="flex justify-between items-start mb-8 relative z-10">
+         <div className="flex items-center space-x-5">
+           <div className={cn(
+             "w-20 h-20 rounded-[1.75rem] flex items-center justify-center border transition-all duration-500 group shadow-inner",
+             type === 'BAR' ? "bg-purple-500/10 border-purple-500/20" : "bg-white/5 border-white/10"
+           )}>
+             <span className="text-4xl font-black text-foreground tracking-tighter drop-shadow-sm">{tableNumber ?? "?"}</span>
            </div>
            <div>
-             <p className="text-[10px] uppercase font-black tracking-[0.2em] text-foreground/30">Mesa</p>
-             <p className="text-[10px] font-bold text-foreground/20 font-mono">#{id.slice(0, 8)}</p>
+             <p className="text-[11px] uppercase font-black tracking-[0.25em] text-foreground/40 mb-1">Mesa</p>
+             <p className="text-[10px] font-bold text-foreground/20 font-mono tracking-widest bg-white/5 px-2 py-0.5 rounded-lg border border-white/5">#{id.slice(0, 8)}</p>
            </div>
          </div>
          <div className={cn(
-           "px-4 py-2 rounded-2xl flex items-center space-x-2 glass shadow-lg",
-           isDelayed ? "text-destructive" : "text-foreground/40"
+           "px-5 py-2.5 rounded-2xl flex items-center space-x-2 glass shadow-xl border-white/5",
+           isDelayed ? "text-destructive" : "text-foreground/60"
          )}>
-           <Clock className="w-4 h-4" />
-           <span className="text-xs font-black tracking-tighter">{elapsed}m</span>
+           <Clock className="w-4 h-4 opacity-70" />
+           <span className="text-sm font-black tracking-tighter font-mono">{elapsed}m</span>
          </div>
        </div>
  
-       <div className="flex-1 space-y-3 mb-8">
-         {items.map((item) => (
+       <div className="flex-1 space-y-3.5 mb-10 relative z-10">
+         {items.map((item, idx) => (
            <motion.div 
-             initial={{ opacity: 0, x: -10 }}
+             initial={{ opacity: 0, x: -20 }}
              animate={{ opacity: 1, x: 0 }}
+             transition={{ delay: idx * 0.1, duration: 0.5, ease: "easeOut" }}
              key={item.id} 
-             className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-colors"
+             className="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/5 border border-white/5 group hover:bg-white/10 hover:border-white/10 transition-all duration-300"
            >
              <div className="flex items-center space-x-4">
-               <span className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-xs font-black text-primary border border-primary/10">
+               <span className={cn(
+                 "w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black border transition-all duration-300 shadow-sm",
+                 type === 'BAR' ? "bg-purple-500/20 text-purple-300 border-purple-500/20" : "bg-primary/20 text-primary border-primary/20"
+               )}>
                  {item.quantity}
                </span>
-               <span className="text-sm font-black text-foreground tracking-tight">{item.menuItem?.name || item.menu_items?.name || "Plato sin nombre"}</span>
+               <div className="flex flex-col">
+                 <span className="text-sm font-black text-foreground tracking-tight group-hover:text-primary transition-colors">{item.menuItem?.name || item.menu_items?.name || "Ítem sin nombre"}</span>
+                 {item.notes && <span className="text-[10px] font-bold text-foreground/30 italic mt-0.5">{item.notes}</span>}
+               </div>
              </div>
              {type === 'BAR' ? (
-                <GlassWater className="w-4 h-4 text-foreground/10 group-hover:text-primary/40 transition-colors" />
+                <GlassWater className="w-4.5 h-4.5 text-foreground/10 group-hover:text-purple-400/40 transition-colors" />
               ) : (
-                <Utensils className="w-4 h-4 text-foreground/10 group-hover:text-primary/40 transition-colors" />
+                <Utensils className="w-4.5 h-4.5 text-foreground/10 group-hover:text-primary/40 transition-colors" />
               )}
            </motion.div>
          ))}
        </div>
+
         {onStatusChange && (
-          <div className="pt-6 mt-6 border-t border-white/5">
-            <div className="flex space-x-3">
+          <div className="pt-8 mt-auto border-t border-white/10 relative z-10">
+            <div className="flex space-x-4">
               <AnimatePresence mode="wait">
                 {(status === "PENDING" || status === "VALIDATED") && (
                   <motion.button 
                     key="btn-preparing"
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    whileHover={{ scale: 1.02 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    whileHover={{ scale: 1.02, translateY: -2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => onStatusChange("PREPARING")}
-                    className="flex-1 py-4 bg-primary text-primary-foreground rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all flex items-center justify-center space-x-2"
+                    className={cn(
+                      "flex-1 py-5 rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.25em] shadow-2xl transition-all flex items-center justify-center space-x-3",
+                      type === 'BAR' ? "bg-purple-600 text-white shadow-purple-900/20 hover:shadow-purple-600/40" : "bg-primary text-primary-foreground shadow-primary/20 hover:shadow-primary/40"
+                    )}
                   >
-                    <PlayCircle className="w-4 h-4" />
+                    <PlayCircle className="w-5 h-5" />
                     <span>Comenzar</span>
                   </motion.button>
                 )}
                 {status === "PREPARING" && (
                   <motion.button 
                     key="btn-ready"
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    whileHover={{ scale: 1.02 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    whileHover={{ scale: 1.02, translateY: -2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => onStatusChange("READY")}
-                    className="flex-1 py-4 bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all flex items-center justify-center space-x-2"
+                    className="flex-1 py-5 bg-emerald-500 text-white rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.25em] shadow-2xl shadow-emerald-900/20 hover:shadow-emerald-500/40 transition-all flex items-center justify-center space-x-3"
                   >
-                    <CheckCircle2 className="w-4 h-4" />
+                    <CheckCircle2 className="w-5 h-5" />
                     <span>Terminar</span>
                   </motion.button>
                 )}
                 {status === "READY" && (
-                  <div className="flex-1 py-4 bg-white/5 border border-white/5 text-emerald-500 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center space-x-2">
-                    <CheckCircle2 className="w-4 h-4" />
+                  <div className="flex-1 py-5 bg-white/5 border border-white/10 text-emerald-500 rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.25em] flex items-center justify-center space-x-3">
+                    <CheckCircle2 className="w-5 h-5" />
                     <span>Listo</span>
                   </div>
                 )}

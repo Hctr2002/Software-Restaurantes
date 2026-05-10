@@ -117,30 +117,44 @@ export default function BarDashboardPage() {
       <div className="min-h-screen bar-gradient text-foreground overflow-hidden flex flex-col p-4 lg:p-6 gap-6">
         <PremiumHeader
           title="Bar"
-          accentTitle="Monitor"
+          accentTitle="Station"
           icon={GlassWater}
-          statusSubLabel="Drink Station"
+          statusSubLabel="Operación en Tiempo Real"
           stats={
             <>
-              <HeaderStat label="Recibidos" value={pendingOrders.length} color="text-foreground/50" />
-              <HeaderStat label="En Barra"  value={preparingOrders.length} color="text-primary" />
+              <HeaderStat label="Nuevos" value={pendingOrders.length} color="text-foreground/40" />
+              <HeaderStat label="En Barra"  value={preparingOrders.length} color="text-purple-400" />
               <HeaderStat label="Listos"    value={readyOrders.length} color="text-emerald-500" />
             </>
           }
           actions={
-            <>
-              <Button variant="outline" onClick={() => setAlertOpen(true)}
-                className="rounded-2xl h-14 px-8 border-yellow-500/20 bg-yellow-500/5 text-yellow-500 hover:bg-yellow-500/10 hover:border-yellow-500/40 gap-3 font-black uppercase tracking-widest text-[10px]">
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setAlertOpen(true)}
+                className="rounded-2xl h-14 px-8 border-yellow-500/10 bg-yellow-500/5 text-yellow-500 hover:bg-yellow-500/10 hover:border-yellow-500/30 gap-3 font-black uppercase tracking-widest text-[10px] transition-all duration-300"
+              >
                 <AlertTriangle className="w-5 h-5" />
                 Alerta Stock
               </Button>
-              <Button variant="outline" size="icon" className="rounded-2xl w-14 h-14" onClick={() => setSettingsOpen(true)}>
-                <Settings className="w-6 h-6 text-muted-foreground" />
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="rounded-2xl w-14 h-14 border-white/5 bg-white/5 hover:bg-white/10 transition-all duration-300" 
+                onClick={() => setSettingsOpen(true)}
+              >
+                <Settings className="w-6 h-6 text-foreground/40" />
               </Button>
-              <Button variant="destructive" size="icon" onClick={handleSignOut} disabled={isSigningOut} className="rounded-2xl w-14 h-14 shadow-xl shadow-destructive/20">
+              <Button 
+                variant="destructive" 
+                size="icon" 
+                onClick={handleSignOut} 
+                disabled={isSigningOut} 
+                className="rounded-2xl w-14 h-14 shadow-2xl shadow-destructive/20 hover:scale-105 active:scale-95 transition-all duration-300"
+              >
                 <LogOut className="w-6 h-6" />
               </Button>
-            </>
+            </div>
           }
         />
 

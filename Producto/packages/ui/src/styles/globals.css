@@ -341,39 +341,40 @@
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* ============================================
-   BAR DASHBOARD SPECIFIC STYLES
+   BAR DASHBOARD SPECIFIC STYLES (Pro Max v2.8)
    ============================================ */
 .bar-gradient {
   background:
-    radial-gradient(circle at 10% 20%, hsla(260, 80%, 60%, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, hsla(200, 80%, 60%, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 10% 20%, hsla(270, 80%, 60%, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, hsla(240, 80%, 60%, 0.08) 0%, transparent 40%),
     hsl(var(--background));
   position: relative;
   overflow-x: hidden;
 }
 
-.bar-gradient::before {
+.bar-gradient::after {
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
   background: 
-    radial-gradient(circle at 50% 50%, hsla(260, 80%, 60%, 0.05) 0%, transparent 50%);
-  filter: blur(100px);
+    radial-gradient(circle at 50% 50%, hsla(270, 80%, 60%, 0.05) 0%, transparent 60%);
+  filter: blur(120px);
   z-index: -1;
-  animation: mesh-float 20s infinite alternate ease-in-out;
+  animation: mesh-float 25s infinite alternate ease-in-out;
 }
 
 .glass-bar {
   background: linear-gradient(
     135deg,
-    hsla(260, 30%, 15%, 0.6) 0%,
-    hsla(260, 30%, 5%, 0.2) 100%
+    hsla(270, 40%, 12%, 0.7) 0%,
+    hsla(270, 40%, 5%, 0.4) 100%
   );
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid hsla(260, 80%, 70%, 0.15);
+  backdrop-filter: blur(40px) saturate(220%);
+  -webkit-backdrop-filter: blur(40px) saturate(220%);
+  border: 1px solid hsla(270, 80%, 75%, 0.2);
   box-shadow: 
-    0 4px 24px -1px rgba(0, 0, 0, 0.1),
-    inset 0 0 20px 0 rgba(255, 255, 255, 0.05);
+    0 10px 40px -10px rgba(0, 0, 0, 0.4),
+    inset 0 0 25px 0 hsla(270, 80%, 80%, 0.05);
 }
+
 
