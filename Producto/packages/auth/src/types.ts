@@ -50,6 +50,7 @@ export type TableRecord = {
   billRequested: boolean;
   helpRequested: boolean;
   session_id?: string | null;
+  current_session_id?: string | null;
   tip_included?: boolean;
 };
 
@@ -80,6 +81,7 @@ export type Order = {
   totalAmount: number;
   createdAt: string;
   updatedAt: string;
+  tableNumber?: number | null;
   validatedAt?: string | null;
   preparingAt?: string | null;
   readyAt?: string | null;
