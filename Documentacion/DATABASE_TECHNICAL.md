@@ -9,6 +9,7 @@
 | Versión | Fecha | Descripción |
 |---|---|---|
 | `0003_schema_extensions` | 2025-05-04 | `TableStatus.CLEANING`; timestamps `validated_at / preparing_at / ready_at` en `orders`; campo `session_id` en `orders`; tablas `push_subscriptions` y `reviews` con sus políticas RLS |
+| `0005_bar_dual_station` | 2026-05-10 | Columnas `kitchen_preparing`, `kitchen_ready`, `bar_preparing`, `bar_ready` en `orders`; campo `target_station` en `categories`; tabla `kds_settings` con JSON polimórfico por estación; rol `BAR` en enum `Role`; actualización de RLS para acceso del rol BAR a `orders` y `categories` |
 
 ### Detalle de `0003_schema_extensions`
 

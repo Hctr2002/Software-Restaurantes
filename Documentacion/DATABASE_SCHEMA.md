@@ -124,6 +124,11 @@ erDiagram
         enum status "OrderStatus"
         decimal total_amount
         string notes "nullable"
+        text station "KITCHEN o BAR, nullable para pedidos legacy"
+        uuid parent_order_id "FK a orders.id, nullable"
+        datetime validatedAt "nullable"
+        datetime preparingAt "nullable"
+        datetime readyAt "nullable"
         datetime createdAt
         datetime updatedAt
     }
@@ -175,6 +180,7 @@ erDiagram
         string name
         uuid restaurant_id FK
         boolean is_active
+        enum target_station "KITCHEN o BAR"
         datetime createdAt
         datetime updatedAt
     }
@@ -234,8 +240,9 @@ erDiagram
 | `SUPER_ADMIN` | Administrador global de la plataforma SaaS | No (nulo) |
 | `ADMIN` | Dueño o gerente de un restaurante específico | Sí |
 | `GARZON` | Personal de sala, toma de pedidos | Sí |
-| `COCINA` | Personal de cocina, gestión de tickets KDS | Sí |
+| `COCINA` | Personal de cocina, gestión de tickets KDS (Kitchen KDS) | Sí |
 | `CAJERO` | Personal de caja, cierre de cuentas | Sí |
+| `BAR` | Personal de barra, gestión de tickets KDS (Bar Dashboard) | Sí |
 | `CLIENTE` | Cliente final, acceso solo al Customer Portal | No |
 
 #### `OrderStatus` — Estados de un Pedido
@@ -244,8 +251,8 @@ erDiagram
 |---|---|---|
 | `PENDING` | Sistema (al crear) | Pedido recién ingresado, en espera de validación |
 | `VALIDATED` | GARZON | Pedido confirmado, enviado a preparación |
-| `PREPARING` | COCINA (KDS) | En proceso de preparación en cocina |
-| `READY` | COCINA (KDS) | Listo para ser retirado/entregado |
+| `PREPARING` | COCINA / BAR (KDS) | En proceso de preparación. Cada sub-pedido tiene su ciclo de vida independiente por estación. |
+| `READY` | COCINA / BAR (KDS) | Listo para ser retirado/entregado. Cada sub-pedido llega a READY de forma independiente. |
 | `DELIVERED` | GARZON | Entregado al cliente |
 | `COMPLETED` | CAJERO | Pago procesado exitosamente (Estado final) |
 | `REJECTED` | GARZON | Rechazado (ingrediente no disponible u otro motivo) |
@@ -360,10 +367,12 @@ Almacena las variables de branding por restaurante. Puede haber múltiples temas
 | `status` | OrderStatus | Estado actual del pedido |
 | `total_amount` | Decimal(10,2) | Monto total calculado |
 | `notes` | String? | Notas generales del pedido (ej: alergias) |
+| `station` | Text? | Estación propietaria del sub-pedido: `'KITCHEN'` o `'BAR'`. Nullable para pedidos legacy anteriores a la migración 0009 |
+| `parent_order_id` | UUID? | Referencia al pedido hermano de la otra estación. Sin FK explícita para compatibilidad con pgbouncer. Nullable |
 | `session_id` | UUID? | ID de sesión compartida para mesas fusionadas. Nulo si la mesa no está fusionada |
 | `validated_at` | Timestamptz? | Momento en que el garzón validó el pedido. Usado para medir tiempos de atención |
-| `preparing_at` | Timestamptz? | Momento en que cocina inició la preparación |
-| `ready_at` | Timestamptz? | Momento en que cocina marcó el pedido como listo |
+| `preparing_at` | Timestamptz? | Momento en que la estación inició la preparación |
+| `ready_at` | Timestamptz? | Momento en que la estación marcó el sub-pedido como listo |
 
 > **Nota analytics:** `ready_at - validated_at` = tiempo neto de cocina. `validated_at - created_at` = tiempo de validación del garzón. Ambos alimentan el heatmap del Local Dashboard.
 
@@ -393,7 +402,7 @@ Almacena las variables de branding por restaurante. Puede haber múltiples temas
 
 #### `categories` y `menu_items`
 
-**`categories`:** Agrupador de items del menú por restaurante. Constraint `UNIQUE(id, restaurant_id)`.
+**`categories`:** Agrupador de items del menú por restaurante. Constraint `UNIQUE(id, restaurant_id)`. El campo `target_station` (`'KITCHEN'` | `'BAR'`) determina a qué KDS se enrutan los ítems de la categoría.
 
 **`menu_items`:** Cada producto del menú. `image_url` apunta a Supabase Storage (bucket `menu-images`, ruta `{restaurantId}/{fileName}`). Constraint `UNIQUE(id, restaurant_id)` y `UNIQUE(category_id, restaurant_id)` para integridad cruzada.
 
@@ -430,21 +439,29 @@ Almacena los endpoints VAPID del navegador para enviar notificaciones push al Ga
 | `created_at` | Timestamptz | |
 | `updated_at` | Timestamptz | |
 
-#### `kds_settings` (Configuración del KDS)
+#### `kds_settings` (Configuración del KDS — Dual Estación)
 
-Almacena preferencias personalizadas para el Kitchen Display System por restaurante.
+Almacena preferencias personalizadas para las estaciones KDS (Cocina y Barra) por restaurante. Una sola fila por restaurante; la columna `settings` es un JSONB con claves por estación.
 
 | Campo | Tipo | Descripción |
 |---|---|---|
 | `id` | UUID PK | |
-| `restaurant_id` | UUID UK | Tenant propietario (1:1) |
-| `settings` | JSONB | Configuración (umbrales de tiempo, sonidos, auto-limpieza) |
+| `restaurant_id` | UUID UK | Tenant propietario (1:1 — un registro por restaurante) |
+| `settings` | JSONB | JSON polimórfico con claves `KITCHEN` y `BAR`, cada una conteniendo: `thresholds`, `categoryTimes`, `sounds`, `autoClear` |
 | `created_at` | Timestamptz | |
 | `updated_at` | Timestamptz | |
 
-**Constraint:** `UNIQUE(user_id, restaurant_id)` — un garzón tiene una sola suscripción activa por restaurante (se actualiza al re-registrarse).
+**Estructura del JSONB `settings`:**
+```json
+{
+  "KITCHEN": { "thresholds": {"yellow": 10, "red": 20}, "categoryTimes": [], "sounds": {"newTicket": true, "criticalAlert": true}, "autoClear": {"enabled": false, "delaySeconds": 30} },
+  "BAR":     { "thresholds": {"yellow": 5, "red": 12},  "categoryTimes": [], "sounds": {"newTicket": true, "criticalAlert": true}, "autoClear": {"enabled": true,  "delaySeconds": 20} }
+}
+```
 
-**RLS:** Inserción y lectura propia por el propio usuario. Lectura por roles ADMIN y COCINA (para enviar notificaciones).
+**Constraint:** `UNIQUE(restaurant_id)` — un solo registro por restaurante; las estaciones coexisten en la misma fila.
+
+**Acceso:** Via `SUPABASE_SERVICE_ROLE_KEY` (bypass de RLS) desde los endpoints `/api/settings` de `kitchen-kds` y `bar-dashboard`. Cada app lee/escribe solo su propia clave de estación.
 
 #### `reviews` (Calificaciones del Cliente)
 
@@ -517,3 +534,30 @@ flowchart LR
     Policy -->|Coincide| Result[(Datos del propio local)]
     Policy -->|No coincide| Empty[(Resultado vacio)]
 ```
+
+---
+
+## 6. MIGRACIONES APLICADAS EN RAMA feature/front_bar
+
+### Migración 0009: Separación de Pedidos por Estación
+
+**Archivo:** `supabase/migrations/0009_order_station_split.sql`
+**Fecha:** 2026-05-10
+
+**Propósito:** Eliminar la lógica de pedidos mixtos con flags cruzados y reemplazarla por sub-pedidos independientes por estación.
+
+**Cambios aplicados:**
+- `ALTER TABLE orders ADD COLUMN station TEXT CHECK (station IN ('KITCHEN', 'BAR'))` — estación propietaria del pedido.
+- `ALTER TABLE orders ADD COLUMN parent_order_id UUID` — referencia al sub-pedido hermano (sin FK para compatibilidad con pgbouncer).
+- `CREATE INDEX idx_orders_station ON orders (station)`
+- `CREATE INDEX idx_orders_parent_order_id ON orders (parent_order_id)`
+- UPDATE de backfill: pedidos con un solo tipo de ítem reciben su `station` automáticamente.
+
+**Patrón de creación (nuevo):**
+```
+Cliente pide: [Hamburguesa (KITCHEN) + Jugo (BAR)]
+→ INSERT orders (station='KITCHEN') → order_items [Hamburguesa]
+→ INSERT orders (station='BAR', parent_order_id=<kitchen_id>) → order_items [Jugo]
+```
+
+**Compatibilidad hacia atrás:** Pedidos con `station IS NULL` siguen siendo válidos. Los hooks de filtrado incluyen `OR station IS NULL` para no romper datos históricos.
