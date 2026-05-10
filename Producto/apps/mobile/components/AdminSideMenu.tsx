@@ -1,26 +1,26 @@
 import React from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  Modal, 
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
   ScrollView,
   Dimensions,
   Pressable
 } from 'react-native';
 import { MB_SPACING, MB_RADIUS } from '../constants/MB_Theme';
-import { 
-  X, 
-  LayoutDashboard, 
-  Users, 
-  UtensilsCrossed, 
-  Tag, 
-  TableProperties, 
-  ClipboardList, 
-  Package, 
-  Palette, 
-  BarChart2, 
+import {
+  X,
+  LayoutDashboard,
+  Users,
+  UtensilsCrossed,
+  Tag,
+  TableProperties,
+  ClipboardList,
+  Package,
+  Palette,
+  BarChart2,
   LogOut,
   Store,
   Settings,
@@ -28,11 +28,11 @@ import {
   Wallet,
   Beer
 } from 'lucide-react-native';
-import Animated, { 
-  FadeIn, 
-  FadeOut, 
-  SlideInLeft, 
-  SlideOutLeft 
+import Animated, {
+  FadeIn,
+  FadeOut,
+  SlideInLeft,
+  SlideOutLeft
 } from 'react-native-reanimated';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -59,14 +59,14 @@ export default function AdminSideMenu({ visible, onClose }: AdminSideMenuProps) 
   const NavItem = ({ icon: Icon, label, path }: { icon: any, label: string, path: string }) => {
     const isActive = pathname === path;
     return (
-      <TouchableOpacity 
-        style={[styles.navItem, isActive && { backgroundColor: colors.brandAccent }]} 
+      <TouchableOpacity
+        style={[styles.navItem, isActive && { backgroundColor: colors.brandAccent }]}
         onPress={() => navigateTo(path)}
       >
         <View style={styles.iconBox}>
-          <Icon 
+          <Icon
             color={isActive ? 'white' : colors.muted}
-            size={20} 
+            size={20}
           />
         </View>
         <Text style={[styles.navLabel, isActive && { color: 'white' }, !isActive && { color: colors.muted }]}>{label}</Text>
@@ -92,8 +92,8 @@ export default function AdminSideMenu({ visible, onClose }: AdminSideMenuProps) 
           </Animated.View>
         </Pressable>
 
-        <Animated.View 
-          entering={SlideInLeft.duration(300)} 
+        <Animated.View
+          entering={SlideInLeft.duration(300)}
           exiting={SlideOutLeft.duration(250)}
           style={[styles.menuContainer, { backgroundColor: colors.navy }]}
         >
@@ -120,9 +120,6 @@ export default function AdminSideMenu({ visible, onClose }: AdminSideMenuProps) 
             <SectionTitle title="Gestión" />
             <NavItem icon={Users} label="Usuarios" path="/(admin)/users" />
             <NavItem icon={UtensilsCrossed} label="Menú" path="/(admin)/menu" />
-            <NavItem icon={ChefHat} label="Cocina" path="/(kitchen)" />
-            <NavItem icon={Beer} label="Bar" path="/(bar)" />
-            <NavItem icon={Wallet} label="Caja" path="/(cashier)" />
             <NavItem icon={Tag} label="Categorías" path="/(admin)/categories" />
             <NavItem icon={TableProperties} label="Mesas" path="/(admin)/tables" />
             <NavItem icon={ClipboardList} label="Pedidos" path="/(admin)/orders" />
@@ -144,8 +141,8 @@ export default function AdminSideMenu({ visible, onClose }: AdminSideMenuProps) 
                 <Text style={[styles.userRole, { color: colors.brandAccent }]}>{role}</Text>
               </View>
             </View>
-            <TouchableOpacity 
-              style={[styles.signOutButton, { borderColor: colors.brandAccent + '30', backgroundColor: colors.glass }]} 
+            <TouchableOpacity
+              style={[styles.signOutButton, { borderColor: colors.brandAccent + '30', backgroundColor: colors.glass }]}
               onPress={signOut}
             >
               <LogOut size={18} color={colors.brandAccent} />

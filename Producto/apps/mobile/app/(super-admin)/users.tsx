@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
-import { Users, AlertCircle, Edit2, Trash2, Plus, X } from 'lucide-react-native';
+import { Users, AlertCircle, Edit2, Trash2, Plus, X, Eye, EyeOff } from 'lucide-react-native';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 import { SUPERADMIN_API } from '../../lib/api';
@@ -28,6 +28,7 @@ export default function UsersTab() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ email: '', password: '', role: 'CLIENTE', restaurantId: '' as string | null });
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -256,14 +257,26 @@ export default function UsersTab() {
 
               <View style={styles.formGroup}>
                 <Text style={styles.label}>Contraseña {editingId && '(Opcional)'}</Text>
-                <TextInput 
-                  style={styles.input} 
-                  placeholder={editingId ? "Dejar en blanco para no cambiar" : "Mínimo 6 caracteres"} 
-                  placeholderTextColor={MB_COLORS.muted}
-                  value={formData.password}
-                  secureTextEntry
-                  onChangeText={(text) => setFormData({ ...formData, password: text })}
-                />
+                <View style={styles.passwordContainer}>
+                  <TextInput 
+                    style={[styles.input, { flex: 1, backgroundColor: 'transparent', borderWidth: 0 }]} 
+                    placeholder={editingId ? "Dejar en blanco para no cambiar" : "Mínimo 6 caracteres"} 
+                    placeholderTextColor={MB_COLORS.muted}
+                    value={formData.password}
+                    secureTextEntry={!showPassword}
+                    onChangeText={(text) => setFormData({ ...formData, password: text })}
+                  />
+                  <TouchableOpacity 
+                    style={styles.eyeIcon} 
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff color={MB_COLORS.muted} size={20} />
+                    ) : (
+                      <Eye color={MB_COLORS.muted} size={20} />
+                    )}
+                  </TouchableOpacity>
+                </View>
               </View>
 
               <View style={styles.formGroup}>
@@ -350,7 +363,18 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 20, fontWeight: 'bold', color: MB_COLORS.cream },
   formGroup: { marginBottom: MB_SPACING.lg },
   label: { fontSize: 14, fontWeight: 'bold', color: MB_COLORS.cream, marginBottom: MB_SPACING.sm },
-  input: { backgroundColor: 'rgba(0,0,0,0.3)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: MB_RADIUS.md, color: MB_COLORS.cream, padding: MB_SPACING.md, fontSize: 16 },
+  input: { color: MB_COLORS.cream, padding: MB_SPACING.md, fontSize: 16, backgroundColor: 'rgba(0,0,0,0.3)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: MB_RADIUS.md },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: MB_RADIUS.md,
+  },
+  eyeIcon: {
+    paddingHorizontal: 12,
+  },
   pill: { backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
   pillActive: { backgroundColor: 'rgba(139, 92, 246, 0.2)', borderColor: '#8b5cf6' },
   pillText: { color: MB_COLORS.muted, fontWeight: 'bold' },
