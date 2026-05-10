@@ -23,12 +23,17 @@ export function useRealtimeSync<T>(
   const [loading, setLoading] = useState(true);
 
   const performFetch = useCallback(async () => {
-    const { data: res, error } = await fetchFn();
-    if (!error && res) {
-      setData(transform ? (Array.isArray(res) ? res.map(transform) : transform(res)) as any : res);
+    try {
+      const { data: res, error } = await fetchFn();
+      if (!error && res) {
+        setData(transform ? (Array.isArray(res) ? res.map(transform) : transform(res)) as any : res);
+      }
+    } catch (e) {
+      console.error(`[Realtime] Error in performFetch for ${tableName}:`, e);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, [fetchFn, transform]);
+  }, [fetchFn, transform, tableName]);
 
   useEffect(() => {
     performFetch();
