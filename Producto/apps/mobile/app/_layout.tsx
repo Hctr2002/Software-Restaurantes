@@ -47,6 +47,7 @@ function InitialLayout() {
       else if (role === 'ADMIN') targetGroup = '(admin)';
       else if (role === 'GARZON') targetGroup = '(waiter)';
       else if (role === 'COCINA') targetGroup = '(kitchen)';
+      else if (role === 'CAJERO') targetGroup = '(cashier)';
 
       // Redirect if they are in the wrong group
       if (segments[0] !== targetGroup) {
@@ -72,6 +73,7 @@ function InitialLayout() {
       <Stack.Screen name="(admin)" />
       <Stack.Screen name="(waiter)" options={{ headerShown: false }} />
       <Stack.Screen name="(kitchen)" options={{ headerShown: false }} />
+      <Stack.Screen name="(cashier)" options={{ headerShown: false }} />
       <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Detalles' }} />
     </Stack>
   );
