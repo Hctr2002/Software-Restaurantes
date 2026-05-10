@@ -101,6 +101,7 @@ export default function CashierPage() {
         VALIDATED: "PREPARING",
         PREPARING: "READY",
         READY: "DELIVERED",
+        DELIVERED: "COMPLETED",
       };
 
       for (const order of group.orders) {
@@ -112,9 +113,9 @@ export default function CashierPage() {
           .single();
 
         let currentStatus = fresh?.status ?? order.status;
-        if (currentStatus === "DELIVERED" || currentStatus === "REJECTED" || currentStatus === "COMPLETED") continue;
+        if (currentStatus === "REJECTED" || currentStatus === "COMPLETED") continue;
 
-        // Avanzar paso a paso hasta DELIVERED
+        // Avanzar paso a paso hasta COMPLETED
         while (TRANSITIONS[currentStatus]) {
           const nextStatus = TRANSITIONS[currentStatus];
           const { error } = await supabase
@@ -232,7 +233,18 @@ export default function CashierPage() {
             )}
           </AnimatePresence>
  
-          <BillAlertIsland groups={groups.pending} onSelect={setSelectedGroup} />
+          <BillAlertIsland 
+            groups={groups.pending} 
+            onSelect={async (group) => {
+              setSelectedGroup(group);
+              if (group.tableId) {
+                await supabase
+                  .from("tables")
+                  .update({ bill_requested: false })
+                  .eq("id", group.tableId);
+              }
+            }} 
+          />
         </main>
  
         {selectedGroup && (
