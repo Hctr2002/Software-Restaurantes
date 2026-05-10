@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 interface CategoryNavProps {
   categories: Category[];
   activeCategory: string | null;
-  onSelectCategory: (id: string) => void;
+  onSelectCategory: (id: string | null) => void;
 }
 
 export function CategoryNav({ categories, activeCategory, onSelectCategory }: CategoryNavProps) {
@@ -14,7 +14,7 @@ export function CategoryNav({ categories, activeCategory, onSelectCategory }: Ca
     <nav className="px-6 overflow-x-auto no-scrollbar flex gap-2 pb-3 bg-transparent">
       {/* Opción "Todo" */}
       <button 
-        onClick={() => onSelectCategory(null as any)} 
+        onClick={() => onSelectCategory(null)}
         className="relative whitespace-nowrap px-4 py-3 text-sm font-bold transition-all duration-500 group"
       >
         <span 
@@ -35,7 +35,7 @@ export function CategoryNav({ categories, activeCategory, onSelectCategory }: Ca
             />
             <motion.div 
               layoutId="activeCategoryBar"
-              className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-full shadow-[0_-4px_12px_rgba(var(--primary),0.5)]"
+              className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-full shadow-[0_-4px_12px_hsl(var(--primary)/0.5)]"
               initial={false}
               transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
             />
@@ -70,7 +70,7 @@ export function CategoryNav({ categories, activeCategory, onSelectCategory }: Ca
             {isActive && (
               <motion.div 
                 layoutId="activeCategoryBar"
-                className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-full shadow-[0_-4px_12px_rgba(var(--primary),0.5)]"
+                className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-full shadow-[0_-4px_12px_hsl(var(--primary)/0.5)]"
                 initial={false}
                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
               />

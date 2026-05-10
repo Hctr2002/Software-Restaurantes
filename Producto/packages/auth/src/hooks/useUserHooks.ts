@@ -2,8 +2,8 @@
 
 import { useCallback, useState, useEffect, useMemo } from "react";
 import { supabase, updateOrderStatus } from "../index";
-import type { Order, TableRecord } from "../types";
-import { mapTable, mapOrder } from "../utils";
+import type { TableRecord } from "../types";
+import { mapTable } from "../utils";
 import { useRealtimeSync } from "./useRealtimeSync";
 import { useTables } from "./useTableHooks";
 import { useRealtimeOrders } from "./useOrderHooks";
@@ -11,7 +11,7 @@ import { useRealtimeOrders } from "./useOrderHooks";
 export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
   const { tables, loading: tablesLoading } = useTables(restaurantId);
   const { orders, loading } = useRealtimeOrders(restaurantId, {
-    statuses: ["PENDING", "VALIDATED", "PREPARING", "READY"],
+    statuses: ["PENDING", "VALIDATED", "PREPARING", "READY", "DELIVERED"],
     ascending: true
   });
 
@@ -32,7 +32,7 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
   const pendingOrders = orders.filter((o) => o.status === "PENDING");
   const preparingOrders = orders.filter((o) => o.status === "VALIDATED" || o.status === "PREPARING");
   const readyOrders = orders.filter((o) => o.status === "READY");
-  const partiallyReadyOrders = orders.filter((o) => (o.barReady || o.kitchenReady) && o.status !== "READY" && o.status !== "DELIVERED");
+  const partiallyReadyOrders = orders.filter((o) => (o.barReady || o.kitchenReady) && o.status !== "READY" && o.status !== "DELIVERED" && o.status !== "COMPLETED");
 
   const handleValidate = async (orderId: string, note?: string) => {
     setProcessingId(orderId);
@@ -66,8 +66,22 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
     setSavingNoteId(null);
   };
 
-  const handleDeliver = async (orderId: string) => {
-    await updateOrderStatus(orderId, "DELIVERED");
+  const handleDeliver = async (orderId: string, order?: { kitchenReady: boolean; barReady: boolean; status: string }) => {
+    const isPartial = order && order.status !== "READY" && (order.kitchenReady || order.barReady);
+    if (isPartial) {
+      const updates: Record<string, unknown> = { status: "PARCIAL" };
+      if (order!.kitchenReady) {
+        updates.kitchen_ready = false;
+        updates.kitchen_preparing = false;
+      }
+      if (order!.barReady) {
+        updates.bar_ready = false;
+        updates.bar_preparing = false;
+      }
+      await supabase.from("orders").update(updates).eq("id", orderId);
+    } else {
+      await updateOrderStatus(orderId, "DELIVERED");
+    }
   };
 
   const handleTableClean = async (tableId: string) => {
@@ -86,6 +100,7 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
   const cleaningTables = useMemo(() => tables.filter((t) => t.status === "CLEANING"), [tables]);
 
   return {
+    orders,
     pendingOrders,
     preparingOrders,
     readyOrders,

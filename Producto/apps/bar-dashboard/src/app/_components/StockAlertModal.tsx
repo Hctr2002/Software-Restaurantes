@@ -59,7 +59,7 @@ export function StockAlertModal({ restaurantId, userId, userEmail, onClose }: Pr
             <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Producto Afectado</label>
             <input
               type="text"
-              placeholder="Ej. Salmón Ahumado..."
+              placeholder="Ej. Gin Tanqueray..."
               value={alertItem}
               onChange={(e) => setAlertItem(e.target.value)}
               className="w-full px-6 py-4 rounded-2xl bg-foreground/5 border border-foreground/10 text-foreground font-bold placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-500/50"

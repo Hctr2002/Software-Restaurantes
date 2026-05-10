@@ -6,7 +6,7 @@ import { supabase } from "@menu-bites/auth";
 import { Lock, ArrowRight, Loader2, Mail, Eye, EyeOff } from "lucide-react";
 import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent } from "@menu-bites/ui";
 
-const REQUIRED_ROLE = "COCINA";
+const REQUIRED_ROLE = "BAR";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -39,7 +39,7 @@ export default function LoginPage() {
 
       if (role !== REQUIRED_ROLE) {
         await supabase.auth.signOut();
-        setError(`Esta app es exclusiva para Cocina. Tu rol es: ${role}`);
+        setError(`Esta app es exclusiva para la Barra. Tu rol es: ${role}`);
         return;
       }
 
@@ -60,14 +60,14 @@ export default function LoginPage() {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-slate-950">
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-background" />
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-background" />
       <main className="relative z-10 w-full max-w-md">
         <Card className="border-white/5 backdrop-blur-2xl">
           <CardHeader className="text-center space-y-2">
             <CardTitle className="text-4xl tracking-tighter">
               Menu <span className="text-primary">Bites</span>
             </CardTitle>
-            <CardDescription>Kitchen Display System</CardDescription>
+            <CardDescription>Bar Station Dashboard</CardDescription>
           </CardHeader>
 
           <CardContent>
@@ -77,7 +77,7 @@ export default function LoginPage() {
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/50 z-10" />
                   <Input
                     type="email"
-                    placeholder="cocina@menubites.com"
+                    placeholder="barra@menubites.com"
                     required
                     className="pl-10"
                     value={email}
@@ -117,7 +117,7 @@ export default function LoginPage() {
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   <>
-                    Entrar a Cocina
+                    Entrar a Barra
                     <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
@@ -129,3 +129,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

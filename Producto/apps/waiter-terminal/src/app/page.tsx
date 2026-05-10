@@ -14,7 +14,8 @@ import {
   TableMergeBar, 
   AlertModal, 
   TableCard,
-  PreparingOrdersList
+  PreparingOrdersList,
+  TableOrdersModal
 } from "@menu-bites/ui";
 import { useRealtimeWaiterOrders as useWaiterOrders, useAlertForm, useThemeSync } from "@menu-bites/auth";
 import { useWebPush } from "../hooks/useWebPush";
@@ -42,6 +43,9 @@ export default function WaiterDashboard() {
   const [alertModal, setAlertModal] = useState(false);
   const [isIslandExpanded, setIsIslandExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<"mesas" | "pedidos">("mesas");
+  const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
+
+  const selectedTable = tables.find(t => t.id === selectedTableId) || null;
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -245,7 +249,14 @@ export default function WaiterDashboard() {
                       mergeMode={merge.mergeMode}
                       isSelectedForMerge={merge.selectedForMerge.has(table.id)}
                       onSelect={merge.toggleMergeSelect}
-                      onNavigate={(id) => router.push(`/tables/${id}/menu`)}
+                      orders={orders.orders}
+                      onNavigate={(id) => {
+                        if (table.status === 'OCCUPIED' || table.status === 'RESERVED') {
+                          setSelectedTableId(id);
+                        } else {
+                          router.push(`/tables/${id}/menu`);
+                        }
+                      }}
                     />
                   ))}
                 </div>
@@ -255,10 +266,9 @@ export default function WaiterDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-4xl font-black tracking-tighter">Gestión de <span className="text-primary">Pedidos</span></h2>
-                    <p className="text-muted-foreground text-xs font-black uppercase tracking-widest opacity-60 mt-1">Validación y seguimiento de cocina</p>
+                    <p className="text-muted-foreground text-xs font-black uppercase tracking-widest opacity-60 mt-1">Validación y seguimiento de preparación</p>
                   </div>
                 </div>
-
                 {orders.pendingOrders.length > 0 && (
                   <div className="space-y-4">
                     <h3 className="text-sm font-black uppercase tracking-widest text-yellow-500/80 flex items-center gap-2">
@@ -286,7 +296,7 @@ export default function WaiterDashboard() {
                   </div>
                 )}
 
-                {/* En Cocina (Unified Component) */}
+                {/* En Preparación (Unified Component) */}
                 <PreparingOrdersList orders={orders.preparingOrders} />
 
                 {orders.pendingOrders.length === 0 && orders.preparingOrders.length === 0 && (
@@ -309,6 +319,15 @@ export default function WaiterDashboard() {
               setAlertModal(false);
               alertForm.reset();
             }} 
+          />
+        )}
+        {selectedTableId && (
+          <TableOrdersModal
+            isOpen={!!selectedTableId}
+            onClose={() => setSelectedTableId(null)}
+            table={selectedTable}
+            orders={orders.orders}
+            onTakeOrder={(id) => router.push(`/tables/${id}/menu`)}
           />
         )}
       </AnimatePresence>

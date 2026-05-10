@@ -56,7 +56,6 @@ export default function TableMenuPage() {
         .insert({
           restaurant_id: user.restaurantId,
           table_id: tableId,
-          user_id: user.id,
           status: "VALIDATED",
           validated_at: new Date().toISOString(),
           total_amount: total,
@@ -90,9 +89,9 @@ export default function TableMenuPage() {
 
       // 4. Éxito: volver al inicio
       router.push("/");
-    } catch (err) {
-      console.error("Error al enviar pedido:", err);
-      alert("Error al enviar a cocina. Inténtelo de nuevo.");
+    } catch (err: any) {
+      console.error("Error al enviar pedido:", err?.message || err?.code || JSON.stringify(err));
+      alert("Error al enviar pedido. Inténtelo de nuevo.");
     } finally {
       setSubmitting(false);
     }
@@ -185,7 +184,7 @@ export default function TableMenuPage() {
 
             <input
               type="text"
-              placeholder="Nota para cocina (ej: sin sal, alergia...)"
+              placeholder="Nota para preparación (ej: sin sal, alergia...)"
               value={orderNote}
               onChange={(e) => setOrderNote(e.target.value)}
               className="w-full text-xs px-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/20"
@@ -203,7 +202,7 @@ export default function TableMenuPage() {
                 className="flex-[2] py-4 bg-sage text-navy font-black uppercase tracking-widest rounded-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center shadow-xl shadow-black/30 text-[10px] disabled:opacity-50"
               >
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="mr-2 w-4 h-4" />}
-                Enviar a Cocina
+                Enviar Pedido
               </button>
             </div>
           </div>

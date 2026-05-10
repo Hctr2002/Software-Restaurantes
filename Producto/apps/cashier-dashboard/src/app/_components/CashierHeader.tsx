@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Receipt, LogOut, AlertTriangle, RefreshCw, Search, CreditCard, Bell } from "lucide-react";
 import { formatCLP } from "@menu-bites/auth";
+import { PremiumHeader, HeaderStat } from "@menu-bites/ui";
 
 interface Props {
   userEmail: string | undefined;
@@ -25,8 +26,6 @@ const AnimatedNumber = ({ value, formatFn }: { value: number; formatFn: (n: numb
     {formatFn(value)}
   </motion.span>
 );
-
-import { PremiumHeader, HeaderStat } from "@menu-bites/ui";
 
 export function CashierHeader({ userEmail, restaurantId, isSigningOut, isRefreshing, totalPending, alertCount, searchQuery, isSearchExpanded, onSearchChange, onSearchToggle, onAlertClick, onRefresh, onSignOut }: Props) {
   return (

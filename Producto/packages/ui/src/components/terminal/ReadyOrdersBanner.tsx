@@ -11,8 +11,8 @@ type ReadyOrder = {
 };
 
 interface ReadyOrdersBannerProps {
-  orders: any[]; // Usamos any[] temporalmente o el tipo Order si lo importamos
-  onDeliver: (id: string) => void;
+  orders: any[];
+  onDeliver: (id: string, order: any) => void;
 }
 
 export function ReadyOrdersBanner({ orders, onDeliver }: ReadyOrdersBannerProps) {
@@ -50,19 +50,32 @@ export function ReadyOrdersBanner({ orders, onDeliver }: ReadyOrdersBannerProps)
             </div>
             
             <div className="space-y-1">
-              {order.orderItems?.slice(0, 3).map((item: any) => (
-                <p key={item.id} className="text-xs text-foreground/60 truncate font-medium flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/40" />
-                  {item.quantity}x {item.menu_items?.name || item.menuItem?.name}
-                </p>
-              ))}
-              {(order.orderItems?.length ?? 0) > 3 && (
-                <p className="text-[9px] text-muted-foreground italic">...y {(order.orderItems?.length ?? 0) - 3} más</p>
-              )}
+              {(() => {
+                const isPartial = order.status !== "READY";
+                const displayItems = isPartial
+                  ? (order.orderItems ?? []).filter((item: any) => {
+                      const station = item.menuItem?.category?.targetStation ?? item.menu_items?.category?.target_station;
+                      return (order.kitchenReady && station === "KITCHEN") || (order.barReady && station === "BAR");
+                    })
+                  : (order.orderItems ?? []);
+                return (
+                  <>
+                    {displayItems.slice(0, 3).map((item: any) => (
+                      <p key={item.id} className="text-xs text-foreground/60 truncate font-medium flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/40" />
+                        {item.quantity}x {item.menu_items?.name || item.menuItem?.name}
+                      </p>
+                    ))}
+                    {displayItems.length > 3 && (
+                      <p className="text-[9px] text-muted-foreground italic">...y {displayItems.length - 3} más</p>
+                    )}
+                  </>
+                );
+              })()}
             </div>
 
             <button
-              onClick={() => onDeliver(order.id)}
+              onClick={() => onDeliver(order.id, order)}
               className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[10px] uppercase tracking-widest py-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
             >
               <CheckCircle className="w-4 h-4" />

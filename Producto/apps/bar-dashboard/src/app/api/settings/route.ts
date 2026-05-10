@@ -41,11 +41,18 @@ export async function GET() {
     .eq('restaurant_id', restaurantId)
     .single();
 
-  if (error && error.code !== 'PGRST116') { // PGRST116 is "No rows found"
+  if (error && error.code !== 'PGRST116') {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(data?.settings ?? null);
+  const settings = data?.settings as any;
+  if (settings && settings.BAR) {
+    return NextResponse.json(settings.BAR);
+  }
+  
+  // Si no hay configuración de BAR específica, devolvemos null o los settings raíz (si existen)
+  // Pero para evitar colisiones con Cocina, si no tiene la llave BAR, asumimos que no tiene configuración de barra aún.
+  return NextResponse.json(null);
 }
 
 export async function POST(req: NextRequest) {
@@ -54,14 +61,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
   }
 
-  const settings = await req.json();
-
+  const incomingSettings = await req.json();
   const db = serviceClient();
+
+  // 1. Obtener settings actuales para no borrar lo de Cocina
+  const { data: current } = await db
+    .from('kds_settings')
+    .select('settings')
+    .eq('restaurant_id', restaurantId)
+    .single();
+
+  const finalSettings = {
+    ...(current?.settings as any || {}),
+    BAR: incomingSettings
+  };
+
   const { data, error } = await db
     .from('kds_settings')
     .upsert({
       restaurant_id: restaurantId,
-      settings: settings,
+      settings: finalSettings,
       updated_at: new Date().toISOString(),
     }, {
       onConflict: 'restaurant_id'
@@ -73,5 +92,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(data.settings);
+  return NextResponse.json(data.settings.BAR);
 }

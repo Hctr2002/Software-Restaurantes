@@ -67,6 +67,9 @@ export function useRealtimeOrders(restaurantId: string | undefined, options: Rea
             // Calcular status independiente para esta estación
             const stationReady     = isKitchen ? order.kitchenReady     : order.barReady;
             const stationPreparing = isKitchen ? order.kitchenPreparing : order.barPreparing;
+
+            // PARCIAL: this station already delivered its portion — hide from its board
+            if (order.status === "PARCIAL" && !stationReady && !stationPreparing) return false;
             if (stationReady) {
               order.status = "READY";
             } else if (stationPreparing) {
@@ -97,7 +100,7 @@ export function useRealtimeOrders(restaurantId: string | undefined, options: Rea
 
 export function useKitchenOrders(restaurantId: string | undefined) {
   return useRealtimeOrders(restaurantId, {
-    statuses: ["VALIDATED", "PREPARING", "READY"],
+    statuses: ["VALIDATED", "PREPARING", "READY", "PARCIAL"],
     ascending: true,
     station: 'KITCHEN'
   });
@@ -105,7 +108,7 @@ export function useKitchenOrders(restaurantId: string | undefined) {
 
 export function useBarOrders(restaurantId: string | undefined) {
   return useRealtimeOrders(restaurantId, {
-    statuses: ["VALIDATED", "PREPARING", "READY"],
+    statuses: ["VALIDATED", "PREPARING", "READY", "PARCIAL"],
     ascending: true,
     station: 'BAR'
   });

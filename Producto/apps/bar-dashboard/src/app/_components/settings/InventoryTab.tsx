@@ -47,7 +47,7 @@ export function InventoryTab({ restaurantId }: Props) {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Error al importar");
       setStatus("success");
-      setMessage(`${json.updated} ítem(s) actualizado(s)${json.errors?.length ? ` · ${json.errors.length} error(es)` : ""}.`);
+      setMessage(`${json.updated} ítem(s) de barra actualizado(s)${json.errors?.length ? ` · ${json.errors.length} error(es)` : ""}.`);
       setCritical(json.critical ?? []);
     } catch (err: unknown) {
       setStatus("error");
@@ -59,10 +59,10 @@ export function InventoryTab({ restaurantId }: Props) {
 
   return (
     <div className="space-y-6">
-      <p className="text-white/40 text-sm">Descarga el inventario actual como CSV, actualiza los conteos y vuelve a subirlo.</p>
-      <div className="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-2 text-xs text-white/50">
-        <p className="font-bold text-white/70 uppercase tracking-widest text-[10px] mb-2">Cómo usar</p>
-        <p>1. Descarga el CSV. 2. Edita la columna <span className="font-black text-white/80">stock_actual</span>. 3. Súbelo con el botón "Subir Conteo".</p>
+      <p className="text-foreground/40 text-sm">Descarga el inventario de bebidas y suministros de barra como CSV, actualiza los conteos y vuelve a subirlo.</p>
+      <div className="p-4 bg-foreground/5 rounded-2xl border border-foreground/5 space-y-2 text-xs text-foreground/50">
+        <p className="font-bold text-foreground/70 uppercase tracking-widest text-[10px] mb-2">Cómo usar</p>
+        <p>1. Descarga el CSV. 2. Edita la columna <span className="font-black text-foreground/80">stock_actual</span>. 3. Súbelo con el botón "Subir Conteo".</p>
         <p className="text-yellow-400/70 pt-1">Solo se actualizan los stocks. El nombre y la unidad no cambian.</p>
       </div>
 
@@ -73,7 +73,7 @@ export function InventoryTab({ restaurantId }: Props) {
           Descargar CSV
         </button>
         <label className={cn("flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl border text-xs font-bold uppercase tracking-widest transition-all cursor-pointer",
-          !restaurantId || status === "uploading" ? "opacity-40 pointer-events-none bg-white/5 border-white/10 text-white/40" : "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30")}>
+          !restaurantId || status === "uploading" ? "opacity-40 pointer-events-none bg-foreground/5 border-foreground/10 text-foreground/40" : "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30")}>
           {status === "uploading" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
           Subir Conteo
           <input ref={fileRef} type="file" accept=".csv,text/csv,text/plain" className="hidden" onChange={handleUpload} disabled={!restaurantId || status === "uploading"} />

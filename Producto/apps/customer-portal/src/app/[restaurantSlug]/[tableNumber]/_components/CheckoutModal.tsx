@@ -49,21 +49,31 @@ export function CheckoutModal({
         </div>
 
         {/* Info de Mesa Automática */}
-        <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 mb-8 flex items-center justify-between animate-in fade-in zoom-in">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-              <MapPin className="w-6 h-6 text-primary-foreground" />
+        {table.data ? (
+          <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 mb-8 flex items-center justify-between animate-in fade-in zoom-in">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                <MapPin className="w-6 h-6 text-primary-foreground" />
+              </div>
+              <div>
+                <h4 className="text-sand font-bold text-lg leading-tight">Ubicación Confirmada</h4>
+                <p className="text-primary font-medium text-sm">Tu pedido llegará aquí.</p>
+              </div>
             </div>
+            <div className="text-right">
+              <span className="block text-[10px] uppercase font-black tracking-widest text-sand/40 mb-1">Mesa</span>
+              <span className="text-3xl font-black italic text-primary tracking-tighter leading-none">#{table.data.number}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-6 mb-8 flex items-center gap-4 animate-in fade-in zoom-in">
+            <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0" />
             <div>
-              <h4 className="text-sand font-bold text-lg leading-tight">Ubicación Confirmada</h4>
-              <p className="text-primary font-medium text-sm">Tu pedido llegará aquí.</p>
+              <h4 className="text-sand font-bold text-sm leading-tight">Mesa no detectada</h4>
+              <p className="text-red-400 font-medium text-xs mt-0.5">Escanea el código QR de tu mesa para continuar.</p>
             </div>
           </div>
-          <div className="text-right">
-            <span className="block text-[10px] uppercase font-black tracking-widest text-sand/40 mb-1">Mesa</span>
-            <span className="text-3xl font-black italic text-primary tracking-tighter leading-none">#{table.data?.number}</span>
-          </div>
-        </div>
+        )}
 
         <div className="bg-white/5 rounded-2xl p-6 mb-8 border border-white/5">
           <div className="flex justify-between items-center mb-2"><span className="text-sand/60">Subtotal</span><span className="text-sand font-medium">${cartTotal.toLocaleString()}</span></div>

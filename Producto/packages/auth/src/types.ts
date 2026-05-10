@@ -67,7 +67,7 @@ export type OrderItem = {
   menu_item_id?: string;
 };
 
-export type OrderStatus = 'PENDING' | 'VALIDATED' | 'PREPARING' | 'READY' | 'DELIVERED' | 'COMPLETED' | 'REJECTED';
+export type OrderStatus = 'PENDING' | 'VALIDATED' | 'PREPARING' | 'READY' | 'PARCIAL' | 'DELIVERED' | 'COMPLETED' | 'REJECTED';
 
 export type Order = {
   id: string;

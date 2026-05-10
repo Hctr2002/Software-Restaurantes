@@ -34,7 +34,7 @@ export async function saveSettings(s: KDSSettings): Promise<void> {
       body: JSON.stringify(s),
     });
   } catch (error) {
-    console.error("Error saving KDS settings:", error);
+    console.error("Error saving Bar Dashboard settings:", error);
   }
 }
 

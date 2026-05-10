@@ -37,6 +37,13 @@ export default function BarDashboardPage() {
 
   const orders    = liveOrders.filter((o) => !clearedOrders.has(o.id));
   const loading   = liveLoading;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (mounted && !user) router.replace("/login");
+  }, [mounted, user, router]);
 
   useEffect(() => { loadSettings().then(setSettings); }, []);
   useEffect(() => {
@@ -104,7 +111,7 @@ export default function BarDashboardPage() {
     { key: "ready", title: "Para Despacho", orders: readyOrders, icon: <Activity className="w-5 h-5 text-emerald-500" />, active: false },
   ];
 
-  if (loading) {
+  if (!mounted || !user || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-primary shadow-2xl shadow-primary/20" />

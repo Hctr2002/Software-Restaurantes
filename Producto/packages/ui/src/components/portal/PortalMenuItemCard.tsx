@@ -93,6 +93,7 @@ export function PortalMenuItemCard({ item, cartQuantity, onAdd, onDecrement }: P
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={() => onDecrement(item.id)}
+                  aria-label="Disminuir cantidad"
                   className="w-10 h-10 flex items-center justify-center bg-white/5 text-foreground hover:bg-white/10 hover:text-primary rounded-xl transition-all"
                 >
                   <Minus className="w-4 h-4" />
@@ -106,6 +107,7 @@ export function PortalMenuItemCard({ item, cartQuantity, onAdd, onDecrement }: P
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={() => onAdd(item)}
+                  aria-label="Aumentar cantidad"
                   className="w-10 h-10 flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl transition-all shadow-lg shadow-primary/20"
                 >
                   <Plus className="w-4 h-4" />

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, Timer, Layers, Volume2, ChefHat, ShoppingBag, Package } from "lucide-react";
+import { Timer, Layers, Volume2, ChefHat, ShoppingBag, Package, X } from "lucide-react";
 import { supabase } from "@menu-bites/auth";
 import { cn } from "@menu-bites/ui";
 import type { KDSSettings } from "../../lib/kdsSettings";
@@ -63,20 +63,25 @@ export function SettingsModal({ settings: initial, restaurantId, onSave, onClose
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="w-full max-w-2xl bg-slate-900 border border-white/10 rounded-3xl shadow-2xl flex flex-col max-h-[90vh]">
+      <div className="w-full max-w-2xl bg-card border border-foreground/10 rounded-3xl shadow-2xl flex flex-col max-h-[90vh]">
 
-        <div className="flex items-center justify-between px-8 py-6 border-b border-white/5">
-          <h2 className="text-xl font-black text-white tracking-tight">Configuración KDS</h2>
-          <button onClick={onClose} className="text-white/40 hover:text-white transition-colors">
+        <div className="flex items-center justify-between px-8 py-6 border-b border-foreground/5">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-xl">
+              <ChefHat className="w-6 h-6 text-primary" />
+            </div>
+            <h2 className="text-xl font-black text-foreground tracking-tight">Configuración de Cocina</h2>
+          </div>
+          <button onClick={onClose} className="text-foreground/40 hover:text-foreground transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex space-x-1 px-8 py-4 border-b border-white/5 overflow-x-auto no-scrollbar">
+        <div className="flex space-x-1 px-8 py-4 border-b border-foreground/5 overflow-x-auto no-scrollbar">
           {TABS.map(({ key, label, Icon }) => (
             <button key={key} onClick={() => setTab(key)}
               className={cn("flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-all",
-                tab === key ? "bg-primary text-primary-foreground" : "text-white/40 hover:text-white hover:bg-white/5")}>
+                tab === key ? "bg-primary text-primary-foreground" : "text-foreground/40 hover:text-foreground hover:bg-foreground/5")}>
               <Icon className="w-3.5 h-3.5" />
               <span>{label}</span>
             </button>
@@ -92,8 +97,8 @@ export function SettingsModal({ settings: initial, restaurantId, onSave, onClose
           {tab === "inventario" && <InventoryTab restaurantId={restaurantId} />}
         </div>
 
-        <div className="px-8 py-5 border-t border-white/5 flex justify-end space-x-3">
-          <button onClick={onClose} className="px-6 py-3 rounded-xl text-white/40 text-xs font-bold uppercase tracking-widest hover:text-white transition-colors">
+        <div className="px-8 py-5 border-t border-foreground/5 flex justify-end space-x-3">
+          <button onClick={onClose} className="px-6 py-3 rounded-xl text-foreground/40 text-xs font-bold uppercase tracking-widest hover:text-foreground transition-colors">
             {showSave ? "Cancelar" : "Cerrar"}
           </button>
           {showSave && (

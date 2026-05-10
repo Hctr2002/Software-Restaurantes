@@ -20,7 +20,6 @@ const CRITICAL_SFX   = "https://assets.mixkit.co/active_storage/sfx/2997/2997-pr
 function playSound(url: string) { new Audio(url).play().catch(() => {}); }
 
 export default function KitchenKDSPage() {
-  console.log("[KDS] PremiumHeader status:", typeof PremiumHeader !== "undefined" ? "Defined" : "UNDEFINED");
   const { user, logout: clearAuth } = useAuthStore();
   const { orders: liveOrders, loading: liveLoading } = useKitchenOrders(user?.restaurantId);
   const [clearedOrders, setClearedOrders] = useState<Set<string>>(new Set());
@@ -38,6 +37,13 @@ export default function KitchenKDSPage() {
 
   const orders    = liveOrders.filter((o) => !clearedOrders.has(o.id));
   const loading   = liveLoading;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (mounted && !user) router.replace("/login");
+  }, [mounted, user, router]);
 
   useEffect(() => { loadSettings().then(setSettings); }, []);
   useEffect(() => {
@@ -110,7 +116,7 @@ export default function KitchenKDSPage() {
     { key: "ready", title: "Para Despacho", orders: readyOrders, icon: <Activity className="w-5 h-5 text-emerald-500" />, active: false },
   ];
 
-  if (loading) {
+  if (!mounted || !user || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-primary shadow-2xl shadow-primary/20" />

@@ -61,7 +61,7 @@ export const updateOrderStatus = async (orderId: string, status: string, station
     // Consultamos el estado actual para decidir si el pedido global ya puede ser READY
     const { data: currentOrder } = await supabase
       .from("orders")
-      .select("bar_ready, kitchen_ready, order_items(menu_items(category:categories(target_station)))")
+      .select("status, bar_ready, kitchen_ready, order_items(menu_items(category:categories(target_station)))")
       .eq("id", orderId)
       .single();
 
@@ -72,8 +72,10 @@ export const updateOrderStatus = async (orderId: string, status: string, station
         (item: any) => item.menu_items?.category?.target_station === otherStation
       );
       const otherStationReady = isKitchen ? currentOrder.bar_ready : currentOrder.kitchen_ready;
+      // If status is PARCIAL, the other station already delivered its portion — this one is now READY
+      const otherStationDone = currentOrder.status === "PARCIAL";
 
-      payload.status = (!hasOtherStationItems || otherStationReady) ? "READY" : "PREPARING";
+      payload.status = (!hasOtherStationItems || otherStationReady || otherStationDone) ? "READY" : "PREPARING";
     } else {
       payload.status = "READY";
     }
