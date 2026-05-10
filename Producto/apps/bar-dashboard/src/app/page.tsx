@@ -4,14 +4,13 @@ import { useEffect, useRef, useState } from "react";
 // Rebuild trigger: 2026-05-07T06:09:40Z
 import { useAuthStore } from "@menu-bites/store";
 import { useBarOrders, updateOrderStatus, signOut, useThemeSync } from "@menu-bites/auth";
-import { OrderTicket, Button, RestaurantThemeProvider, KDSColumn, TicketWrapper } from "@menu-bites/ui";
+import { OrderTicket, Button, RestaurantThemeProvider, KDSColumn, TicketWrapper, PremiumHeader, HeaderStat } from "@menu-bites/ui";
 import { GlassWater, Bell, Settings, LogOut, AlertTriangle, Activity } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 
 
 import { SettingsModal } from "./_components/SettingsModal";
-import { KDSStat } from "./_components/KDSStat";
 import { StockAlertModal } from "./_components/StockAlertModal";
 import { loadSettings, saveSettings, getTicketUrgency, DEFAULT_SETTINGS, type KDSSettings } from "../lib/kdsSettings";
 
@@ -116,43 +115,34 @@ export default function BarDashboardPage() {
   return (
     <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
       <div className="min-h-screen bar-gradient text-foreground overflow-hidden flex flex-col p-4 lg:p-6 gap-6">
-
-        <header className="glass-bar rounded-[2.5rem] p-6 flex justify-between items-center shadow-2xl">
-          <div className="flex items-center space-x-6">
-            <div className="w-16 h-16 bg-primary rounded-[1.5rem] flex items-center justify-center shadow-2xl shadow-primary/30">
-              <GlassWater className="text-primary-foreground w-8 h-8" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-black tracking-tighter uppercase italic leading-none">
-                Bar <span className="text-primary">Monitor</span>
-              </h1>
-              <div className="flex items-center space-x-3 text-[10px] font-black text-foreground/40 uppercase tracking-[0.3em] mt-1">
-                <span className="text-emerald-500 animate-pulse">● Live System</span>
-                <span>•</span>
-                <span>Drink Station</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-12 px-10 py-3 glass rounded-[2rem] border border-white/5 shadow-xl">
-              <KDSStat label="Recibidos" value={pendingOrders.length} color="text-foreground/50" />
-              <KDSStat label="En Barra"  value={preparingOrders.length} color="text-primary" />
-              <KDSStat label="Listos"    value={readyOrders.length} color="text-emerald-500" />
-            </div>
-            <Button variant="outline" onClick={() => setAlertOpen(true)}
-              className="rounded-2xl h-14 px-8 border-yellow-500/20 bg-yellow-500/5 text-yellow-500 hover:bg-yellow-500/10 hover:border-yellow-500/40 gap-3 font-black uppercase tracking-widest text-[10px]">
-              <AlertTriangle className="w-5 h-5" />
-              Alerta Stock
-            </Button>
-            <Button variant="outline" size="icon" className="rounded-2xl w-14 h-14" onClick={() => setSettingsOpen(true)}>
-              <Settings className="w-6 h-6 text-muted-foreground" />
-            </Button>
-            <Button variant="destructive" size="icon" onClick={handleSignOut} disabled={isSigningOut} className="rounded-2xl w-14 h-14 shadow-xl shadow-destructive/20">
-              <LogOut className="w-6 h-6" />
-            </Button>
-          </div>
-        </header>
+        <PremiumHeader
+          title="Bar"
+          accentTitle="Monitor"
+          icon={GlassWater}
+          statusSubLabel="Drink Station"
+          stats={
+            <>
+              <HeaderStat label="Recibidos" value={pendingOrders.length} color="text-foreground/50" />
+              <HeaderStat label="En Barra"  value={preparingOrders.length} color="text-primary" />
+              <HeaderStat label="Listos"    value={readyOrders.length} color="text-emerald-500" />
+            </>
+          }
+          actions={
+            <>
+              <Button variant="outline" onClick={() => setAlertOpen(true)}
+                className="rounded-2xl h-14 px-8 border-yellow-500/20 bg-yellow-500/5 text-yellow-500 hover:bg-yellow-500/10 hover:border-yellow-500/40 gap-3 font-black uppercase tracking-widest text-[10px]">
+                <AlertTriangle className="w-5 h-5" />
+                Alerta Stock
+              </Button>
+              <Button variant="outline" size="icon" className="rounded-2xl w-14 h-14" onClick={() => setSettingsOpen(true)}>
+                <Settings className="w-6 h-6 text-muted-foreground" />
+              </Button>
+              <Button variant="destructive" size="icon" onClick={handleSignOut} disabled={isSigningOut} className="rounded-2xl w-14 h-14 shadow-xl shadow-destructive/20">
+                <LogOut className="w-6 h-6" />
+              </Button>
+            </>
+          }
+        />
 
         <main className="flex-1 grid grid-cols-3 gap-6 overflow-hidden">
           <AnimatePresence mode="popLayout">
