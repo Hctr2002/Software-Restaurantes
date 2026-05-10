@@ -9,15 +9,16 @@ interface KitchenOrderCardProps {
   order: any;
   onPress: () => void;
   onAdvanceStatus?: () => void;
+  thresholds?: { yellow: number; red: number };
 }
 
-export default function KitchenOrderCard({ order, onPress, onAdvanceStatus }: KitchenOrderCardProps) {
+export default function KitchenOrderCard({ order, onPress, onAdvanceStatus, thresholds = { yellow: 10, red: 20 } }: KitchenOrderCardProps) {
   const { colors } = useTheme();
   
   const getUrgencyColor = () => {
     const elapsedMinutes = (new Date().getTime() - new Date(order.createdAt).getTime()) / 60000;
-    if (elapsedMinutes > 20) return '#ef4444'; // Red
-    if (elapsedMinutes > 10) return '#f59e0b'; // Amber
+    if (elapsedMinutes > thresholds.red) return '#ef4444'; // Red
+    if (elapsedMinutes > thresholds.yellow) return '#f59e0b'; // Amber
     return colors.brandAccent || MB_COLORS.brandAccent;
   };
 

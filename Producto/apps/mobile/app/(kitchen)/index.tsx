@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   StyleSheet, 
   View, 
@@ -12,9 +12,11 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
-import { ChefHat, LogOut } from 'lucide-react-native';
+import { ChefHat, LogOut, AlertTriangle, Settings } from 'lucide-react-native';
 import KitchenOrderCard from './_components/KitchenOrderCard';
 import OrderDetailModal, { OrderStatus } from '../../components/OrderDetailModal';
+import StockAlertModal from './_components/StockAlertModal';
+import KdsSettingsModal, { KdsSettings, DEFAULT_KDS_SETTINGS } from './_components/KdsSettingsModal';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 
 type KitchenTab = 'Nuevos' | 'Cocinando' | 'Listos';
@@ -29,7 +31,15 @@ export default function KitchenDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  
+  // Modals Visibility
+  const [isDetailVisible, setIsDetailVisible] = useState(false);
+  const [isAlertVisible, setIsAlertVisible] = useState(false);
+  const [isSettingsVisible, setIsSettingsVisible] = useState(false);
+  
+  // KDS Settings
+  const [settings, setSettings] = useState<KdsSettings>(DEFAULT_KDS_SETTINGS);
+  const [tick, setTick] = useState(0);
 
   const fetchOrders = useCallback(async () => {
     if (!restaurantId) return;
@@ -59,8 +69,26 @@ export default function KitchenDashboard() {
     }
   }, [restaurantId]);
 
+  const fetchSettings = useCallback(async () => {
+    if (!restaurantId) return;
+    try {
+      const { data, error } = await supabase
+        .from('kds_settings')
+        .select('settings')
+        .eq('restaurant_id', restaurantId)
+        .single();
+
+      if (!error && data?.settings) {
+        setSettings({ ...DEFAULT_KDS_SETTINGS, ...data.settings });
+      }
+    } catch (err) {
+      console.error('[Kitchen] Settings fetch error:', err);
+    }
+  }, [restaurantId]);
+
   useEffect(() => {
     fetchOrders();
+    fetchSettings();
 
     if (!restaurantId) return;
 
@@ -80,10 +108,14 @@ export default function KitchenDashboard() {
       )
       .subscribe();
 
+    // Re-render tick every 30s to update timers and auto-clear
+    const interval = setInterval(() => setTick(t => t + 1), 30000);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(interval);
     };
-  }, [restaurantId, fetchOrders]);
+  }, [restaurantId, fetchOrders, fetchSettings]);
 
   const handleUpdateStatus = async (orderId: string, nextStatus: OrderStatus) => {
     setUpdating(true);
@@ -99,7 +131,7 @@ export default function KitchenDashboard() {
 
       if (error) throw error;
       
-      setIsModalVisible(false);
+      setIsDetailVisible(false);
     } catch (err) {
       console.error('[Kitchen] Update error:', err);
     } finally {
@@ -107,7 +139,19 @@ export default function KitchenDashboard() {
     }
   };
 
-  const filteredOrders = orders.filter(o => {
+  // Filter out auto-cleared orders
+  const visibleOrders = orders.filter(order => {
+    if (order.status === 'READY' && settings.autoClear.enabled) {
+      const readyAt = order.ready_at ? new Date(order.ready_at).getTime() : 0;
+      if (readyAt > 0) {
+        const elapsedSeconds = (Date.now() - readyAt) / 1000;
+        if (elapsedSeconds > settings.autoClear.delaySeconds) return false;
+      }
+    }
+    return true;
+  });
+
+  const filteredOrders = visibleOrders.filter(o => {
     if (activeTab === 'Nuevos') return o.status === 'VALIDATED';
     if (activeTab === 'Cocinando') return o.status === 'PREPARING';
     if (activeTab === 'Listos') return o.status === 'READY';
@@ -115,9 +159,9 @@ export default function KitchenDashboard() {
   });
 
   const getTabCount = (tab: KitchenTab) => {
-    if (tab === 'Nuevos') return orders.filter(o => o.status === 'VALIDATED').length;
-    if (tab === 'Cocinando') return orders.filter(o => o.status === 'PREPARING').length;
-    if (tab === 'Listos') return orders.filter(o => o.status === 'READY').length;
+    if (tab === 'Nuevos') return visibleOrders.filter(o => o.status === 'VALIDATED').length;
+    if (tab === 'Cocinando') return visibleOrders.filter(o => o.status === 'PREPARING').length;
+    if (tab === 'Listos') return visibleOrders.filter(o => o.status === 'READY').length;
     return 0;
   };
 
@@ -135,9 +179,23 @@ export default function KitchenDashboard() {
           </View>
         </View>
       </View>
-      <TouchableOpacity onPress={() => signOut()} style={[styles.logoutBtn, { backgroundColor: colors.glass }]}>
-        <LogOut size={20} color={colors.muted} />
-      </TouchableOpacity>
+      <View style={styles.headerActions}>
+        <TouchableOpacity 
+          onPress={() => setIsAlertVisible(true)} 
+          style={[styles.headerBtn, { backgroundColor: 'rgba(245, 158, 11, 0.1)' }]}
+        >
+          <AlertTriangle size={20} color="#f59e0b" />
+        </TouchableOpacity>
+        <TouchableOpacity 
+          onPress={() => setIsSettingsVisible(true)} 
+          style={[styles.headerBtn, { backgroundColor: colors.glass }]}
+        >
+          <Settings size={20} color={colors.text} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => signOut()} style={[styles.headerBtn, { backgroundColor: colors.glass }]}>
+          <LogOut size={20} color={colors.muted} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -190,9 +248,10 @@ export default function KitchenDashboard() {
             <Animated.View entering={FadeInRight.delay(index * 100)}>
               <KitchenOrderCard 
                 order={item} 
+                thresholds={settings.thresholds}
                 onPress={() => {
                   setSelectedOrder(item);
-                  setIsModalVisible(true);
+                  setIsDetailVisible(true);
                 }}
                 onAdvanceStatus={() => {
                   const next: any = { VALIDATED: 'PREPARING', PREPARING: 'READY' };
@@ -215,14 +274,26 @@ export default function KitchenDashboard() {
         />
       )}
 
+      {/* Modals */}
       <OrderDetailModal 
-        visible={isModalVisible}
+        visible={isDetailVisible}
         order={selectedOrder}
-        onClose={() => setIsModalVisible(false)}
+        onClose={() => setIsDetailVisible(false)}
         onUpdateStatus={handleUpdateStatus}
         updating={updating}
         allowDelivery={false}
         allowCancel={false}
+      />
+
+      <StockAlertModal 
+        visible={isAlertVisible}
+        onClose={() => setIsAlertVisible(false)}
+      />
+
+      <KdsSettingsModal 
+        visible={isSettingsVisible}
+        onClose={() => setIsSettingsVisible(false)}
+        onSave={(newSettings) => setSettings(newSettings)}
       />
     </View>
   );
@@ -272,10 +343,14 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 1,
   },
-  logoutBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+  headerActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  headerBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
