@@ -93,25 +93,38 @@ export default function CashierPage() {
 
   const handleMarkDelivered = async (group: TableGroup) => {
     try {
+      // La BD tiene un trigger estricto que prohíbe saltar estados.
+      // Re-leemos el estado real de cada orden desde la DB para evitar
+      // transiciones inválidas por estado cacheado en el cliente.
+      const TRANSITIONS: Record<string, string> = {
+        PENDING: "VALIDATED",
+        VALIDATED: "PREPARING",
+        PREPARING: "READY",
+        READY: "DELIVERED",
+      };
+
       for (const order of group.orders) {
-        if (order.status === "DELIVERED" || order.status === "COMPLETED") continue;
-        
-        let currentStatus = order.status;
-        
-        if (currentStatus === "PENDING") {
-          await supabase.from("orders").update({ status: "VALIDATED" }).eq("id", order.id);
-          currentStatus = "VALIDATED";
+        // Leer estado actual real de la DB (no del cache del cliente)
+        const { data: fresh } = await supabase
+          .from("orders")
+          .select("status")
+          .eq("id", order.id)
+          .single();
+
+        let currentStatus = fresh?.status ?? order.status;
+        if (currentStatus === "DELIVERED" || currentStatus === "REJECTED" || currentStatus === "COMPLETED") continue;
+
+        // Avanzar paso a paso hasta DELIVERED
+        while (TRANSITIONS[currentStatus]) {
+          const nextStatus = TRANSITIONS[currentStatus];
+          const { error } = await supabase
+            .from("orders")
+            .update({ status: nextStatus })
+            .eq("id", order.id);
+          if (error) throw error;
+          currentStatus = nextStatus;
         }
-        if (currentStatus === "VALIDATED") {
-          await supabase.from("orders").update({ status: "PREPARING" }).eq("id", order.id);
-          currentStatus = "PREPARING";
-        }
-        if (currentStatus === "PREPARING") {
-          await supabase.from("orders").update({ status: "READY" }).eq("id", order.id);
-          currentStatus = "READY";
-        }
-        if (currentStatus === "READY") {
-          await supabase.from("orders").update({ status: "COMPLETED" }).eq("id", order.id);
+      }
         }
       }
       
@@ -130,8 +143,6 @@ export default function CashierPage() {
     } catch (err: any) {
       console.error("Error al procesar pago:", err?.message || JSON.stringify(err));
       alert(`Error al cobrar: ${err?.message || "Revisa la consola"}`);
-    }
-  };
     }
   };
 
