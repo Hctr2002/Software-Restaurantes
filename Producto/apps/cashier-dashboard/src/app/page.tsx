@@ -125,8 +125,6 @@ export default function CashierPage() {
           currentStatus = nextStatus;
         }
       }
-        }
-      }
       
       if (group.tableId) {
         await supabase

@@ -89,7 +89,6 @@ export default function KitchenKDSPage() {
       console.error(`[KDS] Error inesperado en handleStatusChange:`, err);
       alert("Ocurrió un error inesperado al procesar el cambio de estado.");
     }
-    }
   };
 
   const handleSaveSettings = async (s: KDSSettings) => {

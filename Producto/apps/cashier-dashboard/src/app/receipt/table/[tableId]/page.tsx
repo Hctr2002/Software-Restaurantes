@@ -65,6 +65,9 @@ export default async function ReceiptTablePage({
     .single();
 
   // Fetch orders for this table
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   const { data: orders, error } = await db
     .from("orders")
     .select("id, status, createdAt, order_items(quantity, unit_price, menu_items(name))")

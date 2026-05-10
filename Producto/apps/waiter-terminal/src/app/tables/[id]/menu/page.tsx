@@ -2,11 +2,10 @@
 
 import React, { useState, useMemo } from "react";
 import { useAuthStore } from "@menu-bites/store";
-import { useMenu, useTable, supabase } from "@menu-bites/auth";
+import { useMenu, useTable, supabase, useThemeSync } from "@menu-bites/auth";
 import { MenuItemCard, ProductSearchBar, CategoryTabs, Button, RestaurantThemeProvider } from "@menu-bites/ui";
 import { useParams, useRouter } from "next/navigation";
 import { ChevronLeft, ShoppingBag, Send, Trash2, Loader2, Receipt } from "lucide-react";
-import { useThemeSync } from "@/hooks/useThemeSync";
 
 export default function TableMenuPage() {
   const params = useParams();
@@ -167,17 +166,8 @@ export default function TableMenuPage() {
             <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Pedir Cuenta</span>
           </button>
         </header>
-        </div>
-        <button
-          onClick={() => setShowBillModal(true)}
-          className="flex items-center gap-2 px-4 py-3 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-2xl hover:bg-yellow-500/20 transition-all active:scale-95"
-        >
-          <Receipt className="w-4 h-4" />
-          <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Pedir Cuenta</span>
-        </button>
-      </header>
 
-      <main className="space-y-6 pt-6">
+        <main className="space-y-6 pt-6">
         <ProductSearchBar 
           value={searchTerm} 
           onChange={setSearchTerm} 
