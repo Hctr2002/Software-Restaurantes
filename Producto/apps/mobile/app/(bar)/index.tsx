@@ -31,6 +31,7 @@ export default function BarDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [clearedOrderIds, setClearedOrderIds] = useState<Set<string>>(new Set());
   
   // Modals Visibility
   const [isDetailVisible, setIsDetailVisible] = useState(false);
@@ -138,8 +139,15 @@ export default function BarDashboard() {
       setUpdating(false);
     }
   };
+  
+  const handleDismissOrder = (orderId: string) => {
+    setClearedOrderIds(prev => new Set([...prev, orderId]));
+    setIsDetailVisible(false);
+  };
 
   const visibleOrders = orders.filter(order => {
+    if (clearedOrderIds.has(order.id)) return false;
+
     if (order.status === 'READY' && settings.autoClear.enabled) {
       const readyAt = order.ready_at ? new Date(order.ready_at).getTime() : 0;
       if (readyAt > 0) {
@@ -258,6 +266,7 @@ export default function BarDashboard() {
                     handleUpdateStatus(item.id, next[item.status]);
                   }
                 }}
+                onReject={() => handleDismissOrder(item.id)}
               />
             </Animated.View>
           )}
@@ -281,7 +290,9 @@ export default function BarDashboard() {
         onUpdateStatus={handleUpdateStatus}
         updating={updating}
         allowDelivery={false}
-        allowCancel={false}
+        allowCancel={true}
+        cancelLabel="QUITAR DE LA VISTA"
+        onCancel={() => handleDismissOrder(selectedOrder?.id)}
       />
 
       <StockAlertModal 
