@@ -13,7 +13,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
-import { History, Clock, Search, Wallet, TrendingUp, X, AlertTriangle } from 'lucide-react-native';
+import { History, Clock, Search, Wallet, TrendingUp, X, AlertTriangle, LogOut } from 'lucide-react-native';
 import { formatCurrency } from '../../lib/dashboard';
 import CashierOrderCard from './_components/CashierOrderCard';
 import PaymentModal from './_components/PaymentModal';
@@ -51,7 +51,7 @@ function groupOrders(orders: any[], billMap: Record<string, boolean>): any[] {
 }
 
 export default function CashierDashboard() {
-  const { restaurantId, user } = useAuth();
+  const { restaurantId, user, signOut } = useAuth();
   const { colors } = useTheme();
   
   const [activeTab, setActiveTab] = useState<CashierTab>('pending');
@@ -222,9 +222,12 @@ export default function CashierDashboard() {
   const renderHeader = () => (
     <View style={[styles.header, { backgroundColor: colors.navy }]}>
       <View style={styles.headerTop}>
-        <View>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>CAJA <Text style={{ color: colors.brandAccent }}>REGISTRADORA</Text></Text>
-          <Text style={[styles.headerSub, { color: colors.muted }]}>CONTROL DE COBROS</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.headerTitle, { color: colors.text, lineHeight: 22 }]}>
+            CAJA{"\n"}
+            <Text style={{ color: colors.brandAccent }}>REGISTRADORA</Text>
+          </Text>
+          <Text style={[styles.headerSub, { color: colors.muted, marginTop: 4 }]}>CONTROL DE COBROS</Text>
         </View>
         <View style={styles.headerRight}>
           <TouchableOpacity 
@@ -238,6 +241,12 @@ export default function CashierDashboard() {
             onPress={() => setShowSearch(!showSearch)}
           >
             <Search size={20} color={showSearch ? colors.brandAccent : colors.muted} />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.headerIconBtn, { backgroundColor: 'rgba(239, 68, 68, 0.1)', marginLeft: 8 }]}
+            onPress={() => signOut()}
+          >
+            <LogOut size={20} color="#ef4444" />
           </TouchableOpacity>
         </View>
       </View>
@@ -379,7 +388,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '900',
     fontStyle: 'italic',
   },
