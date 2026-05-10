@@ -26,6 +26,8 @@ export interface OrderDetailProps {
   order: any | null;
   onUpdateStatus: (orderId: string, nextStatus: OrderStatus) => Promise<void>;
   updating: boolean;
+  onCancel?: () => void;
+  cancelLabel?: string;
 }
 
 const NEXT_STATUS: Partial<Record<OrderStatus, OrderStatus>> = {
@@ -44,7 +46,17 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
   'REJECTED': 'ANULADO'
 };
 
-export default function OrderDetailModal({ visible, onClose, order, onUpdateStatus, updating, allowDelivery = true, allowCancel = true }: OrderDetailProps & { allowDelivery?: boolean, allowCancel?: boolean }) {
+export default function OrderDetailModal({ 
+  visible, 
+  onClose, 
+  order, 
+  onUpdateStatus, 
+  updating, 
+  onCancel,
+  cancelLabel = "ANULAR PEDIDO",
+  allowDelivery = true, 
+  allowCancel = true 
+}: OrderDetailProps & { allowDelivery?: boolean, allowCancel?: boolean }) {
   const { colors } = useTheme();
   if (!order) return null;
 
@@ -149,10 +161,10 @@ export default function OrderDetailModal({ visible, onClose, order, onUpdateStat
             {allowCancel && !['DELIVERED', 'REJECTED'].includes(order.status) && (
               <TouchableOpacity 
                 style={[styles.cancelAction, { borderColor: colors.glassHeavy }]}
-                onPress={() => onUpdateStatus(order.id, 'REJECTED')}
+                onPress={() => onCancel ? onCancel() : onUpdateStatus(order.id, 'REJECTED')}
                 disabled={updating}
               >
-                <Text style={[styles.cancelText, { color: colors.muted }]}>ANULAR PEDIDO</Text>
+                <Text style={[styles.cancelText, { color: colors.muted }]}>{cancelLabel}</Text>
               </TouchableOpacity>
             )}
           </View>

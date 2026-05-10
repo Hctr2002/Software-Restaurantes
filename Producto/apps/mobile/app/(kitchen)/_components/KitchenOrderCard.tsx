@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Clock, ChevronRight } from 'lucide-react-native';
+import { Clock, ChevronRight, X } from 'lucide-react-native';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../../constants/MB_Theme';
 import { useTheme } from '../../../context/ThemeContext';
 import { timeAgo } from '../../../lib/dashboard';
@@ -9,10 +9,17 @@ interface KitchenOrderCardProps {
   order: any;
   onPress: () => void;
   onAdvanceStatus?: () => void;
+  onReject?: () => void;
   thresholds?: { yellow: number; red: number };
 }
 
-export default function KitchenOrderCard({ order, onPress, onAdvanceStatus, thresholds = { yellow: 10, red: 20 } }: KitchenOrderCardProps) {
+export default function KitchenOrderCard({ 
+  order, 
+  onPress, 
+  onAdvanceStatus, 
+  onReject, 
+  thresholds = { yellow: 10, red: 20 } 
+}: KitchenOrderCardProps) {
   const { colors } = useTheme();
   
   const getUrgencyColor = () => {
@@ -69,18 +76,36 @@ export default function KitchenOrderCard({ order, onPress, onAdvanceStatus, thre
         ))}
       </View>
 
-      {onAdvanceStatus && nextLabel && (
-        <TouchableOpacity 
-          style={[styles.actionButton, { backgroundColor: urgencyColor }]}
-          onPress={(e) => {
-            e.stopPropagation();
-            onAdvanceStatus();
-          }}
-        >
-          <Text style={styles.actionText}>{nextLabel}</Text>
-          <ChevronRight size={16} color="white" />
-        </TouchableOpacity>
-      )}
+      <View style={styles.footerActions}>
+        {nextLabel ? (
+          <TouchableOpacity 
+            style={[styles.actionButton, { backgroundColor: urgencyColor }]}
+            onPress={(e) => {
+              e.stopPropagation();
+              onAdvanceStatus?.();
+            }}
+          >
+            <Text style={styles.actionText}>{nextLabel}</Text>
+            <ChevronRight size={16} color="white" />
+          </TouchableOpacity>
+        ) : (
+          <View style={[styles.actionButton, { backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 1, borderColor: '#10b98140' }]}>
+            <Text style={[styles.actionText, { color: '#10b981' }]}>LISTO</Text>
+          </View>
+        )}
+
+        {onReject && (
+          <TouchableOpacity 
+            style={styles.rejectButtonSmall}
+            onPress={(e) => {
+              e.stopPropagation();
+              onReject();
+            }}
+          >
+            <X size={20} color="#ef4444" />
+          </TouchableOpacity>
+        )}
+      </View>
     </TouchableOpacity>
   );
 }
@@ -118,6 +143,12 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
   },
+  rejectBtn: {
+    marginLeft: 10,
+    padding: 4,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderRadius: 8,
+  },
   content: {
     gap: 8,
     marginBottom: MB_SPACING.md,
@@ -145,18 +176,34 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontStyle: 'italic',
   },
+  footerActions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 4,
+  },
   actionButton: {
+    flex: 1,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 10,
-    borderRadius: 12,
+    paddingVertical: 12,
+    borderRadius: 14,
     gap: 6,
   },
   actionText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '900',
-    letterSpacing: 1,
+    letterSpacing: 1.5,
+  },
+  rejectButtonSmall: {
+    width: 50,
+    height: 50,
+    borderRadius: 14,
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 });
