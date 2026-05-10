@@ -18,12 +18,12 @@ export function KDSColumn({ title, count, icon, children, active }: Props) {
       layout
       className={cn(
         "flex flex-col h-full glass-premium rounded-[3rem] border border-white/5 overflow-hidden transition-all duration-700",
-        active ? "bg-primary/[0.03] border-primary/20 ring-1 ring-primary/10 shadow-2xl shadow-primary/5" : "shadow-xl"
+        active ? "bg-primary/[0.05] border-primary/30 ring-1 ring-primary/20 shadow-2xl shadow-primary/10" : "bg-foreground/[0.02] shadow-xl"
       )}
     >
-      <div className="p-8 flex justify-between items-center border-b border-white/5 bg-white/[0.02]">
+      <div className="p-8 flex justify-between items-center border-b border-white/5 bg-foreground/[0.03]">
         <div className="flex items-center space-x-4">
-          <div className={cn("p-2 rounded-xl", active ? "bg-primary/20" : "bg-white/5")}>{icon}</div>
+          <div className={cn("p-2 rounded-xl", active ? "bg-primary/20" : "bg-foreground/5")}>{icon}</div>
           <h3 className="font-black text-[11px] uppercase tracking-[0.3em] text-foreground/60">{title}</h3>
         </div>
         <span className={cn("px-4 py-1.5 rounded-full text-xs font-black shadow-lg", active ? "bg-primary text-primary-foreground" : "bg-white/10 text-foreground")}>

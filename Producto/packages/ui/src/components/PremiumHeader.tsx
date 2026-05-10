@@ -58,7 +58,7 @@ export const PremiumHeader = ({
           style={{ backgroundColor: 'hsl(var(--primary))' }}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
-          <Icon className={cn("text-primary-foreground relative z-10", isCompact ? "w-6 h-6" : "w-7 h-7 sm:w-10 h-10")} />
+          <Icon className={cn("text-primary-foreground relative z-10", isCompact ? "w-6 h-6" : "w-7 h-7 sm:w-10 sm:h-10")} />
         </div>
         <div className="flex-1 min-w-0">
           <h1 

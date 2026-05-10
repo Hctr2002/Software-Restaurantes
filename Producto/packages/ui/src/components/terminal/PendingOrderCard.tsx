@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CheckCircle, Loader2, MessageSquare, XCircle } from "lucide-react";
+import { CheckCircle, Loader2, MessageSquare, Wine, XCircle } from "lucide-react";
 import { Button } from "../ui/button";
 
 export type PendingOrder = {
@@ -15,19 +15,22 @@ export type PendingOrder = {
 };
 
 interface PendingOrderCardProps {
-  order: any; // Usamos any para evitar conflictos de importación o el tipo Order de auth
+  order: any;
   note: string;
+  barNote?: string;
   processingId: string | null;
   savingNoteId: string | null;
   onNoteChange: (id: string, value: string) => void;
   onSaveNote: (id: string) => void;
+  onBarNoteChange?: (id: string, value: string) => void;
+  onSaveBarNote?: (id: string) => void;
   onValidate: (order: any) => void;
   onReject: (order: any) => void;
 }
 
 export function PendingOrderCard({
-  order, note, processingId, savingNoteId,
-  onNoteChange, onSaveNote, onValidate, onReject,
+  order, note, barNote = "", processingId, savingNoteId,
+  onNoteChange, onSaveNote, onBarNoteChange, onSaveBarNote, onValidate, onReject,
 }: PendingOrderCardProps) {
   const isProcessing = processingId === order.id;
 
@@ -88,6 +91,32 @@ export function PendingOrderCard({
           </button>
         </div>
       </div>
+
+      {/* Nota de bar — solo visible si el pedido tiene un sub-pedido de barra */}
+      {order.barSubOrderId && onBarNoteChange && onSaveBarNote && (
+        <div className="space-y-1.5">
+          <label className="flex items-center gap-1.5 text-[10px] font-black text-amber-500/70 uppercase tracking-widest">
+            <Wine className="w-3 h-3" />
+            Nota de bar
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Ej: Sin hielo, vaso grande…"
+              value={barNote}
+              onChange={(e) => onBarNoteChange(order.barSubOrderId, e.target.value)}
+              className="flex-1 text-xs px-3 py-2 rounded-xl bg-amber-500/5 border border-amber-500/20 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-amber-500/40"
+            />
+            <button
+              onClick={() => onSaveBarNote(order.barSubOrderId)}
+              disabled={savingNoteId === order.barSubOrderId || !barNote}
+              className="px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs font-black text-amber-500/70 hover:text-amber-400 hover:bg-amber-500/20 transition-all disabled:opacity-30"
+            >
+              {savingNoteId === order.barSubOrderId ? <Loader2 className="w-3 h-3 animate-spin" /> : "OK"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex gap-3">

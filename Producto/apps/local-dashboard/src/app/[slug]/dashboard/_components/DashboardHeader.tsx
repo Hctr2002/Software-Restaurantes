@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Menu as MenuIcon, ChevronRight } from "lucide-react";
+import { Menu as MenuIcon, ChevronRight, LayoutDashboard } from "lucide-react";
+import { PremiumHeader } from "@menu-bites/ui";
 import AlertsPanel from "./AlertsPanel";
 
 interface DashboardHeaderProps {
@@ -9,9 +10,6 @@ interface DashboardHeaderProps {
   subtitle: string;
   onOpenMobileMenu: () => void;
 }
-
-import { LayoutDashboard } from "lucide-react";
-import { PremiumHeader } from "@menu-bites/ui";
 
 export default function DashboardHeader({ title, subtitle, onOpenMobileMenu }: DashboardHeaderProps) {
   return (

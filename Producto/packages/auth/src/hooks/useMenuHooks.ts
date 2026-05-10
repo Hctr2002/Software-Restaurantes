@@ -8,15 +8,17 @@ import { useRealtimeSync } from "./useRealtimeSync";
 
 export function useMenu(restaurantId: string | undefined) {
   const fetchMenu = useCallback(async () => {
+    if (!restaurantId) return { data: [], error: null };
     return supabase.from("menu_items").select("*").eq("restaurant_id", restaurantId).eq("is_active", true);
   }, [restaurantId]);
-  
+
   const fetchCats = useCallback(async () => {
+    if (!restaurantId) return { data: [], error: null };
     return supabase.from("categories").select("*").eq("restaurant_id", restaurantId).eq("is_active", true);
   }, [restaurantId]);
 
-  const { data: menu, loading: menuLoading } = useRealtimeSync<MenuItem[]>(restaurantId, "menu_items", fetchMenu, { transform: mapMenuItem });
-  const { data: categories, loading: catLoading } = useRealtimeSync<Category[]>(restaurantId, "categories", fetchCats, { transform: mapCategory });
+  const { data: menu, loading: menuLoading } = useRealtimeSync<MenuItem[]>(restaurantId, "menu_items", fetchMenu, { transform: (data: any) => Array.isArray(data) ? data.map(mapMenuItem) : [] });
+  const { data: categories, loading: catLoading } = useRealtimeSync<Category[]>(restaurantId, "categories", fetchCats, { transform: (data: any) => Array.isArray(data) ? data.map(mapCategory) : [] });
 
   return { menu, categories, loading: menuLoading || catLoading };
 }

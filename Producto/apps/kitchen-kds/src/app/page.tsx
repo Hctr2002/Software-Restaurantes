@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-// Rebuild trigger: 2026-05-09T20:36:10Z
 import { useAuthStore } from "@menu-bites/store";
 import { useKitchenOrders, updateOrderStatus, signOut, useThemeSync } from "@menu-bites/auth";
 import { OrderTicket, Button, RestaurantThemeProvider, KDSColumn, TicketWrapper, PremiumHeader, HeaderStat } from "@menu-bites/ui";
@@ -20,9 +19,8 @@ const CRITICAL_SFX   = "https://assets.mixkit.co/active_storage/sfx/2997/2997-pr
 function playSound(url: string) { new Audio(url).play().catch(() => {}); }
 
 export default function KitchenKDSPage() {
-  console.log("[KDS] PremiumHeader status:", typeof PremiumHeader !== "undefined" ? "Defined" : "UNDEFINED");
   const { user, logout: clearAuth } = useAuthStore();
-  const { orders: liveOrders, loading: liveLoading } = useKitchenOrders(user?.restaurantId);
+  const { orders: liveOrders, loading: liveLoading, refetch } = useKitchenOrders(user?.restaurantId);
   const [clearedOrders, setClearedOrders] = useState<Set<string>>(new Set());
   const [settings, setSettings] = useState<KDSSettings>(DEFAULT_SETTINGS);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -38,6 +36,13 @@ export default function KitchenKDSPage() {
 
   const orders    = liveOrders.filter((o) => !clearedOrders.has(o.id));
   const loading   = liveLoading;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (mounted && !user) router.replace("/login");
+  }, [mounted, user, router]);
 
   useEffect(() => { loadSettings().then(setSettings); }, []);
   useEffect(() => {
@@ -79,7 +84,8 @@ export default function KitchenKDSPage() {
         alert(`Error al actualizar el pedido: ${error.message}`);
         return;
       }
-      console.log(`[KDS] Estado actualizado exitosamente en Supabase`);
+      // Optimistic refetch: updates the UI immediately without waiting for realtime event
+      refetch();
 
       if (newStatus === "READY" && settings.autoClear.enabled) {
         const timer = setTimeout(() => setClearedOrders((prev) => new Set([...prev, orderId])), settings.autoClear.delaySeconds * 1000);
@@ -116,7 +122,7 @@ export default function KitchenKDSPage() {
     { key: "ready", title: "Para Despacho", orders: readyOrders, icon: <Activity className="w-5 h-5 text-emerald-500" />, active: false },
   ];
 
-  if (loading) {
+  if (!mounted || !user || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-primary shadow-2xl shadow-primary/20" />
@@ -162,7 +168,7 @@ export default function KitchenKDSPage() {
               <KDSColumn key={col.key} title={col.title} count={col.orders.length} icon={col.icon} active={col.active}>
                 {col.orders.map((order) => (
                   <TicketWrapper key={`${col.key}-${order.id}`} createdAt={order.createdAt} thresholds={settings.thresholds} status={order.status}>
-                    <OrderTicket id={order.id} tableNumber={order.table?.number ?? 0} status={order.status} createdAt={order.createdAt} items={order.orderItems || []} onStatusChange={(s) => handleStatusChange(order.id, s)} notes={order.notes} />
+                    <OrderTicket type="KITCHEN" id={order.id} tableNumber={order.table?.number ?? 0} status={order.status} createdAt={order.createdAt} items={order.orderItems || []} notes={order.notes} onStatusChange={(s) => handleStatusChange(order.id, s)} onDismiss={() => setClearedOrders((prev) => new Set([...prev, order.id]))} />
                   </TicketWrapper>
                 ))}
               </KDSColumn>

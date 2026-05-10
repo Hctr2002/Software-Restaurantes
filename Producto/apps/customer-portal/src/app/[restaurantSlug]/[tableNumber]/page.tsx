@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useEffect, useRef } from "react";
+import { use, useState, useEffect } from "react";
 import { 
   useTableOrders, 
   useCustomerOrderTracker, 
@@ -56,17 +56,6 @@ export default function MenuPage({
   const [ratingDone, setRatingDone]       = useState(false);
 
   const [isCuentaOpen, setIsCuentaOpen]     = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-
-  const handleTableInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, ''); 
-    portal.setTableInput(value);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      portal.validateTable(value);
-    }, 500);
-  };
 
   const handlePlaceOrder = async () => {
     const success = await portal.placeOrder();

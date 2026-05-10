@@ -18,6 +18,12 @@ enum Role {
   COCINA
   CAJERO
   CLIENTE
+  BAR
+}
+
+enum StationType {
+  KITCHEN
+  BAR
 }
 
 enum OrderStatus {
@@ -25,6 +31,7 @@ enum OrderStatus {
   VALIDATED
   PREPARING
   READY
+  PARCIAL
   DELIVERED
   COMPLETED
   REJECTED
@@ -89,7 +96,8 @@ model Category {
   id           String  @id @default(uuid())
   name         String
   restaurantId String  @map("restaurant_id")
-  isActive     Boolean @default(true) @map("is_active")
+  targetStation StationType @default(KITCHEN) @map("target_station")
+  isActive      Boolean     @default(true) @map("is_active")
 
   restaurant Restaurant @relation(fields: [restaurantId], references: [id])
   menuItems  MenuItem[]
@@ -192,8 +200,16 @@ model Order {
   totalAmount  Decimal     @default(0) @map("total_amount") @db.Decimal(10, 2)
   notes        String?
   sessionId    String?     @map("session_id")
+  station      StationType? @map("station")
+  parentOrderId String?    @map("parent_order_id")
 
-  // Timestamps de ciclo de vida para analytics de tiempos de cocina
+  // Legacy cross-station flags — kept for backward compat with old mixed orders
+  barReady        Boolean  @default(false) @map("bar_ready")
+  kitchenReady    Boolean  @default(false) @map("kitchen_ready")
+  kitchenPreparing Boolean @default(false) @map("kitchen_preparing")
+  barPreparing    Boolean  @default(false) @map("bar_preparing")
+
+  // Timestamps de ciclo de vida para analytics
   validatedAt  DateTime?   @map("validated_at")  @db.Timestamptz(3)
   preparingAt  DateTime?   @map("preparing_at")  @db.Timestamptz(3)
   readyAt      DateTime?   @map("ready_at")      @db.Timestamptz(3)
@@ -208,6 +224,7 @@ model Order {
   @@unique([id, restaurantId])
   @@index([restaurantId])
   @@index([sessionId])
+  @@index([station])
   @@map("orders")
 }
 

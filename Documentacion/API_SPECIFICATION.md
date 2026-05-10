@@ -1,6 +1,6 @@
 # Especificación Técnica de API — Sistema Menu Bites
 
-**Versión:** 2.2.0 | **Protocolo:** HTTPS | **Formato:** JSON | **Auth:** Supabase Auth (JWT en cookie HttpOnly)
+**Versión:** 2.4.0 | **Protocolo:** HTTPS | **Formato:** JSON | **Auth:** Supabase Auth (JWT en cookie HttpOnly)
 
 Esta documentación detalla los endpoints de la API interna del sistema Menu Bites, utilizada por las interfaces frontend para comunicarse con la capa de persistencia en Supabase.
 
@@ -579,3 +579,165 @@ Comprobante unificado para mesas fusionadas bajo un `session_id`.
 Se ha implementado un patrón de inicialización protegida en todos los endpoints de `customer-portal` (`/api/orders`, `/api/reviews`, `/api/help-request`, `/api/bill-request`) para garantizar la compatibilidad con los entornos de CI/CD de Vercel.
 
 **Garantía de Disponibilidad:** Los endpoints ahora manejan la ausencia de variables de entorno de servidor en tiempo de construcción, eliminando errores de referencia global y permitiendo un despliegue sin fricciones en el pipeline de Turborepo.
+
+---
+
+## 12. API BAR DASHBOARD (Estación de Barra)
+
+Rutas del `bar-dashboard` (puerto 3006). Rol requerido: `BAR`. Cookie de sesión: `sb-bar-session`.
+
+### 12.1 Configuración KDS de Barra
+
+#### `GET /api/settings`
+
+Recupera la configuración KDS de la estación BAR para el restaurante del usuario autenticado.
+
+- **Auth:** Cookie `sb-bar-session` (rol BAR)
+- **Respuesta exitosa:**
+
+```json
+{
+  "thresholds": { "yellow": 5, "red": 12 },
+  "categoryTimes": [
+    { "name": "Cócteles", "minutes": 8 },
+    { "name": "Jugos", "minutes": 3 }
+  ],
+  "sounds": { "newTicket": true, "criticalAlert": true },
+  "autoClear": { "enabled": true, "delaySeconds": 20 }
+}
+```
+
+- **Respuesta sin configuración previa:** `null` (el cliente usa `DEFAULT_SETTINGS`)
+- **Mecanismo:** Lee `kds_settings.settings.BAR` de la tabla `kds_settings` usando el `restaurant_id` del JWT. El acceso a la tabla usa `SUPABASE_SERVICE_ROLE_KEY` para bypass de RLS.
+
+#### `POST /api/settings`
+
+Guarda la configuración KDS de la estación BAR. Utiliza upsert para no sobrescribir la configuración de `KITCHEN`.
+
+- **Auth:** Cookie `sb-bar-session` (rol BAR)
+- **Body:** Objeto `KDSSettings` completo (mismo esquema que GET)
+- **Comportamiento:**
+  1. Lee el registro `kds_settings` actual del restaurante.
+  2. Fusiona la configuración entrante bajo la clave `BAR`: `{ ...current, BAR: incomingSettings }`.
+  3. Hace upsert con `onConflict: 'restaurant_id'`, preservando la clave `KITCHEN` intacta.
+- **Respuesta:** El objeto `KDSSettings` recién guardado para BAR.
+
+**Tipo `KDSSettings` (TypeScript):**
+
+```typescript
+type KDSSettings = {
+  thresholds: { yellow: number; red: number };
+  categoryTimes: { name: string; minutes: number }[];
+  sounds: { newTicket: boolean; criticalAlert: boolean };
+  autoClear: { enabled: boolean; delaySeconds: number };
+};
+```
+
+### 12.2 Alertas de Stock desde Barra
+
+Las alertas de quiebre de stock se insertan mediante la función `sendAlert()` del paquete `@menu-bites/auth`, que escribe directamente en la tabla `alerts` vía Supabase JS SDK (sin pasar por un endpoint dedicado):
+
+```typescript
+// Payload enviado por StockAlertModal del bar-dashboard
+{
+  restaurant_id:  string,   // del JWT
+  user_id:        string,   // del JWT
+  user_email:     string,   // del JWT
+  type:           "STOCK_SHORTAGE",
+  message:        string,   // descripción del quiebre
+  status:         "PENDING",
+  menu_item_name: string | null  // producto afectado (opcional)
+}
+```
+
+Las alertas con `type: STOCK_SHORTAGE` son visibles para el `ADMIN` en el panel de alertas del `local-dashboard`.
+
+### 12.3 Inventario (Lectura)
+
+El `InventoryTab` del modal de configuración lee el inventario del restaurante directamente via Supabase JS SDK:
+
+```
+supabase.from("inventory")
+  .select("id, name, stock, unit")
+  .eq("restaurant_id", restaurantId)
+  .order("name")
+```
+
+No existe un endpoint REST separado para esta lectura — se consume el cliente browser con RLS habilitado.
+
+### 12.4 Ítems de Menú — Toggle Disponibilidad (86 Items)
+
+El `StockOutTab` del modal modifica `menu_items.is_active` directamente via Supabase JS SDK:
+
+```
+supabase.from("menu_items")
+  .update({ is_active: false })
+  .eq("id", itemId)
+```
+
+Esto afecta tanto al `bar-dashboard` (deja de mostrar el ítem en las órdenes) como al `customer-portal` (el ítem desaparece del menú público del restaurante).
+
+### 12.5 Enrutamiento de Pedidos por Estación
+
+Los pedidos se filtran por `categories.target_station` en el hook `useBarOrders()`. La query base incluye:
+
+```sql
+SELECT orders.*, 
+       tables(id, number),
+       order_items(*, menu_items(name, category:categories(target_station)))
+FROM orders
+WHERE restaurant_id = :restaurantId
+  AND status IN ('VALIDATED', 'PREPARING', 'READY')
+ORDER BY createdAt ASC
+```
+
+El filtrado por estación y el cálculo del status virtual se realizan en el `transform` del hook `useRealtimeSync`, en el cliente, para mantener la suscripción Realtime en un único canal por restaurante.
+
+---
+
+## 13. ACTUALIZACIONES DE API EXISTENTES (v2.4.0)
+
+### 13.1 Categorías — Campo `target_station`
+
+El endpoint `GET /api/local/categories` y `POST /api/local/categories` ahora incluyen el campo `target_station`:
+
+```json
+{
+  "id": "uuid",
+  "name": "Cócteles",
+  "restaurant_id": "uuid",
+  "is_active": true,
+  "target_station": "BAR"
+}
+```
+
+Valores válidos: `"KITCHEN"` | `"BAR"`. Determina en qué KDS aparecen los ítems de esa categoría.
+
+### 13.2 Órdenes — Campos de Estado por Estación
+
+El endpoint `GET /api/local/orders` ahora incluye los campos de estado dual-estación en cada orden:
+
+```json
+{
+  "id": "uuid",
+  "status": "PREPARING",
+  "kitchen_preparing": true,
+  "kitchen_ready": false,
+  "bar_preparing": false,
+  "bar_ready": true,
+  "order_items": [...]
+}
+```
+
+### 13.3 `updateOrderStatus()` — Firma Actual
+
+La función pública `updateOrderStatus(orderId, status)` del paquete `@menu-bites/auth` actualiza directamente el campo `status` del pedido:
+
+```ts
+updateOrderStatus(orderId: string, status: string): Promise<{ data, error }>
+```
+
+- **Cada pedido pertenece a una sola estación** (`station = 'KITCHEN' | 'BAR'`). No existe lógica de flags cruzados.
+- El garzón y el cajero llaman a esta función para avanzar el estado (VALIDATED → PREPARING → READY → DELIVERED → COMPLETED).
+- La máquina de estados está validada en BD por el trigger `tr_order_status_validation` (migración 0011).
+

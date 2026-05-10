@@ -1,6 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
-export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'GARZON' | 'COCINA' | 'CAJERO' | 'CLIENTE';
+export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'GARZON' | 'COCINA' | 'CAJERO' | 'CLIENTE' | 'BAR';
+export type StationType = 'KITCHEN' | 'BAR';
 
 export type User = {
   id: string;
@@ -20,6 +21,7 @@ export type Category = {
   id: string;
   name: string;
   restaurantId: string;
+  targetStation: StationType;
   is_active: boolean;
   isActive: boolean;
 };
@@ -68,7 +70,7 @@ export type OrderItem = {
   menu_item_id?: string;
 };
 
-export type OrderStatus = 'PENDING' | 'VALIDATED' | 'PREPARING' | 'READY' | 'DELIVERED' | 'COMPLETED' | 'REJECTED';
+export type OrderStatus = 'PENDING' | 'VALIDATED' | 'PREPARING' | 'READY' | 'PARCIAL' | 'DELIVERED' | 'COMPLETED' | 'REJECTED';
 
 export type Order = {
   id: string;
@@ -79,6 +81,15 @@ export type Order = {
   status: OrderStatus;
   notes: string | null;
   totalAmount: number;
+  station: 'KITCHEN' | 'BAR' | null;
+  parentOrderId: string | null;
+  // Computed by groupOrdersByTable — track sub-order IDs within a grouped card
+  barSubOrderId?: string | null;
+  kitchenSubOrderId?: string | null;
+  barReady: boolean;
+  kitchenReady: boolean;
+  kitchenPreparing: boolean;
+  barPreparing: boolean;
   createdAt: string;
   updatedAt: string;
   tableNumber?: number | null;

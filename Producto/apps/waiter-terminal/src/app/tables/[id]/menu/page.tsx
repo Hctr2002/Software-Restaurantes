@@ -20,6 +20,7 @@ export default function TableMenuPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [cart, setCart] = useState<any[]>([]);
+  const [orderNote, setOrderNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showBillModal, setShowBillModal] = useState(false);
   const [requestingBill, setRequestingBill] = useState(false);
@@ -64,51 +65,59 @@ export default function TableMenuPage() {
         .eq("id", tableId)
         .single();
 
-      // 1. Crear la orden
-      const orderId = crypto.randomUUID();
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          id: orderId,
-          restaurant_id: user.restaurantId,
-          table_id: tableId,
-          session_id: tableData?.session_id || null,
-          status: "PENDING", // Pasa a cocina para validación/preparación
-          total_amount: total,
-          notes: orderNotes || null
-        })
-        .select()
-        .single();
+      // Map each category to its station
+      const categoryStationMap = new Map<string, 'KITCHEN' | 'BAR'>(
+        categories.map((cat: any) => [cat.id, (cat.target_station ?? 'KITCHEN') as 'KITCHEN' | 'BAR'])
+      );
+      // Map each menu item to its station via category
+      const itemStationMap = new Map<string, 'KITCHEN' | 'BAR'>(
+        menu.map((item) => [item.id, categoryStationMap.get(item.categoryId ?? '') ?? 'KITCHEN'])
+      );
 
-      if (orderError) throw orderError;
+      const kitchenItems = cart.filter((i) => itemStationMap.get(i.id) === 'KITCHEN');
+      const barItems     = cart.filter((i) => itemStationMap.get(i.id) === 'BAR');
 
-      // 2. Insertar ítems
-      const orderItems = cart.map((item) => ({
-        id: crypto.randomUUID(),
-        order_id: order.id,
-        menu_item_id: item.id,
-        restaurant_id: user.restaurantId,
-        quantity: item.quantity,
-        unit_price: item.price
-      }));
+      const createSubOrder = async (items: typeof cart, station: 'KITCHEN' | 'BAR', parentId?: string) => {
+        const stationTotal = items.reduce((acc, i) => acc + i.price * i.quantity, 0);
+        const { data: order, error: orderError } = await supabase
+          .from("orders")
+          .insert({
+            restaurant_id: user.restaurantId,
+            table_id: tableId,
+            session_id: tableData?.session_id || null,
+            status: "VALIDATED",
+            validated_at: new Date().toISOString(),
+            total_amount: items.length === cart.length ? total : stationTotal,
+            station,
+            parent_order_id: parentId ?? null,
+            notes: orderNote.trim() || null
+          })
+          .select()
+          .single();
+        if (orderError) throw orderError;
 
-      const { error: itemsError } = await supabase
-        .from("order_items")
-        .insert(orderItems);
+        const { error: itemsError } = await supabase.from("order_items").insert(
+          items.map((item) => ({
+            order_id: order.id,
+            menu_item_id: item.id,
+            quantity: item.quantity,
+            unit_price: item.price,
+            restaurant_id: user.restaurantId
+          }))
+        );
+        if (itemsError) throw itemsError;
+        return order.id as string;
+      };
 
-      if (itemsError) throw itemsError;
+      const orderIds: string[] = [];
+      if (kitchenItems.length > 0) orderIds.push(await createSubOrder(kitchenItems, 'KITCHEN'));
+      if (barItems.length > 0)     orderIds.push(await createSubOrder(barItems, 'BAR', orderIds[0] ?? undefined));
 
-      // 3. Marcar mesa como OCUPADA
-      await supabase
-        .from("tables")
-        .update({ status: "OCCUPIED" })
-        .eq("id", tableId);
-
-      // 4. Éxito: volver al inicio
+      await supabase.from("tables").update({ status: "OCCUPIED" }).eq("id", tableId);
       router.push("/");
     } catch (err: any) {
-      console.error("Error al enviar pedido:", err?.message || JSON.stringify(err));
-      alert(`Error al enviar a cocina: ${err?.message || 'Revisa la consola'}`);
+      console.error("Error al enviar pedido:", err?.message || err?.code || JSON.stringify(err));
+      alert("Error al enviar pedido. Inténtelo de nuevo.");
     } finally {
       setSubmitting(false);
     }
@@ -238,30 +247,28 @@ export default function TableMenuPage() {
               </button>
             </div>
 
-            <div className="mt-2 mb-2">
-              <input
-                type="text"
-                placeholder="Notas para la cocina (ej: sin sal, sin hielo)..."
-                value={orderNotes}
-                onChange={(e) => setOrderNotes(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white text-xs placeholder:text-white/20 focus:outline-none focus:border-sage/50"
-              />
-            </div>
+            <input
+              type="text"
+              placeholder="Nota para preparación (ej: sin sal, alergia...)"
+              value={orderNote}
+              onChange={(e) => setOrderNote(e.target.value)}
+              className="w-full text-xs px-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/20"
+            />
 
             <div className="flex space-x-3">
-              <button 
-                onClick={() => alert("Función de detalle en construcción")}
-                className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all border border-white/5"
+              <button
+                onClick={() => setCart([])}
+                className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all border border-white/5 text-white/60"
               >
-                Revisar ({cart.length})
+                Limpiar
               </button>
-              <button 
+              <button
                 onClick={handleSubmitOrder}
                 disabled={submitting}
                 className="flex-[2] py-4 bg-sage text-navy font-black uppercase tracking-widest rounded-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center shadow-xl shadow-black/30 text-[10px] disabled:opacity-50"
               >
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="mr-2 w-4 h-4" />}
-                Enviar a Cocina
+                Enviar Pedido
               </button>
             </div>
           </div>

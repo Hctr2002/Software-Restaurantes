@@ -8,14 +8,15 @@ Este manual describe cada pantalla, flujo de trabajo y lógica de negocio de tod
 
 ## ÍNDICE DE APLICACIONES
 
-| Aplicación | Rol Principal | Sección |
-|---|---|---|
-| Admin Dashboard | SUPER_ADMIN | [Sección 1](#1-panel-de-administración-global-admin-dashboard) |
-| Local Dashboard | ADMIN | [Sección 2](#2-dashboard-operativo-local-local-dashboard) |
-| Kitchen KDS | COCINA | [Sección 3](#3-pantalla-de-cocina-kitchen-kds) |
-| Waiter Terminal | GARZON | [Sección 4](#4-terminal-de-garzón-waiter-terminal) |
-| Cashier Dashboard | CAJERO | [Sección 5](#5-terminal-de-caja-cashier-dashboard) |
-| Customer Portal | CLIENTE | [Sección 6](#6-portal-del-cliente-customer-portal) |
+| Aplicación | Rol Principal | Puerto Dev | Sección |
+|---|---|---|---|
+| Admin Dashboard | SUPER_ADMIN | 3000 | [Sección 1](#1-panel-de-administración-global-admin-dashboard) |
+| Local Dashboard | ADMIN | 3003 | [Sección 2](#2-dashboard-operativo-local-local-dashboard) |
+| Kitchen KDS | COCINA | 3001 | [Sección 3](#3-pantalla-de-cocina-kitchen-kds) |
+| Waiter Terminal | GARZON | 3002 | [Sección 4](#4-terminal-de-garzón-waiter-terminal) |
+| Cashier Dashboard | CAJERO | 3004 | [Sección 5](#5-terminal-de-caja-cashier-dashboard) |
+| Customer Portal | CLIENTE | 3005 | [Sección 6](#6-portal-del-cliente-customer-portal) |
+| Bar Dashboard | BAR | 3006 | [Sección 7](#7-estación-de-barra-bar-dashboard) |
 
 ---
 
@@ -705,13 +706,111 @@ El Service Worker se actualiza automáticamente en cada nueva build del proyecto
 
 ---
 
-## 7. TABLA MAESTRA DE ROLES Y PERMISOS
+## 7. ESTACIÓN DE BARRA (Bar Dashboard)
+
+Panel KDS dedicado para el personal de barra. Gestiona únicamente los pedidos que contienen ítems de categorías con `target_station = BAR` (bebidas, cócteles, jugos, etc.).
+
+### 7.1 Pantalla Principal
+
+La interfaz se organiza en tres columnas, con actualización en tiempo real via Supabase Realtime:
+
+| Columna | Estado | Descripción |
+|---|---|---|
+| **Pedidos Nuevos** | VALIDATED | Pedidos llegados a la barra, listos para preparar |
+| **En Barra** | PREPARING | Bebidas en proceso de preparación |
+| **Para Despacho** | READY | Bebidas listas para entregar al garzón |
+
+Cada ticket muestra: número de mesa, ítems de barra, notas especiales, tiempo transcurrido y código de urgencia de color (verde / amarillo / rojo según umbrales configurados).
+
+### 7.2 Acciones sobre un Ticket
+
+| Acción | Descripción |
+|---|---|
+| **Iniciar preparación** | Mueve el ticket de "Pedidos Nuevos" a "En Barra"; marca `bar_preparing = true` en la orden |
+| **Marcar listo** | Mueve el ticket a "Para Despacho"; marca `bar_ready = true`. Si la cocina también terminó (o no hay ítems de cocina), la orden pasa a READY globalmente |
+| **Descartar** | Oculta el ticket de la vista local sin modificar la base de datos (útil para limpiar pantalla) |
+
+### 7.3 Header de Estadísticas
+
+El `PremiumHeader` muestra en tiempo real:
+- **Nuevos:** tickets pendientes de atender
+- **En Barra:** tickets en preparación activa
+- **Listos:** tickets listos para despacho
+
+### 7.4 Modal de Configuración (⚙️ Ajustes)
+
+Seis pestañas de configuración, persistidas en la tabla `kds_settings` bajo la clave `BAR`:
+
+**Sin Stock (86 Items)**
+- Lista todos los ítems de menú de categorías BAR del restaurante.
+- Desactivar un ítem desde aquí escribe `is_active = false` en `menu_items`, ocultándolo también en el Customer Portal.
+- Útil para marcar bebidas agotadas durante el turno.
+
+**Tiempos por Bebida**
+- Define tiempos objetivo de preparación por categoría (ej: Cócteles → 8 min, Jugos → 3 min).
+- Referencial: no bloquea transiciones, pero informa al personal.
+
+**Alertas de Tiempo**
+- **Umbral Amarillo:** minutos antes de que el ticket se resalte en amarillo (alerta de demora).
+- **Umbral Rojo:** minutos antes de que el ticket se resalte en rojo (alerta crítica).
+
+**Notificaciones**
+- Activar/desactivar sonido al llegar un nuevo ticket.
+- Activar/desactivar sonido de alerta crítica (cuando un ticket pasa al umbral rojo).
+
+**Auto-despacho**
+- Configura si los tickets READY se ocultan automáticamente tras N segundos.
+- Útil en turnos de alta demanda para mantener la pantalla limpia.
+
+**Inventario**
+- Vista de lectura del inventario actual del restaurante.
+- Permite al personal de barra verificar stock de insumos sin salir del dashboard.
+
+### 7.5 Modal de Quiebre de Stock (⚠️ Alerta Stock)
+
+Permite al barman reportar un quiebre de stock directamente desde la barra:
+
+1. Presionar el botón **"Alerta Stock"** en el header.
+2. Ingresar el nombre del producto afectado (opcional).
+3. Escribir el mensaje descriptivo del quiebre.
+4. Presionar **"Enviar Alerta"**.
+
+El sistema inserta un registro en la tabla `alerts` con `type: STOCK_SHORTAGE`, visible para el ADMIN en el Local Dashboard.
+
+### 7.6 Login del Barman
+
+- URL: `http://localhost:3006/login` (dev) o el dominio de producción.
+- Credenciales de email + contraseña.
+- Solo acepta usuarios con `role = BAR`. Cualquier otro rol recibe el error: *"Esta app es exclusiva para la Barra."*
+- Tras login exitoso, redirige a `/` donde carga el KDS de barra.
+
+### 7.7 Flujo de Pedido Mixto (Cocina + Barra)
+
+Cuando un pedido contiene ítems de ambas estaciones:
+
+```
+Cliente ordena: [Pizza Margherita (KITCHEN)] + [Pisco Sour (BAR)]
+
+Cocina ve: solo "Pizza Margherita"
+Barra ve:  solo "Pisco Sour"
+
+Cocina marca READY → kitchen_ready = true → status global = PREPARING (barra aún trabaja)
+Barra marca READY  → bar_ready = true     → status global = READY (ambas listas)
+
+Garzón recibe notificación: pedido completo listo para entregar
+```
+
+---
+
+## 8. TABLA MAESTRA DE ROLES Y PERMISOS
 
 | Rol | App Principal | Puede crear pedidos | Puede cambiar estado pedido | Puede editar menú | Puede ver reportes |
 |---|---|---|---|---|---|
 | `SUPER_ADMIN` | Admin Dashboard | No | No | No | Solo globales |
 | `ADMIN` | Local Dashboard | Si | Todos los estados | Si | Si |
 | `GARZON` | Waiter Terminal | Si | VALIDATED, REJECTED, DELIVERED | No | No |
-| `COCINA` | Kitchen KDS | No | PREPARING, READY | No | No |
+| `COCINA` | Kitchen KDS | No | PREPARING, READY (estación KITCHEN) | No | No |
 | `CAJERO` | Cashier Dashboard | No | No (solo cierre) | No | Solo turno |
+| `BAR` | Bar Dashboard | No | PREPARING, READY (estación BAR) | No | No (solo inventario) |
+| `CLIENTE` | Customer Portal | Si (anónimo) | No | No | No |
 | `CLIENTE` | Customer Portal | Si (propio) | No | No | No |

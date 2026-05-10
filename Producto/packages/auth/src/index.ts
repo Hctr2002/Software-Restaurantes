@@ -25,14 +25,15 @@ export const signOut = async () => {
 };
 
 const STATUS_TIMESTAMP: Record<string, string> = {
-  VALIDATED:  "validated_at",
-  PREPARING:  "preparing_at",
-  READY:      "ready_at",
+  VALIDATED: "validated_at",
+  PREPARING: "preparing_at",
+  READY:     "ready_at",
 };
 
+// Each order now belongs to a single station — direct status update, no cross-station logic.
 export const updateOrderStatus = async (orderId: string, status: string) => {
-  const timestampField = STATUS_TIMESTAMP[status];
   const payload: Record<string, unknown> = { status };
+  const timestampField = STATUS_TIMESTAMP[status];
   if (timestampField) payload[timestampField] = new Date().toISOString();
 
   const { data, error } = await supabase
@@ -122,3 +123,4 @@ export const getRestaurantTheme = async (restaurantId: string) => {
 export * from "./hooks";
 export * from "./utils";
 export * from "./constants";
+export * from "./auditLog";

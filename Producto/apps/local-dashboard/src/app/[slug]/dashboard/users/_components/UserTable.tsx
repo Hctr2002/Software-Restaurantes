@@ -19,6 +19,7 @@ function roleVariant(role: string): BadgeVariant {
   if (role === "COCINA") return "warning";
   if (role === "CAJERO") return "success";
   if (role === "GARZON") return "neutral";
+  if (role === "BAR") return "info";
   return "neutral";
 }
 
