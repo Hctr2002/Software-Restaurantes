@@ -1,5 +1,5 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -17,8 +17,9 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(auth)/login',
+  initialRouteName: '(tabs)',
 };
+
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -32,10 +33,11 @@ function InitialLayout() {
     if (loading) return;
 
     const inAuthGroup = (segments[0] as string) === '(auth)';
+    const inTabsGroup = (segments[0] as string) === '(tabs)';
 
-    if (!session && !inAuthGroup) {
-      // Redirect to login if not authenticated
-      router.replace('/(auth)/login' as any);
+    if (!session && !inAuthGroup && !inTabsGroup) {
+      // Redirect to login if not authenticated and not in tabs/auth
+      router.replace('/(tabs)' as any);
     } else if (session) {
       // Determine the target group based on role
       let targetGroup = '(tabs)'; // Default to client
@@ -52,11 +54,18 @@ function InitialLayout() {
   }, [session, loading, segments, role]);
 
   return (
-    <Stack>
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="(super-admin)" options={{ headerShown: false }} />
-      <Stack.Screen name="(admin)" options={{ headerShown: false }} />
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: '#020617' },
+        animation: 'fade',
+      }}
+    >
+      <Stack.Screen name="index" />
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(super-admin)" />
+      <Stack.Screen name="(admin)" />
       <Stack.Screen name="(waiter)" options={{ headerShown: false }} />
       <Stack.Screen name="(kitchen)" options={{ headerShown: false }} />
       <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Detalles' }} />
@@ -71,23 +80,27 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (error) throw error;
-  }, [error]);
-
-  useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
+  const customDarkTheme = {
+    ...DarkTheme,
+    colors: {
+      ...DarkTheme.colors,
+      background: '#020617',
+      card: '#020617',
+      text: '#F7F4F3',
+    },
+  };
+
+  if (!loaded) return null;
 
   return (
     <AuthProvider>
       <RestaurantThemeProvider>
-        <ThemeProvider value={DarkTheme}>
+        <ThemeProvider value={customDarkTheme}>
           <InitialLayout />
         </ThemeProvider>
       </RestaurantThemeProvider>

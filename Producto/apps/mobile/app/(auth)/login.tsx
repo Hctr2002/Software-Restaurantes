@@ -130,7 +130,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MB_COLORS.navy,
+    backgroundColor: '#020617',
   },
   bgCircle1: {
     position: 'absolute',
