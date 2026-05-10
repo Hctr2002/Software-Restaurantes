@@ -7,8 +7,8 @@ interface CategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   editingCat: Category | null;
-  form: { name: string; is_active: boolean };
-  setForm: (form: { name: string; is_active: boolean }) => void;
+  form: { name: string; is_active: boolean; target_station: "KITCHEN" | "BAR" };
+  setForm: (form: { name: string; is_active: boolean; target_station: "KITCHEN" | "BAR" }) => void;
   saving: boolean;
   onSave: () => void;
 }
@@ -61,6 +61,29 @@ export function CategoryModal({
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
+        </div>
+        <div className="space-y-3">
+          <label className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] px-1">
+            Estación de preparación *
+          </label>
+          <div className="flex gap-3">
+            {(["KITCHEN", "BAR"] as const).map((station) => (
+              <button
+                key={station}
+                type="button"
+                onClick={() => setForm({ ...form, target_station: station })}
+                className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                  form.target_station === station
+                    ? station === "BAR"
+                      ? "bg-purple-500/20 border-purple-500/60 text-purple-300"
+                      : "bg-primary/20 border-primary/60 text-primary"
+                    : "bg-white/5 border-white/10 text-foreground/40 hover:border-white/20"
+                }`}
+              >
+                {station === "KITCHEN" ? "Cocina" : "Barra"}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5">
           <input

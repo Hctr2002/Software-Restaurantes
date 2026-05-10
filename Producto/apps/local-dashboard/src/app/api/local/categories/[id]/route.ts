@@ -11,12 +11,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
 
   const body = await req.json();
-  const { name, is_active } = body;
+  const { name, is_active, target_station } = body;
 
   const db = createServiceClient();
   const { data, error } = await db
     .from("categories")
-    .update({ name: name?.trim(), is_active })
+    .update({ name: name?.trim(), is_active, ...(target_station && { target_station }) })
     .eq("id", id)
     .eq("restaurant_id", restaurantId)
     .select()

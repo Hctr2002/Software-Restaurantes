@@ -19,12 +19,12 @@ export function useRealtimeOrders(restaurantId: string | undefined, options: Rea
   const statusesStr = JSON.stringify(statuses);
 
   const fetchFn = useCallback(async () => {
+    if (!restaurantId) return { data: [], error: null };
     let query = supabase
       .from("orders")
       .select(`
         *,
         table:tables(id, number),
-        users(email),
         order_items(*, menu_items(name, category:categories(target_station)))
       `)
       .eq("restaurant_id", restaurantId)
@@ -48,32 +48,42 @@ export function useRealtimeOrders(restaurantId: string | undefined, options: Rea
     { 
       channelId: `orders-${statusesStr}-${station || 'all'}`,
       transform: (data) => {
-        let mapped = (data as any[]).map(mapOrder);
+        if (!Array.isArray(data)) {
+          console.warn(`[RealtimeOrders] Expected array but received:`, typeof data, data);
+          return [];
+        }
+
+        let mapped = data.map(mapOrder);
         
         if (station) {
-          // Filtrar órdenes que tengan al menos un item para esta estación
-          // Y filtrar los items de la orden para que solo muestre los de esa estación
+          const isKitchen = station === "KITCHEN";
           return mapped.filter(order => {
-            const items = order.order_items || order.orderItems || [];
-            const hasStationItems = items.some((item: any) => 
+            const rawItems = order.order_items || [];
+            const hasStationItems = rawItems.some((item: any) =>
               item.menu_items?.category?.target_station === station
             );
-            
-            if (hasStationItems) {
-              // Mutamos/filtramos los items para que el dashboard solo vea lo suyo
-              if (order.order_items) {
-                order.order_items = order.order_items.filter((item: any) => 
-                  item.menu_items?.category?.target_station === station
-                );
-              }
-              if (order.orderItems) {
-                order.orderItems = order.orderItems.filter((item: any) => 
-                  item.menuItem?.category?.targetStation === station
-                );
-              }
-              return true;
+            if (!hasStationItems) return false;
+
+            // Calcular status independiente para esta estación
+            const stationReady     = isKitchen ? order.kitchenReady     : order.barReady;
+            const stationPreparing = isKitchen ? order.kitchenPreparing : order.barPreparing;
+            if (stationReady) {
+              order.status = "READY";
+            } else if (stationPreparing) {
+              order.status = "PREPARING";
+            } else {
+              order.status = "VALIDATED";
             }
-            return false;
+
+            // Filtrar items para que solo se vean los de esta estación
+            order.order_items = rawItems.filter((item: any) =>
+              item.menu_items?.category?.target_station === station
+            );
+            order.orderItems = (order.orderItems || []).filter((item: any) =>
+              item.menuItem?.category?.targetStation === station
+            );
+
+            return true;
           });
         }
         
@@ -103,7 +113,7 @@ export function useBarOrders(restaurantId: string | undefined) {
 
 export function useRealtimeStats(restaurantId: string | undefined) {
   const fetchFn = useCallback(async () => {
-    if (!restaurantId) return { data: null, error: "No restaurant ID" };
+    if (!restaurantId) return { data: null, error: null };
     try {
       const response = await fetch(`/api/local/stats`, { cache: 'no-store' });
       if (response.ok) {

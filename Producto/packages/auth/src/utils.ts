@@ -34,13 +34,22 @@ export const mapOrder = (o: any): Order => ({
   validatedAt: o.validated_at,
   preparingAt: o.preparing_at,
   readyAt: o.ready_at,
+  kitchenReady: o.kitchen_ready ?? o.kitchenReady ?? false,
+  barReady: o.bar_ready ?? o.barReady ?? false,
+  kitchenPreparing: o.kitchen_preparing ?? o.kitchenPreparing ?? false,
+  barPreparing: o.bar_preparing ?? o.barPreparing ?? false,
   orderItems: (o.order_items || o.items)?.map((oi: any) => ({
     ...oi,
     orderId: oi.order_id,
     menuItemId: oi.menu_item_id,
     restaurantId: oi.restaurant_id,
     unitPrice: Number(oi.unit_price),
-    menuItem: oi.menu_items || oi.menu_item ? { name: (oi.menu_items || oi.menu_item).name } : null
+    menuItem: oi.menu_items || oi.menu_item ? {
+      name: (oi.menu_items || oi.menu_item).name,
+      category: (oi.menu_items || oi.menu_item).category
+        ? { targetStation: (oi.menu_items || oi.menu_item).category.target_station }
+        : null
+    } : null
   }))
 });
 

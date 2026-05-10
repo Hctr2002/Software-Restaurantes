@@ -80,6 +80,8 @@ export type Order = {
   totalAmount: number;
   barReady: boolean;
   kitchenReady: boolean;
+  kitchenPreparing: boolean;
+  barPreparing: boolean;
   createdAt: string;
   updatedAt: string;
   validatedAt?: string | null;

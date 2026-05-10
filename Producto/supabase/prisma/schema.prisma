@@ -198,8 +198,10 @@ model Order {
   totalAmount  Decimal     @default(0) @map("total_amount") @db.Decimal(10, 2)
   notes        String?
   sessionId    String?     @map("session_id")
-  barReady     Boolean     @default(false) @map("bar_ready")
-  kitchenReady Boolean     @default(false) @map("kitchen_ready")
+  barReady        Boolean  @default(false) @map("bar_ready")
+  kitchenReady    Boolean  @default(false) @map("kitchen_ready")
+  kitchenPreparing Boolean @default(false) @map("kitchen_preparing")
+  barPreparing    Boolean  @default(false) @map("bar_preparing")
 
   // Timestamps de ciclo de vida para analytics de tiempos de cocina
   validatedAt  DateTime?   @map("validated_at")  @db.Timestamptz(3)

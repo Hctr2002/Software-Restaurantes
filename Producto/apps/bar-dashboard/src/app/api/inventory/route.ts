@@ -22,7 +22,7 @@ async function getRestaurantId(): Promise<string | null> {
         getAll: () => cookieStore.getAll(),
         setAll: () => {},
       },
-      cookieOptions: { name: 'sb-kds-session' },
+      cookieOptions: { name: 'sb-bar-session' },
     }
   );
   const { data: { session } } = await supabase.auth.getSession();

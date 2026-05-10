@@ -19,6 +19,7 @@ export default function TableMenuPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [cart, setCart] = useState<any[]>([]);
+  const [orderNote, setOrderNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const loading = menuLoading || tableLoading;
@@ -56,8 +57,10 @@ export default function TableMenuPage() {
           restaurant_id: user.restaurantId,
           table_id: tableId,
           user_id: user.id,
-          status: "PENDING", // Pasa a cocina para validación/preparación
-          total_amount: total
+          status: "VALIDATED",
+          validated_at: new Date().toISOString(),
+          total_amount: total,
+          notes: orderNote.trim() || null
         })
         .select()
         .single();
@@ -180,14 +183,21 @@ export default function TableMenuPage() {
               </button>
             </div>
 
+            <input
+              type="text"
+              placeholder="Nota para cocina (ej: sin sal, alergia...)"
+              value={orderNote}
+              onChange={(e) => setOrderNote(e.target.value)}
+              className="w-full text-xs px-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/20"
+            />
             <div className="flex space-x-3">
-              <button 
-                onClick={() => alert("Función de detalle en construcción")}
-                className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all border border-white/5"
+              <button
+                onClick={() => setCart([])}
+                className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all border border-white/5 text-white/60"
               >
-                Revisar ({cart.length})
+                Limpiar
               </button>
-              <button 
+              <button
                 onClick={handleSubmitOrder}
                 disabled={submitting}
                 className="flex-[2] py-4 bg-sage text-navy font-black uppercase tracking-widest rounded-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center shadow-xl shadow-black/30 text-[10px] disabled:opacity-50"

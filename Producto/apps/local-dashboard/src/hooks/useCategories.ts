@@ -10,7 +10,7 @@ export function useCategories() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCat, setEditingCat] = useState<Category | null>(null);
-  const [form, setForm] = useState({ name: "", is_active: true });
+  const [form, setForm] = useState({ name: "", is_active: true, target_station: "KITCHEN" as "KITCHEN" | "BAR" });
 
   const fetchCategories = useCallback(async () => {
     setLoading(true);
@@ -33,13 +33,13 @@ export function useCategories() {
 
   const openCreate = () => {
     setEditingCat(null);
-    setForm({ name: "", is_active: true });
+    setForm({ name: "", is_active: true, target_station: "KITCHEN" });
     setIsModalOpen(true);
   };
 
   const openEdit = (cat: Category) => {
     setEditingCat(cat);
-    setForm({ name: cat.name, is_active: cat.is_active });
+    setForm({ name: cat.name, is_active: cat.is_active, target_station: ((cat.targetStation ?? (cat as any).target_station ?? "KITCHEN") as "KITCHEN" | "BAR") });
     setIsModalOpen(true);
   };
 

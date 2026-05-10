@@ -34,8 +34,11 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
   const readyOrders = orders.filter((o) => o.status === "READY");
   const partiallyReadyOrders = orders.filter((o) => (o.barReady || o.kitchenReady) && o.status !== "READY" && o.status !== "DELIVERED");
 
-  const handleValidate = async (orderId: string) => {
+  const handleValidate = async (orderId: string, note?: string) => {
     setProcessingId(orderId);
+    if (note?.trim()) {
+      await supabase.from("orders").update({ notes: note.trim() }).eq("id", orderId);
+    }
     await updateOrderStatus(orderId, "VALIDATED");
     setProcessingId(null);
   };
@@ -157,9 +160,9 @@ export function useCustomerPortal(restaurantId: string | undefined, tableNumber?
       return { data, error };
     }, [table.data?.id]),
     {
-      channelId: `table-portal-${table.data?.id}`,
+      channelId: `table-portal-${table.data?.id ?? "none"}`,
       filter: table.data?.id ? `id=eq.${table.data.id}` : undefined,
-      transform: mapTable
+      transform: (data: any) => data ? mapTable(data) : null,
     }
   );
 
@@ -246,10 +249,10 @@ export function useCustomerOrderTracker(orderId: string | null) {
     undefined,
     "orders",
     fetchFn,
-    { 
-      channelId: `tracker-${orderId}`, 
-      filter: `id=eq.${orderId}`,
-      initialData: null 
+    {
+      channelId: `tracker-${orderId ?? "none"}`,
+      filter: orderId ? `id=eq.${orderId}` : undefined,
+      initialData: null
     }
   );
 

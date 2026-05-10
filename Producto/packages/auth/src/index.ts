@@ -32,16 +32,33 @@ const STATUS_TIMESTAMP: Record<string, string> = {
 
 export const updateOrderStatus = async (orderId: string, status: string, station?: StationType) => {
   const timestampField = STATUS_TIMESTAMP[status];
-  const payload: Record<string, unknown> = { status };
+  const payload: Record<string, unknown> = {};
   if (timestampField) payload[timestampField] = new Date().toISOString();
 
-  // Si se proporciona una estación y el estado es READY, actualizamos el flag específico
-  if (station && status === "READY") {
-    const readyField = station === "BAR" ? "bar_ready" : "kitchen_ready";
-    payload[readyField] = true;
+  if (!station) {
+    // Sin estación: actualización directa del estado global (garzon, cajero, etc.)
+    payload.status = status;
+    const { data, error } = await supabase.from("orders").update(payload).eq("id", orderId).select();
+    return { data, error };
+  }
 
-    // Lógica inteligente: ¿Debería el pedido completo estar READY?
-    // Primero obtenemos el estado actual de la otra estación
+  const isKitchen = station === "KITCHEN";
+  const preparingField = isKitchen ? "kitchen_preparing" : "bar_preparing";
+  const readyField     = isKitchen ? "kitchen_ready"     : "bar_ready";
+
+  if (status === "PREPARING") {
+    // Solo marca esta estación como en preparación; no toca la otra estación ni el status global.
+    payload[preparingField] = true;
+    payload.status = "PREPARING"; // el pedido global pasa a PREPARING si no lo estaba aún
+    const { data, error } = await supabase.from("orders").update(payload).eq("id", orderId).select();
+    return { data, error };
+  }
+
+  if (status === "READY") {
+    payload[readyField]     = true;
+    payload[preparingField] = false;
+
+    // Consultamos el estado actual para decidir si el pedido global ya puede ser READY
     const { data: currentOrder } = await supabase
       .from("orders")
       .select("bar_ready, kitchen_ready, order_items(menu_items(category:categories(target_station)))")
@@ -50,27 +67,24 @@ export const updateOrderStatus = async (orderId: string, status: string, station
 
     if (currentOrder) {
       const items = currentOrder.order_items || [];
-      const hasOtherStationItems = items.some((item: any) => 
-        item.menu_items?.category?.target_station !== station
+      const otherStation = isKitchen ? "BAR" : "KITCHEN";
+      const hasOtherStationItems = items.some(
+        (item: any) => item.menu_items?.category?.target_station === otherStation
       );
+      const otherStationReady = isKitchen ? currentOrder.bar_ready : currentOrder.kitchen_ready;
 
-      const otherStationReady = station === "BAR" ? currentOrder.kitchen_ready : currentOrder.bar_ready;
-
-      // Si no tiene items de la otra estación, o la otra estación ya está lista
-      if (!hasOtherStationItems || otherStationReady) {
-        payload.status = "READY";
-      } else {
-        // El pedido sigue en PREPARING porque falta la otra estación
-        payload.status = "PREPARING";
-      }
+      payload.status = (!hasOtherStationItems || otherStationReady) ? "READY" : "PREPARING";
+    } else {
+      payload.status = "READY";
     }
+
+    const { data, error } = await supabase.from("orders").update(payload).eq("id", orderId).select();
+    return { data, error };
   }
 
-  const { data, error } = await supabase
-    .from("orders")
-    .update(payload)
-    .eq("id", orderId)
-    .select();
+  // Cualquier otro estado (DELIVERED, COMPLETED, REJECTED): actualización directa
+  payload.status = status;
+  const { data, error } = await supabase.from("orders").update(payload).eq("id", orderId).select();
   return { data, error };
 };
 

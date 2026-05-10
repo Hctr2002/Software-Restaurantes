@@ -276,7 +276,7 @@ export default function WaiterDashboard() {
                               savingNoteId={orders.savingNoteId}
                               onNoteChange={(id, val) => orders.setNotesByOrder((p) => ({ ...p, [id]: val }))}
                               onSaveNote={orders.handleSaveNote}
-                              onValidate={(order) => orders.handleValidate(order.id)}
+                              onValidate={(order) => orders.handleValidate(order.id, orders.notesByOrder[order.id])}
                               onReject={(order) => orders.handleReject(order.id, order.tableId)}
                             />
                           </motion.div>

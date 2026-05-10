@@ -21,7 +21,7 @@ export async function proxy(req: NextRequest) {
           );
         },
       },
-      cookieOptions: { name: 'sb-kds-session' },
+      cookieOptions: { name: 'sb-bar-session' },
     }
   );
 
@@ -29,7 +29,7 @@ export async function proxy(req: NextRequest) {
   const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
   const rawRole = session?.user?.app_metadata?.role;
   const role = Array.isArray(rawRole) ? rawRole[0] : rawRole;
-  const isKitchen = String(role).toUpperCase() === 'COCINA';
+  const isBar = String(role).toUpperCase() === 'BAR';
 
   // Sin sesión → central login
   if (!session) {
@@ -37,7 +37,7 @@ export async function proxy(req: NextRequest) {
   }
 
   // Rol incorrecto → central login
-  if (!isKitchen) {
+  if (!isBar) {
     return NextResponse.redirect(new URL(authUrl, req.url));
   }
 

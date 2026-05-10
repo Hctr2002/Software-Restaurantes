@@ -52,11 +52,12 @@ export default function LoginPage() {
       const hasRestaurant = restaurantId && String(restaurantId).trim() !== "" && String(restaurantId) !== "null" && String(restaurantId) !== "undefined";
 
       // 1. ROLES OPERATIVOS: Siempre redirigen a sus apps
-      if (['COCINA', 'GARZON', 'CAJERO'].includes(roleUpper)) {
+      if (['COCINA', 'GARZON', 'CAJERO', 'BAR'].includes(roleUpper)) {
         const callbackBases: Record<string, string | undefined> = {
           COCINA: process.env.NEXT_PUBLIC_KITCHEN_URL,
           GARZON: process.env.NEXT_PUBLIC_WAITER_URL,
           CAJERO: process.env.NEXT_PUBLIC_CASHIER_URL,
+          BAR: process.env.NEXT_PUBLIC_BAR_URL,
         };
         const callbackBase = callbackBases[roleUpper];
         if (callbackBase) {

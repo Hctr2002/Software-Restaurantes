@@ -2,7 +2,7 @@
  
  import React, { useState, useEffect } from "react";
  import { cn } from "../lib/utils";
- import { Clock, CheckCircle2, PlayCircle, Utensils, AlertCircle, GlassWater } from "lucide-react";
+ import { Clock, CheckCircle2, PlayCircle, Utensils, AlertCircle, GlassWater, MessageSquare, X } from "lucide-react";
  import { motion, AnimatePresence } from "framer-motion";
  import { OrderItem, OrderStatus } from "@menu-bites/auth";
  
@@ -12,11 +12,13 @@
    status: OrderStatus;
    createdAt: string;
    items: OrderItem[];
+   notes?: string | null;
    onStatusChange: (newStatus: OrderStatus) => void;
+   onDismiss?: () => void;
    type?: 'KITCHEN' | 'BAR';
  }
- 
- export const OrderTicket = ({ id, tableNumber, status, createdAt, items, onStatusChange, type = 'KITCHEN' }: OrderTicketProps) => {
+
+ export const OrderTicket = ({ id, tableNumber, status, createdAt, items, notes, onStatusChange, onDismiss, type = 'KITCHEN' }: OrderTicketProps) => {
    const [elapsed, setElapsed] = useState(0);
  
    useEffect(() => {
@@ -83,6 +85,16 @@
          </div>
        </div>
  
+       {notes && (
+         <div className={cn(
+           "flex items-start gap-3 px-4 py-3 rounded-2xl border mb-6 relative z-10",
+           type === 'BAR' ? "bg-purple-500/10 border-purple-500/20" : "bg-amber-500/10 border-amber-500/20"
+         )}>
+           <MessageSquare className={cn("w-4 h-4 mt-0.5 shrink-0", type === 'BAR' ? "text-purple-400" : "text-amber-400")} />
+           <p className={cn("text-xs font-bold italic leading-relaxed", type === 'BAR' ? "text-purple-200" : "text-amber-200")}>{notes}</p>
+         </div>
+       )}
+
        <div className="flex-1 space-y-3.5 mb-10 relative z-10">
          {items.map((item, idx) => (
            <motion.div 
@@ -151,9 +163,22 @@
                   </motion.button>
                 )}
                 {status === "READY" && (
-                  <div className="flex-1 py-5 bg-white/5 border border-white/10 text-emerald-500 rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.25em] flex items-center justify-center space-x-3">
-                    <CheckCircle2 className="w-5 h-5" />
-                    <span>Listo</span>
+                  <div className="flex flex-1 gap-3">
+                    <div className="flex-1 py-5 bg-white/5 border border-white/10 text-emerald-500 rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.25em] flex items-center justify-center space-x-3">
+                      <CheckCircle2 className="w-5 h-5" />
+                      <span>Listo</span>
+                    </div>
+                    {onDismiss && (
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={onDismiss}
+                        className="px-5 py-5 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-foreground/40 hover:text-foreground rounded-[1.5rem] transition-all duration-300 flex items-center justify-center"
+                        title="Retirar de la cola"
+                      >
+                        <X className="w-5 h-5" />
+                      </motion.button>
+                    )}
                   </div>
                 )}
               </AnimatePresence>
