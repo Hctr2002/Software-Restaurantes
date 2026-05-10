@@ -14,8 +14,10 @@ function groupOrdersByTable(orders: Order[]): Order[] {
     const key = order.tableId ?? order.id;
     const existing = map.get(key);
     if (!existing) {
-      const merged = { ...order, orderItems: [...(order.orderItems ?? [])] };
-      (merged as any).order_items = [...(order.orderItems ?? [])];
+      const merged = { ...order, orderItems: [...(order.orderItems ?? [])] } as any;
+      merged.order_items = [...(order.orderItems ?? [])];
+      if (order.station === 'BAR') merged.barSubOrderId = order.id;
+      else merged.kitchenSubOrderId = order.id;
       map.set(key, merged);
     } else {
       const newItems = order.orderItems ?? [];
@@ -25,6 +27,8 @@ function groupOrdersByTable(orders: Order[]): Order[] {
       if ((priority[order.status] ?? 0) > (priority[existing.status] ?? 0)) {
         existing.status = order.status;
       }
+      if (order.station === 'BAR') (existing as any).barSubOrderId = order.id;
+      else if (order.station === 'KITCHEN') (existing as any).kitchenSubOrderId = order.id;
       if (order.station && existing.station && order.station !== existing.station) {
         existing.station = null;
       }
@@ -59,11 +63,14 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
   const readyOrders     = useMemo(() => groupOrdersByTable(orders.filter((o) => o.status === "READY")), [orders]);
   const partiallyReadyOrders: Order[] = [];
 
-  const handleValidate = async (orderId: string, note?: string) => {
+  const handleValidate = async (orderId: string, note?: string, barOrderId?: string, barNote?: string) => {
     setProcessingId(orderId);
     const order = orders.find((o) => o.id === orderId);
     if (note?.trim()) {
       await supabase.from("orders").update({ notes: note.trim() }).eq("id", orderId);
+    }
+    if (barOrderId && barNote?.trim()) {
+      await supabase.from("orders").update({ notes: barNote.trim() }).eq("id", barOrderId);
     }
     // Validate all PENDING sub-orders for the same table in one batch
     if (order?.tableId) {
@@ -106,6 +113,12 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
   const handleSaveNote = async (orderId: string) => {
     setSavingNoteId(orderId);
     await supabase.from("orders").update({ notes: notesByOrder[orderId] ?? "" }).eq("id", orderId);
+    setSavingNoteId(null);
+  };
+
+  const handleSaveBarNote = async (barOrderId: string) => {
+    setSavingNoteId(barOrderId);
+    await supabase.from("orders").update({ notes: notesByOrder[barOrderId] ?? "" }).eq("id", barOrderId);
     setSavingNoteId(null);
   };
 
@@ -157,6 +170,7 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
     handleValidate,
     handleReject,
     handleSaveNote,
+    handleSaveBarNote,
     handleDeliver,
     handleTableClean,
     handleHelpComplete,

@@ -282,11 +282,19 @@ export default function WaiterDashboard() {
                             <PendingOrderCard
                               order={order}
                               note={orders.notesByOrder[order.id] ?? ""}
+                              barNote={order.barSubOrderId ? (orders.notesByOrder[order.barSubOrderId] ?? "") : undefined}
                               processingId={orders.processingId}
                               savingNoteId={orders.savingNoteId}
                               onNoteChange={(id, val) => orders.setNotesByOrder((p) => ({ ...p, [id]: val }))}
                               onSaveNote={orders.handleSaveNote}
-                              onValidate={(order) => orders.handleValidate(order.id, orders.notesByOrder[order.id])}
+                              onBarNoteChange={(id, val) => orders.setNotesByOrder((p) => ({ ...p, [id]: val }))}
+                              onSaveBarNote={orders.handleSaveBarNote}
+                              onValidate={(order) => orders.handleValidate(
+                                order.id,
+                                orders.notesByOrder[order.id],
+                                order.barSubOrderId,
+                                order.barSubOrderId ? orders.notesByOrder[order.barSubOrderId] : undefined
+                              )}
                               onReject={(order) => orders.handleReject(order.id, order.tableId)}
                             />
                           </motion.div>

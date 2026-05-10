@@ -80,6 +80,9 @@ export type Order = {
   totalAmount: number;
   station: 'KITCHEN' | 'BAR' | null;
   parentOrderId: string | null;
+  // Computed by groupOrdersByTable — track sub-order IDs within a grouped card
+  barSubOrderId?: string | null;
+  kitchenSubOrderId?: string | null;
   barReady: boolean;
   kitchenReady: boolean;
   kitchenPreparing: boolean;
