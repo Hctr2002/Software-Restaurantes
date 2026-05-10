@@ -83,8 +83,7 @@ export default function TableMenuPage() {
         menu_item_id: item.id,
         restaurant_id: user.restaurantId,
         quantity: item.quantity,
-        unit_price: item.price,
-        restaurant_id: user.restaurantId
+        unit_price: item.price
       }));
 
       const { error: itemsError } = await supabase

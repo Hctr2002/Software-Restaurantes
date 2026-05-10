@@ -51,7 +51,7 @@ export default async function ReceiptSessionPage({
 
   const { data: orders } = await db
     .from("orders")
-    .select("id, status, createdAt, table_id, tables(number, label), order_items(quantity, unit_price, menu_items(name))")
+    .select("id, status, createdAt, table_id, payment_reference, tables(number, label), order_items(quantity, unit_price, menu_items(name))")
     .eq("session_id", sessionId)
     .eq("restaurant_id", restaurantId)
     .order("createdAt", { ascending: true });

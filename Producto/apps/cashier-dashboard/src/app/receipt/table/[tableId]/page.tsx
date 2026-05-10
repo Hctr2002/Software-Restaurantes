@@ -70,7 +70,7 @@ export default async function ReceiptTablePage({
 
   const { data: orders, error } = await db
     .from("orders")
-    .select("id, status, createdAt, order_items(quantity, unit_price, menu_items(name))")
+    .select("id, status, createdAt, payment_reference, order_items(quantity, unit_price, menu_items(name))")
     .eq("table_id", tableId)
     .eq("restaurant_id", restaurantId)
     .gte("createdAt", today.toISOString())
