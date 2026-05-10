@@ -20,7 +20,7 @@ function playSound(url: string) { new Audio(url).play().catch(() => {}); }
 
 export default function KitchenKDSPage() {
   const { user, logout: clearAuth } = useAuthStore();
-  const { orders: liveOrders, loading: liveLoading } = useKitchenOrders(user?.restaurantId);
+  const { orders: liveOrders, loading: liveLoading, refetch } = useKitchenOrders(user?.restaurantId);
   const [clearedOrders, setClearedOrders] = useState<Set<string>>(new Set());
   const [settings, setSettings] = useState<KDSSettings>(DEFAULT_SETTINGS);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -78,7 +78,8 @@ export default function KitchenKDSPage() {
         alert(`Error al actualizar el pedido: ${error.message}`);
         return;
       }
-      console.log(`[KDS] Estado actualizado exitosamente en Supabase`);
+      // Optimistic refetch: updates the UI immediately without waiting for realtime event
+      refetch();
 
       if (newStatus === "READY" && settings.autoClear.enabled) {
         const timer = setTimeout(() => setClearedOrders((prev) => new Set([...prev, orderId])), settings.autoClear.delaySeconds * 1000);

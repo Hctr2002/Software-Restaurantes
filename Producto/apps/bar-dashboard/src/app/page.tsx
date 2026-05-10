@@ -26,7 +26,7 @@ function playSound(url: string) { new Audio(url).play().catch(() => {}); }
 
 export default function BarDashboardPage() {
   const { user, logout: clearAuth } = useAuthStore();
-  const { orders: liveOrders, loading: liveLoading } = useBarOrders(user?.restaurantId);
+  const { orders: liveOrders, loading: liveLoading, refetch } = useBarOrders(user?.restaurantId);
   const [clearedOrders, setClearedOrders] = useState<Set<string>>(new Set());
   const [settings, setSettings] = useState<KDSSettings>(DEFAULT_SETTINGS);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -80,7 +80,8 @@ export default function BarDashboardPage() {
         alert(`Error al actualizar el pedido: ${error.message}`);
         return;
       }
-  
+      refetch();
+
       if (newStatus === "READY" && settings.autoClear.enabled) {
         const timer = setTimeout(() => setClearedOrders((prev) => new Set([...prev, orderId])), settings.autoClear.delaySeconds * 1000);
         autoClearTimers.current.set(orderId, timer);
