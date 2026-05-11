@@ -58,10 +58,10 @@ export default function TableMenuPage() {
     setSubmitting(true);
 
     try {
-      // 0. Obtener el session_id de la mesa actual para agrupar en mesas fusionadas
+      // 0. Obtener el current_session_id de la mesa actual para agrupar en mesas fusionadas
       const { data: tableData } = await supabase
         .from("tables")
-        .select("session_id")
+        .select("current_session_id")
         .eq("id", tableId)
         .single();
 
@@ -84,7 +84,7 @@ export default function TableMenuPage() {
           .insert({
             restaurant_id: user.restaurantId,
             table_id: tableId,
-            session_id: tableData?.session_id || null,
+            session_id: tableData?.current_session_id || null,
             status: "VALIDATED",
             validated_at: new Date().toISOString(),
             total_amount: items.length === cart.length ? total : stationTotal,
