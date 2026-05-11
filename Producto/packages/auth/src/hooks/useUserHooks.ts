@@ -3,15 +3,44 @@
 import { useCallback, useState, useEffect, useMemo } from "react";
 import { supabase, updateOrderStatus } from "../index";
 import type { Order, TableRecord } from "../types";
-import { mapTable, mapOrder } from "../utils";
+import { mapTable } from "../utils";
 import { useRealtimeSync } from "./useRealtimeSync";
 import { useTables } from "./useTableHooks";
 import { useRealtimeOrders } from "./useOrderHooks";
 
+function groupOrdersByTable(orders: Order[]): Order[] {
+  const map = new Map<string, Order>();
+  for (const order of orders) {
+    const key = order.tableId ?? order.id;
+    const existing = map.get(key);
+    if (!existing) {
+      const merged = { ...order, orderItems: [...(order.orderItems ?? [])] } as any;
+      merged.order_items = [...(order.orderItems ?? [])];
+      if (order.station === 'BAR') merged.barSubOrderId = order.id;
+      else merged.kitchenSubOrderId = order.id;
+      map.set(key, merged);
+    } else {
+      const newItems = order.orderItems ?? [];
+      existing.orderItems = [...(existing.orderItems ?? []), ...newItems];
+      (existing as any).order_items = existing.orderItems;
+      const priority: Record<string, number> = { READY: 4, PREPARING: 3, VALIDATED: 2, PENDING: 1 };
+      if ((priority[order.status] ?? 0) > (priority[existing.status] ?? 0)) {
+        existing.status = order.status;
+      }
+      if (order.station === 'BAR') (existing as any).barSubOrderId = order.id;
+      else if (order.station === 'KITCHEN') (existing as any).kitchenSubOrderId = order.id;
+      if (order.station && existing.station && order.station !== existing.station) {
+        existing.station = null;
+      }
+    }
+  }
+  return Array.from(map.values());
+}
+
 export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
   const { tables, loading: tablesLoading } = useTables(restaurantId);
   const { orders, loading } = useRealtimeOrders(restaurantId, {
-    statuses: ["PENDING", "VALIDATED", "PREPARING", "READY"],
+    statuses: ["PENDING", "VALIDATED", "PREPARING", "READY", "DELIVERED"],
     ascending: true
   });
 
@@ -29,29 +58,54 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
     }
   }, [orders]);
 
-  const pendingOrders = orders.filter((o) => o.status === "PENDING");
-  const preparingOrders = orders.filter((o) => o.status === "VALIDATED" || o.status === "PREPARING");
-  const readyOrders = orders.filter((o) => o.status === "READY");
+  const pendingOrders   = useMemo(() => groupOrdersByTable(orders.filter((o) => o.status === "PENDING")), [orders]);
+  const preparingOrders = useMemo(() => groupOrdersByTable(orders.filter((o) => o.status === "VALIDATED" || o.status === "PREPARING")), [orders]);
+  const readyOrders     = useMemo(() => groupOrdersByTable(orders.filter((o) => o.status === "READY")), [orders]);
+  const partiallyReadyOrders: Order[] = [];
 
-  const handleValidate = async (orderId: string) => {
+  const handleValidate = async (orderId: string, note?: string, barOrderId?: string, barNote?: string) => {
     setProcessingId(orderId);
-    await updateOrderStatus(orderId, "VALIDATED");
+    const order = orders.find((o) => o.id === orderId);
+    if (note?.trim()) {
+      await supabase.from("orders").update({ notes: note.trim() }).eq("id", orderId);
+    }
+    if (barOrderId && barNote?.trim()) {
+      await supabase.from("orders").update({ notes: barNote.trim() }).eq("id", barOrderId);
+    }
+    // Validate all PENDING sub-orders for the same table in one batch
+    if (order?.tableId) {
+      await supabase
+        .from("orders")
+        .update({ status: "VALIDATED", validated_at: new Date().toISOString() })
+        .eq("table_id", order.tableId)
+        .eq("status", "PENDING");
+    } else {
+      await updateOrderStatus(orderId, "VALIDATED");
+    }
     setProcessingId(null);
   };
 
   const handleReject = async (orderId: string, tableId?: string | null) => {
     setProcessingId(orderId);
-    await updateOrderStatus(orderId, "REJECTED");
-    if (tableId) {
+    const order = orders.find((o) => o.id === orderId);
+    const tid = tableId ?? order?.tableId;
+    if (tid) {
+      // Reject all PENDING/VALIDATED sub-orders for the same table
+      await supabase
+        .from("orders")
+        .update({ status: "REJECTED" })
+        .eq("table_id", tid)
+        .in("status", ["PENDING", "VALIDATED"]);
       const { data: remaining } = await supabase
         .from("orders")
         .select("id")
-        .eq("table_id", tableId)
-        .not("status", "in", '("REJECTED","DELIVERED")')
-        .neq("id", orderId);
+        .eq("table_id", tid)
+        .not("status", "in", '("REJECTED","DELIVERED","COMPLETED")');
       if (!remaining?.length) {
-        await supabase.from("tables").update({ status: "FREE" }).eq("id", tableId);
+        await supabase.from("tables").update({ status: "FREE" }).eq("id", tid);
       }
+    } else {
+      await updateOrderStatus(orderId, "REJECTED");
     }
     setProcessingId(null);
   };
@@ -62,8 +116,22 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
     setSavingNoteId(null);
   };
 
-  const handleDeliver = async (orderId: string) => {
-    await updateOrderStatus(orderId, "DELIVERED");
+  const handleSaveBarNote = async (barOrderId: string) => {
+    setSavingNoteId(barOrderId);
+    await supabase.from("orders").update({ notes: notesByOrder[barOrderId] ?? "" }).eq("id", barOrderId);
+    setSavingNoteId(null);
+  };
+
+  const handleDeliver = async (orderId: string, order?: any) => {
+    const tableId = order?.tableId ?? orders.find((o) => o.id === orderId)?.tableId;
+    if (tableId) {
+      await supabase.from("orders")
+        .update({ status: "DELIVERED" })
+        .eq("table_id", tableId)
+        .eq("status", "READY");
+    } else {
+      await updateOrderStatus(orderId, "DELIVERED");
+    }
   };
 
   const handleTableClean = async (tableId: string) => {
@@ -82,9 +150,11 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
   const cleaningTables = useMemo(() => tables.filter((t) => t.status === "CLEANING"), [tables]);
 
   return {
+    orders,
     pendingOrders,
     preparingOrders,
     readyOrders,
+    partiallyReadyOrders,
     tables,
     billRequestedTableIds,
     helpRequestedTableIds,
@@ -100,6 +170,7 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
     handleValidate,
     handleReject,
     handleSaveNote,
+    handleSaveBarNote,
     handleDeliver,
     handleTableClean,
     handleHelpComplete,
@@ -155,9 +226,9 @@ export function useCustomerPortal(restaurantId: string | undefined, tableNumber?
       return { data, error };
     }, [table.data?.id]),
     {
-      channelId: `table-portal-${table.data?.id}`,
+      channelId: `table-portal-${table.data?.id ?? "none"}`,
       filter: table.data?.id ? `id=eq.${table.data.id}` : undefined,
-      transform: mapTable
+      transform: (data: any) => data ? mapTable(data) : null,
     }
   );
 
@@ -184,7 +255,7 @@ export function useCustomerPortal(restaurantId: string | undefined, tableNumber?
   };
 
   const placeOrder = async () => {
-    if (!table.data || order.cart.length === 0 || !restaurantId) return;
+    if (!table.data || order.cart.length === 0 || !restaurantId) return false;
     setOrder(p => ({ ...p, placing: true, error: null }));
 
     try {
@@ -207,8 +278,10 @@ export function useCustomerPortal(restaurantId: string | undefined, tableNumber?
       if (!response.ok) throw new Error(result.error || "Error al procesar el pedido");
 
       setOrder(p => ({ ...p, lastId: result.id, cart: [], success: true }));
+      return true;
     } catch (err: any) {
       setOrder(p => ({ ...p, error: err.message }));
+      return false;
     } finally {
       setOrder(p => ({ ...p, placing: false }));
     }
@@ -228,6 +301,7 @@ export function useCustomerPortal(restaurantId: string | undefined, tableNumber?
     cartCount: totals.count,
     cartTotal: totals.total,
     placeOrder,
+    resetOrder: () => setOrder(p => ({ ...p, success: false, lastId: null, error: null })),
   };
 }
 
@@ -241,10 +315,10 @@ export function useCustomerOrderTracker(orderId: string | null) {
     undefined,
     "orders",
     fetchFn,
-    { 
-      channelId: `tracker-${orderId}`, 
-      filter: `id=eq.${orderId}`,
-      initialData: null 
+    {
+      channelId: `tracker-${orderId ?? "none"}`,
+      filter: orderId ? `id=eq.${orderId}` : undefined,
+      initialData: null
     }
   );
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { createBrowserClient } from "@supabase/ssr";
+import { supabase } from "@menu-bites/auth";
 import { useAuthStore } from "@menu-bites/store";
 import { Loader2 } from "lucide-react";
 
@@ -21,12 +21,6 @@ export default function AuthCallback() {
       window.location.replace(AUTH_URL);
       return;
     }
-
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { cookieOptions: { name: "sb-kds-session" } }
-    );
 
     supabase.auth
       .setSession({ access_token: accessToken, refresh_token: refreshToken })

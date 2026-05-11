@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { Modal, Button } from "@menu-bites/ui";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { MenuItem, Category } from "@/app/[slug]/dashboard/_components/localShared";
 import MenuFormFields from "./MenuFormFields";
 
@@ -35,13 +35,14 @@ export function MenuItemModal({
 }: MenuItemModalProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Sincronizar previsualización de imagen al abrir el modal
   useEffect(() => {
     if (isOpen) {
       setImageFile(null);
       setImagePreview(editingItem?.image_url ?? null);
+      setSaveError(null);
     }
   }, [isOpen, editingItem]);
 
@@ -59,7 +60,12 @@ export function MenuItemModal({
   };
 
   const handleLocalSave = async () => {
-    await onSave(imageFile, imagePreview);
+    setSaveError(null);
+    try {
+      await onSave(imageFile, imagePreview);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Error al guardar el plato");
+    }
   };
 
   return (
@@ -86,6 +92,12 @@ export function MenuItemModal({
         </div>
       }
     >
+      {saveError && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-destructive/30 bg-destructive/10 text-sm text-destructive font-bold mb-2">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          {saveError}
+        </div>
+      )}
       <MenuFormFields
         form={form}
         setForm={setForm}

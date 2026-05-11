@@ -15,12 +15,58 @@ interface CreateOrderPayload {
   items: OrderItemPayload[];
 }
 
-export async function POST(req: NextRequest) {
-  const supabaseAdmin = createClient(
+function serviceClient() {
+  return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
+}
+
+async function insertOrder(
+  db: ReturnType<typeof serviceClient>,
+  params: {
+    restaurant_id: string;
+    table_id: string | null;
+    station: 'KITCHEN' | 'BAR';
+    total_amount: number;
+    parent_order_id?: string;
+  }
+): Promise<{ id: string; error: string | null }> {
+  const id = randomUUID();
+  const { error } = await db.from('orders').insert({
+    id,
+    restaurant_id: params.restaurant_id,
+    table_id: params.table_id || null,
+    status: 'PENDING',
+    total_amount: params.total_amount,
+    station: params.station,
+    parent_order_id: params.parent_order_id ?? null,
+    notes: 'Pedido desde portal web',
+  });
+  return { id, error: error?.message ?? null };
+}
+
+async function insertItems(
+  db: ReturnType<typeof serviceClient>,
+  orderId: string,
+  restaurant_id: string,
+  items: OrderItemPayload[]
+): Promise<string | null> {
+  const rows = items.map((item) => ({
+    id: randomUUID(),
+    order_id: orderId,
+    menu_item_id: item.menu_item_id,
+    restaurant_id,
+    quantity: item.quantity,
+    unit_price: item.unit_price,
+  }));
+  const { error } = await db.from('order_items').insert(rows);
+  return error?.message ?? null;
+}
+
+export async function POST(req: NextRequest) {
+  const db = serviceClient();
   try {
     const body: CreateOrderPayload = await req.json();
     const { restaurant_id, table_id, total_amount, items } = body;
@@ -33,7 +79,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Verificar restaurante activo
-    const { data: restaurant, error: restError } = await supabaseAdmin
+    const { data: restaurant, error: restError } = await db
       .from('restaurants')
       .select('id')
       .eq('id', restaurant_id)
@@ -47,53 +93,98 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generar UUID explícitamente — Prisma no pone DEFAULT en la columna id de la BD
-    const orderId = randomUUID();
+    // Obtener target_station de cada menu_item via su categoría (dos queries explícitas)
+    // Filtramos por restaurant_id para evitar que IDs de otros restaurantes sean resueltos
+    const menuItemIds = items.map((i) => i.menu_item_id);
+    const { data: menuItemRows, error: miError } = await db
+      .from('menu_items')
+      .select('id, category_id')
+      .in('id', menuItemIds)
+      .eq('restaurant_id', restaurant_id);
 
-    const { error: orderError } = await supabaseAdmin
-      .from('orders')
-      .insert({
-        id:           orderId,
+    if (miError) {
+      return NextResponse.json({ error: miError.message }, { status: 500 });
+    }
+
+    // Validar que todos los items existen y pertenecen al restaurante
+    if ((menuItemRows ?? []).length !== menuItemIds.length) {
+      const foundIds = new Set((menuItemRows ?? []).map((mi: any) => mi.id));
+      const invalid = menuItemIds.filter((id) => !foundIds.has(id));
+      return NextResponse.json(
+        { error: `Items no válidos o de otro restaurante: ${invalid.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    const categoryIds = [...new Set((menuItemRows ?? []).map((mi: any) => mi.category_id).filter(Boolean))];
+    const { data: categoryRows } = await db
+      .from('categories')
+      .select('id, target_station')
+      .in('id', categoryIds)
+      .eq('restaurant_id', restaurant_id);
+
+    const categoryStationMap = new Map<string, 'KITCHEN' | 'BAR'>(
+      (categoryRows ?? []).map((c: any) => [c.id, c.target_station as 'KITCHEN' | 'BAR'])
+    );
+
+    const stationMap = new Map<string, 'KITCHEN' | 'BAR'>(
+      (menuItemRows ?? []).map((mi: any) => [
+        mi.id,
+        categoryStationMap.get(mi.category_id) ?? 'KITCHEN',
+      ])
+    );
+
+    const kitchenItems = items.filter((i) => stationMap.get(i.menu_item_id) === 'KITCHEN');
+    const barItems     = items.filter((i) => stationMap.get(i.menu_item_id) === 'BAR');
+
+    const kitchenTotal = kitchenItems.reduce((s, i) => s + i.unit_price * i.quantity, 0);
+    const barTotal     = barItems.reduce((s, i) => s + i.unit_price * i.quantity, 0);
+
+    const orderIds: string[] = [];
+
+    // Crear sub-pedido KITCHEN
+    if (kitchenItems.length > 0) {
+      const { id: kitchenOrderId, error: koError } = await insertOrder(db, {
         restaurant_id,
-        table_id:     table_id || null,
-        status:       'PENDING',
-        total_amount,
-        notes:        'Pedido desde portal web',
+        table_id,
+        station: 'KITCHEN',
+        total_amount: kitchenItems.length === items.length ? total_amount : kitchenTotal,
       });
-
-    if (orderError) {
-      console.error('[api/orders] Error creando order:', orderError.message);
-      return NextResponse.json({ error: orderError.message }, { status: 500 });
+      if (koError) {
+        return NextResponse.json({ error: koError }, { status: 500 });
+      }
+      const itemsError = await insertItems(db, kitchenOrderId, restaurant_id, kitchenItems);
+      if (itemsError) {
+        return NextResponse.json({ error: itemsError }, { status: 500 });
+      }
+      orderIds.push(kitchenOrderId);
     }
 
-    // Crear los order_items con UUIDs explícitos
-    const orderItems = items.map((item) => ({
-      id:            randomUUID(),
-      order_id:      orderId,
-      menu_item_id:  item.menu_item_id,
-      restaurant_id,
-      quantity:      item.quantity,
-      unit_price:    item.unit_price,
-    }));
-
-    const { error: itemsError } = await supabaseAdmin
-      .from('order_items')
-      .insert(orderItems);
-
-    if (itemsError) {
-      console.error('[api/orders] Error creando order_items:', itemsError.message);
-      return NextResponse.json({ error: itemsError.message }, { status: 500 });
+    // Crear sub-pedido BAR (referencia al pedido KITCHEN como parent si existe)
+    if (barItems.length > 0) {
+      const { id: barOrderId, error: boError } = await insertOrder(db, {
+        restaurant_id,
+        table_id,
+        station: 'BAR',
+        total_amount: barItems.length === items.length ? total_amount : barTotal,
+        parent_order_id: orderIds[0],
+      });
+      if (boError) {
+        return NextResponse.json({ error: boError }, { status: 500 });
+      }
+      const itemsError = await insertItems(db, barOrderId, restaurant_id, barItems);
+      if (itemsError) {
+        return NextResponse.json({ error: itemsError }, { status: 500 });
+      }
+      orderIds.push(barOrderId);
     }
 
-    // Marcar mesa como OCCUPIED al recibir el primer pedido
+    // Marcar mesa como OCCUPIED
     if (table_id) {
-      await supabaseAdmin
-        .from('tables')
-        .update({ status: 'OCCUPIED' })
-        .eq('id', table_id);
+      await db.from('tables').update({ status: 'OCCUPIED' }).eq('id', table_id);
     }
 
-    return NextResponse.json({ id: orderId }, { status: 201 });
+    return NextResponse.json({ id: orderIds[0], orderIds }, { status: 201 });
   } catch (err: any) {
     console.error('[api/orders] Error inesperado:', err);
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });

@@ -106,8 +106,6 @@ export function useMenu() {
       if (!res.ok) throw new Error(json.error || "Error guardando item");
       setIsModalOpen(false);
       fetchItems();
-    } catch (err) {
-      throw err;
     } finally {
       setSaving(false);
     }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createServiceClient, createSessionClient, ensureServiceConfig } from "@/lib/localApi";
 
-const ALLOWED_ROLES = ["ADMIN", "GARZON", "COCINA", "CAJERO"];
+const ALLOWED_ROLES = ["ADMIN", "GARZON", "COCINA", "CAJERO", "BAR"];
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const cfg = ensureServiceConfig();

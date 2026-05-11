@@ -52,28 +52,40 @@ export default function LoginPage() {
       const hasRestaurant = restaurantId && String(restaurantId).trim() !== "" && String(restaurantId) !== "null" && String(restaurantId) !== "undefined";
 
       // 1. ROLES OPERATIVOS: Siempre redirigen a sus apps
-      if (['COCINA', 'GARZON', 'CAJERO'].includes(roleUpper)) {
+      if (['COCINA', 'GARZON', 'CAJERO', 'BAR'].includes(roleUpper)) {
         const callbackBases: Record<string, string | undefined> = {
           COCINA: process.env.NEXT_PUBLIC_KITCHEN_URL,
           GARZON: process.env.NEXT_PUBLIC_WAITER_URL,
           CAJERO: process.env.NEXT_PUBLIC_CASHIER_URL,
+          BAR: process.env.NEXT_PUBLIC_BAR_URL,
         };
+
+        const missingUrls = Object.entries(callbackBases)
+          .filter(([, url]) => !url)
+          .map(([role]) => role);
+        if (missingUrls.length > 0) {
+          console.warn(`[Login] Variables de entorno faltantes para: ${missingUrls.join(', ')}`);
+        }
+
         const callbackBase = callbackBases[roleUpper];
-        if (callbackBase) {
-          let slug: string | null = null;
-          if (hasRestaurant) {
-            const { data: rest } = await supabase.from('restaurants').select('slug').eq('id', restaurantId).single();
-            slug = rest?.slug ?? null;
-          }
-          const nextPath = slug ? `/${slug}` : '/';
-          const hash = new URLSearchParams({
-            access_token:  data.session!.access_token,
-            refresh_token: data.session!.refresh_token,
-            next:          nextPath,
-          }).toString();
-          window.location.replace(`${callbackBase}/auth/callback#${hash}`);
+        if (!callbackBase) {
+          setError(`La aplicación para el rol ${roleUpper} no está configurada. Contacte al administrador.`);
           return;
         }
+
+        let slug: string | null = null;
+        if (hasRestaurant) {
+          const { data: rest } = await supabase.from('restaurants').select('slug').eq('id', restaurantId).single();
+          slug = rest?.slug ?? null;
+        }
+        const nextPath = slug ? `/${slug}` : '/';
+        const hash = new URLSearchParams({
+          access_token:  data.session!.access_token,
+          refresh_token: data.session!.refresh_token,
+          next:          nextPath,
+        }).toString();
+        window.location.replace(`${callbackBase}/auth/callback#${hash}`);
+        return;
       }
 
       // 2. ROL ADMIN: Redirigir a 3003 SOLO si tiene un restaurante asignado

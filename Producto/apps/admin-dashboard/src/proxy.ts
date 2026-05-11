@@ -7,6 +7,7 @@ const ROLE_URLS: Record<string, string | undefined> = {
   COCINA:  process.env.NEXT_PUBLIC_KITCHEN_URL,
   GARZON:  process.env.NEXT_PUBLIC_WAITER_URL,
   CAJERO:  process.env.NEXT_PUBLIC_CASHIER_URL,
+  BAR:     process.env.NEXT_PUBLIC_BAR_URL,
 };
 
 /**

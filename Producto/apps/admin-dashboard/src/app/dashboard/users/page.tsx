@@ -120,6 +120,7 @@ export default function UsersPage() {
     if (role === "SUPER_ADMIN") return "danger";
     if (role === "ADMIN") return "info";
     if (role === "CLIENTE") return "neutral";
+    if (role === "BAR") return "info";
     return "warning"; // GARZON, COCINA
   };
 

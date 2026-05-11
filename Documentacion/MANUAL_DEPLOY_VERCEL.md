@@ -27,12 +27,12 @@ graph LR
     classDef coreNode fill:#6366f1,stroke:#4f46e5,color:#fff,rx:10,ry:10;
     classDef appNode fill:#f8fafc,stroke:#cbd5e1,color:#1e293b,rx:5,ry:5;
 
-    Commit[💻 Push to GitHub]:::coreNode --> Build[⚙️ Turbo Build]:::coreNode
-    Build --> A[📱 Admin Dashboard]:::appNode
-    Build --> B[🌐 Customer Portal]:::appNode
+    Commit[Push to GitHub]:::coreNode --> Build[Turbo Build]:::coreNode
+    Build --> A[Admin Dashboard]:::appNode
+    Build --> B[Customer Portal]:::appNode
     A --> C[Rest of Apps]:::appNode
     B --> C
-    C --> Prod[🚀 Vercel Production]:::coreNode
+    C --> Prod[Vercel Production]:::coreNode
 ```
 
 ### Tabla de referencia rápida
@@ -49,29 +49,29 @@ graph LR
 ### Orden obligatorio de deploy
 
 ```
-Paso 1: admin-dashboard     ← auth gateway; su URL es dependencia de todas las demás
-Paso 2: customer-portal     ← standalone; no depende del workspace
+Paso 1: admin-dashboard     (auth gateway; su URL es dependencia de todas las demás)
+Paso 2: customer-portal     (standalone; no depende del workspace)
 Paso 3: kitchen-kds   }
-        waiter-terminal}     ← pueden desplegarse en paralelo entre sí
+        waiter-terminal}     (pueden desplegarse en paralelo entre sí)
         cashier-dashboard}
-Paso 4: local-dashboard     ← depende de conocer las URLs de las apps anteriores
-Paso 5: Actualizar env vars en admin-dashboard con las URLs reales → Redeploy
+Paso 4: local-dashboard     (depende de conocer las URLs de las apps anteriores)
+Paso 5: Actualizar env vars en admin-dashboard con las URLs reales -> Redeploy
 ```
 
 ### Flujo de autenticación cross-app
 
 ```
 Usuario abre kitchen-kds
-  → proxy.ts no encuentra cookie "sb-kds-session"
-  → redirect a NEXT_PUBLIC_AUTH_URL (admin-dashboard)
-  → usuario hace login
-  → admin-dashboard detecta rol COCINA
-  → window.location.replace(
+  -> proxy.ts no encuentra cookie "sb-kds-session"
+  -> redirect a NEXT_PUBLIC_AUTH_URL (admin-dashboard)
+  -> usuario hace login
+  -> admin-dashboard detecta rol COCINA
+  -> window.location.replace(
       `${NEXT_PUBLIC_KITCHEN_URL}/auth/callback#access_token=...&refresh_token=...`
     )
-  → kitchen-kds/auth/callback/page.tsx llama supabase.auth.setSession()
-  → cookie "sb-kds-session" creada en el dominio de kitchen-kds
-  → proxy.ts permite acceso
+  -> kitchen-kds/auth/callback/page.tsx llama supabase.auth.setSession()
+  -> cookie "sb-kds-session" creada en el dominio de kitchen-kds
+  -> proxy.ts permite acceso
 ```
 
 ---
@@ -105,11 +105,11 @@ Tener a mano antes de comenzar:
 
 | Credencial | Dónde obtenerla |
 |------------|-----------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase Dashboard → Project Settings → API → Project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard → Project Settings → API → anon/public |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Project Settings → API → service_role |
-| `DATABASE_URL` | Supabase Dashboard → Project Settings → Database → Connection string (Transaction pooler) |
-| `DIRECT_URL` | Supabase Dashboard → Project Settings → Database → Connection string (Direct) |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase Dashboard -> Project Settings -> API -> Project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard -> Project Settings -> API -> anon/public |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard -> Project Settings -> API -> service_role |
+| `DATABASE_URL` | Supabase Dashboard -> Project Settings -> Database -> Connection string (Transaction pooler) |
+| `DIRECT_URL` | Supabase Dashboard -> Project Settings -> Database -> Connection string (Direct) |
 
 > **Advertencia:** No usar las credenciales del entorno de desarrollo local en producción. Son proyectos Supabase separados.
 
@@ -186,9 +186,9 @@ Al hacer "Import Git Repository" en `vercel.com/new`:
 |-------|---------------------|
 | Framework Preset | Next.js (detección automática) |
 | Root Directory | Ver tabla de la Sección 0 |
-| Build Command | Dejar en blanco → el `vercel.json` lo provee |
-| Output Directory | Dejar en blanco → el `vercel.json` lo provee |
-| Install Command | Dejar en blanco → el `vercel.json` lo provee |
+| Build Command | Dejar en blanco -> el `vercel.json` lo provee |
+| Output Directory | Dejar en blanco -> el `vercel.json` lo provee |
+| Install Command | Dejar en blanco -> el `vercel.json` lo provee |
 
 > El `vercel.json` dentro de cada app define automáticamente los comandos. No sobrescribir en la UI.
 
@@ -283,7 +283,7 @@ Estos archivos ya están creados en el repositorio. Se listan aquí como referen
 
 ## Sección 5 — Variables de Entorno en Vercel
 
-Configurar en cada proyecto: **Settings → Environment Variables**.
+Configurar en cada proyecto: **Settings -> Environment Variables**.
 
 > Para secrets (`SUPABASE_SERVICE_ROLE_KEY`), marcar la opción "Sensitive" en la UI de Vercel para que el valor no sea visible tras guardarlo.
 
@@ -347,8 +347,8 @@ Configurar en cada proyecto: **Settings → Environment Variables**.
 
 1. Desplegar `admin-dashboard` con las URLs de las otras apps en **placeholder temporal**: `https://placeholder.vercel.app`
 2. Desplegar las demás 5 apps. Anotar las URLs finales que asigna Vercel.
-3. Volver a `admin-dashboard` → Settings → Environment Variables → actualizar cada URL con el valor real.
-4. Hacer redeploy de `admin-dashboard`: ir a Deployments → seleccionar el último deploy → menú de tres puntos → "Redeploy".
+3. Volver a `admin-dashboard` -> Settings -> Environment Variables -> actualizar cada URL con el valor real.
+4. Hacer redeploy de `admin-dashboard`: ir a Deployments -> seleccionar el último deploy -> menú de tres puntos -> "Redeploy".
 
 ---
 
@@ -356,7 +356,7 @@ Configurar en cada proyecto: **Settings → Environment Variables**.
 
 ### 6.1 URLs de redirect permitidas
 
-En Supabase Dashboard → Authentication → URL Configuration:
+En Supabase Dashboard -> Authentication -> URL Configuration:
 
 **Site URL:**
 
@@ -424,8 +424,8 @@ CREATE POLICY public_read_themes ON restaurant_themes
 
 `SUPABASE_SERVICE_ROLE_KEY` bypasea RLS completamente. Está configurada **sin** el prefijo `NEXT_PUBLIC_` y solo se usa en:
 
-- `admin-dashboard` → `src/lib/adminApi.ts` (Route Handlers server-side)
-- `customer-portal` → `src/app/api/orders/route.ts` (Route Handler server-side)
+- `admin-dashboard` -> `src/lib/adminApi.ts` (Route Handlers server-side)
+- `customer-portal` -> `src/app/api/orders/route.ts` (Route Handler server-side)
 
 Nunca debe aparecer en código de cliente (componentes React). Vercel nunca la expone al navegador si no tiene prefijo `NEXT_PUBLIC_`.
 
@@ -465,8 +465,8 @@ vercel --prod
 
 **Vía UI:**
 
-1. `vercel.com/new` → Import Git Repository → seleccionar el repo
-2. **Root Directory:** `Producto/apps/admin-dashboard` → clic en "Edit"
+1. `vercel.com/new` -> Import Git Repository -> seleccionar el repo
+2. **Root Directory:** `Producto/apps/admin-dashboard` -> clic en "Edit"
 3. Framework: Next.js (detección automática)
 4. Build/Install/Output: dejar en blanco (los toma del `vercel.json`)
 5. Agregar variables de entorno (Sección 5.2) — usar `https://placeholder.vercel.app` para las URLs de otras apps
@@ -548,12 +548,13 @@ vercel --prod --force
 Checklist de smoke test post-deploy:
 
 - [ ] `https://menubites-admin.vercel.app/` muestra la pantalla de login de Menu Bites
-- [ ] Login con un usuario COCINA → redirige a `menubites-kitchen.vercel.app/auth/callback#...` → aterriza en el KDS
-- [ ] Login con usuario ADMIN con restaurante asignado → redirige a `menubites-local.vercel.app/auth/callback#...` → aterriza en `/{slug}/dashboard`
-- [ ] Login con usuario GARZON → redirige a `menubites-waiter.vercel.app/auth/callback#...` → aterriza en la terminal
+- [ ] Login con un usuario COCINA -> redirige a `menubites-kitchen.vercel.app/auth/callback#...` -> aterriza en el KDS
+- [ ] Login con usuario ADMIN con restaurante asignado -> redirige a `menubites-local.vercel.app/auth/callback#...` -> aterriza en `/{slug}/dashboard`
+- [ ] Login con usuario GARZON -> redirige a `menubites-waiter.vercel.app/auth/callback#...` -> aterriza en la terminal
 - [ ] `https://menubites-customer.vercel.app/{slug}` muestra el menú del restaurante
 - [ ] Pedido creado en customer-portal aparece en Supabase Table Editor (tabla `orders`)
 - [ ] Pedido aparece en kitchen-kds en tiempo real
+- [ ] DevTools -> Application -> Cookies confirma que la cookie de sesión se escribe en el dominio correcto
 
 ---
 
@@ -567,7 +568,7 @@ Por defecto, Vercel despliega automáticamente en cada push a la rama conectada 
 
 Para que Vercel solo reconstruya un proyecto cuando hay cambios relevantes, configurar en cada proyecto:
 
-**Vercel → Settings → Git → Ignored Build Step**
+**Vercel -> Settings -> Git -> Ignored Build Step**
 
 | Proyecto | Ignored Build Step |
 |----------|-------------------|
@@ -605,7 +606,7 @@ Si el proyecto tiene dominio propio (ej. `menubites.com`):
 
 ### 9.2 Configurar en Vercel
 
-1. Proyecto → Settings → Domains → Add Domain
+1. Proyecto -> Settings -> Domains -> Add Domain
 2. Ingresar el subdominio deseado
 3. Vercel mostrará los registros DNS a configurar en el proveedor del dominio:
    - Tipo `CNAME` apuntando a `cname.vercel-dns.com`
@@ -620,7 +621,7 @@ También actualizar las Redirect URLs en Supabase Authentication (Sección 6.1).
 
 Para el patrón `{restaurante}.menubites.com` (cada restaurante en su propio subdominio) en lugar de `menu.menubites.com/{slug}`:
 
-- Requiere un wildcard DNS: `*.menubites.com → menubites-customer.vercel.app`
+- Requiere un wildcard DNS: `*.menubites.com -> menubites-customer.vercel.app`
 - Requiere modificar `customer-portal` para leer el slug del header `Host` en lugar del path param
 - Esta modificación está fuera del scope del deploy actual. Documentada como mejora futura.
 
@@ -638,7 +639,7 @@ Para el patrón `{restaurante}.menubites.com` (cada restaurante en su propio sub
 "installCommand": "cd ../.. && npm install"
 ```
 
-Si el `vercel.json` existe pero el error persiste, verificar en Vercel UI → Settings → General → Build & Development Settings que los campos Build/Install/Output están en blanco (el `vercel.json` debe tener prioridad).
+Si el `vercel.json` existe pero el error persiste, verificar en Vercel UI -> Settings -> General -> Build & Development Settings que los campos Build/Install/Output están en blanco (el `vercel.json` debe tener prioridad).
 
 ---
 
@@ -646,7 +647,7 @@ Si el `vercel.json` existe pero el error persiste, verificar en Vercel UI → Se
 
 **Causa:** La variable `NEXT_PUBLIC_AUTH_URL` no fue configurada en Vercel, o quedó con el valor del `.env.example` local.
 
-**Solución:** Vercel → proyecto `kitchen-kds` (o la app afectada) → Settings → Environment Variables → agregar `NEXT_PUBLIC_AUTH_URL=https://menubites-admin.vercel.app` → Redeploy.
+**Solución:** Vercel -> proyecto `kitchen-kds` (o la app afectada) -> Settings -> Environment Variables -> agregar `NEXT_PUBLIC_AUTH_URL=https://menubites-admin.vercel.app` -> Redeploy.
 
 ---
 
@@ -672,7 +673,7 @@ Si el `vercel.json` existe pero el error persiste, verificar en Vercel UI → Se
 
 **Causa:** `SUPABASE_SERVICE_ROLE_KEY` tiene el prefijo `NEXT_PUBLIC_` (lo que la expone al cliente y además la variable del servidor queda vacía), o no está configurada en el proyecto Vercel correcto.
 
-**Solución:** Verificar en `admin-dashboard` y `customer-portal` que la variable existe sin prefijo `NEXT_PUBLIC_` en Settings → Environment Variables.
+**Solución:** Verificar en `admin-dashboard` y `customer-portal` que la variable existe sin prefijo `NEXT_PUBLIC_` en Settings -> Environment Variables.
 
 ---
 
@@ -688,9 +689,9 @@ Si el `vercel.json` existe pero el error persiste, verificar en Vercel UI → Se
 
 **Causa probable:** El cliente Supabase SSR está configurado con un `cookieOptions.domain` que no coincide con el dominio de Vercel. O bien, la respuesta del `setSession()` no está siendo procesada (error silencioso en el catch).
 
-**Diagnóstico:** Abrir DevTools → Network → buscar la petición a `auth/callback` → verificar que la respuesta incluye `Set-Cookie`. Si no hay `Set-Cookie`, el `supabase.auth.setSession()` falló.
+**Diagnóstico:** Abrir DevTools -> Network -> buscar la petición a `auth/callback` -> verificar que la respuesta incluye `Set-Cookie`. Si no hay `Set-Cookie`, el `supabase.auth.setSession()` falló.
 
-**Solución:** Revisar los logs del servidor en Vercel → Functions → `/auth/callback` para ver el error real.
+**Solución:** Revisar los logs del servidor en Vercel -> Functions -> `/auth/callback` para ver el error real.
 
 ---
 
@@ -724,15 +725,15 @@ Si el `vercel.json` existe pero el error persiste, verificar en Vercel UI → Se
 ### Post-deploy
 
 - [ ] `admin-dashboard` muestra el login (smoke test básico)
-- [ ] Flujo de login para rol COCINA → aterriza en kitchen-kds
-- [ ] Flujo de login para rol GARZON → aterriza en waiter-terminal
-- [ ] Flujo de login para rol CAJERO → aterriza en cashier-dashboard
-- [ ] Flujo de login para rol ADMIN con restaurante → aterriza en local-dashboard
-- [ ] Flujo de login para SUPER_ADMIN → aterriza en admin-dashboard/dashboard
+- [ ] Flujo de login para rol COCINA -> aterriza en kitchen-kds
+- [ ] Flujo de login para rol GARZON -> aterriza en waiter-terminal
+- [ ] Flujo de login para rol CAJERO -> aterriza en cashier-dashboard
+- [ ] Flujo de login para rol ADMIN con restaurante -> aterriza en local-dashboard
+- [ ] Flujo de login para SUPER_ADMIN -> aterriza en admin-dashboard/dashboard
 - [ ] `customer-portal/{slug}` muestra el menú del restaurante (acceso público)
 - [ ] Pedido creado en customer-portal aparece en Supabase (tabla `orders`)
 - [ ] Pedido aparece en kitchen-kds en tiempo real (Supabase Realtime)
-- [ ] DevTools → Application → Cookies confirma que la cookie de sesión se escribe en el dominio correcto
+- [ ] DevTools -> Application -> Cookies confirma que la cookie de sesión se escribe en el dominio correcto
 
 ---
 

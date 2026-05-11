@@ -9,6 +9,10 @@
 | Versión | Fecha | Descripción |
 |---|---|---|
 | `0003_schema_extensions` | 2025-05-04 | `TableStatus.CLEANING`; timestamps `validated_at / preparing_at / ready_at` en `orders`; campo `session_id` en `orders`; tablas `push_subscriptions` y `reviews` con sus políticas RLS |
+| `0005_allow_cashier_completion` | 2026-05-10 | Redefine `validate_order_transition()`: permite a Caja cerrar pedidos directamente desde `VALIDATED` y `PREPARING` (pago express). Recrea el trigger `tr_order_status_validation`. |
+| `0009_order_station_split` | 2026-05-10 | Agrega columnas `station` (`KITCHEN`\|`BAR`) y `parent_order_id` en `orders`; índices por estación; backfill de pedidos activos según `categories.target_station`. |
+| `0010_bar_rls_and_settings_atomic` | 2026-05-10 | Políticas RLS restrictivas para rol BAR en `orders`; función SQL `upsert_kds_settings_safe` para escrituras atómicas; documentación de ciclo de vida de `parent_order_id`. |
+| `0011_consolidate_order_state_machine` | 2026-05-10 | Versión definitiva de `validate_order_transition()` que unifica reglas de 0005 y 0007: VALIDATED/PREPARING→COMPLETED (caja), PARCIAL, e INSERT con VALIDATED para garzón. |
 
 ### Detalle de `0003_schema_extensions`
 

@@ -11,8 +11,8 @@ type ReadyOrder = {
 };
 
 interface ReadyOrdersBannerProps {
-  orders: any[]; // Usamos any[] temporalmente o el tipo Order si lo importamos
-  onDeliver: (id: string) => void;
+  orders: any[];
+  onDeliver: (id: string, order: any) => void;
 }
 
 export function ReadyOrdersBanner({ orders, onDeliver }: ReadyOrdersBannerProps) {
@@ -35,7 +35,14 @@ export function ReadyOrdersBanner({ orders, onDeliver }: ReadyOrdersBannerProps)
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-black text-foreground text-lg tracking-tighter">Mesa {order.table?.number ?? "—"}</p>
-                <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{order.orderItems?.length ?? 0} ítem(s)</p>
+                <div className="flex gap-2 mt-1">
+                  {(order.station === 'KITCHEN' || !order.station) && (
+                    <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 uppercase tracking-widest">Cocina</span>
+                  )}
+                  {(order.station === 'BAR' || !order.station) && (
+                    <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 uppercase tracking-widest">Bar</span>
+                  )}
+                </div>
               </div>
               <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-lg uppercase tracking-wider">
                 LISTO
@@ -43,23 +50,23 @@ export function ReadyOrdersBanner({ orders, onDeliver }: ReadyOrdersBannerProps)
             </div>
             
             <div className="space-y-1">
-              {order.orderItems?.slice(0, 3).map((item: any) => (
+              {(order.orderItems ?? []).slice(0, 3).map((item: any) => (
                 <p key={item.id} className="text-xs text-foreground/60 truncate font-medium flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/40" />
-                  {item.quantity}x {item.menu_items?.name}
+                  {item.quantity}x {item.menuItem?.name || item.menu_items?.name}
                 </p>
               ))}
-              {(order.orderItems?.length ?? 0) > 3 && (
-                <p className="text-[9px] text-muted-foreground italic">...y {(order.orderItems?.length ?? 0) - 3} más</p>
+              {(order.orderItems ?? []).length > 3 && (
+                <p className="text-[9px] text-muted-foreground italic">...y {(order.orderItems ?? []).length - 3} más</p>
               )}
             </div>
 
             <button
-              onClick={() => onDeliver(order.id)}
+              onClick={() => onDeliver(order.id, order)}
               className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[10px] uppercase tracking-widest py-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
             >
               <CheckCircle className="w-4 h-4" />
-              Retirar de Cocina
+              Entregar Pedido
             </button>
           </div>
         ))}

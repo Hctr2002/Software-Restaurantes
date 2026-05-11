@@ -4,3 +4,4 @@ export * from "./TableCard";
 export * from "./TableMergeBar";
 export * from "./AlertModal";
 export * from "./PreparingOrdersList";
+export * from "./TableOrdersModal";

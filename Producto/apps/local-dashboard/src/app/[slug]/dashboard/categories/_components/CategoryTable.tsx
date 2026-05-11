@@ -18,7 +18,7 @@ export function CategoryTable({
 }: CategoryTableProps) {
   return (
     <div className="hidden lg:block">
-      <Table headers={["Nombre", "Estado", "Acciones"]}>
+      <Table headers={["Nombre", "Estación", "Estado", "Acciones"]}>
         {categories.length === 0 && (
           <TableRow>
             <TableCell
@@ -33,6 +33,14 @@ export function CategoryTable({
           <TableRow key={cat.id}>
             <TableCell className="font-black text-foreground text-sm tracking-tight uppercase italic">
               {cat.name}
+            </TableCell>
+            <TableCell>
+              <Badge
+                variant={(cat.targetStation ?? (cat as any).target_station) === "BAR" ? "info" : "neutral"}
+                className="px-4 py-1 text-[10px] font-black uppercase tracking-widest"
+              >
+                {(cat.targetStation ?? (cat as any).target_station) === "BAR" ? "Barra" : "Cocina"}
+              </Badge>
             </TableCell>
             <TableCell>
               <Badge
