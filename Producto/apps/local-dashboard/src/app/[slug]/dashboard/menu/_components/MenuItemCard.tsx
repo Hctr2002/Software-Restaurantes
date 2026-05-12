@@ -32,7 +32,7 @@ export function MenuItemCard({ item, onToggleActive, onEdit, onDelete, isDeletin
         <div className="absolute top-4 left-4">
           <Badge 
             variant={item.is_active ? "success" : "neutral"} 
-            className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-widest border-none shadow-lg ${item.is_active ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground'}`}
+            className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-widest border-none shadow-lg ${item.is_active ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}
           >
             {item.is_active ? "En Venta" : "Pausado"}
           </Badge>
@@ -44,7 +44,7 @@ export function MenuItemCard({ item, onToggleActive, onEdit, onDelete, isDeletin
               "h-10 w-10 rounded-2xl flex items-center justify-center transition-all shadow-xl active:scale-95",
               item.is_active 
                 ? "bg-primary text-primary-foreground hover:bg-primary/90" 
-                : "bg-background text-foreground/40 hover:text-primary"
+                : "bg-secondary text-secondary-foreground hover:bg-primary"
             )}
           >
             <Power className="w-4 h-4" />
