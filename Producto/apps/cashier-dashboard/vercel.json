@@ -2,5 +2,11 @@
   "framework": "nextjs",
   "buildCommand": "cd ../.. && npx turbo run build --filter=@menu-bites/cashier-dashboard",
   "installCommand": "cd ../.. && npm install",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "develop": true
+    }
+  }
 }

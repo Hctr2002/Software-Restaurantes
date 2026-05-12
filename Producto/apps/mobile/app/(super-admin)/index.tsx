@@ -4,6 +4,8 @@ import { Store, Users, AlertCircle } from 'lucide-react-native';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 
+import { SUPERADMIN_API } from '../../lib/api';
+
 type Restaurant = {
   id: string;
   name: string;
@@ -34,24 +36,11 @@ export default function SuperAdminIndex() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No hay sesión activa");
 
-      let API_URL = 'http://10.122.168.197:3000'; // Fallback a tu IP de red actual
-      
-      try {
-        const Constants = await import('expo-constants');
-        const debuggerHost = Constants.default.expoConfig?.hostUri;
-        if (debuggerHost) {
-          const hostIp = debuggerHost.split(':')[0];
-          API_URL = `http://${hostIp}:3000`;
-        }
-      } catch (e) {
-        // Fallback silencioso
-      }
-
       const [restRes, usersRes] = await Promise.all([
-        fetch(`${API_URL}/api/admin/restaurants`, {
+        fetch(`${SUPERADMIN_API}/api/admin/restaurants`, {
           headers: { Authorization: `Bearer ${session.access_token}` }
         }),
-        fetch(`${API_URL}/api/admin/users`, {
+        fetch(`${SUPERADMIN_API}/api/admin/users`, {
           headers: { Authorization: `Bearer ${session.access_token}` }
         })
       ]);
