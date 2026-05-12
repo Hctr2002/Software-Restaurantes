@@ -30,15 +30,15 @@ export const getApiUrl = (port: number = 3000) => {
 /**
  * Predefined API endpoints for the Super Admin (Frontend dashboard)
  */
-export const SUPERADMIN_API = getApiUrl(3000) || process.env.EXPO_PUBLIC_SUPERADMIN_API_URL;
+export const SUPERADMIN_API = process.env.EXPO_PUBLIC_SUPERADMIN_API_URL || getApiUrl(3000);
 
 /**
  * Predefined API endpoints for the Local Admin (Local dashboard)
  */
-export const LOCALADMIN_API = getApiUrl(3003) || process.env.EXPO_PUBLIC_LOCALADMIN_API_URL;
+export const LOCALADMIN_API = process.env.EXPO_PUBLIC_LOCALADMIN_API_URL || getApiUrl(3003);
 
 /**
  * URL for the Customer Portal (for QR generation)
  */
-export const CUSTOMER_PORTAL_URL = getApiUrl(3005) || process.env.EXPO_PUBLIC_CUSTOMER_PORTAL_URL || 'https://menubites.vercel.app';
+export const CUSTOMER_PORTAL_URL = process.env.EXPO_PUBLIC_CUSTOMER_PORTAL_URL || getApiUrl(3005);
 

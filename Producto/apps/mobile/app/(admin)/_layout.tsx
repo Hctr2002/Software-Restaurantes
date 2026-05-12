@@ -22,6 +22,8 @@ export default function AdminLayout() {
   React.useEffect(() => {
     if (!restaurantId) return;
 
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
     const channelSuffix = Math.random().toString(36).substring(7);
     const channel = supabase
       .channel(`global-notifications-${restaurantId}-${channelSuffix}`)
@@ -36,12 +38,14 @@ export default function AdminLayout() {
         (payload) => {
           setNewOrder(payload.new);
           // Auto-hide after 5 seconds
-          setTimeout(() => setNewOrder(null), 5000);
+          if (timeoutId) clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => setNewOrder(null), 5000);
         }
       )
       .subscribe();
 
     return () => {
+      if (timeoutId) clearTimeout(timeoutId);
       supabase.removeChannel(channel);
     };
   }, [restaurantId]);
