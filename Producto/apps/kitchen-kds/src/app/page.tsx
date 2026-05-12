@@ -26,6 +26,7 @@ export default function KitchenKDSPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [activeCol, setActiveCol] = useState<string>("preparing");
   const theme = useThemeSync(user?.restaurantId, "kds");
   const [tick, setTick] = useState(0);
 
@@ -111,9 +112,9 @@ export default function KitchenKDSPage() {
   const readyOrders     = orders.filter((o) => o.status === "READY");
 
   const columns = [
-    { key: "pending", title: "Pedidos Nuevos", orders: pendingOrders, icon: <Bell className="w-5 h-5 text-muted-foreground" />, active: false },
-    { key: "preparing", title: "Preparando", orders: preparingOrders, icon: <ChefHat className="w-5 h-5 text-primary" />, active: true },
-    { key: "ready", title: "Para Despacho", orders: readyOrders, icon: <Activity className="w-5 h-5 text-emerald-500" />, active: false },
+    { key: "pending", title: "Nuevos", orders: pendingOrders, icon: null, active: false },
+    { key: "preparing", title: "Cocina", orders: preparingOrders, icon: null, active: true },
+    { key: "ready", title: "Listos", orders: readyOrders, icon: null, active: false },
   ];
 
   if (!mounted || !user || loading) {
@@ -126,48 +127,80 @@ export default function KitchenKDSPage() {
 
   return (
     <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
-      <div className="min-h-screen wow-gradient text-foreground overflow-hidden flex flex-col p-4 lg:p-6 gap-6">
-        <PremiumHeader
-          title="Kitchen"
-          accentTitle="Monitor"
-          icon={ChefHat}
-          statusSubLabel="Main Station"
-          stats={
-            <>
-              <HeaderStat label="Recibidos" value={pendingOrders.length} color="text-foreground/50" />
-              <HeaderStat label="En Fuego"  value={preparingOrders.length} color="text-primary" />
-              <HeaderStat label="Listos"    value={readyOrders.length} color="text-emerald-500" />
-            </>
-          }
-          actions={
-            <>
-              <Button variant="outline" onClick={() => setAlertOpen(true)}
-                className="rounded-2xl h-14 px-8 border-yellow-500/20 bg-yellow-500/5 text-yellow-500 hover:bg-yellow-500/10 hover:border-yellow-500/40 gap-3 font-black uppercase tracking-widest text-[10px]">
-                <AlertTriangle className="w-5 h-5" />
-                Alerta Stock
-              </Button>
-              <Button variant="outline" size="icon" className="rounded-2xl w-14 h-14" onClick={() => setSettingsOpen(true)}>
-                <Settings className="w-6 h-6 text-muted-foreground" />
-              </Button>
-              <Button variant="destructive" size="icon" onClick={handleSignOut} disabled={isSigningOut} className="rounded-2xl w-14 h-14 shadow-xl shadow-destructive/20">
-                <LogOut className="w-6 h-6" />
-              </Button>
-            </>
-          }
-        />
+      <div className="min-h-screen wow-gradient text-foreground overflow-hidden flex flex-col font-sans">
+        <div className="p-4 sm:p-6 pt-6 sm:pt-8 pb-0">
+          <PremiumHeader
+            title="Kitchen"
+            accentTitle="Monitor"
+            icon={ChefHat}
+            statusSubLabel="Main Station"
+            stats={
+              <div className="hidden sm:flex items-center gap-6">
+                <HeaderStat label="Recibidos" value={pendingOrders.length} color="text-foreground/50" />
+                <HeaderStat label="En Fuego"  value={preparingOrders.length} color="text-primary" />
+                <HeaderStat label="Listos"    value={readyOrders.length} color="text-emerald-500" />
+              </div>
+            }
+            actions={
+              <div className="flex items-center gap-2 sm:gap-4">
+                <Button variant="outline" onClick={() => setAlertOpen(true)}
+                  className="rounded-2xl h-11 sm:h-14 px-4 sm:px-8 border-yellow-500/20 bg-yellow-500/5 text-yellow-500 hover:bg-yellow-500/10 hover:border-yellow-500/40 gap-2 sm:gap-3 font-black uppercase tracking-widest text-[9px] sm:text-[10px]">
+                  <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Alerta Stock</span>
+                  <span className="sm:hidden">Stock</span>
+                </Button>
+                <Button variant="outline" size="icon" className="rounded-xl sm:rounded-2xl w-11 h-11 sm:w-14 sm:h-14" onClick={() => setSettingsOpen(true)}>
+                  <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" />
+                </Button>
+                <Button variant="destructive" size="icon" onClick={handleSignOut} disabled={isSigningOut} 
+                  className="rounded-xl sm:rounded-2xl w-11 h-11 sm:w-14 sm:h-14 bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/30 border-none">
+                  <LogOut className="w-5 h-5 sm:w-6 sm:h-6" />
+                </Button>
+              </div>
+            }
+          />
+        </div>
 
-        <main className="flex-1 grid grid-cols-3 gap-6 overflow-hidden">
-          <AnimatePresence mode="popLayout">
+        {/* Mobile Column Tabs */}
+        <div className="md:hidden px-4 py-2">
+          <div className="flex p-1 bg-card/60 backdrop-blur-md rounded-2xl border border-foreground/10 gap-1">
             {columns.map((col) => (
-              <KDSColumn key={col.key} title={col.title} count={col.orders.length} icon={col.icon} active={col.active}>
-                {col.orders.map((order) => (
-                  <TicketWrapper key={`${col.key}-${order.id}`} createdAt={order.createdAt} thresholds={settings.thresholds} status={order.status}>
-                    <OrderTicket type="KITCHEN" id={order.id} tableNumber={order.table?.number ?? 0} status={order.status} createdAt={order.createdAt} items={order.orderItems || []} notes={order.notes} onStatusChange={(s) => handleStatusChange(order.id, s)} onDismiss={() => setClearedOrders((prev) => new Set([...prev, order.id]))} />
-                  </TicketWrapper>
-                ))}
-              </KDSColumn>
+              <button
+                key={col.key}
+                onClick={() => setActiveCol(col.key)}
+                className={`flex-1 flex flex-col items-center justify-center py-2 rounded-xl transition-all ${
+                  activeCol === col.key ? "bg-primary text-primary-foreground shadow-lg" : "text-muted-foreground"
+                }`}
+              >
+                <div className="relative px-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest">{col.title}</span>
+                  {col.orders.length > 0 && (
+                    <span className="absolute -top-3 -right-3 flex h-5 w-5 items-center justify-center bg-red-600 text-white rounded-full text-[10px] font-black border-2 border-card shadow-md">
+                      {col.orders.length}
+                    </span>
+                  )}
+                </div>
+              </button>
             ))}
-          </AnimatePresence>
+          </div>
+        </div>
+
+        <main className="flex-1 p-4 sm:p-6 overflow-hidden">
+          <div className="h-full grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            <AnimatePresence mode="popLayout">
+              {columns.map((col) => (
+                <div key={col.key} className={`h-full ${activeCol === col.key ? "block" : "hidden md:block"}`}>
+                  <KDSColumn title={col.title} count={col.orders.length} icon={col.icon} active={col.active}>
+                    {col.orders.map((order) => (
+                      <TicketWrapper key={`${col.key}-${order.id}`} createdAt={order.createdAt} thresholds={settings.thresholds} status={order.status}>
+                        <OrderTicket type="KITCHEN" id={order.id} tableNumber={order.table?.number ?? 0} status={order.status} createdAt={order.createdAt} items={order.orderItems || []} notes={order.notes} onStatusChange={(s) => handleStatusChange(order.id, s)} onDismiss={() => setClearedOrders((prev) => new Set([...prev, order.id]))} />
+                      </TicketWrapper>
+                    ))}
+                  </KDSColumn>
+                </div>
+              ))}
+            </AnimatePresence>
+          </div>
         </main>
 
         <AnimatePresence>

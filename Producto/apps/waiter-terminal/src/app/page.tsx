@@ -88,7 +88,7 @@ export default function WaiterDashboard() {
             statusSubLabel={`${user?.restaurantId?.split("-")[0] || "RESTAURANTE"} · EN LÍNEA`}
             actions={
               <div className="flex items-center gap-4">
-                <div className="flex items-center bg-white/5 rounded-2xl p-1 border border-white/5">
+                <div className="flex items-center bg-foreground/5 rounded-2xl p-1 border border-foreground/10">
                   <button onClick={() => setAlertModal(true)} className="p-2.5 rounded-xl text-yellow-500 hover:bg-yellow-500/10 transition-all active:scale-90" title="Nueva Alerta">
                     <AlertTriangle className="w-4 h-4" />
                   </button>
@@ -106,24 +106,24 @@ export default function WaiterDashboard() {
         </div>
 
         {/* Status Islands */}
-        <div className="px-6 py-4 flex flex-col gap-3">
+        <div className="px-4 sm:px-6 py-4 flex flex-col gap-3">
           <AnimatePresence mode="popLayout">
             {(orders.readyOrders.length > 0 || orders.partiallyReadyOrders.length > 0) && (
               <motion.div layout initial={{ height: 80, opacity: 0, y: -20 }} animate={{ height: isIslandExpanded ? "auto" : 80, opacity: 1, y: 0 }} exit={{ height: 0, opacity: 0 }} transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                className="relative overflow-hidden bg-emerald-500/10 border border-emerald-500/20 rounded-[2.5rem] p-4 flex flex-col">
+                className="relative overflow-hidden bg-emerald-500/10 border border-emerald-500/30 rounded-[2.5rem] p-4 flex flex-col shadow-lg shadow-emerald-500/5">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 2 }} className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
-                      <Sparkles className="w-6 h-6 text-emerald-400" />
+                    <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 2 }} className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/40">
+                      <Sparkles className="w-6 h-6 text-emerald-700" />
                     </motion.div>
                     <div>
-                      <h3 className="font-black text-sm text-emerald-400 uppercase tracking-widest leading-none mb-1.5">Aviso de Despacho</h3>
-                      <p className="text-[10px] text-emerald-400/60 font-black uppercase tracking-widest">
+                      <h3 className="font-black text-sm text-emerald-700 uppercase tracking-widest leading-none mb-1.5">Aviso de Despacho</h3>
+                      <p className="text-[10px] text-emerald-700/80 font-black uppercase tracking-widest">
                         {orders.readyOrders.length + orders.partiallyReadyOrders.length} Pedidos disponibles
                       </p>
                     </div>
                   </div>
-                  <button onClick={() => setIsIslandExpanded(!isIslandExpanded)} className="p-3 bg-white/5 rounded-2xl hover:bg-white/10 transition-all text-emerald-400">
+                  <button onClick={() => setIsIslandExpanded(!isIslandExpanded)} className="p-3 bg-white/10 rounded-2xl hover:bg-white/20 transition-all text-emerald-700 border border-emerald-500/20">
                     <motion.div animate={{ rotate: isIslandExpanded ? 180 : 0 }}><ChevronDown className="w-5 h-5" /></motion.div>
                   </button>
                 </div>
@@ -144,19 +144,19 @@ export default function WaiterDashboard() {
           <div className="flex flex-col md:flex-row gap-3">
             <AnimatePresence>
               {orders.helpRequestedTables?.length > 0 && (
-                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex-1 bg-red-500/10 border border-red-500/20 rounded-[2.5rem] p-5 flex items-center justify-between gap-4 shadow-lg shadow-red-500/5">
+                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex-1 bg-rose-500/10 border border-rose-500/20 rounded-[2.5rem] p-5 flex items-center justify-between gap-4 shadow-lg shadow-rose-500/5">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-red-500/20 flex items-center justify-center border border-red-500/30">
-                      <Bell className="w-5 h-5 text-red-400 animate-pulse" />
+                    <div className="w-12 h-12 rounded-2xl bg-rose-500/20 flex items-center justify-center border border-rose-500/30">
+                      <Bell className="w-5 h-5 text-rose-600 animate-pulse" />
                     </div>
                     <div>
-                      <h3 className="font-black text-xs text-red-400 uppercase tracking-widest leading-none mb-1.5">Solicitud Ayuda</h3>
-                      <p className="text-[10px] text-red-400/60 font-black uppercase tracking-widest">{orders.helpRequestedTables.length} Mesas esperando</p>
+                      <h3 className="font-black text-xs text-rose-600 uppercase tracking-widest leading-none mb-1.5">Solicitud Ayuda</h3>
+                      <p className="text-[10px] text-rose-600/80 font-black uppercase tracking-widest">{orders.helpRequestedTables.length} Mesas esperando</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     {orders.helpRequestedTables.slice(0, 2).map((t: any) => (
-                      <button key={t.id} onClick={() => orders.handleHelpComplete(t.id)} className="bg-red-500/20 hover:bg-red-500/30 text-[10px] font-black text-white px-4 py-3 rounded-2xl border border-red-500/30 transition-all active:scale-95 shadow-xl shadow-red-500/20">
+                      <button key={t.id} onClick={() => orders.handleHelpComplete(t.id)} className="bg-rose-600/20 hover:bg-rose-600/30 text-[10px] font-black text-rose-950 px-4 py-3 rounded-2xl border border-rose-600/30 transition-all active:scale-95 shadow-xl shadow-rose-600/10">
                         Mesa {t.number} ✓
                       </button>
                     ))}
@@ -167,19 +167,19 @@ export default function WaiterDashboard() {
 
             <AnimatePresence>
               {cleaningTables.length > 0 && (
-                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex-1 bg-sky-500/10 border border-sky-500/20 rounded-[2.5rem] p-5 flex items-center justify-between gap-4">
+                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex-1 bg-cyan-500/10 border border-cyan-500/20 rounded-[2.5rem] p-5 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-sky-500/20 flex items-center justify-center border border-sky-500/30">
-                      <RefreshCw className="w-5 h-5 text-sky-400 animate-spin-slow" />
+                    <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 flex items-center justify-center border border-cyan-500/30">
+                      <RefreshCw className="w-5 h-5 text-cyan-700 animate-spin-slow" />
                     </div>
                     <div>
-                      <h3 className="font-black text-xs text-sky-400 uppercase tracking-widest leading-none mb-1.5">Limpieza</h3>
-                      <p className="text-[10px] text-sky-400/60 font-black uppercase tracking-widest">{cleaningTables.length} Mesas pendientes</p>
+                      <h3 className="font-black text-xs text-cyan-700 uppercase tracking-widest leading-none mb-1.5">Limpieza</h3>
+                      <p className="text-[10px] text-cyan-700/80 font-black uppercase tracking-widest">{cleaningTables.length} Mesas pendientes</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     {cleaningTables.slice(0, 2).map((t) => (
-                      <button key={t.id} onClick={() => handleTableClean(t.id)} className="bg-sky-500/20 hover:bg-sky-500/30 text-[10px] font-black text-white px-4 py-3 rounded-2xl border border-sky-500/30 transition-all active:scale-95">
+                      <button key={t.id} onClick={() => handleTableClean(t.id)} className="bg-cyan-600/20 hover:bg-cyan-600/30 text-[10px] font-black text-cyan-950 px-4 py-3 rounded-2xl border border-cyan-600/30 transition-all active:scale-95">
                         Mesa {t.number} ✓
                       </button>
                     ))}
@@ -189,13 +189,13 @@ export default function WaiterDashboard() {
             </AnimatePresence>
             <AnimatePresence>
               {tables.some((t) => t.billRequested) && (
-                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex-1 bg-yellow-500/10 border border-yellow-500/20 rounded-[2.5rem] p-5 flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-yellow-500/20 flex items-center justify-center border border-yellow-500/30">
-                    <Receipt className="w-5 h-5 text-yellow-400 animate-bounce-slow" />
+                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex-1 bg-amber-500/10 border border-amber-500/20 rounded-[2.5rem] p-5 flex items-center gap-4 shadow-lg shadow-amber-500/5">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center border border-amber-500/30">
+                    <Receipt className="w-5 h-5 text-amber-600 animate-bounce-slow" />
                   </div>
                   <div>
-                    <h3 className="font-black text-xs text-yellow-400 uppercase tracking-widest leading-none mb-1.5">Cuentas</h3>
-                    <p className="text-[10px] text-yellow-400/60 font-black uppercase tracking-widest">{tables.filter((t) => t.billRequested).length} Por cobrar</p>
+                    <h3 className="font-black text-xs text-amber-600 uppercase tracking-widest leading-none mb-1.5">Cuentas</h3>
+                    <p className="text-[10px] text-amber-600/80 font-black uppercase tracking-widest">{tables.filter((t) => t.billRequested).length} Por cobrar</p>
                   </div>
                 </motion.div>
               )}
@@ -204,11 +204,11 @@ export default function WaiterDashboard() {
         </div>
 
         {/* Tabs */}
-        <div className="px-6 py-2">
-          <div className="flex p-1.5 bg-card/60 backdrop-blur-md rounded-[1.5rem] border border-white/5 w-fit gap-2">
+        <div className="px-4 sm:px-6 py-2">
+          <div className="flex p-1.5 bg-card/60 backdrop-blur-md rounded-[1.5rem] border border-foreground/10 w-fit gap-2">
             {(["mesas", "pedidos"] as const).map((tab) => (
               <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`relative flex items-center gap-2 px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${activeTab === tab ? "bg-primary text-primary-foreground shadow-xl shadow-primary/20" : "text-muted-foreground hover:text-foreground hover:bg-white/5"}`}>
+                className={`relative flex items-center gap-2 px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] transition-all ${activeTab === tab ? "bg-primary text-primary-foreground shadow-xl shadow-primary/20" : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"}`}>
                 {tab === "mesas" ? <LayoutDashboard className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
                 {tab === "mesas" ? "Mesas" : "Pedidos"}
                 {tab === "pedidos" && orders.pendingOrders.length > 0 && (
@@ -222,23 +222,23 @@ export default function WaiterDashboard() {
         </div>
 
         {/* Main content */}
-        <main className="flex-1 px-6 py-8">
+        <main className="flex-1 px-4 sm:px-6 py-8">
           <AnimatePresence mode="wait">
             {activeTab === "mesas" ? (
               <motion.div key="mesas" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-4xl font-black tracking-tighter">Gestión de <span className="text-primary">Salón</span></h2>
+                    <h2 className="text-2xl sm:text-4xl font-black tracking-tighter">Gestión de <span className="text-primary">Salón</span></h2>
                     <p className="text-muted-foreground text-xs font-black uppercase tracking-widest opacity-60 mt-1">
                       {merge.mergeMode ? "Selecciona 2+ mesas OCCUPIED para fusionar" : "Selecciona una mesa para tomar comandas"}
                     </p>
                   </div>
-                  <Button variant="outline" size="icon" onClick={merge.toggleMode} className={`rounded-xl w-11 h-11 shrink-0 transition-all ${merge.mergeMode ? "border-primary/40 text-primary bg-primary/10" : "border-border/20"}`}>
+                  <Button variant="outline" size="icon" onClick={merge.toggleMode} className={`rounded-xl w-11 h-11 shrink-0 transition-all ${merge.mergeMode ? "border-primary/40 text-primary bg-primary/10 shadow-lg shadow-primary/10" : "border-foreground/20 bg-foreground/5 text-foreground/60 hover:bg-foreground/10 hover:text-foreground"}`}>
                     <Link2 className="w-4 h-4" />
                   </Button>
                 </div>
                 <TableMergeBar mergeMode={merge.mergeMode} selectedCount={merge.selectedForMerge.size} merging={merge.merging} mergeResult={merge.mergeResult} onToggleMode={merge.toggleMode} onConfirmMerge={merge.handleMergeTables} />
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-6">
                   {tables.map((table) => (
                     <TableCard
                       key={table.id}
@@ -265,7 +265,7 @@ export default function WaiterDashboard() {
               <motion.div key="pedidos" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-4xl font-black tracking-tighter">Gestión de <span className="text-primary">Pedidos</span></h2>
+                    <h2 className="text-2xl sm:text-4xl font-black tracking-tighter">Gestión de <span className="text-primary">Pedidos</span></h2>
                     <p className="text-muted-foreground text-xs font-black uppercase tracking-widest opacity-60 mt-1">Validación y seguimiento de preparación</p>
                   </div>
                 </div>
@@ -308,7 +308,7 @@ export default function WaiterDashboard() {
                 <PreparingOrdersList orders={orders.preparingOrders} />
 
                 {orders.pendingOrders.length === 0 && orders.preparingOrders.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-32 gap-6 text-muted-foreground border-2 border-dashed border-white/5 rounded-[3rem]">
+                <div className="flex flex-col items-center justify-center py-32 gap-6 text-muted-foreground border-2 border-dashed border-foreground/10 rounded-[3rem]">
                     <p className="text-sm font-black uppercase tracking-widest opacity-40">Todo está al día</p>
                   </div>
                 )}

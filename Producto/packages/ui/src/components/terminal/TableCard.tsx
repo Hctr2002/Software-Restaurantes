@@ -89,25 +89,25 @@ export function TableCard({ table, isBillRequested, isReady, isPreparing, mergeM
         )}
       </div>
 
-      <div className={`relative bg-card/40 border border-white/5 rounded-[2.5rem] p-6 flex flex-col items-center justify-center gap-4 transition-all cursor-pointer hover:bg-card/60 hover:border-white/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] ${
+      <div className={`relative bg-card/40 border border-white/5 rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-6 flex flex-col items-center justify-center gap-3 sm:gap-4 transition-all cursor-pointer hover:bg-card/60 hover:border-white/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] ${
         isBillRequested ? "ring-2 ring-yellow-500/30" : ""
       } ${isReady ? "ring-2 ring-emerald-500/30" : ""} ${isPreparing && !isReady ? "ring-2 ring-primary/30" : ""}`}>
-        <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center border transition-all ${STATUS_STYLES[currentStatus]}`}>
-          <Hash className="w-8 h-8 font-black" />
+        <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-[1rem] sm:rounded-[1.5rem] flex items-center justify-center border transition-all ${STATUS_STYLES[currentStatus]}`}>
+          <Hash className="w-6 h-6 sm:w-8 sm:h-8 font-black" />
         </div>
         <div className="text-center">
-          <p className="text-2xl font-black tracking-tighter leading-none mb-1">{table.number}</p>
-          <p className={`text-[9px] font-black uppercase tracking-widest ${STATUS_TEXT[currentStatus]}`}>
+          <p className="text-xl sm:text-2xl font-black tracking-tighter leading-none mb-1">{table.number}</p>
+          <p className={`text-[8px] sm:text-[9px] font-black uppercase tracking-widest ${STATUS_TEXT[currentStatus]}`}>
             {currentStatus}
           </p>
           {itemsCount > 0 && (
-            <p className="text-[8px] font-bold text-muted-foreground mt-2 uppercase tracking-tight">
+            <p className="text-[7px] sm:text-[8px] font-bold text-muted-foreground mt-1.5 sm:mt-2 uppercase tracking-tight">
               {itemsCount} ítem(s) en curso
             </p>
           )}
         </div>
-        {isReady && <div className="absolute -inset-0.5 bg-emerald-500/20 rounded-[2.6rem] blur animate-pulse -z-10" />}
-        {isBillRequested && <div className="absolute -inset-0.5 bg-yellow-500/20 rounded-[2.6rem] blur animate-pulse -z-10" />}
+        {isReady && <div className="absolute -inset-0.5 bg-emerald-500/20 rounded-[1.6rem] sm:rounded-[2.6rem] blur animate-pulse -z-10" />}
+        {isBillRequested && <div className="absolute -inset-0.5 bg-yellow-500/20 rounded-[1.6rem] sm:rounded-[2.6rem] blur animate-pulse -z-10" />}
       </div>
     </motion.div>
   );

@@ -87,11 +87,14 @@
  
        {notes && (
          <div className={cn(
-           "flex items-start gap-3 px-4 py-3 rounded-2xl border mb-6 relative z-10",
-           type === 'BAR' ? "bg-purple-500/10 border-purple-500/20" : "bg-amber-500/10 border-amber-500/20"
+           "flex flex-col gap-1 px-5 py-4 rounded-2xl border mb-6 relative z-10",
+           type === 'BAR' ? "bg-purple-500/20 border-purple-500/30" : "bg-amber-500/20 border-amber-500/30"
          )}>
-           <MessageSquare className={cn("w-4 h-4 mt-0.5 shrink-0", type === 'BAR' ? "text-purple-400" : "text-amber-400")} />
-           <p className={cn("text-xs font-bold italic leading-relaxed", type === 'BAR' ? "text-purple-200" : "text-amber-200")}>{notes}</p>
+           <div className="flex items-center gap-2 mb-1">
+             <MessageSquare className={cn("w-3.5 h-3.5", type === 'BAR' ? "text-purple-400" : "text-amber-500")} />
+             <span className={cn("text-[9px] font-black uppercase tracking-[0.2em]", type === 'BAR' ? "text-purple-400" : "text-amber-600")}>Notas del Pedido</span>
+           </div>
+           <p className={cn("text-xs font-bold italic leading-relaxed", type === 'BAR' ? "text-purple-100" : "text-amber-900/80")}>{notes}</p>
          </div>
        )}
 
