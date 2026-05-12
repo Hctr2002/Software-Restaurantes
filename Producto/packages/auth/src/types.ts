@@ -51,7 +51,6 @@ export type TableRecord = {
   restaurantId: string;
   billRequested: boolean;
   helpRequested: boolean;
-  session_id?: string | null;
   current_session_id?: string | null;
   tip_included?: boolean;
 };

@@ -81,7 +81,6 @@ export function useTableOrders(tableId: string | undefined, sessionId?: string |
       filter: sessionId ? `session_id=eq.${sessionId}` : `table_id=eq.${tableId}`,
       transform: (data: any) => Array.isArray(data) ? data.map(mapOrder) : []
     }
-    }
   );
 
   return { orders, loading, refetch };

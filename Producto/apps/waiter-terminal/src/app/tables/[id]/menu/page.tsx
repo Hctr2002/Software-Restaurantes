@@ -84,7 +84,7 @@ export default function TableMenuPage() {
           .insert({
             restaurant_id: user.restaurantId,
             table_id: tableId,
-            session_id: tableData?.current_session_id || null,
+            session_id: tableData?.current_session_id ?? null,
             status: "VALIDATED",
             validated_at: new Date().toISOString(),
             total_amount: items.length === cart.length ? total : stationTotal,
