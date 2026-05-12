@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Badge, Button } from "@menu-bites/ui";
+import { Badge, Button, cn } from "@menu-bites/ui";
 import { ImagePlus, Power, Pencil, Trash2, Loader2 } from "lucide-react";
 import { formatPrice, MenuItem } from "@/app/[slug]/dashboard/_components/localShared";
 
@@ -30,14 +30,22 @@ export function MenuItemCard({ item, onToggleActive, onEdit, onDelete, isDeletin
           </div>
         )}
         <div className="absolute top-4 left-4">
-          <Badge variant={item.is_active ? "success" : "neutral"} className="px-3 py-1 text-[9px] font-black uppercase tracking-widest bg-background/80 backdrop-blur-md border-foreground/10">
+          <Badge 
+            variant={item.is_active ? "success" : "neutral"} 
+            className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-widest border-none shadow-lg ${item.is_active ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground'}`}
+          >
             {item.is_active ? "En Venta" : "Pausado"}
           </Badge>
         </div>
         <div className="absolute top-4 right-4 flex gap-2">
           <button
             onClick={() => onToggleActive(item)}
-            className={`h-9 w-9 rounded-xl flex items-center justify-center transition-all ${item.is_active ? "bg-primary/20 text-primary hover:bg-primary hover:text-primary-foreground" : "bg-foreground/10 text-foreground hover:bg-primary hover:text-primary-foreground"}`}
+            className={cn(
+              "h-10 w-10 rounded-2xl flex items-center justify-center transition-all shadow-xl active:scale-95",
+              item.is_active 
+                ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                : "bg-background text-foreground/40 hover:text-primary"
+            )}
           >
             <Power className="w-4 h-4" />
           </button>
