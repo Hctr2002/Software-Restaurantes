@@ -105,6 +105,8 @@ export default function LocalShell({ title, subtitle, children }: LocalShellProp
           <DashboardHeader 
             title={title}
             subtitle={subtitle}
+            pathname={pathname}
+            base={base}
             onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
           />
  
