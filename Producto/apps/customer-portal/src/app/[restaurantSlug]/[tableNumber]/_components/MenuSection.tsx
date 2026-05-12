@@ -82,7 +82,7 @@ export function MenuSection({ categoryName, activeCategory, categories, items, c
           ))
         ) : (
           <div className="text-center py-12 col-span-full">
-            <p className="text-sand/40 italic">No hay platos disponibles en esta categoría.</p>
+            <p className="text-foreground/40 italic">No hay platos disponibles en esta categoría.</p>
           </div>
         )}
       </motion.div>

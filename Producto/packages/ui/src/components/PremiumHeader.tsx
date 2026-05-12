@@ -79,9 +79,9 @@ export const PremiumHeader = ({
               {statusLabel}
             </span>
             {statusSubLabel && (
-              <div className="hidden sm:flex items-center space-x-2">
+              <div className="flex items-center space-x-2">
                 <span className="opacity-30">•</span>
-                <span className="truncate">{statusSubLabel}</span>
+                <span className="truncate max-w-[80px] sm:max-w-none">{statusSubLabel}</span>
               </div>
             )}
           </div>

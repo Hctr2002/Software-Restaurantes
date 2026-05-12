@@ -36,7 +36,7 @@ export default function AlertItem({
   const cfg = TYPE_CONFIG[alert.type] || { label: "Alerta", variant: "neutral" };
 
   return (
-    <div className="p-6 rounded-[2rem] border border-primary/10 bg-white/[0.04] backdrop-blur-md space-y-4 group hover:border-primary/50 hover:bg-white/[0.08] transition-all shadow-xl">
+    <div className="p-6 rounded-[2.5rem] border border-foreground/10 bg-foreground/[0.03] backdrop-blur-md space-y-4 group hover:border-primary/30 hover:bg-foreground/[0.05] transition-all shadow-lg">
       {/* Header de la alerta */}
       <div className="flex items-start justify-between gap-4">
         <Badge variant={cfg.variant} className="px-3 py-1 text-[9px] font-black uppercase tracking-widest shadow-sm">
@@ -67,7 +67,7 @@ export default function AlertItem({
           <button
             disabled={isActing}
             onClick={() => onResolve(alert.id, "disable_item", alert.menu_item_id)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-primary-foreground transition-all disabled:opacity-50"
           >
             <PowerOff className="w-3.5 h-3.5" /> Deshabilitar
           </button>

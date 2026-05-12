@@ -13,19 +13,19 @@ interface TableStatusBoardProps {
 
 export function TableStatusBoard({ tables }: TableStatusBoardProps) {
   return (
-    <Card className="border-white/5 bg-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden group mt-6">
+    <Card className="border-foreground/10 bg-card backdrop-blur-xl rounded-[2.5rem] overflow-hidden group mt-6 shadow-lg">
       <CardHeader>
-        <CardTitle className="flex items-center gap-3 text-white">
+        <CardTitle className="flex items-center gap-3 text-foreground">
           <div className="p-2 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform">
             <TableProperties className="w-5 h-5 text-primary" />
           </div>
           Estado de Mesas
         </CardTitle>
-        <CardDescription className="text-slate-500 font-medium">Distribución actual del salón</CardDescription>
+        <CardDescription className="text-muted-foreground font-medium">Distribución actual del salón</CardDescription>
       </CardHeader>
       <CardContent>
         {tables.length === 0 ? (
-          <p className="text-sm text-slate-500 italic">No hay mesas registradas.</p>
+          <p className="text-sm text-muted-foreground italic">No hay mesas registradas.</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {tables.map((table) => (
@@ -38,24 +38,24 @@ export function TableStatusBoard({ tables }: TableStatusBoardProps) {
                   table.status === "OCCUPIED"  && "bg-red-500/10 border-red-500/20 shadow-red-500/5",
                   table.status === "RESERVED"  && "bg-amber-500/10 border-amber-500/20 shadow-amber-500/5",
                   table.status === "CLEANING"  && "bg-sky-500/10 border-sky-500/20 shadow-sky-500/5",
-                  !["FREE","OCCUPIED","RESERVED","CLEANING"].includes(table.status) && "bg-white/5 border-white/10"
+                  !["FREE","OCCUPIED","RESERVED","CLEANING"].includes(table.status) && "bg-foreground/[0.03] border-foreground/10"
                 )}
               >
                 <p className={cn(
                   "text-3xl font-black tracking-tighter",
-                  table.status === "FREE"     && "text-emerald-400",
-                  table.status === "OCCUPIED" && "text-red-400",
-                  table.status === "RESERVED" && "text-amber-400",
-                  table.status === "CLEANING" && "text-sky-400",
+                  table.status === "FREE"     && "text-emerald-600 dark:text-emerald-400",
+                  table.status === "OCCUPIED" && "text-red-600 dark:text-red-400",
+                  table.status === "RESERVED" && "text-amber-600 dark:text-amber-400",
+                  table.status === "CLEANING" && "text-sky-600 dark:text-sky-400",
                 )}>
                   {table.number}
                 </p>
                 <span className={cn(
                   "text-[10px] font-black uppercase mt-1 tracking-widest",
-                  table.status === "FREE"     && "text-emerald-600",
-                  table.status === "OCCUPIED" && "text-red-600",
-                  table.status === "RESERVED" && "text-amber-600",
-                  table.status === "CLEANING" && "text-sky-600",
+                  table.status === "FREE"     && "text-emerald-700 dark:text-emerald-500",
+                  table.status === "OCCUPIED" && "text-red-700 dark:text-red-500",
+                  table.status === "RESERVED" && "text-amber-700 dark:text-amber-500",
+                  table.status === "CLEANING" && "text-sky-700 dark:text-sky-500",
                 )}>
                   {table.status === "FREE" ? "Libre" : table.status === "OCCUPIED" ? "Uso" :
                    table.status === "CLEANING" ? "Limpieza" : "Resv"}

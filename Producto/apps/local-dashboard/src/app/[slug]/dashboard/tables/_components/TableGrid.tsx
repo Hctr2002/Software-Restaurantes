@@ -27,7 +27,7 @@ export function TableGrid({
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
       {tables.length === 0 && (
-        <div className="col-span-full py-20 text-center glass rounded-[2.5rem] border-white/5">
+        <div className="col-span-full py-20 text-center glass rounded-[2.5rem] border-foreground/5">
           <p className="text-foreground/40 font-bold uppercase tracking-widest text-xs">
             No hay mesas configuradas aún.
           </p>
@@ -38,12 +38,12 @@ export function TableGrid({
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           key={table.id}
-          className="glass p-6 rounded-[2.5rem] border-white/5 relative overflow-hidden group cursor-pointer hover:border-primary/20 transition-all duration-300"
+          className="glass p-6 rounded-[2.5rem] border-foreground/5 relative overflow-hidden group cursor-pointer hover:border-primary/20 transition-all duration-300"
           onClick={() => onEdit(table)}
         >
           <div className="flex flex-col items-center text-center space-y-3">
             <div
-              className={`p-4 rounded-[1.5rem] bg-white/5 transition-transform group-hover:scale-110 ${
+              className={`p-4 rounded-[1.5rem] bg-foreground/5 transition-transform group-hover:scale-110 ${
                 table.status === "OCCUPIED"
                   ? "text-destructive"
                   : table.status === "RESERVED"
@@ -76,7 +76,7 @@ export function TableGrid({
                 onDelete(table.id);
               }}
               disabled={deleteId === table.id}
-              className="p-2 rounded-xl bg-destructive/10 text-destructive hover:bg-destructive hover:text-white transition-all"
+              className="p-2 rounded-xl bg-destructive/10 text-destructive hover:bg-destructive hover:text-primary-foreground transition-all"
             >
               {deleteId === table.id ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

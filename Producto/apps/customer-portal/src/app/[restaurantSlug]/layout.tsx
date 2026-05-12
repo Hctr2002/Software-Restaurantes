@@ -69,19 +69,19 @@ export default function TenantLayout({ children }: { children: React.ReactNode }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-navy-dark flex items-center justify-center">
-        <div className="w-10 h-10 border-2 border-sage border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (notFound || !restaurant) {
     return (
-      <div className="min-h-screen bg-navy-dark flex flex-col items-center justify-center p-6 text-center">
-        <h1 className="text-4xl font-black text-sand mb-3">404</h1>
-        <p className="text-sage text-lg font-semibold mb-2">Restaurante no encontrado</p>
-        <p className="text-sand/40 text-sm">
-          El restaurante <span className="text-sage/70 font-mono">"{restaurantSlug}"</span> no existe
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+        <h1 className="text-4xl font-black text-foreground mb-3">404</h1>
+        <p className="text-primary text-lg font-semibold mb-2">Restaurante no encontrado</p>
+        <p className="text-foreground/40 text-sm">
+          El restaurante <span className="text-primary/70 font-mono">"{restaurantSlug}"</span> no existe
           o no está activo en este momento.
         </p>
       </div>

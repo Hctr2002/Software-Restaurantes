@@ -33,7 +33,7 @@ export default function ReportsToolbar({
   onExport,
 }: ReportsToolbarProps) {
   return (
-    <div className="glass p-6 rounded-[2.5rem] border-white/5 mb-8 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6">
+    <div className="glass p-6 rounded-[2.5rem] border-foreground/5 mb-8 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6">
       <div className="flex flex-col gap-3">
         <p className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] px-1 flex items-center gap-2">
           <Filter className="w-3 h-3" /> Filtrar Período
@@ -46,7 +46,7 @@ export default function ReportsToolbar({
               className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                 (p.days === 0 ? isCustom : !isCustom && preset === p.days)
                   ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                  : "bg-white/5 text-foreground/40 hover:bg-white/10 hover:text-foreground"
+                  : "bg-foreground/5 text-foreground/40 hover:bg-foreground/10 hover:text-foreground"
               }`}
             >
               {p.label}
@@ -56,7 +56,7 @@ export default function ReportsToolbar({
       </div>
 
       {isCustom && (
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-wrap items-end gap-3 glass p-4 rounded-2xl border-white/5">
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-wrap items-end gap-3 glass p-4 rounded-2xl border-foreground/5">
           <div className="space-y-1">
             <label className="text-[9px] font-black text-foreground/30 uppercase tracking-widest px-1">Desde</label>
             <input
@@ -64,7 +64,7 @@ export default function ReportsToolbar({
               value={dateFrom}
               max={dateTo || todayISO()}
               onChange={(e) => onDateFromChange(e.target.value)}
-              className="h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-foreground text-xs font-bold focus:ring-1 focus:ring-primary outline-none"
+              className="h-10 px-3 rounded-xl bg-foreground/5 border border-foreground/10 text-foreground text-xs font-bold focus:ring-1 focus:ring-primary outline-none"
             />
           </div>
           <div className="space-y-1">
@@ -75,7 +75,7 @@ export default function ReportsToolbar({
               min={dateFrom}
               max={todayISO()}
               onChange={(e) => onDateToChange(e.target.value)}
-              className="h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-foreground text-xs font-bold focus:ring-1 focus:ring-primary outline-none"
+              className="h-10 px-3 rounded-xl bg-foreground/5 border border-foreground/10 text-foreground text-xs font-bold focus:ring-1 focus:ring-primary outline-none"
             />
           </div>
           <Button
@@ -93,7 +93,7 @@ export default function ReportsToolbar({
           onClick={onExport}
           disabled={loading}
           variant="ghost"
-          className="h-11 px-6 rounded-2xl bg-white/5 border border-white/5 hover:bg-primary/10 hover:text-primary transition-all group font-bold uppercase tracking-widest text-[10px]"
+          className="h-11 px-6 rounded-2xl bg-foreground/5 border border-foreground/5 hover:bg-primary/10 hover:text-primary transition-all group font-bold uppercase tracking-widest text-[10px]"
         >
           <Download className="w-4 h-4 mr-2 group-hover:-translate-y-0.5 transition-transform" />
           Descargar Excel

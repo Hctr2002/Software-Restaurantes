@@ -41,7 +41,7 @@ export function OrderDetailModal({
             <Button
               variant="ghost"
               onClick={onClose}
-              className="text-foreground/50 hover:bg-white/5 hover:text-foreground rounded-xl font-bold uppercase tracking-widest text-[10px]"
+              className="text-foreground/50 hover:bg-foreground/5 hover:text-foreground rounded-xl font-bold uppercase tracking-widest text-[10px]"
             >
               Cerrar
             </Button>
@@ -61,7 +61,7 @@ export function OrderDetailModal({
           <Button
             variant="ghost"
             onClick={onClose}
-            className="text-foreground/50 hover:bg-white/5 hover:text-foreground rounded-xl font-bold uppercase tracking-widest text-[10px]"
+            className="text-foreground/50 hover:bg-foreground/5 hover:text-foreground rounded-xl font-bold uppercase tracking-widest text-[10px]"
           >
             Cerrar
           </Button>
@@ -69,7 +69,7 @@ export function OrderDetailModal({
       }
     >
       <div className="space-y-8 py-4">
-        <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5">
+        <div className="flex items-center justify-between p-4 rounded-2xl bg-foreground/5 border border-foreground/5">
           <Badge
             variant={orderStatusVariant(order.status)}
             className="px-4 py-1 text-[10px] font-black uppercase tracking-widest"
@@ -90,7 +90,7 @@ export function OrderDetailModal({
             {(order.order_items ?? []).map((item) => (
               <div
                 key={item.id}
-                className="flex justify-between items-center p-4 rounded-2xl bg-white/5 border border-white/5 group hover:border-primary/20 transition-all"
+                className="flex justify-between items-center p-4 rounded-2xl bg-foreground/5 border border-foreground/5 group hover:border-primary/20 transition-all"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black text-xs italic">

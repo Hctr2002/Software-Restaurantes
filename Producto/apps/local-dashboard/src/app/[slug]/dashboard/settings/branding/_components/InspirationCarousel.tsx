@@ -54,7 +54,7 @@ export default function InspirationCarousel({ currentTheme, onSelectTheme }: Ins
             className={`flex-shrink-0 w-64 p-5 rounded-[2rem] border transition-all duration-500 text-left relative overflow-hidden group ${
               currentTheme.paletteName === tpl.id 
                 ? "bg-primary border-primary shadow-2xl shadow-primary/30" 
-                : "bg-white/5 border-white/5 hover:bg-white/10"
+                : "bg-foreground/5 border-foreground/5 hover:bg-foreground/10"
             }`}
           >
             {/* Contenido Visual del Preset */}
@@ -82,7 +82,7 @@ export default function InspirationCarousel({ currentTheme, onSelectTheme }: Ins
             )}
             
             {/* Efecto de Brillo de Cristal en la Esquina */}
-            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all" />
+            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-foreground/10 rounded-full blur-2xl group-hover:bg-foreground/20 transition-all" />
           </motion.button>
         ))}
       </div>

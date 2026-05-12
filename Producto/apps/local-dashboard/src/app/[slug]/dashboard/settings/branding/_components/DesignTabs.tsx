@@ -34,7 +34,7 @@ export default function DesignTabs({
   return (
     <div className="lg:col-span-7 space-y-8">
       {/* Selector de Pestañas con Efecto de Cristal */}
-      <div className="flex p-1.5 bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 sticky top-24 z-30 shadow-2xl">
+      <div className="flex p-1.5 bg-foreground/5 backdrop-blur-xl rounded-3xl border border-foreground/10 sticky top-24 z-30 shadow-2xl">
         <TabButton 
           active={activeTab === 'style'} 
           onClick={() => setActiveTab('style')} 
@@ -108,7 +108,7 @@ function TabButton({
       className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
         active 
           ? "bg-primary text-primary-foreground shadow-xl shadow-primary/20 scale-[1.02]" 
-          : "text-foreground/40 hover:text-foreground hover:bg-white/5"
+          : "text-foreground/40 hover:text-foreground hover:bg-foreground/5"
       }`}
     >
       {icon} {label}

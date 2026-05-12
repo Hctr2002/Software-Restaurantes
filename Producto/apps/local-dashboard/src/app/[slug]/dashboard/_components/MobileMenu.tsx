@@ -39,7 +39,7 @@ export default function MobileMenu({
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed left-0 top-0 bottom-0 w-72 bg-background/95 backdrop-blur-2xl border-r border-white/10 z-[70] lg:hidden flex flex-col overflow-hidden shadow-2xl"
+            className="fixed left-0 top-0 bottom-0 w-72 bg-background/95 backdrop-blur-2xl border-r border-foreground/10 z-[70] lg:hidden flex flex-col overflow-hidden shadow-2xl"
           >
             <Sidebar 
               user={user}

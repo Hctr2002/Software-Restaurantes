@@ -43,7 +43,7 @@ export function UserModal({
       title={editingUser ? "Editar Usuario" : "Nuevo Usuario"}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose} className="text-foreground/50 hover:bg-white/5 hover:text-foreground rounded-xl font-bold uppercase tracking-widest text-[10px]">
+          <Button variant="ghost" onClick={onClose} className="text-foreground/50 hover:bg-foreground/5 hover:text-foreground rounded-xl font-bold uppercase tracking-widest text-[10px]">
             Cancelar
           </Button>
           <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-primary/80 text-primary-foreground rounded-xl font-bold uppercase tracking-widest text-[10px] px-6 shadow-lg shadow-primary/20 transition-all">
@@ -66,7 +66,7 @@ export function UserModal({
           <Input
             type="email"
             placeholder="usuario@restaurante.com"
-            className="bg-white/5 border-white/10 h-12 rounded-2xl focus-visible:ring-primary text-foreground font-medium"
+            className="bg-foreground/5 border-foreground/10 h-12 rounded-2xl focus-visible:ring-primary text-foreground font-medium"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
           />
@@ -80,7 +80,7 @@ export function UserModal({
             <Input
               type={showPassword ? "text" : "password"}
               placeholder={editingUser ? "••••••••" : "Mínimo 6 caracteres"}
-              className="bg-white/5 border-white/10 h-12 rounded-2xl focus-visible:ring-primary text-foreground font-medium pr-10"
+              className="bg-foreground/5 border-foreground/10 h-12 rounded-2xl focus-visible:ring-primary text-foreground font-medium pr-10"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
@@ -100,7 +100,7 @@ export function UserModal({
           <select
             value={form.role}
             onChange={(e) => setForm({ ...form, role: e.target.value })}
-            className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-foreground font-bold focus:outline-none focus:ring-2 focus:ring-primary appearance-none cursor-pointer"
+            className="w-full h-12 rounded-2xl border border-foreground/10 bg-foreground/5 px-4 text-sm text-foreground font-bold focus:outline-none focus:ring-2 focus:ring-primary appearance-none cursor-pointer"
           >
             {LOCAL_ROLES.map((r) => (
               <option key={r} value={r} className="bg-background">{r}</option>

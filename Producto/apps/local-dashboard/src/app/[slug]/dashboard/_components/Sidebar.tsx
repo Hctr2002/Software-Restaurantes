@@ -18,7 +18,7 @@ export default function Sidebar({ user, pathname, base, isSigningOut, onSignOut,
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Brand */}
-      <div className="h-24 flex items-center px-8 border-b border-white/5 shrink-0">
+      <div className="h-24 flex items-center px-8 border-b border-foreground/5 shrink-0">
         <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center mr-3 shadow-lg shadow-primary/20">
           <Store className="w-5 h-5 text-primary-foreground" />
         </div>
@@ -28,7 +28,7 @@ export default function Sidebar({ user, pathname, base, isSigningOut, onSignOut,
         </div>
         {onCloseMobile && (
           <button
-            className="lg:hidden p-2 rounded-xl text-foreground/40 hover:text-foreground hover:bg-white/5 transition-colors"
+            className="lg:hidden p-2 rounded-xl text-foreground/40 hover:text-foreground hover:bg-foreground/5 transition-colors"
             onClick={onCloseMobile}
           >
             <X className="w-5 h-5" />
@@ -67,9 +67,9 @@ export default function Sidebar({ user, pathname, base, isSigningOut, onSignOut,
       </div>
 
       {/* User Profile & Sign Out */}
-      <div className="p-6 bg-white/5 border-t border-white/5 mt-auto">
+      <div className="p-6 bg-foreground/5 border-t border-foreground/5 mt-auto">
         <div className="flex items-center space-x-3 mb-6 px-2">
-          <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 shadow-inner">
+          <div className="w-10 h-10 rounded-2xl bg-foreground/5 flex items-center justify-center border border-foreground/10 shadow-inner">
             <span className="text-xs font-black text-primary">{user?.email?.charAt(0).toUpperCase() || "U"}</span>
           </div>
           <div className="flex-1 overflow-hidden">
@@ -79,7 +79,7 @@ export default function Sidebar({ user, pathname, base, isSigningOut, onSignOut,
         </div>
         <Button
           variant="outline"
-          className="w-full justify-start h-11 px-4 rounded-2xl bg-white/5 border-white/5 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 transition-all duration-300 group"
+          className="w-full justify-start h-11 px-4 rounded-2xl bg-foreground/5 border-foreground/5 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 transition-all duration-300 group"
           onClick={onSignOut}
           disabled={isSigningOut}
         >

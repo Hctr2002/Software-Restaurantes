@@ -18,13 +18,13 @@ export default function BrandingToolbar({
   isSaving
 }: BrandingToolbarProps) {
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-4 pt-8 border-t border-white/5">
+    <div className="flex flex-col sm:flex-row items-center gap-4 pt-8 border-t border-foreground/5">
       <div className="flex-1 w-full relative group">
         <Input 
           placeholder="Nombre para guardar este diseño..." 
           value={customName}
           onChange={(e) => setCustomName(e.target.value)}
-          className="h-14 bg-white/5 border-white/5 focus:border-primary/30 rounded-2xl px-6 text-xs font-bold uppercase tracking-widest transition-all"
+          className="h-14 bg-foreground/5 border-foreground/5 focus:border-primary/30 rounded-2xl px-6 text-xs font-bold uppercase tracking-widest transition-all"
         />
         <Button 
           size="sm"

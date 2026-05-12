@@ -14,7 +14,7 @@ export function OrderMobileList({ orders, onSelectOrder }: OrderMobileListProps)
   return (
     <div className="grid grid-cols-1 gap-4 lg:hidden">
       {orders.length === 0 && (
-        <div className="py-12 text-center glass rounded-[2.5rem] border-white/5">
+        <div className="py-12 text-center glass rounded-[2.5rem] border-foreground/5">
           <p className="text-foreground/40 font-bold uppercase tracking-widest text-[10px]">No se encontraron pedidos.</p>
         </div>
       )}
@@ -23,7 +23,7 @@ export function OrderMobileList({ orders, onSelectOrder }: OrderMobileListProps)
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           key={order.id}
-          className="glass p-6 rounded-[2rem] border-white/5 space-y-4 relative overflow-hidden"
+          className="glass p-6 rounded-[2rem] border-foreground/5 space-y-4 relative overflow-hidden"
           onClick={() => onSelectOrder(order)}
         >
           <div className="flex justify-between items-start relative z-10">
@@ -42,7 +42,7 @@ export function OrderMobileList({ orders, onSelectOrder }: OrderMobileListProps)
             </Badge>
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-white/5">
+          <div className="flex items-center justify-between pt-2 border-t border-foreground/5">
             <div className="flex items-center gap-2">
               <ShoppingBag className="w-3.5 h-3.5 text-primary" />
               <span className="text-[10px] font-black text-foreground/60 uppercase tracking-widest">{order.order_items?.length ?? 0} Items</span>

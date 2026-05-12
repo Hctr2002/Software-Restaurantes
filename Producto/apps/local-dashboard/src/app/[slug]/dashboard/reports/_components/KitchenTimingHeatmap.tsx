@@ -14,7 +14,7 @@ export default function KitchenTimingHeatmap({ stats, loading, description }: Ki
   const maxTotal = Math.max(...stats.map((s) => s.totalMin), 1);
 
   return (
-    <Card className="glass rounded-[2.5rem] border-white/5 overflow-hidden xl:col-span-2">
+    <Card className="glass rounded-[2.5rem] border-foreground/5 overflow-hidden xl:col-span-2">
       <CardHeader className="p-8 pb-4">
         <div className="flex items-center gap-3 mb-2">
           <div className="p-2.5 rounded-2xl bg-rose-500/10 text-rose-400">
@@ -53,7 +53,7 @@ export default function KitchenTimingHeatmap({ stats, loading, description }: Ki
               <div className="space-y-1">
                 {/* Validación bar */}
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                  <div className="flex-1 h-2 bg-foreground/5 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-blue-500/60 rounded-full transition-all duration-700"
                       style={{ width: `${Math.min((stat.validationMin / maxTotal) * 100, 100)}%` }}
@@ -65,7 +65,7 @@ export default function KitchenTimingHeatmap({ stats, loading, description }: Ki
                 </div>
                 {/* Cocina bar */}
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                  <div className="flex-1 h-2 bg-foreground/5 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${
                         stat.kitchenMin > 20 ? "bg-red-500/70" :
@@ -83,7 +83,7 @@ export default function KitchenTimingHeatmap({ stats, loading, description }: Ki
                 </div>
                 {/* Total bar */}
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                  <div className="flex-1 h-2 bg-foreground/5 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-emerald-500/50 rounded-full transition-all duration-700"
                       style={{ width: `${Math.min((stat.totalMin / maxTotal) * 100, 100)}%` }}

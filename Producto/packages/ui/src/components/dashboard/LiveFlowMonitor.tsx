@@ -26,23 +26,23 @@ export function LiveFlowMonitor({ orders }: LiveFlowMonitorProps) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card className="border-white/5 bg-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
+      <Card className="border-foreground/10 bg-card backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-lg">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-3 text-white text-base">
+          <CardTitle className="flex items-center gap-3 text-foreground text-base">
             <div className="p-2 bg-primary/10 rounded-xl">
               <Flame className="w-4 h-4 text-primary" />
             </div>
             Flujo en Vivo
           </CardTitle>
-          <CardDescription className="text-slate-500 font-medium text-xs">Estado de órdenes en curso</CardDescription>
+          <CardDescription className="text-muted-foreground font-medium text-xs">Estado de órdenes en curso</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-4 gap-3">
             {[
-              { label: "Pendiente",   count: flowCounts.PENDING,   color: "text-yellow-400",  bg: "bg-yellow-500/10 border-yellow-500/20" },
-              { label: "Validado",    count: flowCounts.VALIDATED,  color: "text-blue-400",    bg: "bg-blue-500/10 border-blue-500/20" },
+              { label: "Pendiente",   count: flowCounts.PENDING,   color: "text-yellow-600 dark:text-yellow-400",  bg: "bg-yellow-500/10 border-yellow-500/20" },
+              { label: "Validado",    count: flowCounts.VALIDATED,  color: "text-blue-600 dark:text-blue-400",    bg: "bg-blue-500/10 border-blue-500/20" },
               { label: "Preparando",  count: flowCounts.PREPARING,  color: "text-primary",     bg: "bg-primary/10 border-primary/20" },
-              { label: "Listo",       count: flowCounts.READY,      color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
+              { label: "Listo",       count: flowCounts.READY,      color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
             ].map(({ label, count, color, bg }) => (
               <div key={label} className={`flex flex-col items-center p-3 rounded-2xl border ${bg}`}>
                 <span className={`text-2xl font-black tracking-tighter ${color}`}>{count}</span>
@@ -53,28 +53,28 @@ export function LiveFlowMonitor({ orders }: LiveFlowMonitorProps) {
         </CardContent>
       </Card>
 
-      <Card className="border-white/5 bg-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
+      <Card className="border-foreground/10 bg-card backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-lg">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-3 text-white text-base">
+          <CardTitle className="flex items-center gap-3 text-foreground text-base">
             <div className="p-2 bg-amber-500/10 rounded-xl">
-              <Timer className="w-4 h-4 text-amber-400" />
+              <Timer className="w-4 h-4 text-amber-500" />
             </div>
             Tiempo Promedio Hoy
           </CardTitle>
-          <CardDescription className="text-slate-500 font-medium text-xs">Ciclo completo pedido → listo</CardDescription>
+          <CardDescription className="text-muted-foreground font-medium text-xs">Ciclo completo pedido → listo</CardDescription>
         </CardHeader>
         <CardContent>
           {avgCycleMin === null ? (
             <p className="text-sm text-foreground/30 italic">Sin entregas con timestamps hoy.</p>
           ) : (
             <div className="flex items-end gap-3">
-              <span className="text-4xl font-black tracking-tighter text-amber-400">{avgCycleMin}</span>
+              <span className="text-4xl font-black tracking-tighter text-amber-600 dark:text-amber-400">{avgCycleMin}</span>
               <span className="text-sm font-black text-foreground/40 uppercase tracking-widest pb-1">min</span>
               <div className="ml-auto">
                 <span className={`text-[10px] font-black px-3 py-1.5 rounded-xl ${
-                  avgCycleMin > 30 ? "bg-red-500/20 text-red-400" :
-                  avgCycleMin > 15 ? "bg-yellow-500/20 text-yellow-400" :
-                  "bg-emerald-500/20 text-emerald-400"
+                  avgCycleMin > 30 ? "bg-red-500/20 text-red-600 dark:text-red-400" :
+                  avgCycleMin > 15 ? "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400" :
+                  "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
                 }`}>
                   {avgCycleMin > 30 ? "Lento" : avgCycleMin > 15 ? "Normal" : "Óptimo"}
                 </span>

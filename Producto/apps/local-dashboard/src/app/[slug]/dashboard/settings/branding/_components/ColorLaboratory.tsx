@@ -21,7 +21,7 @@ export default function ColorLaboratory({ currentTheme, setCurrentTheme }: Color
       exit={{ opacity: 0, x: 20 }}
       className="space-y-8"
     >
-      <Card className="p-8 bg-white/5 border-white/5 rounded-[2.5rem] shadow-2xl space-y-10">
+      <Card className="p-8 bg-foreground/5 border-foreground/5 rounded-[2.5rem] shadow-2xl space-y-10">
         <div>
           <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1">Laboratorio de Color</h3>
           <p className="text-xs text-foreground/40 font-medium">Ajusta cada matiz de la experiencia visual</p>
@@ -53,7 +53,7 @@ function ColorInput({ label, value, onChange }: { label: string; value: string; 
           onChange={(e) => onChange(e.target.value)}
           className="w-12 h-12 rounded-2xl border-none p-0 bg-transparent cursor-pointer overflow-hidden shadow-xl"
         />
-        <div className="ml-3 flex-1 h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center px-4 font-mono text-[10px] font-bold text-foreground/60">
+        <div className="ml-3 flex-1 h-12 bg-foreground/5 border border-foreground/10 rounded-2xl flex items-center px-4 font-mono text-[10px] font-bold text-foreground/60">
           {value.toUpperCase()}
         </div>
       </div>

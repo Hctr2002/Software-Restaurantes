@@ -11,15 +11,15 @@ interface CategoryNavProps {
 
 export function CategoryNav({ categories, activeCategory, onSelectCategory }: CategoryNavProps) {
   return (
-    <nav className="px-6 overflow-x-auto no-scrollbar flex gap-2 pb-3 bg-transparent">
+    <nav className="px-6 overflow-x-auto no-scrollbar flex gap-2 pb-1 bg-transparent border-t border-foreground/5">
       {/* Opción "Todo" */}
       <button 
         onClick={() => onSelectCategory(null)}
-        className="relative whitespace-nowrap px-4 py-3 text-sm font-bold transition-all duration-500 group"
+        className="relative whitespace-nowrap px-4 py-4 text-sm font-bold transition-all duration-500 group"
       >
         <span 
-          className={`relative z-10 transition-colors duration-300 text-xs font-black uppercase tracking-widest ${
-            activeCategory === null ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
+          className={`relative z-10 transition-colors duration-300 text-[10px] font-black uppercase tracking-widest ${
+            activeCategory === null ? 'text-primary' : 'text-foreground/40 group-hover:text-foreground'
           }`}
           style={{ fontFamily: "var(--font-accent)" }}
         >
@@ -29,13 +29,13 @@ export function CategoryNav({ categories, activeCategory, onSelectCategory }: Ca
           <>
             <motion.div 
               layoutId="activeCategory"
-              className="absolute inset-0 bg-primary/10 rounded-xl"
+              className="absolute inset-x-2 inset-y-2 bg-primary/10 rounded-xl"
               initial={false}
               transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
             />
             <motion.div 
               layoutId="activeCategoryBar"
-              className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-full shadow-[0_-4px_12px_hsl(var(--primary)/0.5)]"
+              className="absolute bottom-0 left-4 right-4 h-1 bg-primary rounded-t-full shadow-[0_-4px_12px_hsl(var(--primary)/0.5)]"
               initial={false}
               transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
             />
@@ -49,31 +49,31 @@ export function CategoryNav({ categories, activeCategory, onSelectCategory }: Ca
           <button 
             key={cat.id} 
             onClick={() => onSelectCategory(cat.id)} 
-            className="relative whitespace-nowrap px-4 py-3 text-sm font-bold transition-all duration-500 group"
+            className="relative whitespace-nowrap px-4 py-4 text-sm font-bold transition-all duration-500 group"
           >
             <span 
-              className={`relative z-10 transition-colors duration-300 text-xs font-black uppercase tracking-widest ${
-                isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
+              className={`relative z-10 transition-colors duration-300 text-[10px] font-black uppercase tracking-widest ${
+                isActive ? 'text-primary' : 'text-foreground/40 group-hover:text-foreground'
               }`}
               style={{ fontFamily: "var(--font-accent)" }}
             >
               {cat.name}
             </span>
             {isActive && (
-              <motion.div 
-                layoutId="activeCategory"
-                className="absolute inset-0 bg-primary/10 rounded-xl"
-                initial={false}
-                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-              />
-            )}
-            {isActive && (
-              <motion.div 
-                layoutId="activeCategoryBar"
-                className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-full shadow-[0_-4px_12px_hsl(var(--primary)/0.5)]"
-                initial={false}
-                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-              />
+              <>
+                <motion.div 
+                  layoutId="activeCategory"
+                  className="absolute inset-x-2 inset-y-2 bg-primary/10 rounded-xl"
+                  initial={false}
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+                <motion.div 
+                  layoutId="activeCategoryBar"
+                  className="absolute bottom-0 left-4 right-4 h-1 bg-primary rounded-t-full shadow-[0_-4px_12px_hsl(var(--primary)/0.5)]"
+                  initial={false}
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              </>
             )}
           </button>
         );

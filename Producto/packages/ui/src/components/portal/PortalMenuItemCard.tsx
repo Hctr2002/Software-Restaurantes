@@ -17,10 +17,10 @@ export function PortalMenuItemCard({ item, cartQuantity, onAdd, onDecrement }: P
   return (
     <motion.div
       variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
-      className="glass-premium rounded-[2.5rem] sm:rounded-[3.5rem] border border-white/10 overflow-hidden shadow-2xl flex flex-col group transition-all duration-700 hover:shadow-primary/20 hover:-translate-y-2"
+      className="bg-card/95 glass-premium rounded-[2.5rem] sm:rounded-[3.5rem] border border-foreground/10 overflow-hidden shadow-xl flex flex-col group transition-all duration-700 hover:shadow-primary/20 hover:-translate-y-2"
     >
       {/* Imagen Pro con Badge Dinámico */}
-      <div className="h-44 sm:h-56 w-full relative overflow-hidden bg-navy-light/10">
+      <div className="h-44 sm:h-56 w-full relative overflow-hidden bg-foreground/[0.05]">
         <motion.img
           src={getPublicImageUrl(item.imageUrl)}
           className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
@@ -30,7 +30,7 @@ export function PortalMenuItemCard({ item, cartQuantity, onAdd, onDecrement }: P
               "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=400&auto=format&fit=crop";
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
         
         {/* Badge de Cantidad Glassmorphism */}
         <AnimatePresence>
@@ -46,7 +46,7 @@ export function PortalMenuItemCard({ item, cartQuantity, onAdd, onDecrement }: P
                 style={{ fontFamily: "var(--font-accent)" }}
               >
                 <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                {cartQuantity} en Mesa
+                {cartQuantity}
               </span>
             </motion.div>
           )}
@@ -54,11 +54,11 @@ export function PortalMenuItemCard({ item, cartQuantity, onAdd, onDecrement }: P
       </div>
 
       {/* Contenido Pro - Estilo Branding Lab */}
-      <div className="p-6 sm:p-8 flex flex-col space-y-4 bg-gradient-to-br from-white/[0.03] to-transparent">
+      <div className="p-6 sm:p-8 flex flex-col space-y-4 bg-gradient-to-br from-foreground/[0.02] to-transparent">
         <div className="space-y-2">
           <div className="flex justify-between items-start gap-4">
             <h4 
-              className="font-black text-foreground leading-none text-xl sm:text-2xl tracking-tighter italic uppercase group-hover:text-primary transition-colors duration-500 line-clamp-1"
+              className="font-black text-foreground leading-none text-lg sm:text-2xl tracking-tighter italic uppercase group-hover:text-primary transition-colors duration-500 line-clamp-2"
               style={{ fontFamily: "var(--font-title)" }}
             >
               {item.name}
@@ -88,13 +88,13 @@ export function PortalMenuItemCard({ item, cartQuantity, onAdd, onDecrement }: P
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 20, opacity: 0 }}
-                className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-[1.5rem] p-1.5 backdrop-blur-md w-full justify-between shadow-inner"
+                className="flex items-center gap-2 bg-foreground/[0.05] border border-foreground/10 rounded-[1.5rem] p-1.5 backdrop-blur-md w-full justify-between shadow-inner"
               >
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={() => onDecrement(item.id)}
                   aria-label="Disminuir cantidad"
-                  className="w-10 h-10 flex items-center justify-center bg-white/5 text-foreground hover:bg-white/10 hover:text-primary rounded-xl transition-all"
+                  className="w-10 h-10 flex items-center justify-center bg-foreground/5 text-foreground hover:bg-foreground/10 hover:text-primary rounded-xl transition-all"
                 >
                   <Minus className="w-4 h-4" />
                 </motion.button>

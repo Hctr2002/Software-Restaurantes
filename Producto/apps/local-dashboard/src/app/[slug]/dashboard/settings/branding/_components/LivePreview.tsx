@@ -31,7 +31,7 @@ export default function LivePreview({ currentTheme, sampleProduct }: LivePreview
           <h2 className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em]">Simulación Live</h2>
         </div>
         <div className="flex gap-2">
-           <div className="p-1.5 rounded-lg bg-white/5 text-foreground/20"><Monitor className="w-3 h-3" /></div>
+           <div className="p-1.5 rounded-lg bg-foreground/5 text-foreground/20"><Monitor className="w-3 h-3" /></div>
            <div className="p-1.5 rounded-lg bg-primary/20 text-primary"><Smartphone className="w-3 h-3" /></div>
         </div>
       </div>
@@ -75,7 +75,7 @@ export default function LivePreview({ currentTheme, sampleProduct }: LivePreview
                   )}
                   {/* Badge de Acento que usa la fuente seleccionada */}
                   <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full border border-white/20 backdrop-blur-md shadow-xl" style={{ backgroundColor: "hsl(var(--accent))" }}>
-                     <span className="text-[9px] font-black text-background uppercase tracking-widest" style={{ fontFamily: "var(--font-accent)" }}>Destacado</span>
+                     <span className="text-[9px] font-black text-primary-foreground uppercase tracking-widest" style={{ fontFamily: "var(--font-accent)" }}>Destacado</span>
                   </div>
                 </div>
 

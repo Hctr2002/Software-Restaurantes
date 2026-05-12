@@ -142,9 +142,9 @@ export default function MenuPage({
 
   if (menuLoading || !items) {
     return (
-      <div className="min-h-screen bg-navy-dark flex flex-col items-center justify-center p-6">
-        <Loader2 className="w-12 h-12 text-sage animate-spin mb-4" aria-hidden="true" />
-        <p className="text-sand/60 font-medium">Cargando menú de {restaurant?.name}…</p>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" aria-hidden="true" />
+        <p className="text-foreground/60 font-medium">Cargando menú de {restaurant?.name}…</p>
       </div>
     );
   }
@@ -160,7 +160,7 @@ export default function MenuPage({
         />
 
         {/* Bloque de Navegación Unificado Pro Max */}
-        <div className="sticky top-0 z-50 bg-background shadow-2xl border-b border-white/5">
+        <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-md shadow-2xl border-b border-foreground/5">
           <div className="p-4 lg:p-6 pb-2">
             <PremiumHeader
               title={restaurant?.name || ''}
@@ -169,13 +169,13 @@ export default function MenuPage({
               statusLabel="En Servicio"
               statusSubLabel={portal.table.data ? `Mesa ${portal.table.data.number}` : "Escanea tu mesa"}
               isSolid
-            className="border border-white/10"
+              className="border border-foreground/10"
               actions={
                 <div className="flex items-center gap-2 sm:gap-3">
                   <Button 
                     variant="outline" 
                     size="icon" 
-                    className="rounded-2xl w-12 h-12 bg-white/5 border-white/10 text-muted-foreground hover:text-foreground transition-all"
+                    className="rounded-2xl w-12 h-12 bg-foreground/5 border-foreground/10 text-muted-foreground hover:text-foreground transition-all"
                   >
                     <Search className="w-5 h-5" />
                   </Button>
@@ -188,7 +188,7 @@ export default function MenuPage({
                       className="w-12 h-12 sm:w-14 sm:h-14 bg-primary rounded-2xl flex items-center justify-center shadow-xl shadow-primary/30 group relative overflow-hidden"
                     >
                       <motion.div 
-                        className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute inset-0 bg-gradient-to-tr from-primary-foreground/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
                       />
                       <ShoppingBag className="w-6 h-6 text-primary-foreground relative z-10" />
                     </motion.button>
@@ -199,7 +199,7 @@ export default function MenuPage({
                           initial={{ scale: 0, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
                           exit={{ scale: 0, opacity: 0 }}
-                          className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-[3px] border-background shadow-lg z-20"
+                          className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-[3px] border-background shadow-lg z-20"
                         >
                           {portal.cartCount}
                         </motion.span>
