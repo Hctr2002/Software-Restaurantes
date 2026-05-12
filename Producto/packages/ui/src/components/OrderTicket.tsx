@@ -42,7 +42,7 @@
        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
        className={cn(
          "relative flex flex-col p-8 rounded-[2.5rem] border transition-all duration-700 overflow-hidden",
-         type === 'BAR' ? "glass-bar" : "glass-premium",
+         "glass-premium",
          (status === "PENDING" || status === "VALIDATED") && "border-white/10 bg-white/5 shadow-2xl shadow-black/40",
          status === "PREPARING" && (type === 'BAR' ? "border-purple-500/30 bg-purple-500/10 shadow-2xl shadow-purple-500/10" : "border-primary/30 bg-primary/10 shadow-2xl shadow-primary/10"),
          status === "READY" && "border-emerald-500/30 bg-emerald-500/10 shadow-2xl shadow-emerald-500/10",
@@ -92,9 +92,9 @@
          )}>
            <div className="flex items-center gap-2 mb-1">
              <MessageSquare className={cn("w-3.5 h-3.5", type === 'BAR' ? "text-purple-400" : "text-amber-500")} />
-             <span className={cn("text-[9px] font-black uppercase tracking-[0.2em]", type === 'BAR' ? "text-purple-400" : "text-amber-600")}>Notas del Pedido</span>
+             <span className={cn("text-[9px] font-black uppercase tracking-[0.2em]", type === 'BAR' ? "text-purple-600" : "text-amber-600")}>Notas del Pedido</span>
            </div>
-           <p className={cn("text-xs font-bold italic leading-relaxed", type === 'BAR' ? "text-purple-100" : "text-amber-900/80")}>{notes}</p>
+           <p className={cn("text-xs font-bold italic leading-relaxed", type === 'BAR' ? "text-purple-900/80" : "text-amber-900/80")}>{notes}</p>
          </div>
        )}
 
@@ -110,7 +110,7 @@
              <div className="flex items-center space-x-4">
                <span className={cn(
                  "w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black border transition-all duration-300 shadow-sm",
-                 type === 'BAR' ? "bg-purple-500/20 text-purple-300 border-purple-500/20" : "bg-primary/20 text-primary border-primary/20"
+                 type === 'BAR' ? "bg-purple-500/20 text-purple-600 border-purple-500/20" : "bg-primary/20 text-primary border-primary/20"
                )}>
                  {item.quantity}
                </span>

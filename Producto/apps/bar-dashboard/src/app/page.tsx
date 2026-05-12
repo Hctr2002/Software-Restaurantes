@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@menu-bites/store";
 import { useBarOrders, updateOrderStatus, signOut, useThemeSync } from "@menu-bites/auth";
-import { OrderTicket, Button, RestaurantThemeProvider, KDSColumn, TicketWrapper, PremiumHeader, HeaderStat } from "@menu-bites/ui";
+import { OrderTicket, Button, RestaurantThemeProvider, KDSColumn, TicketWrapper, PremiumHeader, HeaderStat, cn } from "@menu-bites/ui";
 import { GlassWater, Bell, Settings, LogOut, AlertTriangle, Activity } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
@@ -42,6 +42,7 @@ export default function BarDashboardPage() {
 
   const orders    = liveOrders.filter((o) => !clearedOrders.has(o.id));
   const [mounted, setMounted] = useState(false);
+  const [activeCol, setActiveCol] = useState("preparing");
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -111,9 +112,9 @@ export default function BarDashboardPage() {
   const readyOrders     = orders.filter((o) => o.status === "READY");
 
   const columns = [
-    { key: "pending", title: "Pedidos Nuevos", orders: pendingOrders, icon: <Bell className="w-5 h-5 text-muted-foreground" />, active: false },
-    { key: "preparing", title: "En Barra", orders: preparingOrders, icon: <GlassWater className="w-5 h-5 text-primary" />, active: true },
-    { key: "ready", title: "Para Despacho", orders: readyOrders, icon: <Activity className="w-5 h-5 text-emerald-500" />, active: false },
+    { key: "pending", title: "Nuevos", orders: pendingOrders, icon: null, active: activeCol === "pending" },
+    { key: "preparing", title: "Barra", orders: preparingOrders, icon: null, active: activeCol === "preparing" },
+    { key: "ready", title: "Listos", orders: readyOrders, icon: null, active: activeCol === "ready" },
   ];
 
   if (!mounted || !user || liveLoading) {
@@ -128,10 +129,11 @@ export default function BarDashboardPage() {
     <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
       <div className="min-h-screen bar-gradient text-foreground overflow-hidden flex flex-col p-4 lg:p-6 gap-6">
         <PremiumHeader
-          title="Bar"
-          accentTitle="Station"
+          title="BAR"
+          accentTitle="MONITOR"
           icon={GlassWater}
-          statusSubLabel="Operación en Tiempo Real"
+          variant="compact"
+          statusSubLabel="EN BARRA"
           stats={
             <>
               <HeaderStat label="Nuevos" value={pendingOrders.length} color="text-foreground/40" />
@@ -140,46 +142,72 @@ export default function BarDashboardPage() {
             </>
           }
           actions={
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Button 
                 variant="outline" 
                 onClick={() => setAlertOpen(true)}
-                className="rounded-2xl h-14 px-8 border-yellow-500/10 bg-yellow-500/5 text-yellow-500 hover:bg-yellow-500/10 hover:border-yellow-500/30 gap-3 font-black uppercase tracking-widest text-[10px] transition-all duration-300"
+                className="rounded-2xl h-12 sm:h-14 px-2 sm:px-8 border-yellow-500/10 bg-yellow-500/5 text-yellow-500 hover:bg-yellow-500/10 hover:border-yellow-500/30 gap-1.5 font-black uppercase tracking-widest text-[10px] transition-all duration-300"
               >
                 <AlertTriangle className="w-5 h-5" />
-                Alerta Stock
+                <span className="hidden md:inline">Alerta Stock</span>
               </Button>
               <Button 
                 variant="outline" 
                 size="icon" 
-                className="rounded-2xl w-14 h-14 border-white/5 bg-white/5 hover:bg-white/10 transition-all duration-300" 
+                className="rounded-2xl w-12 h-12 sm:w-14 sm:h-14 border-white/5 bg-white/5 hover:bg-white/10 transition-all duration-300" 
                 onClick={() => setSettingsOpen(true)}
               >
-                <Settings className="w-6 h-6 text-foreground/40" />
+                <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-foreground/40" />
               </Button>
               <Button 
                 variant="destructive" 
                 size="icon" 
                 onClick={handleSignOut} 
                 disabled={isSigningOut} 
-                className="rounded-2xl w-14 h-14 shadow-2xl shadow-destructive/20 hover:scale-105 active:scale-95 transition-all duration-300"
+                className="rounded-2xl w-12 h-12 sm:w-14 sm:h-14 bg-red-600 text-white shadow-2xl shadow-red-900/40 hover:bg-red-700 hover:scale-105 active:scale-95 transition-all duration-300"
               >
-                <LogOut className="w-6 h-6" />
+                <LogOut className="w-5 h-5 sm:w-6 sm:h-6" />
               </Button>
             </div>
           }
         />
 
-        <main className="flex-1 grid grid-cols-3 gap-6 overflow-hidden">
+        {/* Mobile Tab System */}
+        <div className="md:hidden px-4 py-2">
+          <div className="flex p-1 bg-card/60 backdrop-blur-md rounded-2xl border border-foreground/10 gap-1">
+            {columns.map((col) => (
+              <button
+                key={col.key}
+                onClick={() => setActiveCol(col.key)}
+                className={`flex-1 flex flex-col items-center justify-center py-2 rounded-xl transition-all ${
+                  activeCol === col.key ? "bg-primary text-primary-foreground shadow-lg" : "text-muted-foreground"
+                }`}
+              >
+                <div className="relative px-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest">{col.title}</span>
+                  {col.orders.length > 0 && (
+                    <span className="absolute -top-3 -right-3 flex h-5 w-5 items-center justify-center bg-red-600 text-white rounded-full text-[10px] font-black border-2 border-card shadow-md">
+                      {col.orders.length}
+                    </span>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <main className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 overflow-hidden">
           <AnimatePresence mode="popLayout">
             {columns.map((col) => (
-              <KDSColumn key={col.key} title={col.title} count={col.orders.length} icon={col.icon} active={col.active}>
-                {col.orders.map((order) => (
-                  <TicketWrapper key={`${col.key}-${order.id}`} createdAt={order.createdAt} thresholds={settings.thresholds} status={order.status}>
-                    <OrderTicket type="BAR" id={order.id} tableNumber={order.table?.number ?? 0} status={order.status} createdAt={order.createdAt} items={order.orderItems || []} notes={order.notes} onStatusChange={(s) => handleStatusChange(order.id, s)} onDismiss={() => setClearedOrders((prev) => new Set([...prev, order.id]))} />
-                  </TicketWrapper>
-                ))}
-              </KDSColumn>
+              <div key={col.key} className={cn("h-full", activeCol !== col.key && "hidden md:block")}>
+                <KDSColumn title={col.title} count={col.orders.length} icon={col.icon} active={col.active}>
+                  {col.orders.map((order) => (
+                    <TicketWrapper key={`${col.key}-${order.id}`} createdAt={order.createdAt} thresholds={settings.thresholds} status={order.status}>
+                      <OrderTicket type="BAR" id={order.id} tableNumber={order.table?.number ?? 0} status={order.status} createdAt={order.createdAt} items={order.orderItems || []} notes={order.notes} onStatusChange={(s) => handleStatusChange(order.id, s)} onDismiss={() => setClearedOrders((prev) => new Set([...prev, order.id]))} />
+                    </TicketWrapper>
+                  ))}
+                </KDSColumn>
+              </div>
             ))}
           </AnimatePresence>
         </main>

@@ -79,10 +79,10 @@ export const PremiumHeader = ({
               {statusLabel}
             </span>
             {statusSubLabel && (
-              <>
+              <div className="hidden sm:flex items-center space-x-2">
                 <span className="opacity-30">•</span>
                 <span className="truncate">{statusSubLabel}</span>
-              </>
+              </div>
             )}
           </div>
         </div>
