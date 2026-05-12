@@ -15,6 +15,42 @@ interface CreateOrderPayload {
   items: OrderItemPayload[];
 }
 
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const tableId = searchParams.get('table_id');
+
+  if (!tableId) {
+    return NextResponse.json({ error: 'table_id es requerido' }, { status: 400 });
+  }
+
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('orders')
+      .select(`
+        *,
+        items:order_items(*, menu_item:menu_items(name))
+      `)
+      .eq('table_id', tableId)
+      .not('status', 'in', '("REJECTED","COMPLETED")')
+      .order('createdAt', { ascending: false });
+
+    if (error) {
+      console.error('[api/orders] GET error:', error.message);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
+  } catch (err) {
+    return NextResponse.json({ error: 'Error interno' }, { status: 500 });
+  }
+}
+
 function serviceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

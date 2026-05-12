@@ -124,6 +124,9 @@ audit/**
 !audit/screenshots/
 !audit/screenshots/.gitkeep
 
+# temp files
+*.temp
+
 # Documentacion — scripts de render (dependencias npm locales)
 Documentacion/scripts/
 

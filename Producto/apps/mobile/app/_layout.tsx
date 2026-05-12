@@ -1,5 +1,5 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useAuth, AuthProvider } from '../context/AuthContext';
+import { RestaurantThemeProvider } from '../context/ThemeContext';
 import { useRouter, useSegments } from 'expo-router';
 
 export {
@@ -16,8 +17,9 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(auth)/login',
+  initialRouteName: '(tabs)',
 };
+
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -31,10 +33,13 @@ function InitialLayout() {
     if (loading) return;
 
     const inAuthGroup = (segments[0] as string) === '(auth)';
+    const inTabsGroup = (segments[0] as string) === '(tabs)';
+    const inMenuGroup = (segments[0] as string) === '[restaurantSlug]'; // Catch dynamic menu routes
+    const inScannerGroup = (segments[0] as string) === 'scanner';
 
-    if (!session && !inAuthGroup) {
-      // Redirect to login if not authenticated
-      router.replace('/(auth)/login' as any);
+    if (!session && !inAuthGroup && !inTabsGroup && !inMenuGroup && !inScannerGroup) {
+      // Redirect to login if not authenticated and not in a public group
+      router.replace('/(tabs)' as any);
     } else if (session) {
       // Determine the target group based on role
       let targetGroup = '(tabs)'; // Default to client
@@ -42,6 +47,8 @@ function InitialLayout() {
       else if (role === 'ADMIN') targetGroup = '(admin)';
       else if (role === 'GARZON') targetGroup = '(waiter)';
       else if (role === 'COCINA') targetGroup = '(kitchen)';
+      else if (role === 'CAJERO') targetGroup = '(cashier)';
+      else if (role === 'BAR') targetGroup = '(bar)';
 
       // Redirect if they are in the wrong group
       if (segments[0] !== targetGroup) {
@@ -51,13 +58,24 @@ function InitialLayout() {
   }, [session, loading, segments, role]);
 
   return (
-    <Stack>
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="(super-admin)" options={{ headerShown: false }} />
-      <Stack.Screen name="(admin)" options={{ headerShown: false }} />
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: '#020617' },
+        animation: 'fade',
+      }}
+    >
+      <Stack.Screen name="index" />
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="scanner/index" options={{ presentation: 'modal', title: 'Escanear QR' }} />
+      <Stack.Screen name="[restaurantSlug]/[tableNumber]/index" options={{ title: 'Menú' }} />
+      <Stack.Screen name="(super-admin)" />
+      <Stack.Screen name="(admin)" />
       <Stack.Screen name="(waiter)" options={{ headerShown: false }} />
       <Stack.Screen name="(kitchen)" options={{ headerShown: false }} />
+      <Stack.Screen name="(cashier)" options={{ headerShown: false }} />
+      <Stack.Screen name="(bar)" options={{ headerShown: false }} />
       <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Detalles' }} />
     </Stack>
   );
@@ -70,24 +88,30 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (error) throw error;
-  }, [error]);
-
-  useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
+  const customDarkTheme = {
+    ...DarkTheme,
+    colors: {
+      ...DarkTheme.colors,
+      background: '#020617',
+      card: '#020617',
+      text: '#F7F4F3',
+    },
+  };
+
+  if (!loaded) return null;
 
   return (
     <AuthProvider>
-      <ThemeProvider value={DarkTheme}>
-        <InitialLayout />
-      </ThemeProvider>
+      <RestaurantThemeProvider>
+        <ThemeProvider value={customDarkTheme}>
+          <InitialLayout />
+        </ThemeProvider>
+      </RestaurantThemeProvider>
     </AuthProvider>
   );
 }

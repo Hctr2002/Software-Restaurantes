@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, Tex
 import { CheckCircle2, Rocket, Zap, Building2, X, Plus, Trash2, AlertCircle } from 'lucide-react-native';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
+import { SUPERADMIN_API } from '../../lib/api';
 
 type Plan = {
   id: string;
@@ -50,17 +51,7 @@ export default function PlansTab() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No hay sesión activa");
 
-      let API_URL = 'http://10.122.168.197:3000';
-      try {
-        const Constants = await import('expo-constants');
-        const debuggerHost = Constants.default.expoConfig?.hostUri;
-        if (debuggerHost) {
-          const hostIp = debuggerHost.split(':')[0];
-          API_URL = `http://${hostIp}:3000`;
-        }
-      } catch (e) {}
-
-      const res = await fetch(`${API_URL}/api/admin/plans`, {
+      const res = await fetch(`${SUPERADMIN_API}/api/admin/plans`, {
         headers: { Authorization: `Bearer ${session.access_token}` }
       });
       const json = await res.json() as { data?: any[], error?: string };
@@ -94,17 +85,7 @@ export default function PlansTab() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No hay sesión activa");
 
-      let API_URL = 'http://10.122.168.197:3000';
-      try {
-        const Constants = await import('expo-constants');
-        const debuggerHost = Constants.default.expoConfig?.hostUri;
-        if (debuggerHost) {
-          const hostIp = debuggerHost.split(':')[0];
-          API_URL = `http://${hostIp}:3000`;
-        }
-      } catch (e) {}
-
-      const res = await fetch(`${API_URL}/api/admin/plans/${editingPlan.id}`, {
+      const res = await fetch(`${SUPERADMIN_API}/api/admin/plans/${editingPlan.id}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
