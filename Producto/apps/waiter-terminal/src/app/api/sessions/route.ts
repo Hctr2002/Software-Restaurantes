@@ -36,11 +36,34 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Se necesitan al menos 2 mesas' }, { status: 400 });
   }
 
-  const sessionId = randomUUID();
   const db = serviceClient();
 
-  // Actualizar todas las órdenes activas de esas mesas con el session_id
-  const { data, error } = await db
+  // 1. Obtener las mesas para ver sus estados y sesiones actuales
+  const { data: tables, error: tablesError } = await db
+    .from('tables')
+    .select('id, status, current_session_id')
+    .in('id', tableIds)
+    .eq('restaurant_id', restaurantId);
+
+  if (tablesError) return NextResponse.json({ error: tablesError.message }, { status: 500 });
+
+  // 2. Determinar el sessionId a usar
+  // Buscamos si alguna mesa ya tiene una sesión activa
+  const existingSessionTable = tables?.find(t => t.current_session_id);
+  const sessionId = existingSessionTable?.current_session_id || randomUUID();
+
+  // 3. Actualizar las mesas
+  // Todas pasan a estar OCCUPIED y con el sessionId compartido
+  const { error: updateTablesError } = await db
+    .from('tables')
+    .update({ status: 'OCCUPIED', current_session_id: sessionId })
+    .in('id', tableIds)
+    .eq('restaurant_id', restaurantId);
+
+  if (updateTablesError) return NextResponse.json({ error: updateTablesError.message }, { status: 500 });
+
+  // 4. Actualizar todas las órdenes activas de esas mesas con el session_id
+  const { data: ordersUpdated, error: ordersError } = await db
     .from('orders')
     .update({ session_id: sessionId })
     .in('table_id', tableIds)
@@ -48,9 +71,9 @@ export async function POST(req: NextRequest) {
     .not('status', 'in', '("DELIVERED","REJECTED")')
     .select('id');
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (ordersError) return NextResponse.json({ error: ordersError.message }, { status: 500 });
 
-  return NextResponse.json({ sessionId, ordersUpdated: data?.length ?? 0 });
+  return NextResponse.json({ sessionId, ordersUpdated: ordersUpdated?.length ?? 0 });
 }
 
 // DELETE /api/sessions — separar mesas (limpiar session_id)
