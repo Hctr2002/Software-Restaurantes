@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
-import { Users, AlertCircle, Edit2, Trash2, Plus, X } from 'lucide-react-native';
+import { Users, AlertCircle, Edit2, Trash2, Plus, X, Eye, EyeOff } from 'lucide-react-native';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
+import { SUPERADMIN_API } from '../../lib/api';
 
 type UserRecord = {
   id: string;
@@ -27,30 +28,17 @@ export default function UsersTab() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ email: '', password: '', role: 'CLIENTE', restaurantId: '' as string | null });
   const [submitting, setSubmitting] = useState(false);
-
-  const getApiUrl = async () => {
-    let API_URL = 'http://10.122.168.197:3000';
-    try {
-      const Constants = await import('expo-constants');
-      const debuggerHost = Constants.default.expoConfig?.hostUri;
-      if (debuggerHost) {
-        const hostIp = debuggerHost.split(':')[0];
-        API_URL = `http://${hostIp}:3000`;
-      }
-    } catch (e) {}
-    return API_URL;
-  };
+  const [showPassword, setShowPassword] = useState(false);
 
   const fetchData = async () => {
     try {
       setError(null);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No hay sesión activa");
-      const API_URL = await getApiUrl();
 
       const [usersRes, restRes] = await Promise.all([
-        fetch(`${API_URL}/api/admin/users`, { headers: { Authorization: `Bearer ${session.access_token}` } }),
-        fetch(`${API_URL}/api/admin/restaurants`, { headers: { Authorization: `Bearer ${session.access_token}` } })
+        fetch(`${SUPERADMIN_API}/api/admin/users`, { headers: { Authorization: `Bearer ${session.access_token}` } }),
+        fetch(`${SUPERADMIN_API}/api/admin/restaurants`, { headers: { Authorization: `Bearer ${session.access_token}` } })
       ]);
       
       const usersJson: any = await usersRes.json();
@@ -107,9 +95,8 @@ export default function UsersTab() {
     setSubmitting(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const API_URL = await getApiUrl();
       const method = editingId ? 'PUT' : 'POST';
-      const url = editingId ? `${API_URL}/api/admin/users/${editingId}` : `${API_URL}/api/admin/users`;
+      const url = editingId ? `${SUPERADMIN_API}/api/admin/users/${editingId}` : `${SUPERADMIN_API}/api/admin/users`;
 
       // Clean payload
       const payload: any = { ...formData };
@@ -153,8 +140,7 @@ export default function UsersTab() {
   const handleDelete = async (id: string) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const API_URL = await getApiUrl();
-      const res = await fetch(`${API_URL}/api/admin/users/${id}`, {
+      const res = await fetch(`${SUPERADMIN_API}/api/admin/users/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${session?.access_token}` }
       });
@@ -271,14 +257,26 @@ export default function UsersTab() {
 
               <View style={styles.formGroup}>
                 <Text style={styles.label}>Contraseña {editingId && '(Opcional)'}</Text>
-                <TextInput 
-                  style={styles.input} 
-                  placeholder={editingId ? "Dejar en blanco para no cambiar" : "Mínimo 6 caracteres"} 
-                  placeholderTextColor={MB_COLORS.muted}
-                  value={formData.password}
-                  secureTextEntry
-                  onChangeText={(text) => setFormData({ ...formData, password: text })}
-                />
+                <View style={styles.passwordContainer}>
+                  <TextInput 
+                    style={[styles.input, { flex: 1, backgroundColor: 'transparent', borderWidth: 0 }]} 
+                    placeholder={editingId ? "Dejar en blanco para no cambiar" : "Mínimo 6 caracteres"} 
+                    placeholderTextColor={MB_COLORS.muted}
+                    value={formData.password}
+                    secureTextEntry={!showPassword}
+                    onChangeText={(text) => setFormData({ ...formData, password: text })}
+                  />
+                  <TouchableOpacity 
+                    style={styles.eyeIcon} 
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff color={MB_COLORS.muted} size={20} />
+                    ) : (
+                      <Eye color={MB_COLORS.muted} size={20} />
+                    )}
+                  </TouchableOpacity>
+                </View>
               </View>
 
               <View style={styles.formGroup}>
@@ -365,7 +363,18 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 20, fontWeight: 'bold', color: MB_COLORS.cream },
   formGroup: { marginBottom: MB_SPACING.lg },
   label: { fontSize: 14, fontWeight: 'bold', color: MB_COLORS.cream, marginBottom: MB_SPACING.sm },
-  input: { backgroundColor: 'rgba(0,0,0,0.3)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: MB_RADIUS.md, color: MB_COLORS.cream, padding: MB_SPACING.md, fontSize: 16 },
+  input: { color: MB_COLORS.cream, padding: MB_SPACING.md, fontSize: 16, backgroundColor: 'rgba(0,0,0,0.3)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: MB_RADIUS.md },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: MB_RADIUS.md,
+  },
+  eyeIcon: {
+    paddingHorizontal: 12,
+  },
   pill: { backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
   pillActive: { backgroundColor: 'rgba(139, 92, 246, 0.2)', borderColor: '#8b5cf6' },
   pillText: { color: MB_COLORS.muted, fontWeight: 'bold' },

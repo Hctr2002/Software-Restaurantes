@@ -1,16 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Stack } from 'expo-router';
 import { MB_COLORS } from '../../constants/MB_Theme';
 
 export default function KitchenLayout() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Vista de Cocina</Text>
-    </View>
+    <Stack screenOptions={{ 
+      headerShown: false,
+      contentStyle: { backgroundColor: MB_COLORS.navy }
+    }}>
+      <Stack.Screen name="index" options={{ title: 'Monitor de Cocina' }} />
+    </Stack>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: MB_COLORS.navy, justifyContent: 'center', alignItems: 'center' },
-  text: { color: MB_COLORS.cream, fontSize: 20 },
-});

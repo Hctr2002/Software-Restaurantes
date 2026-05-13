@@ -1,0 +1,252 @@
+import React from 'react';
+import { 
+  StyleSheet, 
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  ScrollView, 
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform
+} from 'react-native';
+import { Stack, useRouter } from 'expo-router';
+import { Store, MapPin, Phone, Mail, Percent, Save, ChevronLeft } from 'lucide-react-native';
+import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
+import { supabase } from '../../lib/supabase';
+
+export default function RestaurantInfoScreen() {
+  const { restaurantId } = useAuth();
+  const { colors } = useTheme();
+  const router = useRouter();
+  
+  const [loading, setLoading] = React.useState(true);
+  const [saving, setSaving] = React.useState(false);
+  const [formData, setFormData] = React.useState({
+    name: ''
+  });
+
+  React.useEffect(() => {
+    loadRestaurantInfo();
+  }, [restaurantId]);
+
+  const loadRestaurantInfo = async () => {
+    if (!restaurantId) return;
+    try {
+      const { data, error } = await supabase
+        .from('restaurants')
+        .select('*')
+        .eq('id', restaurantId)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setFormData({
+          name: data.name || ''
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error', 'No se pudo cargar la información del local');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!restaurantId) return;
+    if (!formData.name.trim()) {
+      Alert.alert('Error', 'El nombre es obligatorio');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('restaurants')
+        .update({
+          name: formData.name
+        })
+        .eq('id', restaurantId);
+
+      if (error) throw error;
+      Alert.alert('Éxito', 'Información actualizada correctamente');
+      router.back();
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error', 'No se pudo guardar la información');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={[styles.centered, { backgroundColor: colors.navy }]}>
+        <ActivityIndicator color={colors.brandAccent} />
+      </View>
+    );
+  }
+
+  return (
+    <KeyboardAvoidingView 
+      style={[styles.container, { backgroundColor: colors.navy }]} 
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <Stack.Screen options={{ headerShown: false }} />
+      
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={[styles.backButton, { backgroundColor: colors.glass }]}>
+          <ChevronLeft color={colors.text} size={24} />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Información del Local</Text>
+        <View style={{ width: 40 }} />
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.muted }]}>DATOS PRINCIPALES</Text>
+          
+          <View style={styles.inputGroup}>
+            <View style={styles.labelRow}>
+              <Store size={14} color={colors.muted} />
+              <Text style={[styles.label, { color: colors.muted }]}>Nombre Comercial</Text>
+            </View>
+            <TextInput
+              style={[styles.input, { backgroundColor: colors.glass, borderColor: colors.glassHeavy, color: colors.text }]}
+              value={formData.name}
+              onChangeText={(t) => setFormData({ ...formData, name: t })}
+              placeholder="Ej: Burger House"
+              placeholderTextColor={colors.muted}
+            />
+          </View>
+        </View>
+
+        <TouchableOpacity 
+          style={[styles.saveButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }, saving && styles.disabledButton]}
+          onPress={handleSave}
+          disabled={saving}
+        >
+          {saving ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <>
+              <Save size={20} color="white" />
+              <Text style={styles.saveButtonText}>GUARDAR CAMBIOS</Text>
+            </>
+          )}
+        </TouchableOpacity>
+        
+        <View style={{ height: 100 }} />
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: MB_COLORS.navy,
+  },
+  centered: {
+    flex: 1,
+    backgroundColor: MB_COLORS.navy,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: MB_SPACING.lg,
+    paddingTop: 60,
+    paddingBottom: 20,
+  },
+  headerTitle: {
+    fontSize: 18,
+    color: 'white',
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    fontStyle: 'italic',
+    letterSpacing: 1,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scrollContent: {
+    padding: MB_SPACING.lg,
+  },
+  section: {
+    marginBottom: 32,
+  },
+  sectionTitle: {
+    color: MB_COLORS.muted,
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 2,
+    marginBottom: 20,
+    marginLeft: 4,
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  label: {
+    color: MB_COLORS.muted,
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  input: {
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    padding: 16,
+    color: 'white',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  saveButton: {
+    backgroundColor: MB_COLORS.brandAccent,
+    height: 60,
+    borderRadius: 20,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12,
+    shadowColor: MB_COLORS.brandAccent,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+    marginTop: 20,
+  },
+  disabledButton: {
+    opacity: 0.7,
+  },
+  saveButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '900',
+    letterSpacing: 1,
+  }
+});

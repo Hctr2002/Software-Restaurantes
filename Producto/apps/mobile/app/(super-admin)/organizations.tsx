@@ -4,6 +4,8 @@ import { Store, AlertCircle, Edit2, Trash2, Plus, X } from 'lucide-react-native'
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 
+import { SUPERADMIN_API } from '../../lib/api';
+
 type Restaurant = {
   id: string;
   name: string;
@@ -32,27 +34,13 @@ export default function OrganizationsTab() {
   const [formData, setFormData] = useState({ name: '', slug: '', status: 'ACTIVE', planId: '' });
   const [submitting, setSubmitting] = useState(false);
 
-  const getApiUrl = async () => {
-    let API_URL = 'http://10.122.168.197:3000';
-    try {
-      const Constants = await import('expo-constants');
-      const debuggerHost = Constants.default.expoConfig?.hostUri;
-      if (debuggerHost) {
-        const hostIp = debuggerHost.split(':')[0];
-        API_URL = `http://${hostIp}:3000`;
-      }
-    } catch (e) {}
-    return API_URL;
-  };
-
   const fetchData = async () => {
     try {
       setError(null);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No hay sesión activa");
-      const API_URL = await getApiUrl();
 
-      const res = await fetch(`${API_URL}/api/admin/restaurants`, {
+      const res = await fetch(`${SUPERADMIN_API}/api/admin/restaurants`, {
         headers: { Authorization: `Bearer ${session.access_token}` }
       });
       const json: any = await res.json();
@@ -70,8 +58,7 @@ export default function OrganizationsTab() {
   const fetchPlans = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const API_URL = await getApiUrl();
-      const res = await fetch(`${API_URL}/api/admin/plans`, {
+      const res = await fetch(`${SUPERADMIN_API}/api/admin/plans`, {
         headers: { Authorization: `Bearer ${session?.access_token}` }
       });
       const json = await res.json() as { data?: any[] };
@@ -116,9 +103,8 @@ export default function OrganizationsTab() {
     setSubmitting(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const API_URL = await getApiUrl();
       const method = editingId ? 'PUT' : 'POST';
-      const url = editingId ? `${API_URL}/api/admin/restaurants/${editingId}` : `${API_URL}/api/admin/restaurants`;
+      const url = editingId ? `${SUPERADMIN_API}/api/admin/restaurants/${editingId}` : `${SUPERADMIN_API}/api/admin/restaurants`;
 
       const res = await fetch(url, {
         method,
@@ -155,8 +141,7 @@ export default function OrganizationsTab() {
   const handleDelete = async (id: string) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const API_URL = await getApiUrl();
-      const res = await fetch(`${API_URL}/api/admin/restaurants/${id}`, {
+      const res = await fetch(`${SUPERADMIN_API}/api/admin/restaurants/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${session?.access_token}` }
       });
