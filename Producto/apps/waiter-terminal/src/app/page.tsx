@@ -230,7 +230,7 @@ export default function WaiterDashboard() {
                   <div>
                     <h2 className="text-4xl font-black tracking-tighter">Gestión de <span className="text-primary">Salón</span></h2>
                     <p className="text-muted-foreground text-xs font-black uppercase tracking-widest opacity-60 mt-1">
-                      {merge.mergeMode ? "Selecciona 2+ mesas OCCUPIED para fusionar" : "Selecciona una mesa para tomar comandas"}
+                      {merge.mergeMode ? "Selecciona mesas (Libres u Ocupadas) para fusionar" : "Selecciona una mesa para tomar comandas"}
                     </p>
                   </div>
                   <button 
@@ -267,8 +267,8 @@ export default function WaiterDashboard() {
                         }
                       }}
                       mergedTableNumbers={
-                        table.session_id 
-                          ? tables.filter(t => t.session_id === table.session_id).map(t => t.number)
+                        table.current_session_id 
+                          ? tables.filter(t => t.current_session_id === table.current_session_id).map(t => t.number)
                           : undefined
                       }
                     />
