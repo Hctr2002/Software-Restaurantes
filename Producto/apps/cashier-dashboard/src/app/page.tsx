@@ -39,10 +39,12 @@ export default function CashierPage() {
     orders, 
     history, 
     loading, 
-    refetch, 
-    markDelivered, 
-    isProcessing 
+    refetch,
   } = useCashierOrders(user?.restaurantId);
+
+  // Estado local que indica que hay una operación de cobro en curso.
+  // Bloquea el botón de confirmación en PaymentSlideOver para evitar doble envío.
+  const [isPaying, setIsPaying] = useState(false);
   const { tables } = useTableStatus(user?.restaurantId);
   const theme = useThemeSync(user?.restaurantId, "cashier");
 
@@ -92,6 +94,7 @@ export default function CashierPage() {
   }, [activeTab, groups, searchQuery]);
 
   const handleMarkDelivered = async (group: TableGroup) => {
+    setIsPaying(true);
     try {
       // Delegar el cierre de órdenes y actualización de mesa a la función
       // RPC completar_pago_mesa. Esta función ejecuta todo en una única
@@ -120,6 +123,8 @@ export default function CashierPage() {
     } catch (err: any) {
       console.error("Error al procesar pago:", err?.message || JSON.stringify(err));
       alert(`Error al cobrar: ${err?.message || "Revisa la consola"}`);
+    } finally {
+      setIsPaying(false);
     }
   };
 
@@ -226,7 +231,7 @@ export default function CashierPage() {
         </main>
  
         {selectedGroup && (
-          <PaymentSlideOver group={selectedGroup} paymentReference={paymentReference} isProcessing={isProcessing} onPaymentRefChange={setPaymentReference} onConfirm={() => handleMarkDelivered(selectedGroup)} onClose={() => setSelectedGroup(null)} />
+          <PaymentSlideOver group={selectedGroup} paymentReference={paymentReference} isProcessing={isPaying} onPaymentRefChange={setPaymentReference} onConfirm={() => handleMarkDelivered(selectedGroup)} onClose={() => setSelectedGroup(null)} />
         )}
  
         {alertModal && (
