@@ -56,6 +56,11 @@ export default async function ReceiptTablePage({
 
   if (!table) return notFound();
 
+  // Validar que el restaurante de la mesa coincide con el rid recibido en la URL.
+  // Aunque el rid no se usa para las consultas (se usa el restaurant_id real de la mesa),
+  // esta comprobacion impide que una URL manipulada exponga datos de otro tenant.
+  if (table.restaurant_id !== restaurantId) return notFound();
+
   const actualRestaurantId = table.restaurant_id;
 
   // Fetch restaurant info

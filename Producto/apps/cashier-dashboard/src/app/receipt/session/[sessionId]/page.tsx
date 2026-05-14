@@ -51,12 +51,18 @@ export default async function ReceiptSessionPage({
 
   const { data: orders } = await db
     .from("orders")
-    .select("id, status, createdAt, table_id, tables(number, label), order_items(quantity, unit_price, menu_items(name))")
+    .select("id, status, createdAt, restaurant_id, table_id, tables(number, label), order_items(quantity, unit_price, menu_items(name))")
     .eq("session_id", sessionId)
     .eq("restaurant_id", restaurantId)
     .order("createdAt", { ascending: true });
 
   if (!orders || orders.length === 0) return notFound();
+
+  // Validar que las ordenes pertenecen al restaurante indicado en el query param rid.
+  // Esta comprobacion impide que una URL manipulada con un rid distinto exponga
+  // datos de otro tenant, incluso si el sessionId fuera conocido por un tercero.
+  const actualRestaurantId = (orders[0] as any).restaurant_id;
+  if (actualRestaurantId !== restaurantId) return notFound();
 
   // Group by table_id to show per-table breakdown
   const tableMap = new Map<string, { tableNumber: number; label: string | null; items: any[] }>();
