@@ -8,7 +8,7 @@ import { TableRecord } from "@menu-bites/auth";
 export type TableStatus = "FREE" | "OCCUPIED" | "CLEANING" | "RESERVED";
 
 interface TableCardProps {
-  table: TableRecord & { bill_requested?: boolean; session_id?: string | null };
+  table: TableRecord & { bill_requested?: boolean; current_session_id?: string | null };
   isBillRequested: boolean;
   isReady: boolean;
   isPreparing: boolean;
