@@ -41,14 +41,22 @@ BEGIN
     WHERE id = ANY(p_order_ids)
       AND status NOT IN ('COMPLETED', 'REJECTED');
 
-    -- Si se proporcionó una mesa, actualizarla a CLEANING.
-    IF p_table_id IS NOT NULL THEN
-        UPDATE tables
-        SET
-            status         = 'CLEANING',
-            bill_requested = false
-        WHERE id = p_table_id;
-    END IF;
+    -- Actualizar a CLEANING todas las mesas involucradas.
+    -- Buscamos las mesas directas de las órdenes y también las mesas
+    -- que compartan la misma sesión (en caso de fusión).
+    UPDATE tables
+    SET
+        status         = 'CLEANING',
+        bill_requested = false
+    WHERE id IN (
+        SELECT DISTINCT table_id 
+        FROM orders 
+        WHERE id = ANY(p_order_ids) AND table_id IS NOT NULL
+    ) OR current_session_id IN (
+        SELECT DISTINCT session_id 
+        FROM orders 
+        WHERE id = ANY(p_order_ids) AND session_id IS NOT NULL
+    ) OR id = p_table_id;
 END;
 $$;
 
