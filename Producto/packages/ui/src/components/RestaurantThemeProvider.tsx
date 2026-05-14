@@ -107,6 +107,27 @@ export const RestaurantThemeProvider = ({ theme, children, isGlobal = false }: P
         });
       }
       
+      // --- Carga Dinámica de Fuentes ---
+      const fontsToLoad = [theme.fontTitle, theme.fontBody, theme.fontAccent].filter(Boolean) as string[];
+      if (fontsToLoad.length > 0) {
+        const linkId = "google-fonts-theme-dynamic";
+        let link = document.getElementById(linkId) as HTMLLinkElement;
+        
+        if (!link) {
+          link = document.createElement("link");
+          link.id = linkId;
+          link.rel = "stylesheet";
+          document.head.appendChild(link);
+        }
+        
+        const fontParams = fontsToLoad
+          .map(f => `family=${f.replace(/\s+/g, '+')}:wght@300;400;500;600;700;800;900`)
+          .join('&');
+        
+        link.href = `https://fonts.googleapis.com/css2?${fontParams}&display=swap`;
+      }
+      // ---------------------------------
+      
       if (theme.fontTitle) {
         const titleStack = `"${theme.fontTitle}", sans-serif`;
         target.style.setProperty("--font-outfit", titleStack);

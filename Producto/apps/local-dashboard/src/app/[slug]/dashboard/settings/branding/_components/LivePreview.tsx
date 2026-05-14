@@ -2,14 +2,8 @@
 
 import React from "react";
 import { Button, RestaurantThemeProvider } from "@menu-bites/ui";
-import { Monitor, Smartphone, Sparkles } from "lucide-react";
-import { hexToHslValues } from "@/lib/brandingUtils";
+import { ChevronRight, Star, Clock, MapPin, Share2, Heart } from "lucide-react";
 
-/**
- * Propiedades del Simulador Live
- * @param currentTheme - Tema que se está previsualizando
- * @param sampleProduct - Producto real del menú para mostrar en el simulador
- */
 interface LivePreviewProps {
   currentTheme: any;
   sampleProduct: any;
@@ -18,91 +12,115 @@ interface LivePreviewProps {
 /**
  * LivePreview
  * 
- * Renderiza un mockup de iPhone que previsualiza los cambios de branding en tiempo real.
- * Inyecta las fuentes de Google y los colores dinámicamente mediante variables CSS.
+ * Mockup de alta fidelidad que reacciona en tiempo real a los cambios del ThemeProvider.
+ * Simula la vista de un producto en el portal del cliente.
  */
-export default function LivePreview({ currentTheme, sampleProduct }: LivePreviewProps) {
+export function LivePreview({ currentTheme, sampleProduct }: LivePreviewProps) {
+  // Protección contra datos nulos durante la carga inicial o errores de fetch
+  if (!sampleProduct) {
+    return (
+      <div className="sticky top-24 aspect-[9/16] w-full max-w-[320px] mx-auto bg-foreground/5 rounded-[3rem] border-[8px] border-foreground/10 flex items-center justify-center">
+        <p className="text-[10px] font-black uppercase tracking-widest text-foreground/20">Cargando Preview...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="sticky top-24 space-y-6">
-      {/* Indicadores de Estado y Dispositivo */}
       <div className="flex items-center justify-between px-2">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <h2 className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em]">Simulación Live</h2>
-        </div>
-        <div className="flex gap-2">
-           <div className="p-1.5 rounded-lg bg-foreground/5 text-foreground/20"><Monitor className="w-3 h-3" /></div>
-           <div className="p-1.5 rounded-lg bg-primary/20 text-primary"><Smartphone className="w-3 h-3" /></div>
+        <div>
+          <h2 className="text-lg font-black text-foreground uppercase italic tracking-tight">Simulación Live</h2>
+          <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">Vista previa del portal móvil</p>
         </div>
       </div>
 
-      {/* Mockup del Dispositivo con Borde de Pantalla Premium */}
-      <div className="rounded-[3.5rem] border-[12px] border-black shadow-[0_50px_100px_-20px_rgba(0,0,0,0.8)] overflow-hidden aspect-[9/18.5] relative bg-background transition-all duration-700">
+      <div className="relative aspect-[9/16] w-full max-w-[320px] mx-auto bg-black rounded-[3rem] border-[8px] border-foreground/10 shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-hidden">
+        {/* Notch del simulador */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-foreground/10 rounded-b-3xl z-50" />
+        
+        {/* Contenedor del ThemeProvider para la simulación */}
         <RestaurantThemeProvider theme={currentTheme}>
           <div 
             className="h-full flex flex-col p-8 space-y-8 relative z-10"
-            style={{
-              backgroundColor: `hsl(${hexToHslValues(currentTheme.backgroundColor)})`,
+            style={{ 
+              backgroundColor: currentTheme.backgroundColor,
               "--font-title":  `"${currentTheme.fontTitle || 'Outfit'}", sans-serif`,
-              "--font-body":   `"${currentTheme.fontBody  || 'Inter'}",  sans-serif`,
-              "--font-accent": `"${currentTheme.fontAccent || 'Outfit'}", sans-serif`,
+              "--font-body": `"${currentTheme.fontBody || 'Outfit'}", sans-serif`,
+              "--font-accent": `"${currentTheme.fontAccent || 'Outfit'}", sans-serif`
             } as any}
           >
-            {/* Barra de Estado (Mock) */}
-            <div className="flex justify-between items-center opacity-30 px-2">
-              <span className="text-[10px] font-black">9:41</span>
-              <div className="flex gap-1.5">
-                <div className="w-3.5 h-2.5 border border-foreground/50 rounded-[2px]" />
-                <div className="w-3.5 h-3.5 bg-foreground rounded-full" />
+            {/* Header del Mockup */}
+            <div className="flex justify-between items-start pt-4">
+              <div className="w-10 h-10 rounded-2xl bg-foreground/5 flex items-center justify-center">
+                <ChevronRight className="w-5 h-5 rotate-180" />
               </div>
-            </div>
-
-            {/* Contenido Principal de la App simulada */}
-            <div className="flex-1 flex flex-col justify-start space-y-6 pt-4">
-              {/* Tarjeta de Producto con Imagen Real del Bucket */}
-              <div className="glass rounded-[3rem] border-white/10 overflow-hidden shadow-2xl flex flex-col group">
-                <div className="h-48 w-full relative overflow-hidden">
-                  {sampleProduct?.image_url ? (
-                    <img 
-                      src={sampleProduct.image_url} 
-                      alt={sampleProduct.name} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                       <Sparkles className="w-12 h-12 text-primary/40 animate-pulse" />
-                    </div>
-                  )}
-                  {/* Badge de Acento que usa la fuente seleccionada */}
-                  <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full border border-white/20 backdrop-blur-md shadow-xl" style={{ backgroundColor: "hsl(var(--accent))" }}>
-                     <span className="text-[9px] font-black text-primary-foreground uppercase tracking-widest" style={{ fontFamily: "var(--font-accent)" }}>Destacado</span>
-                  </div>
+              <div className="flex gap-2">
+                <div className="w-10 h-10 rounded-2xl bg-foreground/5 flex items-center justify-center">
+                  <Share2 className="w-4 h-4" />
                 </div>
-
-                <div className="p-6 space-y-4">
-                  <div className="flex justify-between items-start gap-4">
-                    <h3 className="text-xl font-black italic uppercase leading-none tracking-tight" style={{ fontFamily: "var(--font-title)", color: "hsl(var(--foreground))" }}>
-                      {sampleProduct?.name || "Plato Estrella"}
-                    </h3>
-                    <span className="text-lg font-black text-primary shrink-0" style={{ fontFamily: "var(--font-accent)" }}>
-                       {sampleProduct?.price ? `$${new Intl.NumberFormat("es-CL").format(sampleProduct.price)}` : "$9.990"}
-                    </span>
-                  </div>
-                  <p className="text-[11px] font-bold text-foreground/40 leading-relaxed line-clamp-2" style={{ fontFamily: "var(--font-body)" }}>
-                     {sampleProduct?.description || "Una experiencia sensorial única preparada con los mejores ingredientes locales."}
-                  </p>
-                  {/* Botón de Acción Principal con Color Primario */}
-                  <Button className="w-full h-12 bg-primary text-primary-foreground rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/20">
-                     Añadir al Carrito
-                  </Button>
+                <div className="w-10 h-10 rounded-2xl bg-foreground/5 flex items-center justify-center">
+                  <Heart className="w-4 h-4 text-primary" />
                 </div>
               </div>
             </div>
 
-            {/* Home Indicator (Mock) */}
-            <div className="h-1 w-1/3 bg-foreground/10 rounded-full mx-auto mt-auto mb-2" />
+            {/* Imagen del Producto Mockup */}
+            <div className="relative aspect-square rounded-[2rem] overflow-hidden shadow-2xl border border-foreground/10">
+              <img 
+                src={sampleProduct.image} 
+                alt="Sample" 
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute top-4 right-4 bg-primary px-3 py-1.5 rounded-full shadow-xl">
+                 <p className="text-[10px] font-black text-primary-foreground uppercase tracking-widest">Popular</p>
+              </div>
+            </div>
+
+            {/* Información del Producto */}
+            <div className="space-y-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-xl font-black italic uppercase leading-none tracking-tight" style={{ fontFamily: "var(--font-title)", color: "hsl(var(--foreground))" }}>
+                    {sampleProduct.name}
+                  </h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Star className="w-3 h-3 text-primary fill-primary" />
+                    <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">4.9 (120+ Reseñas)</span>
+                  </div>
+                </div>
+                <p className="text-xl font-black text-primary italic" style={{ fontFamily: "var(--font-accent)" }}>
+                  ${sampleProduct.price}
+                </p>
+              </div>
+
+              <p className="text-xs font-medium text-foreground/60 leading-relaxed line-clamp-3" style={{ fontFamily: "var(--font-body)" }}>
+                {sampleProduct.description}
+              </p>
+            </div>
+
+            {/* Detalles Rápidos */}
+            <div className="grid grid-cols-2 gap-3">
+               <div className="p-4 rounded-3xl bg-foreground/5 border border-foreground/10 flex items-center gap-3">
+                  <Clock className="w-4 h-4 text-primary" />
+                  <p className="text-[10px] font-black uppercase tracking-widest">20-30 min</p>
+               </div>
+               <div className="p-4 rounded-3xl bg-foreground/5 border border-foreground/10 flex items-center gap-3">
+                  <MapPin className="w-4 h-4 text-primary" />
+                  <p className="text-[10px] font-black uppercase tracking-widest">1.2 km</p>
+               </div>
+            </div>
+
+            {/* Botón de Acción */}
+            <div className="mt-auto">
+              <Button className="w-full h-16 rounded-[1.5rem] bg-primary text-primary-foreground font-black uppercase italic tracking-widest shadow-2xl shadow-primary/30">
+                Añadir al Carrito
+              </Button>
+            </div>
           </div>
         </RestaurantThemeProvider>
+        
+        {/* Barra de Inicio del simulador */}
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-foreground/20 rounded-full z-50" />
       </div>
     </div>
   );

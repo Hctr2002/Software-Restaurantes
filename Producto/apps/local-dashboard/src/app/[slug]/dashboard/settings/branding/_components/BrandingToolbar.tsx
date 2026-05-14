@@ -11,7 +11,7 @@ interface BrandingToolbarProps {
   isSaving: boolean;
 }
 
-export default function BrandingToolbar({
+export function BrandingToolbar({
   customName,
   setCustomName,
   onSave,

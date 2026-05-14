@@ -5,11 +5,11 @@ import LocalShell from "../../_components/LocalShell";
 import { Loader2 } from "lucide-react";
 import { useBranding } from "@/hooks/useBranding";
 
-// Sub-componentes modularizados
-import InspirationCarousel from "./_components/InspirationCarousel";
-import DesignTabs from "./_components/DesignTabs";
-import LivePreview from "./_components/LivePreview";
-import BrandingToolbar from "./_components/BrandingToolbar";
+// Sub-componentes modularizados (Importaciones nombradas para evitar conflictos de bundle)
+import { InspirationCarousel } from "./_components/InspirationCarousel";
+import { DesignTabs } from "./_components/DesignTabs";
+import { LivePreview } from "./_components/LivePreview";
+import { BrandingToolbar } from "./_components/BrandingToolbar";
 
 /**
  * BrandingPage - Orquestador del Laboratorio de Marca

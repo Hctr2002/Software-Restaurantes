@@ -9,7 +9,7 @@ interface ColorLaboratoryProps {
   setCurrentTheme: (theme: any) => void;
 }
 
-export default function ColorLaboratory({ currentTheme, setCurrentTheme }: ColorLaboratoryProps) {
+export function ColorLaboratory({ currentTheme, setCurrentTheme }: ColorLaboratoryProps) {
   const updateColor = (key: string, color: string) => {
     setCurrentTheme({ ...currentTheme, [key]: color, paletteName: 'custom' });
   };

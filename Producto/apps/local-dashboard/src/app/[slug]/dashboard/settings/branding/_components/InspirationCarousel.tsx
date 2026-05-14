@@ -21,7 +21,7 @@ interface InspirationCarouselProps {
  * Este componente renderiza una lista horizontal de "presets" o plantillas de diseño.
  * Permite al usuario elegir una base estética (colores y estilo) con un solo clic.
  */
-export default function InspirationCarousel({ currentTheme, onSelectTheme }: InspirationCarouselProps) {
+export function InspirationCarousel({ currentTheme, onSelectTheme }: InspirationCarouselProps) {
   return (
     <section className="space-y-6">
       {/* Cabecera del Carrusel con Estética de Alta Fidelidad */}
@@ -44,25 +44,19 @@ export default function InspirationCarousel({ currentTheme, onSelectTheme }: Ins
             key={tpl.id}
             whileHover={{ y: -5 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onSelectTheme({ 
-              ...tpl, 
-              // Mantenemos las fuentes actuales para no sobreescribir la elección tipográfica del usuario
-              fontTitle: currentTheme.fontTitle, 
-              fontBody: currentTheme.fontBody, 
-              fontAccent: currentTheme.fontAccent 
-            })}
+            onClick={() => onSelectTheme(tpl)}
             className={`flex-shrink-0 w-64 p-5 rounded-[2rem] border transition-all duration-500 text-left relative overflow-hidden group ${
-              currentTheme.paletteName === tpl.id 
+              currentTheme.paletteName === tpl.id || currentTheme.id === tpl.id
                 ? "bg-primary border-primary shadow-2xl shadow-primary/30" 
                 : "bg-foreground/5 border-foreground/5 hover:bg-foreground/10"
             }`}
           >
             {/* Contenido Visual del Preset */}
             <div className="relative z-10">
-              <p className={`text-[9px] font-black uppercase tracking-[0.2em] mb-1 ${currentTheme.paletteName === tpl.id ? "text-primary-foreground/60" : "text-primary"}`}>
+              <p className={`text-[9px] font-black uppercase tracking-[0.2em] mb-1 ${currentTheme.paletteName === tpl.id || currentTheme.id === tpl.id ? "text-primary-foreground/60" : "text-primary"}`}>
                 {tpl.description}
               </p>
-              <h3 className={`text-sm font-black uppercase italic mb-6 ${currentTheme.paletteName === tpl.id ? "text-primary-foreground" : "text-foreground"}`}>
+              <h3 className={`text-sm font-black uppercase italic mb-6 ${currentTheme.paletteName === tpl.id || currentTheme.id === tpl.id ? "text-primary-foreground" : "text-foreground"}`}>
                 {tpl.name}
               </h3>
               
@@ -75,7 +69,7 @@ export default function InspirationCarousel({ currentTheme, onSelectTheme }: Ins
             </div>
             
             {/* Indicador de Selección Activa */}
-            {currentTheme.paletteName === tpl.id && (
+            {(currentTheme.paletteName === tpl.id || currentTheme.id === tpl.id) && (
               <div className="absolute top-5 right-5">
                 <Check className="w-4 h-4 text-primary-foreground" />
               </div>

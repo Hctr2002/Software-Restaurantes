@@ -16,7 +16,7 @@ interface CorporateIdentityProps {
  * 
  * Gestiona el logo y muestra información del slug del local.
  */
-export default function CorporateIdentity({ currentTheme, setCurrentTheme, slug }: CorporateIdentityProps) {
+export function CorporateIdentity({ currentTheme, setCurrentTheme, slug }: CorporateIdentityProps) {
   return (
     <motion.div 
       initial={{ opacity: 0, x: -20 }} 

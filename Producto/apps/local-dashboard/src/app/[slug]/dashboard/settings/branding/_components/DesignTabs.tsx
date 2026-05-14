@@ -3,9 +3,9 @@
 import React from "react";
 import { AnimatePresence } from "framer-motion";
 import { Palette, Type, Image as ImageIcon } from "lucide-react";
-import ColorLaboratory from "./ColorLaboratory";
-import TypographyManager from "./TypographyManager";
-import CorporateIdentity from "./CorporateIdentity";
+import { ColorLaboratory } from "./ColorLaboratory";
+import { TypographyManager } from "./TypographyManager";
+import { CorporateIdentity } from "./CorporateIdentity";
 
 /**
  * Propiedades del Sistema de Pestañas
@@ -24,7 +24,7 @@ interface DesignTabsProps {
  * Orquesta las tres áreas principales de configuración de marca: 
  * Colores (Estilo), Tipografía (Fuentes) e Identidad (Negocio).
  */
-export default function DesignTabs({ 
+export function DesignTabs({ 
   activeTab, 
   setActiveTab, 
   currentTheme, 

@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Card } from "@menu-bites/ui";
-import { TITLE_FONTS, BODY_FONTS } from "./constants";
+import { TITLE_FONTS, BODY_FONTS, ACCENT_FONTS } from "./constants";
 
 interface TypographyManagerProps {
   currentTheme: any;
@@ -15,7 +15,7 @@ interface TypographyManagerProps {
  * 
  * Gestiona la selección de fuentes para títulos, cuerpo y acentos.
  */
-export default function TypographyManager({ currentTheme, setCurrentTheme }: TypographyManagerProps) {
+export function TypographyManager({ currentTheme, setCurrentTheme }: TypographyManagerProps) {
   const updateFont = (key: string, font: string) => {
     setCurrentTheme({ ...currentTheme, [key]: font });
   };
@@ -49,7 +49,7 @@ export default function TypographyManager({ currentTheme, setCurrentTheme }: Typ
           <FontSelector 
             label="Navegación & Precios" 
             value={currentTheme.fontAccent} 
-            options={TITLE_FONTS} 
+            options={ACCENT_FONTS} 
             onChange={(f) => updateFont('fontAccent', f)} 
           />
         </div>

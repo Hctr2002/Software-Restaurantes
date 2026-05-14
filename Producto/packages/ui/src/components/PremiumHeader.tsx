@@ -48,7 +48,7 @@ export const PremiumHeader = ({
       )}
       style={isSolid ? { backgroundColor: 'hsl(var(--card))', opacity: 1 } : undefined}
     >
-      <div className="flex items-center space-x-4 lg:space-x-6 w-full lg:w-auto">
+      <div className="flex items-center space-x-3 sm:space-x-4 lg:space-x-6 flex-1 min-w-0">
         <div 
           className={cn(
             "flex items-center justify-center shadow-2xl shadow-primary/30 shrink-0 transition-all duration-500 hover:scale-110",
@@ -63,10 +63,9 @@ export const PremiumHeader = ({
         <div className="flex-1 min-w-0">
           <h1 
             className={cn(
-              "font-black tracking-tighter uppercase italic leading-tight pr-1",
+              "font-title font-bold tracking-tight leading-tight pr-1 truncate",
               isCompact ? "text-xl sm:text-2xl" : "text-lg sm:text-2xl lg:text-3xl"
             )}
-            style={{ fontFamily: "var(--font-title)" }}
           >
             {title} {accentTitle && <span className="text-primary">{accentTitle}</span>}
           </h1>

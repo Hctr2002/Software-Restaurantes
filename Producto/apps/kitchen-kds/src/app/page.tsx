@@ -142,18 +142,30 @@ export default function KitchenKDSPage() {
               </div>
             }
             actions={
-              <div className="flex items-center gap-2 sm:gap-4">
-                <Button variant="outline" onClick={() => setAlertOpen(true)}
-                  className="rounded-2xl h-11 sm:h-14 px-4 sm:px-8 border-yellow-500/20 bg-yellow-500/5 text-yellow-500 hover:bg-yellow-500/10 hover:border-yellow-500/40 gap-2 sm:gap-3 font-black uppercase tracking-widest text-[9px] sm:text-[10px]">
-                  <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="hidden sm:inline">Alerta Stock</span>
-                  <span className="sm:hidden">Stock</span>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setAlertOpen(true)}
+                  className="rounded-2xl h-12 sm:h-14 px-2 sm:px-8 border-yellow-500/10 bg-yellow-500/5 text-yellow-500 hover:bg-yellow-500/10 hover:border-yellow-500/30 gap-1.5 font-black uppercase tracking-widest text-[10px] transition-all duration-300"
+                >
+                  <AlertTriangle className="w-5 h-5" />
+                  <span className="hidden md:inline">Alerta Stock</span>
                 </Button>
-                <Button variant="outline" size="icon" className="rounded-xl sm:rounded-2xl w-11 h-11 sm:w-14 sm:h-14" onClick={() => setSettingsOpen(true)}>
-                  <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" />
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="rounded-2xl w-12 h-12 sm:w-14 sm:h-14 border-foreground/5 bg-foreground/5 hover:bg-foreground/10 transition-all duration-300" 
+                  onClick={() => setSettingsOpen(true)}
+                >
+                  <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-foreground/40" />
                 </Button>
-                <Button variant="destructive" size="icon" onClick={handleSignOut} disabled={isSigningOut} 
-                  className="rounded-xl sm:rounded-2xl w-11 h-11 sm:w-14 sm:h-14 bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/30 border-none">
+                <Button 
+                  variant="destructive" 
+                  size="icon" 
+                  onClick={handleSignOut} 
+                  disabled={isSigningOut} 
+                  className="rounded-2xl w-12 h-12 sm:w-14 sm:h-14 bg-red-600 text-white shadow-2xl shadow-red-900/40 hover:bg-red-700 hover:scale-105 active:scale-95 transition-all duration-300 border-none"
+                >
                   <LogOut className="w-5 h-5 sm:w-6 sm:h-6" />
                 </Button>
               </div>

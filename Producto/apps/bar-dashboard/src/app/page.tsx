@@ -132,7 +132,6 @@ export default function BarDashboardPage() {
           title="BAR"
           accentTitle="MONITOR"
           icon={GlassWater}
-          variant="compact"
           statusSubLabel="EN BARRA"
           stats={
             <>

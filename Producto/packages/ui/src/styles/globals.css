@@ -54,6 +54,13 @@
     --ring: var(--sage);
 
     --radius: 2rem;
+
+    /* Typography Defaults */
+    --font-title: 'Outfit', sans-serif;
+    --font-body: 'Outfit', sans-serif;
+    --font-accent: 'Outfit', sans-serif;
+    --font-outfit: 'Outfit', sans-serif;
+    --font-inter: 'Inter', sans-serif;
   }
 
   /* Dark mode — neutral basis to avoid blue legacy */
@@ -95,16 +102,16 @@
     box-sizing: border-box;
   }
   html {
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-body);
     line-height: 1.6;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-title);
     font-weight: 700;
   }
 }
@@ -212,7 +219,19 @@
    TYPOGRAPHY UTILITIES
    ============================================ */
 .font-outfit {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit);
+}
+
+.font-title {
+  font-family: var(--font-title);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-accent {
+  font-family: var(--font-accent);
 }
 
 .tracking-brand {
