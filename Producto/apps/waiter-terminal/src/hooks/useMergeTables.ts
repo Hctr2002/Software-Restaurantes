@@ -34,10 +34,27 @@ export function useMergeTables() {
     }
   };
 
+  const handleUnlinkTables = async (sessionId: string) => {
+    if (!sessionId) return;
+    setMerging(true);
+    const res = await fetch("/api/sessions", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId }),
+    });
+    setMerging(false);
+    if (res.ok) {
+      setMergeResult(`Mesas desvinculadas.`);
+      setMergeMode(false);
+      setSelectedForMerge(new Set());
+      setTimeout(() => setMergeResult(null), 4000);
+    }
+  };
+
   const toggleMode = () => {
     setMergeMode((m) => !m);
     setSelectedForMerge(new Set());
   };
 
-  return { mergeMode, selectedForMerge, merging, mergeResult, toggleMergeSelect, handleMergeTables, toggleMode };
+  return { mergeMode, selectedForMerge, merging, mergeResult, toggleMergeSelect, handleMergeTables, toggleMode, handleUnlinkTables };
 }

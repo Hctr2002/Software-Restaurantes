@@ -135,7 +135,16 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
   };
 
   const handleTableClean = async (tableId: string) => {
-    await supabase.from("tables").update({ status: "FREE" }).eq("id", tableId);
+    try {
+      const { error } = await supabase.from("tables").update({ status: "FREE", current_session_id: null }).eq("id", tableId);
+      if (error) {
+        console.error("Error cleaning table:", error);
+        alert(`Error al limpiar mesa: ${error.message}`);
+      }
+    } catch (err: any) {
+      console.error("Critical error cleaning table:", err);
+      alert(`Error crítico al limpiar mesa: ${err.message || 'Revisa la consola'}`);
+    }
   };
 
   const handleHelpComplete = async (tableId: string) => {

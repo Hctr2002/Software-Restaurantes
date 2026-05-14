@@ -1,123 +1,195 @@
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { 
   StyleSheet, 
   ScrollView, 
-  Image, 
   TouchableOpacity, 
   Dimensions,
-  StatusBar
+  StatusBar,
+  ActivityIndicator,
+  View
 } from 'react-native';
-import { Text, View } from '@/components/Themed';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
-import { ChefHat, Search, ShoppingBag, Star, Timer, Flame, Leaf } from 'lucide-react-native';
+import { Text } from '@/components/Themed';
 import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
+import LandingHeader from '../../components/LandingHeader';
+import { supabase } from '../../lib/supabase';
+import { QrCode, Utensils, Zap, Star, Store, MapPin } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
 
 const { width } = Dimensions.get('window');
 
-const CATEGORIES = [
-  { id: '1', name: 'Al Fuego', icon: <Flame size={16} color={MB_COLORS.brandAccent} />, active: true },
-  { id: '2', name: 'Healthy', icon: <Leaf size={16} color={MB_COLORS.sage} /> },
-  { id: '3', name: 'Drinks', icon: <Star size={16} color="#FFD700" /> },
-  { id: '4', name: 'Postres', icon: <ChefHat size={16} color={MB_COLORS.muted} /> },
-];
-
-const FEATURED_DISHES = [
-  {
-    id: '1',
-    name: 'Truffle Double Burger',
-    price: '$12.990',
-    rating: '4.9',
-    time: '15-20 min',
-    image: require('../../assets/images/burger_hero.png'),
-    tag: 'Popular'
-  },
-  {
-    id: '2',
-    name: 'Grilled Salmon Bowl',
-    price: '$14.200',
-    rating: '4.8',
-    time: '20-25 min',
-    image: require('../../assets/images/salad_hero.png'),
-    tag: 'Chef Choice'
-  }
-];
-
 export default function MenuHomeScreen() {
+  const autoScrollOffset = useRef(0);
+  const flatListRef = useRef<any>(null);
+  const isInteracting = useRef(false);
+  const scrollInterval = useRef<any>(null);
+  
+  const insets = useSafeAreaInsets();
+  const [restaurants, setRestaurants] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadRestaurants() {
+      const { data, error } = await supabase
+        .from('restaurants')
+        .select('id, name, slug')
+        .eq('status', 'ACTIVE')
+        .order('name');
+      
+      if (!error && data) setRestaurants(data);
+      setLoading(false);
+    }
+    loadRestaurants();
+  }, []);
+
+  useEffect(() => {
+    if (loading || restaurants.length === 0) return;
+
+    const startCarousel = () => {
+      if (scrollInterval.current) clearInterval(scrollInterval.current);
+      scrollInterval.current = setInterval(() => {
+        if (flatListRef.current && !isInteracting.current) {
+          autoScrollOffset.current += 0.5;
+          
+          // Reset logic based on card width (260) + gap (12)
+          const totalWidth = restaurants.length * 272;
+          if (autoScrollOffset.current > totalWidth) {
+            autoScrollOffset.current = 0;
+          }
+          
+          flatListRef.current.scrollToOffset({ 
+            offset: autoScrollOffset.current, 
+            animated: false 
+          });
+        }
+      }, 30);
+    };
+
+    startCarousel();
+
+    return () => {
+      if (scrollInterval.current) clearInterval(scrollInterval.current);
+    };
+  }, [loading, restaurants]);
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
+      <LandingHeader />
       
-      {/* Premium Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.greeting}>Buenos días,</Text>
-          <Text style={styles.userName}>Gourmet Lover</Text>
-        </View>
-        <TouchableOpacity style={styles.cartButton}>
-          <ShoppingBag color="white" size={24} />
-          <View style={styles.cartBadge} />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false} 
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
+      >
         
-        {/* Search Bar */}
-        <Animated.View entering={FadeInDown.delay(200)} style={styles.searchContainer}>
-          <Search color={MB_COLORS.muted} size={20} />
-          <Text style={styles.searchPlaceholder}>¿Qué se te antoja hoy?</Text>
+        {/* Background Decorative Elements */}
+        <View style={styles.bgDecorContainer}>
+          <View style={styles.bgBlob} />
+        </View>
+
+        {/* Hero Section */}
+        <Animated.View entering={FadeInDown.delay(200)} style={styles.heroSection}>
+          <View style={styles.heroBadge}>
+            <Star size={12} color="#10b981" fill="#10b981" />
+            <Text style={styles.heroBadgeText}>NUEVA EXPERIENCIA GASTRONÓMICA</Text>
+          </View>
+          
+          <Text style={styles.heroTitle}>
+            Pide sin <Text style={{ color: '#10b981' }}>esperas</Text>, disfruta sin límites.
+          </Text>
+          
+          <Text style={styles.heroSubtitle}>
+            Tu menú digital inteligente. Escanea el código QR en tu mesa para comenzar.
+          </Text>
         </Animated.View>
 
-        {/* Categories */}
+        {/* Scan CTA */}
+        <Animated.View entering={FadeInDown.delay(400)} style={styles.scanCtaContainer}>
+          <TouchableOpacity activeOpacity={0.9} style={styles.scanCtaWrapper}>
+            <BlurView intensity={10} tint="dark" style={styles.scanCtaCard}>
+              <View style={styles.scanIconBox}>
+                <QrCode size={32} color="#10b981" />
+              </View>
+              <View style={styles.scanCtaInfo}>
+                <Text style={styles.scanCtaTitle}>¿Estás en un restaurante?</Text>
+                <Text style={styles.scanCtaSub}>Toca aquí para escanear el código QR</Text>
+              </View>
+            </BlurView>
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* Restaurants Section */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Categorías</Text>
+          <View>
+            <Text style={styles.sectionTag}>PARTNERS SELECCIONADOS</Text>
+            <Text style={styles.sectionTitle}>Nuestra Red</Text>
+          </View>
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
-          {CATEGORIES.map((cat, index) => (
-            <Animated.View key={cat.id} entering={FadeInRight.delay(index * 100)}>
-              <TouchableOpacity style={[styles.categoryCard, cat.active && styles.categoryCardActive]}>
-                {cat.icon}
-                <Text style={[styles.categoryText, cat.active && styles.categoryTextActive]}>{cat.name}</Text>
-              </TouchableOpacity>
+
+        <View style={styles.carouselContainer}>
+          {loading ? (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
+              {[1, 2, 3].map((i) => (
+                <View key={i} style={[styles.restaurantCard, { width: 240, opacity: 0.5, justifyContent: 'center' }]}>
+                  <ActivityIndicator color="#10b981" />
+                </View>
+              ))}
+            </ScrollView>
+          ) : restaurants.length > 0 ? (
+            <Animated.FlatList
+              ref={flatListRef}
+              data={[...restaurants, ...restaurants, ...restaurants]}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item, index) => `${item.id}-${index}`}
+              renderItem={({ item, index }) => (
+                <Animated.View entering={FadeInRight.delay(index * 100)}>
+                  <TouchableOpacity style={styles.restaurantCard} activeOpacity={0.8}>
+                    <View style={styles.restaurantIcon}>
+                      <Store size={22} color="#10b981" />
+                    </View>
+                    <View style={styles.restaurantInfo}>
+                      <Text style={item.name.length > 20 ? styles.restaurantNameSmall : styles.restaurantName} numberOfLines={1}>{item.name}</Text>
+                      <View style={styles.restaurantMeta}>
+                        <MapPin size={12} color="rgba(16, 185, 129, 0.5)" />
+                        <Text style={styles.restaurantMetaText}>DISPONIBLE VÍA QR</Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                </Animated.View>
+              )}
+              contentContainerStyle={{ paddingLeft: 24, paddingRight: 24 }}
+              onScroll={(e) => {
+                if (isInteracting.current) {
+                  autoScrollOffset.current = e.nativeEvent.contentOffset.x;
+                }
+              }}
+              onScrollBeginDrag={() => { isInteracting.current = true; }}
+              onScrollEndDrag={() => { isInteracting.current = false; }}
+              onMomentumScrollBegin={() => { isInteracting.current = true; }}
+              onMomentumScrollEnd={() => { isInteracting.current = false; }}
+            />
+          ) : (
+            <Text style={{ color: '#94a3b8', marginLeft: 24, fontStyle: 'italic', fontSize: 13 }}>Pronto nuevos partners...</Text>
+          )}
+        </View>
+
+        {/* Steps Section */}
+        <View style={styles.stepsContainer}>
+          {[
+            { icon: QrCode, title: "Escanea", desc: "Usa la cámara en el QR de tu mesa." },
+            { icon: Utensils, title: "Elige", desc: "Explora el menú con fotos reales." },
+            { icon: Zap, title: "Disfruta", desc: "Tu pedido llega directo a cocina." }
+          ].map((step, idx) => (
+            <Animated.View key={idx} entering={FadeInDown.delay(600 + idx * 100)} style={styles.stepCard}>
+              <View style={styles.stepIconBox}>
+                <step.icon size={24} color="#10b981" />
+              </View>
+              <Text style={styles.stepTitle}>{step.title}</Text>
+              <Text style={styles.stepDesc}>{step.desc}</Text>
             </Animated.View>
           ))}
-        </ScrollView>
-
-        {/* Featured Selection */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Selección del Chef</Text>
-          <TouchableOpacity>
-            <Text style={styles.seeAll}>Ver todo</Text>
-          </TouchableOpacity>
         </View>
-
-        {FEATURED_DISHES.map((dish, index) => (
-          <Animated.View key={dish.id} entering={FadeInDown.delay(400 + index * 100)}>
-            <TouchableOpacity style={styles.dishCard}>
-              <Image source={dish.image} style={styles.dishImage} resizeMode="cover" />
-              <View style={styles.tagBadge}>
-                <Text style={styles.tagText}>{dish.tag}</Text>
-              </View>
-              
-              <View style={styles.dishInfo}>
-                <View style={styles.dishMainRow}>
-                  <Text style={styles.dishName}>{dish.name}</Text>
-                  <Text style={styles.dishPrice}>{dish.price}</Text>
-                </View>
-                
-                <View style={styles.dishMetaRow}>
-                  <View style={styles.metaItem}>
-                    <Star size={12} color="#FFD700" fill="#FFD700" />
-                    <Text style={styles.metaText}>{dish.rating}</Text>
-                  </View>
-                  <View style={styles.metaItem}>
-                    <Timer size={12} color={MB_COLORS.muted} />
-                    <Text style={styles.metaText}>{dish.time}</Text>
-                  </View>
-                </View>
-              </View>
-            </TouchableOpacity>
-          </Animated.View>
-        ))}
 
       </ScrollView>
     </View>
@@ -127,188 +199,204 @@ export default function MenuHomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MB_COLORS.navy,
-    paddingTop: 60,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: MB_SPACING.lg,
-    marginBottom: MB_SPACING.lg,
-  },
-  headerLeft: {
-    flex: 1,
-  },
-  greeting: {
-    fontSize: 14,
-    color: MB_COLORS.muted,
-    fontFamily: 'System',
-    fontWeight: '600',
-  },
-  userName: {
-    fontSize: 24,
-    color: 'white',
-    fontFamily: 'System',
-    fontWeight: '900',
-    letterSpacing: -1,
-  },
-  cartButton: {
-    width: 54,
-    height: 54,
-    borderRadius: 18,
-    backgroundColor: MB_COLORS.glassHeavy,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
-  },
-  cartBadge: {
-    position: 'absolute',
-    top: 14,
-    right: 14,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: MB_COLORS.brandAccent,
-    borderWidth: 2,
-    borderColor: MB_COLORS.navy,
+    backgroundColor: '#020617',
   },
   scrollContent: {
     paddingBottom: 100,
   },
-  searchContainer: {
-    marginHorizontal: MB_SPACING.lg,
-    height: 56,
-    backgroundColor: MB_COLORS.glass,
-    borderRadius: 20,
+  bgDecorContainer: {
+    position: 'absolute',
+    top: -100,
+    left: -100,
+    width: 400,
+    height: 400,
+    pointerEvents: 'none',
+  },
+  bgBlob: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(16, 185, 129, 0.05)',
+    borderRadius: 200,
+  },
+  heroSection: {
+    paddingHorizontal: 24,
+    paddingTop: 40,
+    paddingBottom: 32,
+    alignItems: 'center',
+  },
+  heroBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    gap: 8,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.03)',
-    marginBottom: MB_SPACING.xl,
+    borderColor: 'rgba(16, 185, 129, 0.2)',
+    marginBottom: 24,
   },
-  searchPlaceholder: {
-    color: MB_COLORS.muted,
-    marginLeft: 12,
-    fontSize: 14,
+  heroBadgeText: {
+    color: '#10b981',
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+  heroTitle: {
+    fontSize: 36,
+    fontWeight: '900',
+    color: 'white',
+    textAlign: 'center',
+    lineHeight: 42,
+    letterSpacing: -1,
+  },
+  heroSubtitle: {
+    fontSize: 16,
+    color: '#94a3b8',
+    textAlign: 'center',
+    marginTop: 16,
+    lineHeight: 24,
+    paddingHorizontal: 20,
+  },
+  scanCtaContainer: {
+    paddingHorizontal: 24,
+    marginBottom: 48,
+  },
+  scanCtaWrapper: {
+    borderRadius: 32,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  scanCtaCard: {
+    padding: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 20,
+  },
+  scanIconBox: {
+    width: 64,
+    height: 64,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scanCtaInfo: {
+    flex: 1,
+  },
+  scanCtaTitle: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '900',
+    marginBottom: 4,
+  },
+  scanCtaSub: {
+    color: '#94a3b8',
+    fontSize: 13,
     fontWeight: '600',
   },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    paddingHorizontal: MB_SPACING.lg,
-    marginBottom: MB_SPACING.md,
+    paddingHorizontal: 24,
+    marginBottom: 20,
+  },
+  sectionTag: {
+    color: 'rgba(16, 185, 129, 0.5)',
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 3,
+    marginBottom: 4,
   },
   sectionTitle: {
-    fontSize: 20,
     color: 'white',
+    fontSize: 24,
+    fontWeight: '900',
+  },
+  carouselContainer: {
+    marginBottom: 48,
+    height: 100,
+  },
+  categoryScroll: {
+    paddingLeft: 24,
+  },
+  restaurantCard: {
+    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+    borderRadius: 24,
+    padding: 20,
+    marginRight: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    width: 260,
+  },
+  restaurantIcon: {
+    width: 52,
+    height: 52,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  restaurantInfo: {
+    flex: 1,
+  },
+  restaurantName: {
+    color: 'white',
+    fontSize: 17,
     fontWeight: '900',
     letterSpacing: -0.5,
   },
-  seeAll: {
-    fontSize: 12,
-    color: MB_COLORS.brandAccent,
-    fontWeight: '800',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
+  restaurantNameSmall: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '900',
+    letterSpacing: -0.5,
   },
-  categoryScroll: {
-    paddingLeft: MB_SPACING.lg,
-    marginBottom: MB_SPACING.xl,
-  },
-  categoryCard: {
+  restaurantMeta: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: MB_COLORS.glass,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 16,
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.03)',
+    gap: 6,
+    marginTop: 6,
   },
-  categoryCardActive: {
-    backgroundColor: 'white',
-    borderColor: 'white',
-  },
-  categoryText: {
-    color: 'white',
-    fontSize: 13,
-    fontWeight: 'bold',
-    marginLeft: 8,
-  },
-  categoryTextActive: {
-    color: MB_COLORS.navy,
-  },
-  dishCard: {
-    marginHorizontal: MB_SPACING.lg,
-    backgroundColor: MB_COLORS.glass,
-    borderRadius: 32,
-    overflow: 'hidden',
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.03)',
-  },
-  dishImage: {
-    width: '100%',
-    height: 220,
-  },
-  tagBadge: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
-    backgroundColor: 'rgba(10, 17, 40, 0.8)',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-  },
-  tagText: {
-    color: 'white',
+  restaurantMetaText: {
+    color: '#64748b',
     fontSize: 10,
     fontWeight: '900',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 1.5,
   },
-  dishInfo: {
+  stepsContainer: {
+    paddingHorizontal: 24,
+    gap: 16,
+    marginBottom: 40,
+  },
+  stepCard: {
+    backgroundColor: 'rgba(15, 23, 42, 0.4)',
+    borderRadius: 24,
     padding: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
-  dishMainRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  stepIconBox: {
+    width: 48,
+    height: 48,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    borderRadius: 16,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
-    backgroundColor: 'transparent',
+    marginBottom: 16,
   },
-  dishName: {
-    fontSize: 18,
+  stepTitle: {
     color: 'white',
+    fontSize: 18,
     fontWeight: '900',
-    flex: 1,
-    marginRight: 10,
+    marginBottom: 8,
   },
-  dishPrice: {
-    fontSize: 16,
-    color: MB_COLORS.brandAccent,
-    fontWeight: '900',
-  },
-  dishMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 16,
-    backgroundColor: 'transparent',
-  },
-  metaText: {
-    color: MB_COLORS.muted,
-    fontSize: 12,
-    fontWeight: '700',
-    marginLeft: 4,
+  stepDesc: {
+    color: '#94a3b8',
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500',
   },
 });

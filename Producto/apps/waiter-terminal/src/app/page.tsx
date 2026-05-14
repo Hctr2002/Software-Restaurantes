@@ -6,7 +6,7 @@ import { useAuthStore } from "@menu-bites/store";
 import { useTables, signOut, supabase } from "@menu-bites/auth";
 import { RestaurantThemeProvider, CardSkeleton, Button, Badge, PremiumHeader } from "@menu-bites/ui";
 import { AnimatePresence, motion } from "framer-motion";
-import { LayoutDashboard, Bell, LogOut, AlertTriangle, UtensilsCrossed, Sparkles, ChevronDown, RefreshCw, Receipt, Link2 } from "lucide-react";
+import { LayoutDashboard, Bell, LogOut, AlertTriangle, UtensilsCrossed, Sparkles, ChevronDown, RefreshCw, Receipt, Link2, Link2Off } from "lucide-react";
 
 import { 
   PendingOrderCard, 
@@ -230,15 +230,43 @@ export default function WaiterDashboard() {
                   <div>
                     <h2 className="text-2xl sm:text-4xl font-black tracking-tighter">Gestión de <span className="text-primary">Salón</span></h2>
                     <p className="text-muted-foreground text-xs font-black uppercase tracking-widest opacity-60 mt-1">
-                      {merge.mergeMode ? "Selecciona 2+ mesas OCCUPIED para fusionar" : "Selecciona una mesa para tomar comandas"}
+                      {merge.mergeMode ? "Selecciona mesas (Libres u Ocupadas) para fusionar" : "Selecciona una mesa para tomar comandas"}
                     </p>
                   </div>
-                  <Button variant="outline" size="icon" onClick={merge.toggleMode} className={`rounded-xl w-11 h-11 shrink-0 transition-all ${merge.mergeMode ? "border-primary/40 text-primary bg-primary/10 shadow-lg shadow-primary/10" : "border-foreground/20 bg-foreground/5 text-foreground/60 hover:bg-foreground/10 hover:text-foreground"}`}>
-                    <Link2 className="w-4 h-4" />
-                  </Button>
+                  <button 
+                    onClick={merge.toggleMode} 
+                    className={`relative flex items-center justify-center gap-2 px-6 py-3.5 rounded-[1.25rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all overflow-hidden group ${
+                      merge.mergeMode 
+                        ? "bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 hover:shadow-lg hover:shadow-red-500/10" 
+                        : "bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:shadow-lg hover:shadow-primary/10"
+                    }`}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
+                    {merge.mergeMode ? <Link2Off className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
+                    <span className="hidden sm:block">{merge.mergeMode ? "Cancelar Fusión" : "Fusionar Mesas"}</span>
+                  </button>
                 </div>
-                <TableMergeBar mergeMode={merge.mergeMode} selectedCount={merge.selectedForMerge.size} merging={merge.merging} mergeResult={merge.mergeResult} onToggleMode={merge.toggleMode} onConfirmMerge={merge.handleMergeTables} />
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-6">
+                <TableMergeBar 
+                  mergeMode={merge.mergeMode} 
+                  selectedCount={merge.selectedForMerge.size} 
+                  merging={merge.merging} 
+                  mergeResult={merge.mergeResult} 
+                  onToggleMode={merge.toggleMode} 
+                  onConfirmMerge={merge.handleMergeTables} 
+                  onConfirmUnlink={() => {
+                    const selectedId = Array.from(merge.selectedForMerge)[0];
+                    const table = tables.find(t => t.id === selectedId);
+                    if (table?.current_session_id) {
+                      merge.handleUnlinkTables(table.current_session_id);
+                    }
+                  }}
+                  canUnlink={(() => {
+                    const selectedId = Array.from(merge.selectedForMerge)[0];
+                    const table = tables.find(t => t.id === selectedId);
+                    return !!table?.current_session_id;
+                  })()}
+                />
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                   {tables.map((table) => (
                     <TableCard
                       key={table.id}
@@ -257,6 +285,11 @@ export default function WaiterDashboard() {
                           router.push(`/tables/${id}/menu`);
                         }
                       }}
+                      mergedTableNumbers={
+                        table.current_session_id 
+                          ? tables.filter(t => t.current_session_id === table.current_session_id).map(t => t.number)
+                          : undefined
+                      }
                     />
                   ))}
                 </div>

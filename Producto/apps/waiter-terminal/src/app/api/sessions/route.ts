@@ -36,21 +36,88 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Se necesitan al menos 2 mesas' }, { status: 400 });
   }
 
-  const sessionId = randomUUID();
   const db = serviceClient();
 
-  // Actualizar todas las órdenes activas de esas mesas con el session_id
-  const { data, error } = await db
+  // 1. Obtener las mesas con sus sesiones actuales
+  const { data: tables, error: tablesError } = await db
+    .from('tables')
+    .select('id, status, current_session_id')
+    .in('id', tableIds)
+    .eq('restaurant_id', restaurantId);
+
+  if (tablesError) return NextResponse.json({ error: tablesError.message }, { status: 500 });
+
+  // 2. Recolectar sesiones únicas entre las mesas a fusionar
+  const uniqueSessions: string[] = [
+    ...new Set(
+      (tables ?? []).map((t) => t.current_session_id).filter(Boolean) as string[]
+    ),
+  ];
+
+  let winningSessionId: string;
+
+  if (uniqueSessions.length === 0) {
+    // Ninguna mesa tiene sesión activa: crear una nueva
+    winningSessionId = randomUUID();
+
+  } else if (uniqueSessions.length === 1) {
+    // Una sola sesión activa: usarla directamente, sin conflicto
+    winningSessionId = uniqueSessions[0];
+
+  } else {
+    // Conflicto: varias mesas con sesiones distintas.
+    // Criterio: la sesión con la orden activa más antigua es la ganadora.
+    // Esto respeta la prioridad del grupo que llegó primero al restaurante.
+    const { data: oldestOrders, error: oldestError } = await db
+      .from('orders')
+      .select('session_id, createdAt')
+      .in('session_id', uniqueSessions)
+      .eq('restaurant_id', restaurantId)
+      .not('status', 'in', '("REJECTED")')
+      .order('createdAt', { ascending: true })
+      .limit(1);
+
+    if (oldestError) return NextResponse.json({ error: oldestError.message }, { status: 500 });
+
+    // Si no hay órdenes registradas en ninguna sesión, se toma la primera
+    winningSessionId = oldestOrders?.[0]?.session_id ?? uniqueSessions[0];
+
+    // Reasignar todas las órdenes de las sesiones descartadas a la ganadora.
+    // Se incluyen órdenes DELIVERED para evitar registros huérfanos bajo
+    // sesiones que ya no tienen ninguna mesa asociada.
+    const losingSessionIds = uniqueSessions.filter((s) => s !== winningSessionId);
+    const { error: reassignError } = await db
+      .from('orders')
+      .update({ session_id: winningSessionId })
+      .in('session_id', losingSessionIds)
+      .eq('restaurant_id', restaurantId)
+      .not('status', 'in', '("REJECTED")');
+
+    if (reassignError) return NextResponse.json({ error: reassignError.message }, { status: 500 });
+  }
+
+  // 3. Todas las mesas pasan a OCCUPIED con el session_id ganador
+  const { error: updateTablesError } = await db
+    .from('tables')
+    .update({ status: 'OCCUPIED', current_session_id: winningSessionId })
+    .in('id', tableIds)
+    .eq('restaurant_id', restaurantId);
+
+  if (updateTablesError) return NextResponse.json({ error: updateTablesError.message }, { status: 500 });
+
+  // 4. Sincronizar las órdenes activas de todas las mesas con el session_id ganador.
+  // Cubre el caso de mesas que estaban FREE y no tenían session_id en sus órdenes.
+  const { data: ordersUpdated, error: ordersError } = await db
     .from('orders')
-    .update({ session_id: sessionId })
+    .update({ session_id: winningSessionId })
     .in('table_id', tableIds)
     .eq('restaurant_id', restaurantId)
-    .not('status', 'in', '("DELIVERED","REJECTED")')
+    .not('status', 'in', '("REJECTED")')
     .select('id');
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (ordersError) return NextResponse.json({ error: ordersError.message }, { status: 500 });
 
-  return NextResponse.json({ sessionId, ordersUpdated: data?.length ?? 0 });
+  return NextResponse.json({ sessionId: winningSessionId, ordersUpdated: ordersUpdated?.length ?? 0 });
 }
 
 // DELETE /api/sessions — separar mesas (limpiar session_id)
@@ -70,6 +137,15 @@ export async function DELETE(req: NextRequest) {
     .not('status', 'in', '("DELIVERED","REJECTED")');
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Limpiar current_session_id en la tabla tables
+  const { error: tablesError } = await db
+    .from('tables')
+    .update({ current_session_id: null })
+    .eq('current_session_id', sessionId)
+    .eq('restaurant_id', restaurantId);
+
+  if (tablesError) return NextResponse.json({ error: tablesError.message }, { status: 500 });
 
   return NextResponse.json({ ok: true });
 }

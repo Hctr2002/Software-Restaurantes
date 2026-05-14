@@ -50,27 +50,35 @@ export function useTables(restaurantId: string | undefined) {
   return { tables, loading, refetch };
 }
 
-export function useTableOrders(tableId: string | undefined) {
+export function useTableOrders(tableId: string | undefined, sessionId?: string | null) {
   const fetchFn = useCallback(async () => {
     if (!tableId) return { data: [], error: null };
-    return supabase
+    
+    let query = supabase
       .from("orders")
       .select(`
         *,
         items:order_items(*, menu_item:menu_items(name))
-      `)
-      .eq("table_id", tableId)
+      `);
+      
+    if (sessionId) {
+      query = query.eq("session_id", sessionId);
+    } else {
+      query = query.eq("table_id", tableId);
+    }
+    
+    return query
       .not("status", "in", '("REJECTED","COMPLETED")')
       .order("createdAt", { ascending: false });
-  }, [tableId]);
+  }, [tableId, sessionId]);
 
   const { data: orders, loading, refetch } = useRealtimeSync<Order[]>(
     undefined,
     "orders",
     fetchFn,
-    {
-      channelId: `table-orders-${tableId ?? "none"}`,
-      filter: tableId ? `table_id=eq.${tableId}` : undefined,
+    { 
+      channelId: `table-orders-${sessionId || tableId}`,
+      filter: sessionId ? `session_id=eq.${sessionId}` : `table_id=eq.${tableId}`,
       transform: (data: any) => Array.isArray(data) ? data.map(mapOrder) : []
     }
   );

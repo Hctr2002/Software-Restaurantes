@@ -1,7 +1,7 @@
 # Reporte de Avance - 10 de Mayo de 2026
 
-**Rama:** `feature/front_bar`
-**Commits:** `aabb367`, `9869032`
+**Rama:** `feature/table-merging-v2.3.0`
+**Commits:** `aabb367`, `9869032`, `33e4ed6`
 
 ## 1. Resumen de Actividades
 
@@ -46,12 +46,18 @@ Cada pedido ahora pertenece a exactamente una estación (`station = 'KITCHEN'` o
 | Vista del garzón | 2 tarjetas separadas por mesa | 1 tarjeta unificada con ítems combinados |
 | Retrocompatibilidad | — | Pedidos `station=null` manejados con filtrado por ítem |
 
-## 5. Próximos Pasos
+## 5. Correcciones Adicionales (Fusión de Mesas y Limpieza)
+
+- [x] **Corrección de Columna en Base de Datos**: Se cambió el uso de `session_id` por `current_session_id` en la tabla `tables` para coincidir con el esquema real.
+- [x] **Actualización en Portal del Cliente**: Se corrigió el uso de `portal.table.data?.session_id` por `current_session_id` para que el cliente pueda ver las órdenes unificadas de mesas fusionadas.
+- [x] **Limpieza de Mesas**: Se actualizó la función `handleTableClean` para que borre el `current_session_id` al pasar la mesa a `FREE`.
+
+## 6. Próximos Pasos
 
 - Validar el flujo completo end-to-end: pedido desde el portal → KDS cocina → KDS barra → entrega por el garzón.
 - Revisar la migración `0009_order_station_split.sql` en el entorno de staging antes del merge a `main`.
 - Actualizar las categorías de los restaurantes de prueba para que todas tengan `target_station` definido.
-- PR de `feature/front_bar` → `main` pendiente de revisión.
+- PR de `feature/table-merging-v2.3.0` -> `develop` pendiente de revisión.
 
 ---
 *Reporte generado por el equipo de desarrollo de Menu Bites.*

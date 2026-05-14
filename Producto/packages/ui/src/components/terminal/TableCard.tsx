@@ -1,14 +1,14 @@
 "use client";
 
 import React from "react";
-import { CheckCircle, Hash } from "lucide-react";
+import { CheckCircle, Hash, Link2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { TableRecord } from "@menu-bites/auth";
 
 export type TableStatus = "FREE" | "OCCUPIED" | "CLEANING" | "RESERVED";
 
 interface TableCardProps {
-  table: TableRecord & { bill_requested?: boolean };
+  table: TableRecord & { bill_requested?: boolean; current_session_id?: string | null };
   isBillRequested: boolean;
   isReady: boolean;
   isPreparing: boolean;
@@ -16,6 +16,7 @@ interface TableCardProps {
   isSelectedForMerge: boolean;
   onSelect: (id: string) => void;
   onNavigate: (id: string) => void;
+  mergedTableNumbers?: number[];
   orders?: any[];
 }
 
@@ -33,10 +34,10 @@ const STATUS_TEXT: Record<TableStatus, string> = {
   RESERVED: "text-amber-400",
 };
 
-export function TableCard({ table, isBillRequested, isReady, isPreparing, mergeMode, isSelectedForMerge, onSelect, onNavigate, orders = [] }: TableCardProps) {
+export function TableCard({ table, isBillRequested, isReady, isPreparing, mergeMode, isSelectedForMerge, onSelect, onNavigate, mergedTableNumbers, orders = [] }: TableCardProps) {
   const currentStatus = (table.status as TableStatus) || "FREE";
   const isCleaning = currentStatus === "CLEANING";
-  const isSelectable = mergeMode && currentStatus === "OCCUPIED";
+  const isSelectable = mergeMode && (currentStatus === "OCCUPIED" || currentStatus === "FREE");
 
   // Filtrar pedidos activos para esta mesa
   const tableOrders = orders.filter(o => o.tableId === table.id && o.status !== 'COMPLETED' && o.status !== 'REJECTED');
@@ -90,8 +91,20 @@ export function TableCard({ table, isBillRequested, isReady, isPreparing, mergeM
       </div>
 
       <div className={`relative bg-card/40 border border-white/5 rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-6 flex flex-col items-center justify-center gap-3 sm:gap-4 transition-all cursor-pointer hover:bg-card/60 hover:border-white/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] ${
-        isBillRequested ? "ring-2 ring-yellow-500/30" : ""
-      } ${isReady ? "ring-2 ring-emerald-500/30" : ""} ${isPreparing && !isReady ? "ring-2 ring-primary/30" : ""}`}>
+        isBillRequested ? "ring-2 ring-yellow-500/30 border-yellow-500/20" : 
+        isReady ? "ring-2 ring-emerald-500/30 border-emerald-500/20" : 
+        table.current_session_id ? "ring-2 ring-primary/40 border-primary/50 bg-primary/5" : "border-white/5"
+      }`}>
+        {table.current_session_id && (
+          <div 
+            className="absolute top-4 left-4 text-primary/60" 
+            title={mergedTableNumbers && mergedTableNumbers.length > 0 
+              ? `Fusionada con Mesa ${mergedTableNumbers.filter(n => n !== table.number).join(', ')}` 
+              : "Mesa Fusionada"}
+          >
+            <Link2 className="w-4 h-4" />
+          </div>
+        )}
         <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-[1rem] sm:rounded-[1.5rem] flex items-center justify-center border transition-all ${STATUS_STYLES[currentStatus]}`}>
           <Hash className="w-6 h-6 sm:w-8 sm:h-8 font-black" />
         </div>
@@ -103,6 +116,11 @@ export function TableCard({ table, isBillRequested, isReady, isPreparing, mergeM
           {itemsCount > 0 && (
             <p className="text-[7px] sm:text-[8px] font-bold text-muted-foreground mt-1.5 sm:mt-2 uppercase tracking-tight">
               {itemsCount} ítem(s) en curso
+            </p>
+          )}
+          {mergedTableNumbers && mergedTableNumbers.length > 0 && (
+            <p className="text-[8px] font-black text-primary mt-1 uppercase tracking-widest flex items-center gap-1 justify-center">
+              <Link2 className="w-3 h-3" /> Con Mesas: {mergedTableNumbers.filter(n => n !== table.number).join(', ')}
             </p>
           )}
         </div>

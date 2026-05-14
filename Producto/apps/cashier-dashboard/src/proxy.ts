@@ -5,7 +5,13 @@ import type { NextRequest } from 'next/server';
 export async function proxy(req: NextRequest) {
   let response = NextResponse.next({ request: { headers: req.headers } });
 
-  if (req.nextUrl.pathname.startsWith('/auth/callback')) return response;
+  // Public routes: auth callback and receipt/voucher pages (server-rendered with service role)
+  if (
+    req.nextUrl.pathname.startsWith('/auth/callback') ||
+    req.nextUrl.pathname.startsWith('/receipt/')
+  ) {
+    return response;
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

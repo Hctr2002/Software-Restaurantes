@@ -39,10 +39,12 @@ export default function CashierPage() {
     orders, 
     history, 
     loading, 
-    refetch, 
-    markDelivered, 
-    isProcessing 
+    refetch,
   } = useCashierOrders(user?.restaurantId);
+
+  // Estado local que indica que hay una operación de cobro en curso.
+  // Bloquea el botón de confirmación en PaymentSlideOver para evitar doble envío.
+  const [isPaying, setIsPaying] = useState(false);
   const { tables } = useTableStatus(user?.restaurantId);
   const theme = useThemeSync(user?.restaurantId, "cashier");
 
@@ -53,6 +55,7 @@ export default function CashierPage() {
   
   const alertForm = useAlertForm(user?.restaurantId, user?.id, user?.email);
   const [isSigningOut, setIsSigningOut] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
@@ -69,10 +72,14 @@ export default function CashierPage() {
     Object.fromEntries(tables.map((t) => [t.id, t.billRequested ?? false])), 
   [tables]);
 
+  const tipIncludedTables = useMemo(() => 
+    Object.fromEntries(tables.map((t) => [t.id, t.tip_included ?? false])), 
+  [tables]);
+
   const groups = useMemo(() => ({
-    pending: groupOrders(orders, billRequestedTables),
-    history: groupOrders(history, billRequestedTables)
-  }), [orders, history, billRequestedTables]);
+    pending: groupOrders(orders, billRequestedTables, tipIncludedTables),
+    history: groupOrders(history, billRequestedTables, tipIncludedTables)
+  }), [orders, history, billRequestedTables, tipIncludedTables]);
 
   const totals = useMemo(() => ({
     pending: groups.pending.reduce((s, g) => s + g.total, 0),
@@ -87,12 +94,37 @@ export default function CashierPage() {
   }, [activeTab, groups, searchQuery]);
 
   const handleMarkDelivered = async (group: TableGroup) => {
-    const { success } = await markDelivered(group.orders.map(o => o.id), group.tableId, paymentReference);
-    if (success) {
-      const receiptUrl = group.sessionId ? `/receipt/session/${group.sessionId}` : `/receipt/table/${group.tableId}`;
-      window.open(`${receiptUrl}?rid=${user?.restaurantId}`, "_blank");
+    setIsPaying(true);
+    try {
+      // Delegar el cierre de órdenes y actualización de mesa a la función
+      // RPC completar_pago_mesa. Esta función ejecuta todo en una única
+      // transacción atómica en la base de datos, eliminando el riesgo de
+      // estados inconsistentes que existía con el bucle secuencial anterior.
+      const orderIds = group.orders
+        .filter((o) => o.status !== "COMPLETED" && o.status !== "REJECTED")
+        .map((o) => o.id);
+
+      if (orderIds.length > 0) {
+        const { error } = await supabase.rpc("completar_pago_mesa", {
+          p_order_ids: orderIds,
+          p_table_id:  group.tableId ?? null,
+        });
+        if (error) throw error;
+      }
+
+      const receiptUrl = group.sessionId
+        ? `/receipt/session/${group.sessionId}?rid=${user?.restaurantId}&tip=${group.tipIncluded}&ref=${encodeURIComponent(paymentReference)}`
+        : `/receipt/table/${group.tableId}?rid=${user?.restaurantId}&tip=${group.tipIncluded}&ref=${encodeURIComponent(paymentReference)}`;
+
+      window.open(receiptUrl, "_blank");
       setSelectedGroup(null);
       setPaymentReference("");
+      refetch();
+    } catch (err: any) {
+      console.error("Error al procesar pago:", err?.message || JSON.stringify(err));
+      alert(`Error al cobrar: ${err?.message || "Revisa la consola"}`);
+    } finally {
+      setIsPaying(false);
     }
   };
 
@@ -100,6 +132,7 @@ export default function CashierPage() {
     setIsSigningOut(true);
     try { await signOut(); } finally { clearAuth(); window.location.href = process.env.NEXT_PUBLIC_AUTH_URL ?? "/"; }
   };
+
 
   return (
     <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
@@ -185,11 +218,22 @@ export default function CashierPage() {
             )}
           </AnimatePresence>
  
-          <BillAlertIsland groups={groups.pending} onSelect={setSelectedGroup} />
+          <BillAlertIsland 
+            groups={groups.pending} 
+            onSelect={async (group) => {
+              setSelectedGroup(group);
+              if (group.tableId) {
+                await supabase
+                  .from("tables")
+                  .update({ bill_requested: false })
+                  .eq("id", group.tableId);
+              }
+            }} 
+          />
         </main>
  
         {selectedGroup && (
-          <PaymentSlideOver group={selectedGroup} paymentReference={paymentReference} isProcessing={isProcessing} onPaymentRefChange={setPaymentReference} onConfirm={() => handleMarkDelivered(selectedGroup)} onClose={() => setSelectedGroup(null)} />
+          <PaymentSlideOver group={selectedGroup} paymentReference={paymentReference} isProcessing={isPaying} onPaymentRefChange={setPaymentReference} onConfirm={() => handleMarkDelivered(selectedGroup)} onClose={() => setSelectedGroup(null)} />
         )}
  
         {alertModal && (

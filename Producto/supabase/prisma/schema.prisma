@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,99 +8,64 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-enum Role {
-  SUPER_ADMIN
-  ADMIN
-  GARZON
-  COCINA
-  CAJERO
-  CLIENTE
-  BAR
-}
-
-enum StationType {
-  KITCHEN
-  BAR
-}
-
-enum OrderStatus {
-  PENDING
-  VALIDATED
-  PREPARING
-  READY
-  PARCIAL
-  DELIVERED
-  COMPLETED
-  REJECTED
-}
-
-enum SubscriptionStatus {
-  ACTIVE
-  SUSPENDED
-  CANCELLED
-}
-
-enum TableStatus {
-  FREE
-  OCCUPIED
-  RESERVED
-  CLEANING
-}
-
 model Restaurant {
-  id        String             @id @default(uuid())
-  name      String
-  slug      String             @unique
-  status    SubscriptionStatus @default(ACTIVE)
-  planId    String?            @map("plan_id")
-  createdAt DateTime           @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime           @default(now()) @updatedAt @db.Timestamptz(3)
-
-  // Relationships
-  plan                Plan?              @relation(fields: [planId], references: [id])
-  users               User[]
-  categories          Category[]
-  menuItems           MenuItem[]
-  menuItemIngredients MenuItemIngredient[]
-  menuItemExtras      MenuItemExtra[]
-  tables              Table[]
-  orders              Order[]
-  inventories         Inventory[]
-  orderItems          OrderItem[]
-  orderItemExtras     OrderItemExtra[]
-  themes              Theme[]
-  kdsSettings         KdsSettings?
+  id                   String               @id @default(uuid())
+  name                 String
+  slug                 String               @unique
+  status               SubscriptionStatus   @default(ACTIVE)
+  createdAt            DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt            DateTime             @default(now()) @updatedAt @db.Timestamptz(3)
+  planId               String?              @map("plan_id")
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  stripePriceId        String?
+  currentPeriodEnd     DateTime?            @db.Timestamptz(6)
+  alerts               alerts[]
+  categories           Category[]
+  inventories          Inventory[]
+  kdsSettings          KdsSettings?
+  menuItemExtras       MenuItemExtra[]
+  menuItemIngredients  MenuItemIngredient[]
+  menuItems            MenuItem[]
+  orderItemExtras      OrderItemExtra[]
+  orderItems           OrderItem[]
+  orders               Order[]
+  themes               Theme[]
+  plan                 Plan?                @relation(fields: [planId], references: [id])
+  tables               Table[]
+  users                User[]
 
   @@map("restaurants")
 }
 
 model User {
-  id           String  @id // This should match Supabase Auth User ID
-  email        String  @unique
-  role         Role    @default(CLIENTE)
-  restaurantId String? @map("restaurant_id")
-
-  restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
+  id           String      @id
+  email        String      @unique
+  role         Role        @default(CLIENTE)
+  restaurantId String?     @map("restaurant_id")
   pushToken    String?     @map("push_token")
   createdAt    DateTime    @default(now()) @db.Timestamptz(3)
   updatedAt    DateTime    @default(now()) @updatedAt @db.Timestamptz(3)
+  alerts       alerts[]
+  orders       Order[]
+  restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
+  push_subscriptions push_subscriptions[]
 
   @@index([restaurantId])
+  @@index([restaurantId], map: "idx_users_restaurant_id")
   @@map("users")
 }
 
 model Category {
-  id           String  @id @default(uuid())
-  name         String
-  restaurantId String  @map("restaurant_id")
-  targetStation StationType @default(KITCHEN) @map("target_station")
-  isActive      Boolean     @default(true) @map("is_active")
-
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
-  menuItems  MenuItem[]
-
-  createdAt DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  id            String       @id @default(dbgenerated("(gen_random_uuid())::text"))
+  name          String
+  restaurantId  String       @map("restaurant_id")
+  isActive      Boolean      @default(true) @map("is_active")
+  createdAt     DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime     @default(now()) @updatedAt @db.Timestamptz(3)
+  targetStation StationType? @default(KITCHEN) @map("target_station")
+  restaurant    Restaurant   @relation(fields: [restaurantId], references: [id])
+  menuItems     MenuItem[]
 
   @@unique([id, restaurantId])
   @@index([restaurantId])
@@ -111,23 +73,21 @@ model Category {
 }
 
 model MenuItem {
-  id           String  @id @default(uuid())
+  id           String               @id @default(dbgenerated("(gen_random_uuid())::text"))
   name         String
   description  String?
-  price        Decimal @db.Decimal(10, 2)
-  imageUrl     String? @map("image_url")
-  categoryId   String  @map("category_id")
-  restaurantId String  @map("restaurant_id")
-  isActive     Boolean @default(true) @map("is_active")
-
-  category    Category             @relation(fields: [categoryId, restaurantId], references: [id, restaurantId])
-  restaurant  Restaurant           @relation(fields: [restaurantId], references: [id])
-  orderItems  OrderItem[]
-  ingredients MenuItemIngredient[]
-  extras      MenuItemExtra[]
-
-  createdAt DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  price        Decimal              @db.Decimal(10, 2)
+  imageUrl     String?              @map("image_url")
+  categoryId   String               @map("category_id")
+  restaurantId String               @map("restaurant_id")
+  isActive     Boolean              @default(true) @map("is_active")
+  createdAt    DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime             @default(now()) @updatedAt @db.Timestamptz(3)
+  extras       MenuItemExtra[]
+  ingredients  MenuItemIngredient[]
+  category     Category             @relation(fields: [categoryId, restaurantId], references: [id, restaurantId])
+  restaurant   Restaurant           @relation(fields: [restaurantId], references: [id])
+  orderItems   OrderItem[]
 
   @@unique([id, restaurantId])
   @@index([restaurantId])
@@ -136,201 +96,295 @@ model MenuItem {
 }
 
 model MenuItemIngredient {
-  id           String  @id @default(uuid())
-  menuItemId   String  @map("menu_item_id")
-  inventoryId  String  @map("inventory_id")
-  quantity     Decimal @db.Decimal(10, 2) // Default quantity of this ingredient
-  restaurantId String  @map("restaurant_id")
-
-  menuItem   MenuItem   @relation(fields: [menuItemId], references: [id])
-  inventory  Inventory  @relation(fields: [inventoryId], references: [id])
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  id           String     @id @default(uuid())
+  menuItemId   String     @map("menu_item_id")
+  inventoryId  String     @map("inventory_id")
+  quantity     Decimal    @db.Decimal(10, 2)
+  restaurantId String     @map("restaurant_id")
+  inventory    Inventory  @relation(fields: [inventoryId], references: [id])
+  menuItem     MenuItem   @relation(fields: [menuItemId], references: [id])
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
 
   @@unique([menuItemId, inventoryId])
   @@index([restaurantId])
+  @@index([inventoryId], map: "idx_menu_item_ingredients_inventory")
+  @@index([menuItemId], map: "idx_menu_item_ingredients_menu_item")
   @@map("menu_item_ingredients")
 }
 
 model MenuItemExtra {
-  id           String  @id @default(uuid())
-  name         String
-  price        Decimal @db.Decimal(10, 2)
-  menuItemId   String  @map("menu_item_id")
-  inventoryId  String? @map("inventory_id") // Optional link to inventory
-  quantity     Decimal @default(1) @db.Decimal(10, 2) // Stock to deduct if chosen
-  restaurantId String  @map("restaurant_id")
-
-  menuItem        MenuItem         @relation(fields: [menuItemId], references: [id])
+  id              String           @id @default(uuid())
+  name            String
+  price           Decimal          @db.Decimal(10, 2)
+  menuItemId      String           @map("menu_item_id")
+  inventoryId     String?          @map("inventory_id")
+  quantity        Decimal          @default(1) @db.Decimal(10, 2)
+  restaurantId    String           @map("restaurant_id")
   inventory       Inventory?       @relation(fields: [inventoryId], references: [id])
+  menuItem        MenuItem         @relation(fields: [menuItemId], references: [id])
   restaurant      Restaurant       @relation(fields: [restaurantId], references: [id])
   orderItemExtras OrderItemExtra[]
 
   @@index([restaurantId])
+  @@index([menuItemId], map: "idx_menu_item_extras_menu_item")
   @@map("menu_item_extras")
 }
 
 model Table {
-  id           String      @id @default(uuid())
-  number       Int
-  label        String?
-  status       TableStatus @default(FREE)
-  qrData       String      @unique @map("qr_data")
-  restaurantId String      @map("restaurant_id")
-  helpRequested Boolean    @default(false) @map("help_requested")
-  billRequested Boolean    @default(false) @map("bill_requested")
-
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
-  orders     Order[]
-
-  createdAt DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  id                 String      @id @default(dbgenerated("(gen_random_uuid())::text"))
+  number             Int
+  label              String?
+  status             TableStatus @default(FREE)
+  qrData             String      @unique @map("qr_data")
+  restaurantId       String      @map("restaurant_id")
+  helpRequested      Boolean     @default(false) @map("help_requested")
+  billRequested      Boolean     @default(false) @map("bill_requested")
+  createdAt          DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime    @default(now()) @updatedAt @db.Timestamptz(3)
+  current_session_id String?     @db.Uuid
+  tip_included       Boolean?    @default(false)
+  orders             Order[]
+  restaurant         Restaurant  @relation(fields: [restaurantId], references: [id])
 
   @@unique([id, restaurantId])
   @@unique([restaurantId, number])
   @@index([restaurantId])
+  @@index([current_session_id], map: "idx_tables_current_session_id")
+  @@index([current_session_id])
   @@map("tables")
 }
 
 model Order {
-  id           String      @id @default(uuid())
-  tableId      String?     @map("table_id")
-  restaurantId String      @map("restaurant_id")
-  status       OrderStatus @default(PENDING)
-  totalAmount  Decimal     @default(0) @map("total_amount") @db.Decimal(10, 2)
-  notes        String?
-  sessionId    String?     @map("session_id")
-  station      StationType? @map("station")
-  parentOrderId String?    @map("parent_order_id")
-
-  // Legacy cross-station flags — kept for backward compat with old mixed orders
-  barReady        Boolean  @default(false) @map("bar_ready")
-  kitchenReady    Boolean  @default(false) @map("kitchen_ready")
-  kitchenPreparing Boolean @default(false) @map("kitchen_preparing")
-  barPreparing    Boolean  @default(false) @map("bar_preparing")
-
-  // Timestamps de ciclo de vida para analytics
-  validatedAt  DateTime?   @map("validated_at")  @db.Timestamptz(3)
-  preparingAt  DateTime?   @map("preparing_at")  @db.Timestamptz(3)
-  readyAt      DateTime?   @map("ready_at")      @db.Timestamptz(3)
-
-  table      Table?      @relation(fields: [tableId, restaurantId], references: [id, restaurantId])
-  restaurant Restaurant  @relation(fields: [restaurantId], references: [id])
-  orderItems OrderItem[]
-
-  createdAt DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  id               String      @id @default(dbgenerated("(gen_random_uuid())::text"))
+  tableId          String?     @map("table_id")
+  restaurantId     String      @map("restaurant_id")
+  status           OrderStatus @default(PENDING)
+  totalAmount      Decimal     @default(0) @map("total_amount") @db.Decimal(10, 2)
+  notes            String?
+  createdAt        DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime    @default(now()) @updatedAt @db.Timestamptz(3)
+  user_id          String?
+  validatedAt      DateTime?   @map("validated_at") @db.Timestamptz(6)
+  preparingAt      DateTime?   @map("preparing_at") @db.Timestamptz(6)
+  readyAt          DateTime?   @map("ready_at") @db.Timestamptz(6)
+  sessionId        String?     @map("session_id") @db.Uuid
+  barReady         Boolean?    @default(false) @map("bar_ready")
+  kitchenReady     Boolean?    @default(false) @map("kitchen_ready")
+  kitchenPreparing Boolean     @default(false) @map("kitchen_preparing")
+  barPreparing     Boolean     @default(false) @map("bar_preparing")
+  station          String?     @map("station")
+  parentOrderId    String?     @map("parent_order_id") @db.Uuid
+  orderItems       OrderItem[]
+  restaurant       Restaurant  @relation(fields: [restaurantId], references: [id])
+  tables           Table?      @relation(fields: [tableId], references: [id], onUpdate: NoAction)
+  users            User?       @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 
   @@unique([id, restaurantId])
+  @@index([parentOrderId], map: "idx_orders_parent_order_id")
+  @@index([restaurantId], map: "idx_orders_restaurant_id")
+  @@index([sessionId], map: "idx_orders_session_id")
+  @@index([station], map: "idx_orders_station")
+  @@index([user_id], map: "idx_orders_user_id")
   @@index([restaurantId])
-  @@index([sessionId])
-  @@index([station])
   @@map("orders")
 }
 
 model OrderItem {
-  id           String  @id @default(uuid())
-  orderId      String  @map("order_id")
-  menuItemId   String  @map("menu_item_id")
-  restaurantId String  @map("restaurant_id")
+  id           String           @id @default(dbgenerated("(gen_random_uuid())::text"))
+  orderId      String           @map("order_id")
+  menuItemId   String           @map("menu_item_id")
+  restaurantId String           @map("restaurant_id")
   quantity     Int
-  unitPrice    Decimal @map("unit_price") @db.Decimal(10, 2) // Snapshot of MenuItem price
+  unitPrice    Decimal          @map("unit_price") @db.Decimal(10, 2)
   notes        String?
-
-  order      Order      @relation(fields: [orderId, restaurantId], references: [id, restaurantId])
-  menuItem   MenuItem   @relation(fields: [menuItemId], references: [id])
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
-
-  extras OrderItemExtra[]
+  extras       OrderItemExtra[]
+  menuItem     MenuItem         @relation(fields: [menuItemId], references: [id])
+  order        Order            @relation(fields: [orderId, restaurantId], references: [id, restaurantId])
+  restaurant   Restaurant       @relation(fields: [restaurantId], references: [id])
 
   @@index([restaurantId])
   @@index([orderId, restaurantId])
+  @@index([menuItemId], map: "idx_order_items_menu_item")
   @@map("order_items")
 }
 
 model OrderItemExtra {
-  id           String  @id @default(uuid())
-  orderItemId  String  @map("order_item_id")
-  extraId      String  @map("extra_id")
-  restaurantId String  @map("restaurant_id")
-  price        Decimal @db.Decimal(10, 2) // Snapshot of Extra price at order time
-
-  orderItem  OrderItem     @relation(fields: [orderItemId], references: [id])
-  extra      MenuItemExtra @relation(fields: [extraId], references: [id])
-  restaurant Restaurant    @relation(fields: [restaurantId], references: [id])
+  id           String        @id @default(uuid())
+  orderItemId  String        @map("order_item_id")
+  extraId      String        @map("extra_id")
+  restaurantId String        @map("restaurant_id")
+  price        Decimal       @db.Decimal(10, 2)
+  extra        MenuItemExtra @relation(fields: [extraId], references: [id])
+  orderItem    OrderItem     @relation(fields: [orderItemId], references: [id])
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id])
 
   @@index([restaurantId])
+  @@index([extraId], map: "idx_order_item_extras_extra")
+  @@index([orderItemId], map: "idx_order_item_extras_item")
   @@map("order_item_extras")
 }
 
 model Inventory {
-  id           String  @id @default(uuid())
-  name         String
-  stock        Decimal @db.Decimal(10, 2)
-  unit         String // e.g., "kg", "units", "liters"
-  restaurantId String  @map("restaurant_id")
-
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
-
-  ingredientRelations MenuItemIngredient[]
+  id                  String               @id @default(dbgenerated("(gen_random_uuid())::text"))
+  name                String
+  stock               Decimal              @db.Decimal(10, 2)
+  unit                String
+  restaurantId        String               @map("restaurant_id")
+  createdAt           DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime             @default(now()) @updatedAt @db.Timestamptz(3)
+  restaurant          Restaurant           @relation(fields: [restaurantId], references: [id])
   extraRelations      MenuItemExtra[]
-
-  createdAt DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  ingredientRelations MenuItemIngredient[]
 
   @@index([restaurantId])
   @@map("inventories")
 }
 
 model Plan {
-  id          String   @id @default(uuid())
+  id          String       @id @default(uuid())
   name        String
-  price       String   
-  period      String   @default("/mes")
+  price       String
+  period      String       @default("/mes")
   description String?
-  features    String[] 
-  popular     Boolean  @default(false)
-  createdAt   DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(3)
-
+  features    String[]
+  popular     Boolean      @default(false)
+  createdAt   DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime     @default(now()) @updatedAt @db.Timestamptz(3)
   restaurants Restaurant[]
 
   @@map("plans")
 }
 
 model Theme {
-  id              String   @id @default(uuid())
-  restaurantId    String   @map("restaurant_id")
-  name            String
-  paletteName     String?  @map("palette_name")
-  isCustom        Boolean  @default(false) @map("is_custom")
-  isActive        Boolean  @default(false) @map("is_active")
-  primaryColor    String   @map("primary_color")
-  secondaryColor  String   @map("secondary_color")
-  backgroundColor String   @map("background_color")
-  accentColor     String   @map("accent_color")
-  textColor       String   @map("text_color")
-  cardBackground  String   @map("card_background")
-  fontTitle       String   @default("Outfit") @map("font_title")
-  fontBody        String   @default("Inter") @map("font_body")
-  logoUrl         String?  @map("logo_url")
-  
-  restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  createdAt       DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt       DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  id              String     @id @default(dbgenerated("(gen_random_uuid())::text"))
+  restaurantId    String     @map("restaurant_id")
+  paletteName     String?    @map("palette_name")
+  primaryColor    String     @map("primary_color")
+  secondaryColor  String     @map("secondary_color")
+  backgroundColor String     @map("background_color")
+  accentColor     String     @map("accent_color")
+  textColor       String     @map("text_color")
+  cardBackground  String     @map("card_background")
+  created_at      DateTime?  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?  @default(now()) @db.Timestamptz(6)
+  name            String     @default("Tema sin nombre")
+  isCustom        Boolean?   @default(false) @map("is_custom")
+  isActive        Boolean?   @default(false) @map("is_active")
+  fontTitle       String     @default("Outfit") @map("font_title")
+  fontBody        String     @default("Inter") @map("font_body")
+  logoUrl         String?    @map("logo_url")
+  font_accent     String?    @default("Outfit")
+  restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@map("restaurant_themes")
-  @@index([restaurantId])
 }
 
 model KdsSettings {
-  id              String   @id @default(uuid())
-  restaurantId    String   @unique @map("restaurant_id")
-  settings        Json     // Stores thresholds, categoryTimes, sounds, autoClear
-  createdAt       DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt       DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  id           String     @id @default(uuid())
+  restaurantId String     @unique @map("restaurant_id")
+  settings     Json
+  createdAt    DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime   @default(now()) @updatedAt @db.Timestamptz(3)
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
 
-  restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-
-  @@map("kds_settings")
   @@index([restaurantId])
+  @@map("kds_settings")
 }
+
+
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model alerts {
+  id                String     @id @default(dbgenerated("(gen_random_uuid())::text"))
+  restaurant_id     String
+  user_id           String?
+  user_email        String?
+  type              String
+  message           String
+  table_number      Int?
+  menu_item_id      String?
+  menu_item_name    String?
+  status            String     @default("PENDING")
+  created_at        DateTime?  @default(now()) @db.Timestamptz(6)
+  resolved_at       DateTime?  @db.Timestamptz(6)
+  resolved_by_email String?
+  restaurants       Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users             User?      @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+
+  @@index([restaurant_id, status, created_at(sort: Desc)], map: "idx_alerts_status")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model push_subscriptions {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id       String   @db.Uuid
+  restaurant_id String   @db.Uuid
+  subscription  Json
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @default(now()) @db.Timestamptz(6)
+  users         User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, restaurant_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model reviews {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id      String   @db.Uuid
+  restaurant_id String   @db.Uuid
+  table_id      String?  @db.Uuid
+  session_id    String?  @db.Uuid
+  rating        Int      @db.SmallInt
+  comment       String?
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([restaurant_id, created_at(sort: Desc)], map: "reviews_restaurant_idx")
+}
+
+enum StationType {
+  KITCHEN
+  BAR
+
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  GARZON
+  COCINA
+  CLIENTE
+  CAJERO
+  BAR
+
+}
+
+enum OrderStatus {
+  PENDING
+  VALIDATED
+  PREPARING
+  READY
+  DELIVERED
+  REJECTED
+  COMPLETED
+  PARCIAL
+
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+
+}
+
+enum TableStatus {
+  FREE
+  OCCUPIED
+  RESERVED
+  CLEANING
+
+}
+
+

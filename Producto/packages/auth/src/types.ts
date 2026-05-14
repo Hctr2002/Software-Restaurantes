@@ -51,6 +51,8 @@ export type TableRecord = {
   restaurantId: string;
   billRequested: boolean;
   helpRequested: boolean;
+  current_session_id?: string | null;
+  tip_included?: boolean;
 };
 
 export type OrderItem = {
@@ -89,6 +91,7 @@ export type Order = {
   barPreparing: boolean;
   createdAt: string;
   updatedAt: string;
+  tableNumber?: number | null;
   validatedAt?: string | null;
   preparingAt?: string | null;
   readyAt?: string | null;

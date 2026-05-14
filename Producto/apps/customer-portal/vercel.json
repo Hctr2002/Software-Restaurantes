@@ -2,5 +2,11 @@
   "framework": "nextjs",
   "buildCommand": "cd ../.. && npx turbo run build --filter=customer-portal",
   "installCommand": "cd ../.. && npm install",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "develop": true
+    }
+  }
 }
