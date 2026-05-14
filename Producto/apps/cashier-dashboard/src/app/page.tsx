@@ -113,8 +113,8 @@ export default function CashierPage() {
       }
 
       const receiptUrl = group.sessionId
-        ? `/receipt/session/${group.sessionId}?rid=${user?.restaurantId}&tip=${group.tipIncluded}`
-        : `/receipt/table/${group.tableId}?rid=${user?.restaurantId}&tip=${group.tipIncluded}`;
+        ? `/receipt/session/${group.sessionId}?rid=${user?.restaurantId}&tip=${group.tipIncluded}&ref=${encodeURIComponent(paymentReference)}`
+        : `/receipt/table/${group.tableId}?rid=${user?.restaurantId}&tip=${group.tipIncluded}&ref=${encodeURIComponent(paymentReference)}`;
 
       window.open(receiptUrl, "_blank");
       setSelectedGroup(null);

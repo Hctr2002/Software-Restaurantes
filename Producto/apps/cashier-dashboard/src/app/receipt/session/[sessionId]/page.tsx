@@ -33,10 +33,10 @@ export default async function ReceiptSessionPage({
   searchParams,
 }: {
   params: Promise<{ sessionId: string }>;
-  searchParams: Promise<{ rid?: string; tip?: string }>;
+  searchParams: Promise<{ rid?: string; tip?: string; ref?: string }>;
 }) {
   const { sessionId } = await params;
-  const { rid: restaurantId, tip } = await searchParams;
+  const { rid: restaurantId, tip, ref } = await searchParams;
   const isTipIncluded = tip === "true";
 
   if (!restaurantId) return notFound();
@@ -83,7 +83,7 @@ export default async function ReceiptSessionPage({
   const allItems    = orders.flatMap((o: any) => o.order_items ?? []);
   const subtotal    = allItems.reduce((s: number, i: any) => s + Number(i.unit_price) * i.quantity, 0);
   const tipAmount   = isTipIncluded ? subtotal * 0.1 : 0;
-  const paymentRef  = null; // orders.at(-1)?.payment_reference ?? null;
+  const paymentRef  = ref || null;
   const issuedAt    = orders.at(-1)?.createdAt ?? new Date().toISOString();
 
   return (

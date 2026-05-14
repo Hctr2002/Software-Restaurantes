@@ -37,10 +37,10 @@ export default async function ReceiptTablePage({
   searchParams,
 }: {
   params: Promise<{ tableId: string }>;
-  searchParams: Promise<{ rid?: string; tip?: string }>;
+  searchParams: Promise<{ rid?: string; tip?: string; ref?: string }>;
 }) {
   const { tableId } = await params;
-  const { rid: restaurantId, tip } = await searchParams;
+  const { rid: restaurantId, tip, ref } = await searchParams;
   const isTipIncluded = tip === "true";
 
   if (!restaurantId) return notFound();
@@ -94,7 +94,7 @@ export default async function ReceiptTablePage({
   const consolidatedItems = consolidateItems(safeOrders);
   const subtotal        = consolidatedItems.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
   const tipAmount       = isTipIncluded ? subtotal * 0.1 : 0;
-  const paymentRef      = null;
+  const paymentRef      = ref || null;
   const issuedAt        = safeOrders.at(-1)?.createdAt ?? new Date().toISOString();
 
   return (
