@@ -93,48 +93,26 @@ export default function CashierPage() {
 
   const handleMarkDelivered = async (group: TableGroup) => {
     try {
-      // La BD tiene un trigger estricto que prohíbe saltar estados.
-      // Re-leemos el estado real de cada orden desde la DB para evitar
-      // transiciones inválidas por estado cacheado en el cliente.
-      const TRANSITIONS: Record<string, string> = {
-        PENDING: "VALIDATED",
-        VALIDATED: "PREPARING",
-        PREPARING: "READY",
-        READY: "DELIVERED",
-        DELIVERED: "COMPLETED",
-      };
+      // Delegar el cierre de órdenes y actualización de mesa a la función
+      // RPC completar_pago_mesa. Esta función ejecuta todo en una única
+      // transacción atómica en la base de datos, eliminando el riesgo de
+      // estados inconsistentes que existía con el bucle secuencial anterior.
+      const orderIds = group.orders
+        .filter((o) => o.status !== "COMPLETED" && o.status !== "REJECTED")
+        .map((o) => o.id);
 
-      for (const order of group.orders) {
-        // Leer estado actual real de la DB (no del cache del cliente)
-        const { data: fresh } = await supabase
-          .from("orders")
-          .select("status")
-          .eq("id", order.id)
-          .single();
-
-        let currentStatus = fresh?.status ?? order.status;
-        if (currentStatus === "REJECTED" || currentStatus === "COMPLETED") continue;
-
-        // Avanzar paso a paso hasta COMPLETED
-        while (TRANSITIONS[currentStatus]) {
-          const nextStatus = TRANSITIONS[currentStatus];
-          const { error } = await supabase
-            .from("orders")
-            .update({ status: nextStatus })
-            .eq("id", order.id);
-          if (error) throw error;
-          currentStatus = nextStatus;
-        }
+      if (orderIds.length > 0) {
+        const { error } = await supabase.rpc("completar_pago_mesa", {
+          p_order_ids: orderIds,
+          p_table_id:  group.tableId ?? null,
+        });
+        if (error) throw error;
       }
-      
-      if (group.tableId) {
-        await supabase
-          .from("tables")
-          .update({ status: "CLEANING", bill_requested: false })
-          .eq("id", group.tableId);
-      }
-      
-      const receiptUrl = group.sessionId ? `/receipt/session/${group.sessionId}?rid=${user?.restaurantId}&tip=${group.tipIncluded}` : `/receipt/table/${group.tableId}?rid=${user?.restaurantId}&tip=${group.tipIncluded}`;
+
+      const receiptUrl = group.sessionId
+        ? `/receipt/session/${group.sessionId}?rid=${user?.restaurantId}&tip=${group.tipIncluded}`
+        : `/receipt/table/${group.tableId}?rid=${user?.restaurantId}&tip=${group.tipIncluded}`;
+
       window.open(receiptUrl, "_blank");
       setSelectedGroup(null);
       setPaymentReference("");
