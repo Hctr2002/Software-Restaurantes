@@ -168,9 +168,9 @@ export default async function ReceiptSessionPage({
           <Row label="NETO" value={formatCLP(Math.round(subtotal / 1.19))} />
           <Row label="IVA (19%)" value={formatCLP(subtotal - Math.round(subtotal / 1.19))} />
           <Row label="TOTAL CONSUMO" value={formatCLP(subtotal)} />
-          {isTipIncluded && <Row label="Propina sugerida (10%)" value={formatCLP(tipAmount)} />}
+          {isTipIncluded && <Row label="Propina acordada (10%)" value={formatCLP(tipAmount)} />}
           <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 900, fontSize: 18, marginTop: 8, color: "#111827" }}>
-            <span>{isTipIncluded ? "TOTAL + Propina" : "TOTAL A PAGAR"}</span>
+            <span>{isTipIncluded ? "TOTAL A PAGAR (propina incluida)" : "TOTAL A PAGAR"}</span>
             <span>{formatCLP(subtotal + tipAmount)}</span>
           </div>
         </div>
