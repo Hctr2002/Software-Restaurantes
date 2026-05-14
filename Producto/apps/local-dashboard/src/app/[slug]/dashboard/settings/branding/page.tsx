@@ -7,6 +7,7 @@ import { useBranding } from "@/hooks/useBranding";
 
 // Sub-componentes modularizados (Importaciones nombradas para evitar conflictos de bundle)
 import { InspirationCarousel } from "./_components/InspirationCarousel";
+import SavedThemes from "./_components/SavedThemes";
 import { DesignTabs } from "./_components/DesignTabs";
 import { LivePreview } from "./_components/LivePreview";
 import { BrandingToolbar } from "./_components/BrandingToolbar";
@@ -21,6 +22,8 @@ import { BrandingToolbar } from "./_components/BrandingToolbar";
 export default function BrandingPage() {
   const {
     slug,
+    themes,
+    activeTheme,
     currentTheme,
     setCurrentTheme,
     isSaving,
@@ -31,6 +34,8 @@ export default function BrandingPage() {
     activeTab,
     setActiveTab,
     handleSaveTheme,
+    handleDeleteTheme,
+    handleActivateTheme,
   } = useBranding();
 
   if (isLoading) {
@@ -51,6 +56,14 @@ export default function BrandingPage() {
         <InspirationCarousel 
           currentTheme={currentTheme} 
           onSelectTheme={setCurrentTheme} 
+        />
+
+        {/* Sección de Temas Guardados (Nueva) */}
+        <SavedThemes 
+          themes={themes}
+          activeThemeId={activeTheme?.id}
+          onDelete={handleDeleteTheme}
+          onActivate={handleActivateTheme}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">

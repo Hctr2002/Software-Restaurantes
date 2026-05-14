@@ -122,6 +122,49 @@ export function useBranding() {
     }
   };
 
+  /**
+   * Elimina un tema guardado
+   */
+  const handleDeleteTheme = async (themeId: string) => {
+    try {
+      const res = await fetch(`/api/local/theme?themeId=${themeId}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        await fetchThemes();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error al eliminar tema:", error);
+      return false;
+    }
+  };
+
+  /**
+   * Activa un tema guardado
+   */
+  const handleActivateTheme = async (themeId: string) => {
+    try {
+      const res = await fetch("/api/local/theme", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ themeId, action: "activate" }),
+      });
+
+      if (res.ok) {
+        await fetchThemes();
+        window.dispatchEvent(new Event("theme-updated"));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error al activar tema:", error);
+      return false;
+    }
+  };
+
   return {
     slug,
     themes,
@@ -136,6 +179,8 @@ export function useBranding() {
     activeTab,
     setActiveTab,
     handleSaveTheme,
+    handleDeleteTheme,
+    handleActivateTheme,
     fetchThemes,
   };
 }
