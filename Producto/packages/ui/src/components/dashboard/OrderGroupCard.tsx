@@ -101,7 +101,7 @@ export function OrderGroupCard({ group, index, isPending, onClick }: Props) {
 
       <div className="mt-auto pt-6 border-t border-white/5 space-y-4">
         <div className="flex justify-between items-end">
-          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total Cuenta</span>
+          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total a Cobrar</span>
           <span className="text-2xl font-black text-emerald-400 tracking-tighter">{formatCLP(group.tipIncluded ? group.total * 1.1 : group.total)}</span>
         </div>
 
