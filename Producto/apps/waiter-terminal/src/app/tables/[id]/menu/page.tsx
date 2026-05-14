@@ -297,14 +297,13 @@ export default function TableMenuPage() {
               >
                 {requestingBill ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sí, incluir propina"}
               </Button>
-              <Button
-                variant="outline"
+              <button
                 onClick={() => handleRequestBill(false)}
                 disabled={requestingBill}
-                className="w-full h-14 border-white/10 hover:bg-white/5 font-black uppercase text-[10px] tracking-[0.2em] rounded-[1.5rem]"
+                className="w-full h-14 bg-white/10 hover:bg-white/20 text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-[1.5rem] border border-white/10 flex items-center justify-center transition-colors"
               >
                 {requestingBill ? <Loader2 className="w-4 h-4 animate-spin" /> : "No incluir propina"}
-              </Button>
+              </button>
               <button
                 onClick={() => setShowBillModal(false)}
                 disabled={requestingBill}

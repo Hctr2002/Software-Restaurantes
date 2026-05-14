@@ -26,8 +26,8 @@
 --     cuentas divididas y mesas fusionadas.
 
 CREATE OR REPLACE FUNCTION completar_pago_mesa(
-    p_order_ids UUID[],
-    p_table_id  UUID DEFAULT NULL
+    p_order_ids TEXT[],
+    p_table_id  TEXT DEFAULT NULL
 )
 RETURNS void
 LANGUAGE plpgsql
@@ -54,5 +54,5 @@ $$;
 
 -- Revocar acceso público y concederlo solo al rol autenticado.
 -- Solo usuarios con sesión válida pueden invocar esta función.
-REVOKE ALL ON FUNCTION completar_pago_mesa(UUID[], UUID) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION completar_pago_mesa(UUID[], UUID) TO authenticated;
+REVOKE ALL ON FUNCTION completar_pago_mesa(TEXT[], TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION completar_pago_mesa(TEXT[], TEXT) TO authenticated;
