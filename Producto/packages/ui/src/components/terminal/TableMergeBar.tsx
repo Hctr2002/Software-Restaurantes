@@ -11,11 +11,13 @@ interface TableMergeBarProps {
   mergeResult: string | null;
   onToggleMode: () => void;
   onConfirmMerge: () => void;
+  onConfirmUnlink?: () => void;
+  canUnlink?: boolean;
 }
 
 export function TableMergeBar({
   mergeMode, selectedCount, merging, mergeResult,
-  onToggleMode, onConfirmMerge,
+  onToggleMode, onConfirmMerge, onConfirmUnlink, canUnlink,
 }: TableMergeBarProps) {
   return (
     <>
@@ -27,27 +29,28 @@ export function TableMergeBar({
       )}
 
       {mergeMode && selectedCount >= 2 && (
-        <Button
+        <button
           onClick={onConfirmMerge}
           disabled={merging}
-          className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest gap-2 shadow-lg shadow-primary/20"
+          className="w-full relative flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-primary/20 transition-all hover:scale-[1.01] active:scale-95 disabled:opacity-50 disabled:pointer-events-none group overflow-hidden"
         >
-          {merging ? <Loader2 className="w-4 h-4 animate-spin" /> : <Link2 className="w-4 h-4" />}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
+          {merging ? <Loader2 className="w-5 h-5 animate-spin" /> : <Link2 className="w-5 h-5 drop-shadow-md" />}
           Fusionar {selectedCount} mesas seleccionadas
-        </Button>
+        </button>
       )}
 
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={onToggleMode}
-        title={mergeMode ? "Cancelar fusión" : "Fusionar mesas"}
-        className={`rounded-xl w-11 h-11 shrink-0 transition-all ${
-          mergeMode ? "border-primary/40 text-primary bg-primary/10" : "border-border/20"
-        }`}
-      >
-        {mergeMode ? <Link2Off className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
-      </Button>
+      {mergeMode && canUnlink && selectedCount === 1 && (
+        <button
+          onClick={onConfirmUnlink}
+          disabled={merging}
+          className="w-full relative flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-red-500 to-red-600 text-white font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-red-500/20 transition-all hover:scale-[1.01] active:scale-95 disabled:opacity-50 disabled:pointer-events-none group overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
+          {merging ? <Loader2 className="w-5 h-5 animate-spin" /> : <Link2Off className="w-5 h-5 drop-shadow-md" />}
+          Desvincular mesa seleccionada
+        </button>
+      )}
     </>
   );
 }

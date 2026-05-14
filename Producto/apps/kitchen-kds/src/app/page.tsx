@@ -69,25 +69,26 @@ export default function KitchenKDSPage() {
   }, [tick, orders.length, settings.sounds.criticalAlert, settings.thresholds]);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
-    console.log(`[KDS] Intentando cambiar estado del pedido ${orderId} a ${newStatus}`);
-    
     try {
       const { error } = await updateOrderStatus(orderId, newStatus);
       if (error) {
-        console.error(`[KDS] Error al actualizar estado en Supabase:`, error);
+        console.error("[KDS] Error al actualizar estado:", error);
         alert(`Error al actualizar el pedido: ${error.message}`);
         return;
       }
-      // Optimistic refetch: updates the UI immediately without waiting for realtime event
+      // Actualizar la UI de inmediato sin esperar el evento de tiempo real
       refetch();
 
       if (newStatus === "READY" && settings.autoClear.enabled) {
-        const timer = setTimeout(() => setClearedOrders((prev) => new Set([...prev, orderId])), settings.autoClear.delaySeconds * 1000);
+        const timer = setTimeout(
+          () => setClearedOrders((prev) => new Set([...prev, orderId])),
+          settings.autoClear.delaySeconds * 1000
+        );
         autoClearTimers.current.set(orderId, timer);
       }
     } catch (err) {
-      console.error(`[KDS] Error inesperado en handleStatusChange:`, err);
-      alert("Ocurrió un error inesperado al procesar el cambio de estado.");
+      console.error("[KDS] Error inesperado en handleStatusChange:", err);
+      alert("Ocurrio un error inesperado al procesar el cambio de estado.");
     }
   };
 
@@ -106,6 +107,8 @@ export default function KitchenKDSPage() {
     }
   };
 
+  // Solo se muestran ordenes VALIDATED. El hook useKitchenOrders ya excluye
+  // PENDING en la consulta; este filtro refuerza esa invariante en el cliente.
   const pendingOrders   = orders.filter((o) => o.status === "VALIDATED");
   const preparingOrders = orders.filter((o) => o.status === "PREPARING");
   const readyOrders     = orders.filter((o) => o.status === "READY");

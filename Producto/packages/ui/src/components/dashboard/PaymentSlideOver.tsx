@@ -128,15 +128,17 @@ export function PaymentSlideOver({
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Neto Consumo</span>
                 <span className="text-sm font-black font-mono">{formatCLP(group.total)}</span>
               </div>
-              <div className="flex justify-between items-center text-muted-foreground/60">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Propina Sugerida (10%)</span>
-                <span className="text-sm font-black font-mono">{formatCLP(group.total * 0.1)}</span>
-              </div>
+              {group.tipIncluded && (
+                <div className="flex justify-between items-center text-muted-foreground/60">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Propina acordada (10%)</span>
+                  <span className="text-sm font-black font-mono">{formatCLP(group.total * 0.1)}</span>
+                </div>
+              )}
               <div className="h-px bg-white/5" />
               <div className="flex justify-between items-center">
-                <span className="text-sm font-black text-primary uppercase tracking-[0.2em]">Total Final</span>
+                <span className="text-sm font-black text-primary uppercase tracking-[0.2em]">Total a Cobrar</span>
                 <span className="text-4xl font-black text-emerald-400 tracking-tighter drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
-                  {formatCLP(group.total * 1.1)}
+                  {formatCLP(group.tipIncluded ? group.total * 1.1 : group.total)}
                 </span>
               </div>
             </div>
