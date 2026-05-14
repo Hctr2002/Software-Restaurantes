@@ -246,7 +246,26 @@ export default function WaiterDashboard() {
                     <span className="hidden sm:block">{merge.mergeMode ? "Cancelar Fusión" : "Fusionar Mesas"}</span>
                   </button>
                 </div>
-                <TableMergeBar mergeMode={merge.mergeMode} selectedCount={merge.selectedForMerge.size} merging={merge.merging} mergeResult={merge.mergeResult} onToggleMode={merge.toggleMode} onConfirmMerge={merge.handleMergeTables} />
+                <TableMergeBar 
+                  mergeMode={merge.mergeMode} 
+                  selectedCount={merge.selectedForMerge.size} 
+                  merging={merge.merging} 
+                  mergeResult={merge.mergeResult} 
+                  onToggleMode={merge.toggleMode} 
+                  onConfirmMerge={merge.handleMergeTables} 
+                  onConfirmUnlink={() => {
+                    const selectedId = Array.from(merge.selectedForMerge)[0];
+                    const table = tables.find(t => t.id === selectedId);
+                    if (table?.current_session_id) {
+                      merge.handleUnlinkTables(table.current_session_id);
+                    }
+                  }}
+                  canUnlink={(() => {
+                    const selectedId = Array.from(merge.selectedForMerge)[0];
+                    const table = tables.find(t => t.id === selectedId);
+                    return !!table?.current_session_id;
+                  })()}
+                />
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                   {tables.map((table) => (
                     <TableCard

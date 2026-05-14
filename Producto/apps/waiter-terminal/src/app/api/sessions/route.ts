@@ -138,5 +138,14 @@ export async function DELETE(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  // Limpiar current_session_id en la tabla tables
+  const { error: tablesError } = await db
+    .from('tables')
+    .update({ current_session_id: null })
+    .eq('current_session_id', sessionId)
+    .eq('restaurant_id', restaurantId);
+
+  if (tablesError) return NextResponse.json({ error: tablesError.message }, { status: 500 });
+
   return NextResponse.json({ ok: true });
 }

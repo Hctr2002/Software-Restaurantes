@@ -47,7 +47,8 @@ BEGIN
     UPDATE tables
     SET
         status         = 'CLEANING',
-        bill_requested = false
+        bill_requested = false,
+        current_session_id = NULL
     WHERE id IN (
         SELECT DISTINCT table_id 
         FROM orders 
