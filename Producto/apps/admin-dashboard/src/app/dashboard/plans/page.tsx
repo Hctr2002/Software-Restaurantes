@@ -33,8 +33,10 @@ export default function PlansPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
+  const [confirmDeletePlan, setConfirmDeletePlan] = useState<Plan | null>(null);
 
   const [formData, setFormData] = useState(emptyForm);
 
@@ -106,21 +108,26 @@ export default function PlansPage() {
       await fetchPlans();
       setIsModalOpen(false);
     } catch (err: any) {
-      alert(err.message);
+      setError(err.message);
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async (plan: Plan) => {
-    if (!confirm(`¿Eliminar el plan "${plan.name}"? Esta acción no se puede deshacer.`)) return;
+  const handleDelete = async () => {
+    if (!confirmDeletePlan) return;
     try {
-      const res = await fetch(`/api/admin/plans/${plan.id}`, { method: "DELETE" });
+      setDeleting(true);
+      const res = await fetch(`/api/admin/plans/${confirmDeletePlan.id}`, { method: "DELETE" });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Error al eliminar");
+      setConfirmDeletePlan(null);
       await fetchPlans();
     } catch (err: any) {
-      alert(err.message);
+      setError(err.message);
+      setConfirmDeletePlan(null);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -211,7 +218,7 @@ export default function PlansPage() {
                 variant="outline"
                 size="icon"
                 className="shrink-0 text-red-400 border-slate-700 bg-slate-800 hover:bg-red-500/10 hover:border-red-500/40"
-                onClick={() => handleDelete(plan)}
+                onClick={() => setConfirmDeletePlan(plan)}
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
@@ -316,6 +323,26 @@ export default function PlansPage() {
             </Button>
           </div>
         </div>
+      </Modal>
+
+      <Modal
+        isOpen={!!confirmDeletePlan}
+        onClose={() => !deleting && setConfirmDeletePlan(null)}
+        title="Eliminar Plan"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setConfirmDeletePlan(null)} disabled={deleting} className="text-slate-300 hover:bg-slate-800 hover:text-white">
+              Cancelar
+            </Button>
+            <Button onClick={handleDelete} disabled={deleting} className="bg-red-600 hover:bg-red-700 text-white">
+              {deleting ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Eliminando...</> : "Eliminar"}
+            </Button>
+          </>
+        }
+      >
+        <p className="text-slate-300 text-sm">
+          ¿Estás seguro de que quieres eliminar el plan <span className="font-bold text-white">{confirmDeletePlan?.name}</span>? Esta acción no se puede deshacer.
+        </p>
       </Modal>
     </DashboardShell>
   );

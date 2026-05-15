@@ -44,7 +44,7 @@ function InitialLayout() {
       }
     };
 
-    Linking.getInitialURL().then(url => { if (url) handleUrl(url); });
+    Linking.getInitialURL().then(url => { if (url) handleUrl(url); }).catch(() => {});
     const sub = Linking.addEventListener('url', ({ url }) => handleUrl(url));
     return () => sub.remove();
   }, []);
@@ -54,7 +54,7 @@ function InitialLayout() {
     if (isPasswordRecovery) {
       router.replace('/(auth)/reset-password' as any);
     }
-  }, [isPasswordRecovery]);
+  }, [isPasswordRecovery, router]);
 
   useEffect(() => {
     if (loading) return;
@@ -108,10 +108,12 @@ function InitialLayout() {
 }
 
 export default function RootLayout() {
-  const [loaded] = useFonts({
+  const [loaded, fontError] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
+
+  if (__DEV__ && fontError) console.warn('[Fonts]', fontError);
 
   useEffect(() => {
     if (loaded) {

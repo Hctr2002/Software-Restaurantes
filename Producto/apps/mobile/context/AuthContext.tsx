@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { registerPushToken, clearPushToken } from '../lib/pushNotifications';
@@ -25,6 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
+  const registeredTokenForRef = useRef<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -50,7 +51,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (session?.user) {
         setRole(session.user.app_metadata.role || 'CLIENTE');
         setRestaurantId(session.user.app_metadata.restaurant_id || null);
-        if (event === 'SIGNED_IN') {
+        if (event === 'SIGNED_IN' && registeredTokenForRef.current !== session.user.id) {
+          registeredTokenForRef.current = session.user.id;
           registerPushToken(session.user.id).catch(() => {});
         }
       } else {

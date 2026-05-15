@@ -28,6 +28,7 @@ import {
 } from 'lucide-react-native';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
+import { uuidv4 } from '../../lib/uuid';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import Animated, { FadeInDown, FadeInUp, Layout, FadeInLeft, SlideInDown } from 'react-native-reanimated';
@@ -37,15 +38,6 @@ import AlertModal from '../../components/AlertModal';
 
 const { width } = Dimensions.get('window');
 
-function uuidv4(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = (Math.random() * 16) | 0;
-    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
-  });
-}
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
@@ -302,7 +294,7 @@ export default function WaiterDashboard() {
   };
 
   const handleMergeTables = async () => {
-    if (selectedTables.length < 2) return;
+    if (!restaurantId || selectedTables.length < 2) return;
     setMerging(true);
     try {
       // 1. Obtener session_ids actuales de las mesas seleccionadas
@@ -386,7 +378,7 @@ export default function WaiterDashboard() {
   };
 
   const handleUnmergeTables = async () => {
-    if (selectedTables.length === 0) return;
+    if (!restaurantId || selectedTables.length === 0) return;
     setMerging(true);
     try {
       // Obtener session_ids de las mesas seleccionadas para limpiar el grupo completo

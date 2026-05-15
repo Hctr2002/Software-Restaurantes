@@ -19,6 +19,10 @@ function formatCLP(amount: number): string {
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(amount);
 }
 
+function esc(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function buildHtml(data: ReceiptData): string {
   const { tableLabel, restaurantName, items, reference, date = new Date() } = data;
 
@@ -29,7 +33,7 @@ function buildHtml(data: ReceiptData): string {
     .map(
       i => `
       <tr>
-        <td style="padding:8px 0;color:#e2e8f0;">${i.quantity}x ${i.name}</td>
+        <td style="padding:8px 0;color:#e2e8f0;">${i.quantity}x ${esc(i.name)}</td>
         <td style="padding:8px 0;text-align:right;color:#f7f4f3;font-weight:700;">${formatCLP(i.unitPrice * i.quantity)}</td>
       </tr>`
     )
@@ -63,13 +67,13 @@ function buildHtml(data: ReceiptData): string {
 <body>
   <div class="logo">
     <h1>Menu <span>Bites</span></h1>
-    ${restaurantName ? `<p style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px;">${restaurantName}</p>` : ''}
+    ${restaurantName ? `<p style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px;">${esc(restaurantName)}</p>` : ''}
   </div>
 
   <hr class="divider"/>
 
   <div class="meta">
-    <p><strong>${tableLabel}</strong></p>
+    <p><strong>${esc(tableLabel)}</strong></p>
     <p>${dateStr}</p>
   </div>
 
@@ -87,7 +91,7 @@ function buildHtml(data: ReceiptData): string {
     <span class="total-value">${formatCLP(subtotal)}</span>
   </div>
 
-  ${reference ? `<p class="ref">Referencia: ${reference}</p>` : ''}
+  ${reference ? `<p class="ref">Referencia: ${esc(reference)}</p>` : ''}
 
   <hr class="divider" style="margin-top:24px;"/>
   <div class="footer">
