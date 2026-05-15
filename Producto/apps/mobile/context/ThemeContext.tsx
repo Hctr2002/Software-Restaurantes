@@ -34,7 +34,6 @@ export function RestaurantThemeProvider({ children }: { children: React.ReactNod
 
   const fetchTheme = useCallback(async () => {
     if (!restaurantId) {
-      console.log('[ThemeContext] No restaurantId found, using defaults');
       setColors(DEFAULT_COLORS as any);
       setLogoUrl(null);
       setLoading(false);
@@ -42,18 +41,19 @@ export function RestaurantThemeProvider({ children }: { children: React.ReactNod
     }
 
     try {
-      console.log('[ThemeContext] Fetching theme for restaurant:', restaurantId);
-      const { data, error } = await supabase
+      const { data: rows, error } = await supabase
         .from('restaurant_themes')
         .select('*')
         .eq('restaurant_id', restaurantId)
         .eq('is_active', true)
-        .single();
+        .order('updated_at', { ascending: false })
+        .limit(1);
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) throw error;
+
+      const data = rows?.[0] ?? null;
 
       if (data) {
-        console.log(`[ThemeContext] Theme "${data.name}" found. Primary: ${data.primary_color}, BG: ${data.background_color}`);
         setColors({
           navy: data.background_color || DEFAULT_COLORS.navy,
           brandAccent: data.primary_color || DEFAULT_COLORS.brandAccent,
@@ -69,7 +69,6 @@ export function RestaurantThemeProvider({ children }: { children: React.ReactNod
         });
         setLogoUrl(data.logo_url);
       } else {
-        console.log('[ThemeContext] No active theme found in DB, using defaults');
         setColors(DEFAULT_COLORS as any);
         setLogoUrl(null);
       }
@@ -105,7 +104,8 @@ export function RestaurantThemeProvider({ children }: { children: React.ReactNod
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [restaurantId, fetchTheme]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [restaurantId]);
 
   return (
     <ThemeContext.Provider value={{ colors, logoUrl, loading, refreshTheme: fetchTheme }}>

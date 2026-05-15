@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import DashboardShell from "../_components/DashboardShell";
 import { Button, Input } from "@menu-bites/ui";
-import { CheckCircle2, Building2, Zap, Rocket, AlertCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, Building2, Zap, Rocket, AlertCircle, Loader2, Plus, Trash2 } from "lucide-react";
 import Modal from "../_components/Modal";
 
 type Plan = {
@@ -19,7 +19,14 @@ type Plan = {
   popular?: boolean;
 };
 
-const initialPlans: Plan[] = [];
+const emptyForm = {
+  name: "",
+  price: "",
+  period: "/mes",
+  description: "",
+  features: [] as string[],
+  popular: false,
+};
 
 export default function PlansPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -29,20 +36,23 @@ export default function PlansPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    price: "",
-    description: "",
-    features: [] as string[],
-  });
+  const [formData, setFormData] = useState(emptyForm);
+
+  const openCreateModal = () => {
+    setEditingPlan(null);
+    setFormData(emptyForm);
+    setIsModalOpen(true);
+  };
 
   const openEditModal = (plan: Plan) => {
     setEditingPlan(plan);
     setFormData({
       name: plan.name,
       price: plan.price,
+      period: plan.period || "/mes",
       description: plan.description,
       features: [...plan.features],
+      popular: !!plan.popular,
     });
     setIsModalOpen(true);
   };
@@ -76,11 +86,13 @@ export default function PlansPage() {
   }, []);
 
   const handleSave = async () => {
-    if (!editingPlan) return;
+    if (!formData.name.trim() || !formData.price.trim()) return;
     try {
       setSaving(true);
-      const res = await fetch(`/api/admin/plans/${editingPlan.id}`, {
-        method: "PUT",
+      const url = editingPlan ? `/api/admin/plans/${editingPlan.id}` : "/api/admin/plans";
+      const method = editingPlan ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
@@ -97,6 +109,18 @@ export default function PlansPage() {
       alert(err.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async (plan: Plan) => {
+    if (!confirm(`¿Eliminar el plan "${plan.name}"? Esta acción no se puede deshacer.`)) return;
+    try {
+      const res = await fetch(`/api/admin/plans/${plan.id}`, { method: "DELETE" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Error al eliminar");
+      await fetchPlans();
+    } catch (err: any) {
+      alert(err.message);
     }
   };
 
@@ -118,10 +142,13 @@ export default function PlansPage() {
 
   return (
     <DashboardShell title="Directorio" subtitle="Planes de Suscripción">
-      <div className="mb-8 max-w-3xl">
-        <p className="text-slate-400">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <p className="text-slate-400 max-w-xl">
           Gestiona los niveles de suscripción disponibles para las organizaciones en tiempo real.
         </p>
+        <Button onClick={openCreateModal} className="bg-purple-600 hover:bg-purple-700 text-white font-bold h-11 px-6 rounded-2xl shadow-lg shadow-purple-500/20 shrink-0">
+          <Plus className="w-4 h-4 mr-2" /> Nuevo Plan
+        </Button>
       </div>
 
       {error && (
@@ -137,9 +164,15 @@ export default function PlansPage() {
         </div>
       )}
 
+      {!loading && plans.length === 0 && (
+        <div className="py-16 text-center text-slate-500 border border-dashed border-slate-800 rounded-xl">
+          No hay planes creados. Crea el primero con el botón "Nuevo Plan".
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {plans.map((plan) => (
-          <div key={plan.id} className={`rounded-xl border p-6 flex flex-col ${plan.color}`}>
+          <div key={plan.id} className={`rounded-xl border p-6 flex flex-col relative ${plan.color}`}>
             {plan.popular && (
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-purple-500 text-white text-[10px] font-bold uppercase tracking-wider rounded-full">
                 Más Popular
@@ -167,12 +200,22 @@ export default function PlansPage() {
               ))}
             </ul>
 
-            <Button
-              onClick={() => openEditModal(plan)}
-              className={`w-full ${plan.buttonVariant === "default" ? "bg-purple-600 hover:bg-purple-700 text-white" : "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700"}`}
-            >
-              Editar Plan
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => openEditModal(plan)}
+                className={`flex-1 ${plan.buttonVariant === "default" ? "bg-purple-600 hover:bg-purple-700 text-white" : "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700"}`}
+              >
+                Editar
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="shrink-0 text-red-400 border-slate-700 bg-slate-800 hover:bg-red-500/10 hover:border-red-500/40"
+                onClick={() => handleDelete(plan)}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         ))}
       </div>
@@ -180,45 +223,66 @@ export default function PlansPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => !saving && setIsModalOpen(false)}
-        title="Editar Plan"
+        title={editingPlan ? "Editar Plan" : "Nuevo Plan"}
         footer={
           <>
             <Button variant="ghost" onClick={() => setIsModalOpen(false)} disabled={saving} className="text-slate-300 hover:bg-slate-800 hover:text-white">
               Cancelar
             </Button>
-            <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-700 text-white">
-              {saving ? "Guardando..." : "Guardar cambios"}
+            <Button onClick={handleSave} disabled={saving || !formData.name.trim() || !formData.price.trim()} className="bg-blue-600 hover:bg-blue-700 text-white">
+              {saving ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Guardando...</> : editingPlan ? "Guardar cambios" : "Crear Plan"}
             </Button>
           </>
         }
       >
         <div className="space-y-6">
-          {saving && (
-            <div className="p-3 rounded-md border border-blue-500/30 bg-blue-500/10 text-sm text-blue-400 font-medium flex items-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Sincronizando con la base de datos...
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nombre del Plan</label>
+              <Input
+                className="bg-slate-950 border-slate-800"
+                placeholder="ej. Starter"
+                value={formData.name}
+                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+              />
             </div>
-          )}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nombre del Plan</label>
-            <Input
-              className="bg-slate-950 border-slate-800"
-              value={formData.name}
-              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-            />
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Precio</label>
+              <Input
+                className="bg-slate-950 border-slate-800"
+                placeholder="ej. $29.990"
+                value={formData.price}
+                onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Precio</label>
-            <Input
-              className="bg-slate-950 border-slate-800"
-              value={formData.price}
-              onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Período</label>
+              <Input
+                className="bg-slate-950 border-slate-800"
+                placeholder="ej. /mes"
+                value={formData.period}
+                onChange={(e) => setFormData((prev) => ({ ...prev, period: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2 flex flex-col justify-end">
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded accent-purple-500"
+                  checked={formData.popular}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, popular: e.target.checked }))}
+                />
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Más Popular</span>
+              </label>
+            </div>
           </div>
           <div className="space-y-2">
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Descripción</label>
             <textarea
-              className="w-full min-h-[100px] rounded-md border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full min-h-[80px] rounded-md border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Describe brevemente este plan..."
               value={formData.description}
               onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
             />
@@ -229,6 +293,7 @@ export default function PlansPage() {
               <div key={i} className="flex gap-2">
                 <Input
                   className="bg-slate-950 border-slate-800 flex-1"
+                  placeholder={`Beneficio ${i + 1}`}
                   value={feature}
                   onChange={(e) => updateFeature(i, e.target.value)}
                 />
@@ -238,7 +303,7 @@ export default function PlansPage() {
                   className="shrink-0 text-red-400 border-slate-800 bg-slate-950 hover:bg-red-500/10"
                   onClick={() => removeFeature(i)}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                  <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             ))}
@@ -247,7 +312,7 @@ export default function PlansPage() {
               className="w-full border-slate-800 bg-slate-950 text-slate-400 hover:text-white"
               onClick={addFeature}
             >
-              + Agregar nuevo beneficio
+              <Plus className="w-4 h-4 mr-2" /> Agregar beneficio
             </Button>
           </div>
         </div>

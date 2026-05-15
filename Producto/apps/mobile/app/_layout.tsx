@@ -3,12 +3,14 @@ import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import * as Linking from 'expo-linking';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useAuth, AuthProvider } from '../context/AuthContext';
 import { RestaurantThemeProvider } from '../context/ThemeContext';
 import { useRouter, useSegments } from 'expo-router';
+import { supabase } from '../lib/supabase';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -25,24 +27,49 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 function InitialLayout() {
-  const { session, loading, role } = useAuth();
+  const { session, loading, role, isPasswordRecovery } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+
+  // Handle deep links for password recovery (menubites://reset-password#access_token=...&type=recovery)
+  useEffect(() => {
+    const handleUrl = async (url: string) => {
+      if (!url.includes('access_token')) return;
+      const hash = url.split('#')[1] ?? '';
+      const params = new URLSearchParams(hash);
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
+      if (accessToken && refreshToken) {
+        await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+      }
+    };
+
+    Linking.getInitialURL().then(url => { if (url) handleUrl(url); });
+    const sub = Linking.addEventListener('url', ({ url }) => handleUrl(url));
+    return () => sub.remove();
+  }, []);
+
+  // Redirect to reset-password screen when recovery session is active
+  useEffect(() => {
+    if (isPasswordRecovery) {
+      router.replace('/(auth)/reset-password' as any);
+    }
+  }, [isPasswordRecovery]);
 
   useEffect(() => {
     if (loading) return;
 
     const inAuthGroup = (segments[0] as string) === '(auth)';
     const inTabsGroup = (segments[0] as string) === '(tabs)';
-    const inMenuGroup = (segments[0] as string) === '[restaurantSlug]'; // Catch dynamic menu routes
+    const inMenuGroup = (segments[0] as string) === '[restaurantSlug]';
     const inScannerGroup = (segments[0] as string) === 'scanner';
 
+    if (isPasswordRecovery) return;
+
     if (!session && !inAuthGroup && !inTabsGroup && !inMenuGroup && !inScannerGroup) {
-      // Redirect to login if not authenticated and not in a public group
       router.replace('/(tabs)' as any);
     } else if (session) {
-      // Determine the target group based on role
-      let targetGroup = '(tabs)'; // Default to client
+      let targetGroup = '(tabs)';
       if (role === 'SUPER_ADMIN') targetGroup = '(super-admin)';
       else if (role === 'ADMIN') targetGroup = '(admin)';
       else if (role === 'GARZON') targetGroup = '(waiter)';
@@ -50,12 +77,11 @@ function InitialLayout() {
       else if (role === 'CAJERO') targetGroup = '(cashier)';
       else if (role === 'BAR') targetGroup = '(bar)';
 
-      // Redirect if they are in the wrong group
       if (segments[0] !== targetGroup) {
         router.replace(`/${targetGroup}` as any);
       }
     }
-  }, [session, loading, segments, role]);
+  }, [session, loading, segments, role, isPasswordRecovery]);
 
   return (
     <Stack
@@ -82,7 +108,7 @@ function InitialLayout() {
 }
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
+  const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });

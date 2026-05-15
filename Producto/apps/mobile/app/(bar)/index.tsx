@@ -18,6 +18,7 @@ import OrderDetailModal, { OrderStatus } from '../../components/OrderDetailModal
 import StockAlertModal from '../(kitchen)/_components/StockAlertModal';
 import KdsSettingsModal, { KdsSettings, DEFAULT_KDS_SETTINGS } from '../(kitchen)/_components/KdsSettingsModal';
 import Animated, { FadeInRight } from 'react-native-reanimated';
+import { useKdsAudio } from '../../lib/useKdsAudio';
 
 type BarTab = 'Nuevos' | 'Preparando' | 'Listos';
 
@@ -41,6 +42,10 @@ export default function BarDashboard() {
   // Bar Settings (Using KDS settings for now as they are shared/similar)
   const [settings, setSettings] = useState<KdsSettings>(DEFAULT_KDS_SETTINGS);
   const [tick, setTick] = useState(0);
+
+  // Audio alerts
+  const { playNewOrder, playUrgent } = useKdsAudio(true);
+  const knownOrderIdsRef = useRef<Set<string>>(new Set());
 
   const fetchOrders = useCallback(async () => {
     if (!restaurantId) return;
@@ -117,6 +122,27 @@ export default function BarDashboard() {
       clearInterval(interval);
     };
   }, [restaurantId, fetchOrders, fetchSettings]);
+
+  // Sound: play when new VALIDATED orders appear
+  useEffect(() => {
+    const known = knownOrderIdsRef.current;
+    const incoming = orders.filter(o => o.status === 'VALIDATED');
+    const hasNew = incoming.some(o => !known.has(o.id));
+    if (hasNew) playNewOrder();
+    knownOrderIdsRef.current = new Set(orders.map(o => o.id));
+  }, [orders, playNewOrder]);
+
+  // Sound: play urgent alert on tick if any order exceeds critical threshold
+  useEffect(() => {
+    if (tick === 0) return;
+    const criticalMs = (settings.thresholds?.red ?? 30) * 60 * 1000;
+    const hasCritical = orders.some(o => {
+      if (o.status === 'READY') return false;
+      const age = Date.now() - new Date(o.createdAt).getTime();
+      return age > criticalMs;
+    });
+    if (hasCritical) playUrgent();
+  }, [tick, orders, settings.thresholds, playUrgent]);
 
   const handleUpdateStatus = async (orderId: string, nextStatus: OrderStatus) => {
     setUpdating(true);
