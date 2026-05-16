@@ -27,7 +27,7 @@ interface PaymentModalProps {
 }
 
 export default function PaymentModal({ visible, group, isProcessing, onClose, onConfirm }: PaymentModalProps) {
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   const [reference, setReference] = useState('');
   const [isSharing, setIsSharing] = useState(false);
 
@@ -67,7 +67,7 @@ export default function PaymentModal({ visible, group, isProcessing, onClose, on
       animationType="none"
       onRequestClose={onClose}
     >
-      <BlurView intensity={20} tint="dark" style={styles.overlay}>
+      <BlurView intensity={20} tint={isLight ? 'light' : 'dark'} style={styles.overlay}>
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.centered}
@@ -121,7 +121,7 @@ export default function PaymentModal({ visible, group, isProcessing, onClose, on
 
             <View style={styles.footer}>
               <TouchableOpacity
-                style={styles.shareBtn}
+                style={[styles.shareBtn, { borderColor: colors.glassHeavy }]}
                 onPress={handleShare}
                 disabled={isSharing}
               >
@@ -294,7 +294,6 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
   },
   shareBtnText: {
     color: '#94a3b8',

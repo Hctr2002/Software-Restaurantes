@@ -54,7 +54,7 @@ export default function CashierOrderCard({ group, index, isPending, onPress }: C
           </View>
         </View>
         <View style={styles.headerStatus}>
-          <View style={styles.timeTag}>
+          <View style={[styles.timeTag, { backgroundColor: colors.glass }]}>
             <Clock size={10} color={colors.muted} />
             <Text style={[styles.timeText, { color: colors.muted }]}>{timeAgo(group.oldestCreatedAt)}</Text>
           </View>
@@ -151,7 +151,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: 'rgba(255,255,255,0.03)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,

@@ -52,7 +52,7 @@ function groupOrders(orders: any[], billMap: Record<string, boolean>): any[] {
 
 export default function CashierDashboard() {
   const { restaurantId, user, signOut } = useAuth();
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   
   const [activeTab, setActiveTab] = useState<CashierTab>('pending');
   const [orders, setOrders] = useState<any[]>([]);
@@ -262,7 +262,7 @@ export default function CashierDashboard() {
             autoFocus
           />
           {searchQuery !== '' && (
-            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearSearch}>
+            <TouchableOpacity onPress={() => setSearchQuery('')} style={[styles.clearSearch, { backgroundColor: colors.glassHeavy }]}>
               <X size={16} color={colors.muted} />
             </TouchableOpacity>
           )}
@@ -314,7 +314,7 @@ export default function CashierDashboard() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.navy }]}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={isLight ? 'dark-content' : 'light-content'} />
       {renderHeader()}
       {renderTabs()}
 
@@ -427,7 +427,6 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.05)',
     justifyContent: 'center',
     alignItems: 'center',
   },
