@@ -53,6 +53,19 @@ const THEME_INIT_SCRIPT = `
     set('--card-foreground',       toHsl(t.textColor));
     set('--primary-foreground',    toHsl(t.backgroundColor));
     set('--muted-foreground',      toHsl(t.textColor));
+    if (t.fontTitle)  set('--font-title',  '"' + t.fontTitle  + '", system-ui, sans-serif');
+    if (t.fontBody)   set('--font-body',   '"' + t.fontBody   + '", system-ui, sans-serif');
+    if (t.fontAccent) set('--font-accent', '"' + t.fontAccent + '", system-ui, sans-serif');
+    var fonts = [t.fontTitle, t.fontBody, t.fontAccent]
+      .filter(function(f){ return f && f !== 'Outfit' && f !== 'Inter'; });
+    if (fonts.length > 0) {
+      var lnk = document.createElement('link');
+      lnk.rel = 'stylesheet';
+      lnk.href = 'https://fonts.googleapis.com/css2?' +
+        fonts.map(function(f){ return 'family=' + f.replace(/\s+/g, '+') + ':wght@300;400;500;600;700;800;900'; }).join('&') +
+        '&display=swap';
+      document.head.appendChild(lnk);
+    }
   } catch(e) {}
 })();
 `;
@@ -71,7 +84,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </head>
-      <body className="antialiased">
+      <body className="font-sans antialiased">
         {children}
       </body>
     </html>

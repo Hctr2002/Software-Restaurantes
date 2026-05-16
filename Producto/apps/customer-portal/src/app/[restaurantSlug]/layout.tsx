@@ -58,9 +58,9 @@ export default function TenantLayout({ children }: { children: React.ReactNode }
       .channel(`portal-theme-${restaurantId}`)
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'restaurant_themes', filter: `restaurant_id=eq.${restaurantId}` },
+        { event: '*', schema: 'public', table: 'restaurant_themes', filter: `restaurant_id=eq.${restaurantId}` },
         async (payload) => {
-          if (payload.new.is_active) {
+          if ((payload.new as any)?.is_active) {
             const updated = await getThemeByRestaurant(restaurantId);
             if (updated) {
               setTheme(updated);
