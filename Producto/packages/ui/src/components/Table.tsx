@@ -24,8 +24,8 @@ export function Table({ headers, children }: TableProps) {
   );
 }
 
-export function TableRow({ children }: { children: React.ReactNode }) {
-  return <tr className="hover:bg-muted/50 transition-colors group cursor-default">{children}</tr>;
+export function TableRow({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <tr className={`hover:bg-muted/50 transition-colors group cursor-default ${className}`}>{children}</tr>;
 }
 
 export function TableCell({

@@ -7,7 +7,7 @@
  * para la actividad reciente, aplicando estándares de diseño sólido premium.
  */
 
-import React from "react";
+import * as React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@menu-bites/ui";
 import { Store, Users, Activity, ShieldAlert, UserCheck, ArrowUpRight, Zap } from "lucide-react";
 import DashboardShell from "./_components/DashboardShell";
@@ -194,24 +194,24 @@ export default function DashboardPage() {
   );
 }
 
-function KpiCard({ label, value, detail, icon, variant = "primary" }: { 
-  label: string; 
-  value: number; 
-  detail: string; 
-  icon: React.ReactElement;
+function KpiCard({ label, value, detail, icon, variant = "primary" }: {
+  label: string;
+  value: number;
+  detail: string;
+  icon: React.ReactElement<{ className?: string }>;
   variant?: "primary" | "destructive";
 }) {
   return (
     <motion.div whileHover={{ y: -5 }}>
       <Card className="border-border bg-card hover:bg-muted/30 transition-all duration-500 group overflow-hidden relative shadow-lg shadow-black/5 h-full">
         <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity group-hover:scale-150 transition-transform duration-700">
-          {React.cloneElement(icon, { className: "w-16 h-16" })}
+          {React.cloneElement(icon as React.ReactElement<any>, { className: "w-16 h-16" })}
         </div>
         
         <CardContent className="pt-8 px-8 pb-8 relative z-10">
           <div className="flex items-center gap-2 mb-3">
             <div className={`p-2 rounded-xl ${variant === "primary" ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
-              {React.cloneElement(icon, { className: "w-4 h-4" })}
+              {React.cloneElement(icon as React.ReactElement<any>, { className: "w-4 h-4" })}
             </div>
             <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-black">{label}</p>
           </div>

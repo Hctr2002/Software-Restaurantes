@@ -117,7 +117,7 @@ export default function LocalShell({ title, subtitle, children }: LocalShellProp
             <div className="max-w-6xl mx-auto space-y-8">
               <div className="flex flex-col space-y-1 mb-10">
                 {/* Título de la página usando primitivos de UI para consistencia de branding */}
-                <PortalHeading level={1} className="text-4xl font-black tracking-tighter uppercase italic">
+                <PortalHeading as="h1" className="text-4xl font-black tracking-tighter uppercase italic">
                   {subtitle}
                 </PortalHeading>
                 <div className="h-1.5 w-12 bg-primary rounded-full shadow-lg shadow-primary/20" />

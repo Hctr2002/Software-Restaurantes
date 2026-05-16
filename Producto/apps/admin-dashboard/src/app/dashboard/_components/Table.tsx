@@ -41,9 +41,9 @@ export function Table({ headers, children }: TableProps) {
 /**
  * Fila de la tabla con efecto hover reactivo al tema.
  */
-export function TableRow({ children }: { children: React.ReactNode }) {
+export function TableRow({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <tr className="hover:bg-accent/30 transition-colors group">
+    <tr className={`hover:bg-accent/30 transition-colors group ${className}`}>
       {children}
     </tr>
   );

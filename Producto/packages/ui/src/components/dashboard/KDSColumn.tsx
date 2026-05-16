@@ -8,7 +8,7 @@ import { cn } from "../../lib/utils";
 interface Props {
   title: string;
   count: number;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   children: React.ReactNode;
   active?: boolean;
 }
