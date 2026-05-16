@@ -3,9 +3,15 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function proxy(req: NextRequest) {
-  let response = NextResponse.next({ request: { headers: req.headers } });
+  const pathname = req.nextUrl.pathname;
+  
+  // 1. BYPASS CRÍTICO: No interferir con rutas de autenticación
+  if (pathname.startsWith('/auth/callback') || pathname.startsWith('/login')) {
+    console.log(`[Bar-Proxy] Path: ${pathname} | Bypass Auth Route`);
+    return NextResponse.next();
+  }
 
-  if (req.nextUrl.pathname.startsWith('/auth/callback')) return response;
+  let response = NextResponse.next({ request: { headers: req.headers } });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,7 +35,10 @@ export async function proxy(req: NextRequest) {
   const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
   const rawRole = session?.user?.app_metadata?.role;
   const role = Array.isArray(rawRole) ? rawRole[0] : rawRole;
-  const isBar = String(role).toUpperCase() === 'BAR';
+  const isBar = String(role || '').toUpperCase() === 'BAR';
+
+  // Telemetría
+  console.log(`[Bar-Proxy] Path: ${pathname} | Role: ${role} | Session: ${!!session}`);
 
   // Sin sesión → central login
   if (!session) {
@@ -38,6 +47,7 @@ export async function proxy(req: NextRequest) {
 
   // Rol incorrecto → central login
   if (!isBar) {
+    console.warn(`[Bar-Proxy] Invalid role ${role}. Redirecting to auth center.`);
     return NextResponse.redirect(new URL(authUrl, req.url));
   }
 

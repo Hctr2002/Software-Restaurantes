@@ -16,7 +16,7 @@ export default function TableMenuPage() {
   const { menu, categories, loading: menuLoading } = useMenu(user?.restaurantId);
   const { table, loading: tableLoading } = useTable(tableId);
   const theme = useThemeSync(user?.restaurantId, "waiter");
-  
+
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [cart, setCart] = useState<any[]>([]);
@@ -75,7 +75,7 @@ export default function TableMenuPage() {
       );
 
       const kitchenItems = cart.filter((i) => itemStationMap.get(i.id) === 'KITCHEN');
-      const barItems     = cart.filter((i) => itemStationMap.get(i.id) === 'BAR');
+      const barItems = cart.filter((i) => itemStationMap.get(i.id) === 'BAR');
 
       const createSubOrder = async (items: typeof cart, station: 'KITCHEN' | 'BAR', parentId?: string) => {
         const stationTotal = items.reduce((acc, i) => acc + i.price * i.quantity, 0);
@@ -111,7 +111,7 @@ export default function TableMenuPage() {
 
       const orderIds: string[] = [];
       if (kitchenItems.length > 0) orderIds.push(await createSubOrder(kitchenItems, 'KITCHEN'));
-      if (barItems.length > 0)     orderIds.push(await createSubOrder(barItems, 'BAR', orderIds[0] ?? undefined));
+      if (barItems.length > 0) orderIds.push(await createSubOrder(barItems, 'BAR', orderIds[0] ?? undefined));
 
       await supabase.from("tables").update({ status: "OCCUPIED" }).eq("id", tableId);
       router.push("/");
@@ -131,7 +131,7 @@ export default function TableMenuPage() {
         .from("tables")
         .update({ bill_requested: true, tip_included: includeTip })
         .eq("id", tableId);
-      
+
       if (error) throw error;
       router.push("/");
     } catch (err) {
@@ -176,9 +176,8 @@ export default function TableMenuPage() {
                 <button
                   onClick={() => setShowBillModal(true)}
                   disabled={table?.status === 'FREE'}
-                  className={`flex items-center gap-2 px-4 py-3 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-2xl hover:bg-yellow-500/20 transition-all active:scale-95 ${
-                    table?.status === 'FREE' ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-3 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-2xl hover:bg-yellow-500/20 transition-all active:scale-95 ${table?.status === 'FREE' ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                 >
                   <Receipt className="w-4 h-4" />
                   <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Pedir Cuenta</span>
@@ -189,14 +188,14 @@ export default function TableMenuPage() {
         </div>
 
         <main className="space-y-6 pt-6">
-          <ProductSearchBar 
-            value={searchTerm} 
-            onChange={setSearchTerm} 
-            onClear={() => setSearchTerm("")} 
+          <ProductSearchBar
+            value={searchTerm}
+            onChange={setSearchTerm}
+            onClear={() => setSearchTerm("")}
           />
 
-          <CategoryTabs 
-            categories={[{ id: "all", name: "Todos" }, ...categories]} 
+          <CategoryTabs
+            categories={[{ id: "all", name: "Todos" }, ...categories]}
             activeId={activeCategory}
             onSelect={setActiveCategory}
           />
@@ -247,74 +246,74 @@ export default function TableMenuPage() {
                 </button>
               </div>
 
-            <input
-              type="text"
-              placeholder="Nota para preparación (ej: sin sal, alergia...)"
-              value={orderNote}
-              onChange={(e) => setOrderNote(e.target.value)}
-              className="w-full text-xs px-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/20"
-            />
+              <input
+                type="text"
+                placeholder="Nota para preparación (ej: sin sal, alergia...)"
+                value={orderNote}
+                onChange={(e) => setOrderNote(e.target.value)}
+                className="w-full text-xs px-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/20"
+              />
 
-            <div className="flex space-x-3">
-              <button
-                onClick={() => setCart([])}
-                className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all border border-white/5 text-white/60"
-              >
-                Limpiar
-              </button>
-              <button
-                onClick={handleSubmitOrder}
-                disabled={submitting}
-                className="flex-[2] py-4 bg-sage text-navy font-black uppercase tracking-widest rounded-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center shadow-xl shadow-black/30 text-[10px] disabled:opacity-50"
-              >
-                {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="mr-2 w-4 h-4" />}
-                Enviar Pedido
-              </button>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setCart([])}
+                  className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all border border-white/5 text-white/60"
+                >
+                  Limpiar
+                </button>
+                <button
+                  onClick={handleSubmitOrder}
+                  disabled={submitting}
+                  className="flex-[2] py-4 bg-sage text-navy font-black uppercase tracking-widest rounded-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center shadow-xl shadow-black/30 text-[10px] disabled:opacity-50"
+                >
+                  {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="mr-2 w-4 h-4" />}
+                  Enviar Pedido
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Modal Pedir Cuenta */}
-      {showBillModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-xl" onClick={() => !requestingBill && setShowBillModal(false)} />
-          <div className="relative w-full max-w-sm bg-card border border-white/10 rounded-[3rem] p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
-            <div className="w-16 h-16 bg-yellow-500/10 rounded-[1.5rem] flex items-center justify-center border border-yellow-500/20 mx-auto">
-              <Receipt className="w-8 h-8 text-yellow-500" />
-            </div>
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-black tracking-tighter">Solicitar Cuenta</h2>
-              <p className="text-xs text-muted-foreground font-bold opacity-80">
-                ¿El cliente desea incluir el <span className="text-yellow-500 font-black">10% de propina</span> sugerida?
-              </p>
-            </div>
-            <div className="space-y-3 pt-4">
-              <Button
-                onClick={() => handleRequestBill(true)}
-                disabled={requestingBill}
-                className="w-full h-14 bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-[1.5rem]"
-              >
-                {requestingBill ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sí, incluir propina"}
-              </Button>
-              <button
-                onClick={() => handleRequestBill(false)}
-                disabled={requestingBill}
-                className="w-full h-14 bg-white/10 hover:bg-white/20 text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-[1.5rem] border border-white/10 flex items-center justify-center transition-colors"
-              >
-                {requestingBill ? <Loader2 className="w-4 h-4 animate-spin" /> : "No incluir propina"}
-              </button>
-              <button
-                onClick={() => setShowBillModal(false)}
-                disabled={requestingBill}
-                className="w-full py-4 text-[10px] text-muted-foreground font-black uppercase tracking-widest hover:text-white transition-colors"
-              >
-                Cancelar
-              </button>
+        {/* Modal Pedir Cuenta */}
+        {showBillModal && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
+            <div className="absolute inset-0 bg-background/80 backdrop-blur-xl" onClick={() => !requestingBill && setShowBillModal(false)} />
+            <div className="relative w-full max-w-sm bg-card border border-white/10 rounded-[3rem] p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
+              <div className="w-16 h-16 bg-yellow-500/10 rounded-[1.5rem] flex items-center justify-center border border-yellow-500/20 mx-auto">
+                <Receipt className="w-8 h-8 text-yellow-500" />
+              </div>
+              <div className="text-center space-y-2">
+                <h2 className="text-2xl font-black tracking-tighter">Solicitar Cuenta</h2>
+                <p className="text-xs text-muted-foreground font-bold opacity-80">
+                  ¿El cliente desea incluir el <span className="text-yellow-500 font-black">10% de propina</span> sugerida?
+                </p>
+              </div>
+              <div className="space-y-3 pt-4">
+                <Button
+                  onClick={() => handleRequestBill(true)}
+                  disabled={requestingBill}
+                  className="w-full h-14 bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-[1.5rem]"
+                >
+                  {requestingBill ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sí, incluir propina"}
+                </Button>
+                <button
+                  onClick={() => handleRequestBill(false)}
+                  disabled={requestingBill}
+                  className="w-full h-14 bg-white/10 hover:bg-white/20 text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-[1.5rem] border border-white/10 flex items-center justify-center transition-colors"
+                >
+                  {requestingBill ? <Loader2 className="w-4 h-4 animate-spin" /> : "No incluir propina"}
+                </button>
+                <button
+                  onClick={() => setShowBillModal(false)}
+                  disabled={requestingBill}
+                  className="w-full py-4 text-[10px] text-muted-foreground font-black uppercase tracking-widest hover:text-white transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
     </RestaurantThemeProvider>
   );
