@@ -24,7 +24,7 @@ type KitchenTab = 'Nuevos' | 'Cocinando' | 'Listos';
 
 export default function KitchenDashboard() {
   const { restaurantId, signOut } = useAuth();
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   
   const [activeTab, setActiveTab] = useState<KitchenTab>('Nuevos');
   const [orders, setOrders] = useState<any[]>([]);
@@ -256,7 +256,7 @@ export default function KitchenDashboard() {
               styles.badge, 
               { backgroundColor: activeTab === tab ? colors.brandAccent : colors.glassHeavy }
             ]}>
-              <Text style={styles.badgeText}>{getTabCount(tab)}</Text>
+              <Text style={[styles.badgeText, { color: activeTab === tab ? 'white' : colors.text }]}>{getTabCount(tab)}</Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -266,7 +266,7 @@ export default function KitchenDashboard() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.navy }]}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={isLight ? 'dark-content' : 'light-content'} />
       {renderHeader()}
       {renderTabs()}
 

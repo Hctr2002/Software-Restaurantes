@@ -23,7 +23,7 @@ interface StockAlertModalProps {
 }
 
 export default function StockAlertModal({ visible, onClose }: StockAlertModalProps) {
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   const { restaurantId, user } = useAuth();
   
   const [alertItem, setAlertItem] = useState('');
@@ -69,7 +69,7 @@ export default function StockAlertModal({ visible, onClose }: StockAlertModalPro
       animationType="none"
       onRequestClose={onClose}
     >
-      <BlurView intensity={20} tint="dark" style={styles.overlay}>
+      <BlurView intensity={20} tint={isLight ? 'light' : 'dark'} style={styles.overlay}>
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.centered}
