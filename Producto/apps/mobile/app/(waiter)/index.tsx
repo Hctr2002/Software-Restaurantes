@@ -28,6 +28,7 @@ import {
 } from 'lucide-react-native';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
+import { uuidv4 } from '../../lib/uuid';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import Animated, { FadeInDown, FadeInUp, Layout, FadeInLeft, SlideInDown } from 'react-native-reanimated';
@@ -36,6 +37,7 @@ import { BlurView } from 'expo-blur';
 import AlertModal from '../../components/AlertModal';
 
 const { width } = Dimensions.get('window');
+
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
@@ -226,14 +228,18 @@ export default function WaiterDashboard() {
     return tableNums.length > 0 ? `Mesas: ${tableNums.join(', ')}` : 'Cargando...';
   }, [readyOrders]);
   
-  const mergedGroups = React.useMemo(() => {
-    const groups: Record<string, number> = {};
+  // session_id → números de todas las mesas del grupo (cualquier status)
+  const mergedNumbersBySession = React.useMemo(() => {
+    const map: Record<string, number[]> = {};
     tables.forEach(t => {
-      if (t.current_session_id && t.status === 'OCCUPIED') {
-        groups[t.current_session_id] = (groups[t.current_session_id] || 0) + 1;
+      if (t.current_session_id) {
+        if (!map[t.current_session_id]) map[t.current_session_id] = [];
+        map[t.current_session_id].push(t.number);
       }
     });
-    return groups;
+    // Descartar sesiones con una sola mesa (no son grupos)
+    Object.keys(map).forEach(k => { if (map[k].length < 2) delete map[k]; });
+    return map;
   }, [tables]);
   
   const helpRequestedTables = tables.filter(t => t.help_requested);
@@ -288,30 +294,78 @@ export default function WaiterDashboard() {
   };
 
   const handleMergeTables = async () => {
-    if (selectedTables.length < 2) return;
+    if (!restaurantId || selectedTables.length < 2) return;
     setMerging(true);
     try {
-      const sessionId = Math.random().toString(36).substring(7);
-      
-      // 1. Actualizar pedidos activos
-      const { error: orderError } = await supabase
-        .from('orders')
-        .update({ session_id: sessionId })
-        .in('table_id', selectedTables)
-        .eq('restaurant_id', restaurantId)
-        .not('status', 'in', '("DELIVERED","REJECTED")');
-
-      if (orderError) throw orderError;
-
-      // 2. Actualizar las mesas para que compartan la misma sesión visualmente
-      const { error: tableError } = await supabase
+      // 1. Obtener session_ids actuales de las mesas seleccionadas
+      const { data: tableRows, error: fetchErr } = await supabase
         .from('tables')
-        .update({ current_session_id: sessionId })
-        .in('id', selectedTables)
-        .eq('restaurant_id', restaurantId);
+        .select('id, current_session_id')
+        .in('id', selectedTables);
 
-      if (tableError) throw tableError;
-      
+      if (fetchErr) throw fetchErr;
+
+      const existingSessions = [
+        ...new Set(
+          (tableRows ?? [])
+            .map((t: any) => t.current_session_id)
+            .filter(Boolean)
+        ),
+      ] as string[];
+
+      let winningSessionId: string;
+
+      if (existingSessions.length === 0) {
+        // Ninguna mesa tiene sesión activa — crear nueva
+        winningSessionId = uuidv4();
+      } else if (existingSessions.length === 1) {
+        // Todas apuntan a la misma sesión — reutilizar
+        winningSessionId = existingSessions[0];
+      } else {
+        // Conflicto: múltiples sesiones — gana la que tiene el pedido más antiguo
+        const { data: oldest } = await supabase
+          .from('orders')
+          .select('session_id, createdAt')
+          .in('session_id', existingSessions)
+          .not('status', 'in', '("REJECTED")')
+          .order('createdAt', { ascending: true })
+          .limit(1);
+
+        winningSessionId =
+          oldest && oldest.length > 0
+            ? oldest[0].session_id
+            : existingSessions[0];
+
+        // Reasignar pedidos de sesiones perdedoras a la ganadora (incluye DELIVERED para historial unificado)
+        const losingSessions = existingSessions.filter(s => s !== winningSessionId);
+        const { error: reassignErr } = await supabase
+          .from('orders')
+          .update({ session_id: winningSessionId })
+          .in('session_id', losingSessions)
+          .not('status', 'in', '("REJECTED")');
+
+        if (reassignErr) throw reassignErr;
+      }
+
+      // 2. Sincronizar pedidos de mesas sin sesión previa a la sesión ganadora
+      const { error: orderErr } = await supabase
+        .from('orders')
+        .update({ session_id: winningSessionId })
+        .in('table_id', selectedTables)
+        .eq('restaurant_id', restaurantId!)
+        .not('status', 'in', '("REJECTED")');
+
+      if (orderErr) throw orderErr;
+
+      // 3. Actualizar todas las mesas seleccionadas a la sesión ganadora
+      const { error: tableErr } = await supabase
+        .from('tables')
+        .update({ current_session_id: winningSessionId })
+        .in('id', selectedTables)
+        .eq('restaurant_id', restaurantId!);
+
+      if (tableErr) throw tableErr;
+
       Alert.alert('Éxito', 'Mesas fusionadas correctamente');
       setMergeMode(false);
       setSelectedTables([]);
@@ -324,29 +378,45 @@ export default function WaiterDashboard() {
   };
 
   const handleUnmergeTables = async () => {
-    if (selectedTables.length === 0) return;
+    if (!restaurantId || selectedTables.length === 0) return;
     setMerging(true);
     try {
-      // Para cada mesa seleccionada, le asignamos una sesión única (la separamos)
-      for (const tableId of selectedTables) {
-        const newSessionId = Math.random().toString(36).substring(7);
-        
-        // 1. Actualizar pedidos de esta mesa específica a la nueva sesión
-        await supabase
+      // Obtener session_ids de las mesas seleccionadas para limpiar el grupo completo
+      const { data: tableRows, error: fetchErr } = await supabase
+        .from('tables')
+        .select('id, current_session_id')
+        .in('id', selectedTables);
+
+      if (fetchErr) throw fetchErr;
+
+      const sessionsToDissolve = [
+        ...new Set(
+          (tableRows ?? [])
+            .map((t: any) => t.current_session_id)
+            .filter(Boolean)
+        ),
+      ] as string[];
+
+      if (sessionsToDissolve.length > 0) {
+        // Limpiar session_id de TODAS las mesas del grupo (no solo las seleccionadas)
+        const { error: tableErr } = await supabase
+          .from('tables')
+          .update({ current_session_id: null })
+          .in('current_session_id', sessionsToDissolve)
+          .eq('restaurant_id', restaurantId!);
+
+        if (tableErr) throw tableErr;
+
+        // Limpiar session_id de pedidos activos del grupo (mantiene DELIVERED para historial)
+        const { error: orderErr } = await supabase
           .from('orders')
-          .update({ session_id: newSessionId })
-          .eq('table_id', tableId)
-          .eq('restaurant_id', restaurantId)
+          .update({ session_id: null })
+          .in('session_id', sessionsToDissolve)
           .not('status', 'in', '("DELIVERED","REJECTED")');
 
-        // 2. Actualizar la mesa con su nueva sesión individual
-        await supabase
-          .from('tables')
-          .update({ current_session_id: newSessionId })
-          .eq('id', tableId)
-          .eq('restaurant_id', restaurantId);
+        if (orderErr) throw orderErr;
       }
-      
+
       Alert.alert('Éxito', 'Mesas separadas correctamente');
       setMergeMode(false);
       setSelectedTables([]);
@@ -588,7 +658,7 @@ export default function WaiterDashboard() {
                     styles.tableCard, 
                     { backgroundColor: colors.glass, borderColor: colors.glassHeavy },
                     table.status === 'OCCUPIED' && { borderColor: colors.brandAccent + '40' },
-                    table.current_session_id && mergedGroups[table.current_session_id] > 1 && { backgroundColor: colors.brandAccent + '10', borderColor: colors.brandAccent + '80' },
+                    !!mergedNumbersBySession[table.current_session_id] && { backgroundColor: colors.brandAccent + '10', borderColor: colors.brandAccent + '80' },
                     selectedTables.includes(table.id) && { borderColor: '#FE5F55', backgroundColor: 'rgba(254, 95, 85, 0.1)' }
                   ]}
                   onPress={() => handleTablePress(table)}
@@ -596,25 +666,31 @@ export default function WaiterDashboard() {
                   <View style={[styles.tableHeader, { borderBottomColor: colors.glassHeavy }]}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                       <Text style={[styles.tableNumber, { color: colors.text }]}>{table.number}</Text>
-                      {table.current_session_id && mergedGroups[table.current_session_id] > 1 && (
-                        <View style={{ backgroundColor: colors.brandAccent, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                      {!!mergedNumbersBySession[table.current_session_id] && (
+                        <View style={{ backgroundColor: colors.brandAccent, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                          <Link2 size={8} color="white" />
                           <Text style={{ color: 'white', fontSize: 8, fontWeight: '900' }}>FUSIÓN</Text>
                         </View>
                       )}
                     </View>
                     <View style={[styles.statusDot, { backgroundColor: table.status === 'FREE' ? '#4CAF50' : '#FF9800' }]} />
                   </View>
-                  
+
                   <View style={styles.tableBody}>
-                    <Text style={[styles.tableStatus, { color: colors.muted }]}>
-                      {table.status === 'FREE' ? 'LIBRE' : 'OCUPADA'}
-                    </Text>
-                    <View style={{ flexDirection: 'row', gap: 4 }}>
-                      {table.current_session_id && mergedGroups[table.current_session_id] > 1 && (
-                        <View style={[styles.tableIconBadge, { backgroundColor: colors.brandAccent + '20' }]}>
-                          <Link2 size={12} color={colors.brandAccent} />
-                        </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.tableStatus, { color: colors.muted }]}>
+                        {table.status === 'FREE' ? 'LIBRE' : 'OCUPADA'}
+                      </Text>
+                      {table.current_session_id && mergedNumbersBySession[table.current_session_id] && (
+                        <Text style={{ color: colors.brandAccent, fontSize: 9, fontWeight: '900', marginTop: 3 }} numberOfLines={1}>
+                          + {mergedNumbersBySession[table.current_session_id]
+                              .filter(n => n !== table.number)
+                              .map(n => `M.${n}`)
+                              .join(', ')}
+                        </Text>
                       )}
+                    </View>
+                    <View style={{ flexDirection: 'row', gap: 4 }}>
                       {table.bill_requested && (
                         <View style={styles.tableIconBadge}>
                           <Receipt size={14} color="#FFD700" />

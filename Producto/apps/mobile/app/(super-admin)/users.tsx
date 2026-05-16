@@ -14,7 +14,7 @@ type UserRecord = {
   restaurant_id?: string | null;
 };
 
-const ROLES = ['SUPER_ADMIN', 'ADMIN', 'GARZON', 'COCINA', 'CAJERO', 'CLIENTE', 'BAR'];
+const ROLES = ['SUPER_ADMIN', 'ADMIN', 'GARZON', 'COCINA', 'CAJERO', 'BAR'];
 
 export default function UsersTab() {
   const [users, setUsers] = useState<UserRecord[]>([]);
@@ -26,7 +26,7 @@ export default function UsersTab() {
   // Form State
   const [modalVisible, setModalVisible] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ email: '', password: '', role: 'CLIENTE', restaurantId: '' as string | null });
+  const [formData, setFormData] = useState({ email: '', password: '', role: 'GARZON', restaurantId: '' as string | null });
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -67,7 +67,7 @@ export default function UsersTab() {
 
   const openCreateModal = () => {
     setEditingId(null);
-    setFormData({ email: '', password: '', role: 'CLIENTE', restaurantId: null });
+    setFormData({ email: '', password: '', role: 'GARZON', restaurantId: null });
     setModalVisible(true);
   };
 

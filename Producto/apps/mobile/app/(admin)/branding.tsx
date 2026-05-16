@@ -12,22 +12,19 @@ import {
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
-import { 
-  Palette, 
-  Type, 
-  Image as ImageIcon, 
-  Save, 
+import {
+  Palette,
+  Type,
+  Image as ImageIcon,
+  Save,
   RefreshCcw,
-  Check,
-  ChevronRight,
   Upload
 } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { MB_SPACING } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { PALETTE_TEMPLATES, PaletteTemplate } from '../../constants/Palettes';
 
 const TITLE_FONTS = [
@@ -41,7 +38,7 @@ const BODY_FONTS = [
 
 export default function BrandingScreen() {
   const { restaurantId } = useAuth();
-  const { colors } = useTheme();
+  const { colors, refreshTheme } = useTheme();
   
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
@@ -173,6 +170,7 @@ export default function BrandingScreen() {
       Alert.alert('Éxito', 'Identidad visual actualizada correctamente');
       setNewLogoUri(null);
       fetchTheme();
+      refreshTheme();
     } catch (err: any) {
       Alert.alert('Error', err.message || 'No se pudo guardar la configuración');
     } finally {

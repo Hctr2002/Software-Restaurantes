@@ -101,7 +101,6 @@ export default function DashboardShell({ title, subtitle, children }: DashboardS
           <nav className="space-y-1">
             <NavItem href="/dashboard/restaurants" icon={<Store className="w-4 h-4" />} label="Organizaciones" active={pathname.startsWith("/dashboard/restaurants")} />
             <NavItem href="/dashboard/users" icon={<Users className="w-4 h-4" />} label="Usuarios Globales" active={pathname.startsWith("/dashboard/users")} />
-            <NavItem href="/dashboard/plans" icon={<LayoutDashboard className="w-4 h-4" />} label="Planes" active={pathname.startsWith("/dashboard/plans")} />
           </nav>
         </div>
 
