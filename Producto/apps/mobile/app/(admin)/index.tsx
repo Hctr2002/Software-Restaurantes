@@ -11,14 +11,11 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
-import { 
-  TrendingUp, 
-  Wallet, 
-  ReceiptText, 
-  ClipboardList, 
-  Bell, 
-  User,
-  Menu as MenuIcon,
+import {
+  TrendingUp,
+  Wallet,
+  ReceiptText,
+  ClipboardList,
   Flame,
   Timer
 } from 'lucide-react-native';
@@ -27,7 +24,6 @@ import AdminKpiCard from '../../components/AdminKpiCard';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
-import AdminSideMenu from '../../components/AdminSideMenu';
 import { 
   fetchDashboardStats, 
   fetchRecentOrders, 
@@ -193,16 +189,16 @@ export default function AdminDashboardScreen() {
 
         {/* Live Flow & Metrics */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Métricas en Vivo</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Métricas en Vivo</Text>
         </View>
         
         <View style={styles.metricsContainer}>
-          <View style={[styles.flowCard, { backgroundColor: colors.glass }]}>
+          <View style={[styles.flowCard, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
             <View style={styles.flowHeader}>
               <View style={[styles.iconContainer, { backgroundColor: colors.brandAccent + '1A' }]}>
                 <Flame size={14} color={colors.brandAccent} />
               </View>
-              <Text style={styles.flowTitle}>Flujo de Órdenes</Text>
+              <Text style={[styles.flowTitle, { color: colors.text }]}>Flujo de Órdenes</Text>
             </View>
             <View style={styles.flowGrid}>
               {[
@@ -219,23 +215,23 @@ export default function AdminDashboardScreen() {
             </View>
           </View>
 
-          <View style={[styles.timerCard, { backgroundColor: colors.glass }]}>
+          <View style={[styles.timerCard, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
             <View style={styles.timerLayout}>
               <View style={styles.flowHeader}>
                 <View style={[styles.iconContainer, { backgroundColor: 'rgba(251, 191, 36, 0.1)' }]}>
                   <Timer size={14} color="#fbbf24" />
                 </View>
-                <Text style={styles.flowTitle}>Tiempo Promedio de hoy</Text>
+                <Text style={[styles.flowTitle, { color: colors.text }]}>Tiempo Promedio de hoy</Text>
               </View>
               
               <View style={styles.timerContent}>
                 {stats?.avgCycleMin === null ? (
-                  <Text style={styles.emptyTimerText}>Sin datos hoy</Text>
+                  <Text style={[styles.emptyTimerText, { color: colors.muted }]}>Sin datos hoy</Text>
                 ) : (
                   <View style={styles.timerMain}>
                     <View style={styles.timerValueRow}>
                       <Text style={styles.timerValue}>{stats?.avgCycleMin}</Text>
-                      <Text style={styles.timerUnit}>min</Text>
+                      <Text style={[styles.timerUnit, { color: colors.muted }]}>min</Text>
                     </View>
                     <View style={[
                       styles.timerBadge, 
@@ -257,17 +253,17 @@ export default function AdminDashboardScreen() {
 
         {/* Section: Top Items */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Top Items Hoy</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Top Items Hoy</Text>
         </View>
-        <View style={[styles.glassCard, { backgroundColor: colors.glass }]}>
+        <View style={[styles.glassCard, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
           {!stats?.top_items?.length ? (
-            <Text style={styles.emptyText}>Sin pedidos hoy</Text>
+            <Text style={[styles.emptyText, { color: colors.muted }]}>Sin pedidos hoy</Text>
           ) : (
             stats.top_items.map((item, i) => (
-              <View key={item.name} style={[styles.itemRow, i === stats.top_items.length - 1 && { borderBottomWidth: 0 }]}>
+              <View key={item.name} style={[styles.itemRow, { borderBottomColor: colors.glassHeavy }, i === stats.top_items.length - 1 && { borderBottomWidth: 0 }]}>
                 <View style={styles.itemInfo}>
-                  <Text style={styles.itemRank}>#{i + 1}</Text>
-                  <Text style={styles.itemName}>{item.name}</Text>
+                  <Text style={[styles.itemRank, { color: colors.muted, backgroundColor: colors.glassHeavy }]}>#{i + 1}</Text>
+                  <Text style={[styles.itemName, { color: colors.text }]}>{item.name}</Text>
                 </View>
                 <View style={[styles.itemBadge, { backgroundColor: colors.brandAccent + '1A' }]}>
                   <Text style={[styles.itemCountText, { color: colors.brandAccent }]}>{item.count} UNID.</Text>
@@ -279,11 +275,11 @@ export default function AdminDashboardScreen() {
 
         {/* Section: Tables Status */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Estado de Mesas</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Estado de Mesas</Text>
         </View>
         <View style={styles.tableGrid}>
           {tables.length === 0 ? (
-            <Text style={styles.emptyText}>No hay mesas configuradas</Text>
+            <Text style={[styles.emptyText, { color: colors.muted }]}>No hay mesas configuradas</Text>
           ) : (
             tables.map((table) => {
               const isOccupied = table.status === 'OCCUPIED';
@@ -332,20 +328,20 @@ export default function AdminDashboardScreen() {
 
         {/* Section: Recent Orders */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Pedidos Recientes</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Pedidos Recientes</Text>
           <TouchableOpacity onPress={() => router.push('/(admin)/orders')}>
             <Text style={[styles.seeAll, { color: colors.brandAccent }]}>Ver todo</Text>
           </TouchableOpacity>
         </View>
 
-        <Animated.View entering={FadeInDown.delay(500)} style={[styles.activityCard, { backgroundColor: colors.glass }]}>
+        <Animated.View entering={FadeInDown.delay(500)} style={[styles.activityCard, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
           {recentOrders.length === 0 ? (
-            <Text style={styles.emptyText}>No hay pedidos recientes</Text>
+            <Text style={[styles.emptyText, { color: colors.muted }]}>No hay pedidos recientes</Text>
           ) : (
             recentOrders.map((order, i) => (
-              <View key={order.id} style={[styles.activityItem, i === recentOrders.length - 1 && { borderBottomWidth: 0 }]}>
+              <View key={order.id} style={[styles.activityItem, { borderBottomColor: colors.glassHeavy }, i === recentOrders.length - 1 && { borderBottomWidth: 0 }]}>
                 <View style={styles.activityInfo}>
-                  <Text style={[styles.activityTitle, { color: 'white' }]}>Mesa {order.table_number}</Text>
+                  <Text style={[styles.activityTitle, { color: colors.text }]}>Mesa {order.table_number}</Text>
                   <Text style={[styles.activityTime, { color: colors.muted }]}>{timeAgo(order.createdAt)}</Text>
                 </View>
                 <View style={[styles.statusBadge, order.status === 'DELIVERED' && styles.statusDelivered, { backgroundColor: colors.brandAccent + '1A' }]}>
@@ -454,7 +450,6 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    color: 'white',
     fontWeight: '900',
     letterSpacing: -0.5,
   },
@@ -472,7 +467,6 @@ const styles = StyleSheet.create({
     marginBottom: MB_SPACING.xl,
   },
   emptyText: {
-    color: 'rgba(255,255,255,0.4)',
     fontSize: 12,
     textAlign: 'center',
     paddingVertical: 20,
@@ -484,18 +478,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
   },
   activityInfo: {
     flex: 1,
   },
   activityTitle: {
-    color: 'white',
     fontSize: 15,
     fontWeight: '800',
   },
   activityTime: {
-    color: 'rgba(255,255,255,0.4)',
     fontSize: 11,
     fontWeight: '600',
     marginTop: 2,
@@ -556,7 +547,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
   },
   itemInfo: {
     flexDirection: 'row',
@@ -564,10 +554,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   itemRank: {
-    color: 'rgba(255,255,255,0.4)',
     fontSize: 10,
     fontWeight: '900',
-    backgroundColor: 'rgba(255,255,255,0.05)',
     width: 24,
     height: 24,
     borderRadius: 8,
@@ -575,7 +563,6 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   itemName: {
-    color: 'white',
     fontSize: 14,
     fontWeight: '800',
   },
@@ -657,7 +644,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   flowTitle: {
-    color: 'white',
     fontSize: 10,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -703,7 +689,6 @@ const styles = StyleSheet.create({
   },
   timerUnit: {
     fontSize: 10,
-    color: 'rgba(255,255,255,0.4)',
     fontWeight: '800',
   },
   timerBadge: {
@@ -717,7 +702,6 @@ const styles = StyleSheet.create({
   },
   emptyTimerText: {
     fontSize: 10,
-    color: 'rgba(255,255,255,0.4)',
     fontStyle: 'italic',
   },
 });

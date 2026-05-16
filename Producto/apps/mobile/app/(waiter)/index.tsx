@@ -26,7 +26,7 @@ import {
   XCircle,
   Link2
 } from 'lucide-react-native';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { MB_SPACING } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 import { uuidv4 } from '../../lib/uuid';
 import { useAuth } from '../../context/AuthContext';

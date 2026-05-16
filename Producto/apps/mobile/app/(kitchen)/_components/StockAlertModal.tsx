@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { AlertTriangle, X, Send } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../../constants/MB_Theme';
 import { useTheme } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';
 import { supabase } from '../../../lib/supabase';

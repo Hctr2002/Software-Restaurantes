@@ -2,7 +2,6 @@ import React from 'react';
 import { Stack, useRouter, usePathname } from 'expo-router';
 import { TouchableOpacity, StyleSheet, View, Text } from 'react-native';
 import { Menu as MenuIcon, Bell, ShoppingBag } from 'lucide-react-native';
-import { MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import AdminSideMenu from '../../components/AdminSideMenu';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -110,8 +109,9 @@ export default function AdminLayout() {
           headerStyle: {
             backgroundColor: colors.navy,
           },
+          contentStyle: { backgroundColor: colors.navy },
           headerShadowVisible: false,
-          headerTintColor: 'white',
+          headerTintColor: colors.text,
           headerTitleStyle: {
             fontWeight: '900',
             fontSize: 16,

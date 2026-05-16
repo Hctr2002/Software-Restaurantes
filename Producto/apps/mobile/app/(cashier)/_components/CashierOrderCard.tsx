@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Clock, Hash, ChevronRight, CheckCircle2, Bell } from 'lucide-react-native';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../../constants/MB_Theme';
 import { useTheme } from '../../../context/ThemeContext';
 import { formatCurrency, timeAgo } from '../../../lib/dashboard';
 import Animated, { FadeInRight } from 'react-native-reanimated';
