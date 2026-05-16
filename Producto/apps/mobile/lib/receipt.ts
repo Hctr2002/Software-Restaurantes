@@ -11,6 +11,7 @@ interface ReceiptData {
   tableLabel: string;
   restaurantName?: string;
   items: ReceiptItem[];
+  tipIncluded?: boolean;
   reference?: string;
   date?: Date;
 }
@@ -24,9 +25,11 @@ function esc(s: string): string {
 }
 
 function buildHtml(data: ReceiptData): string {
-  const { tableLabel, restaurantName, items, reference, date = new Date() } = data;
+  const { tableLabel, restaurantName, items, tipIncluded, reference, date = new Date() } = data;
 
   const subtotal = items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
+  const tipAmount = tipIncluded ? Math.round(subtotal * 0.10) : 0;
+  const total = subtotal + tipAmount;
   const dateStr = date.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
   const rows = items
@@ -86,9 +89,15 @@ function buildHtml(data: ReceiptData): string {
 
   <hr class="divider"/>
 
+  ${tipIncluded ? `
+  <div style="display:flex;justify-content:space-between;padding:8px 0;color:#FFD700;">
+    <span style="font-size:11px;font-weight:900;letter-spacing:1px;">PROPINA 10%</span>
+    <span style="font-size:14px;font-weight:900;">+${formatCLP(tipAmount)}</span>
+  </div>` : ''}
+
   <div class="total-row">
     <span class="total-label">TOTAL</span>
-    <span class="total-value">${formatCLP(subtotal)}</span>
+    <span class="total-value">${formatCLP(total)}</span>
   </div>
 
   ${reference ? `<p class="ref">Referencia: ${esc(reference)}</p>` : ''}

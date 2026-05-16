@@ -35,6 +35,9 @@ export default function PaymentModal({ visible, group, isProcessing, onClose, on
 
   const allItems = group.orders.flatMap((o: any) => o.order_items ?? []);
   const tableLabel = group.sessionId ? "Mesas fusionadas" : `Mesa ${group.tableNumber ?? "S/N"}`;
+  const subtotal = group.total;
+  const tipAmount = group.tipIncluded ? Math.round(subtotal * 0.10) : 0;
+  const totalToPay = subtotal + tipAmount;
 
   const handleConfirm = async () => {
     await onConfirm(reference);
@@ -51,6 +54,7 @@ export default function PaymentModal({ visible, group, isProcessing, onClose, on
           quantity: i.quantity,
           unitPrice: Number(i.unit_price),
         })),
+        tipIncluded: group.tipIncluded,
         reference: reference || undefined,
       });
     } catch {
@@ -93,7 +97,13 @@ export default function PaymentModal({ visible, group, isProcessing, onClose, on
             <ScrollView showsVerticalScrollIndicator={false} style={styles.body}>
               <View style={styles.summaryCard}>
                 <Text style={[styles.summaryLabel, { color: colors.muted }]}>TOTAL A COBRAR</Text>
-                <Text style={[styles.summaryValue, { color: colors.text }]}>{formatCurrency(group.total)}</Text>
+                <Text style={[styles.summaryValue, { color: colors.text }]}>{formatCurrency(totalToPay)}</Text>
+                {group.tipIncluded && (
+                  <View style={[styles.tipRow, { backgroundColor: '#FFD70015', borderColor: '#FFD70030' }]}>
+                    <Text style={[styles.tipLabel, { color: '#FFD700' }]}>Propina 10%</Text>
+                    <Text style={[styles.tipValue, { color: '#FFD700' }]}>+{formatCurrency(tipAmount)}</Text>
+                  </View>
+                )}
               </View>
 
               <Text style={[styles.sectionTitle, { color: colors.muted }]}>DESGLOSE DE PRODUCTOS</Text>
@@ -300,4 +310,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
   },
+  tipRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  tipLabel: { fontSize: 11, fontWeight: '900', letterSpacing: 0.5 },
+  tipValue: { fontSize: 14, fontWeight: '900' },
 });

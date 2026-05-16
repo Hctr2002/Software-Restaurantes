@@ -12,26 +12,27 @@ import {
   Alert,
   Modal
 } from 'react-native';
-import { 
-  Search, 
-  ChevronLeft, 
-  Plus, 
-  Minus, 
-  ShoppingCart, 
+import {
+  Search,
+  ChevronLeft,
+  Plus,
+  Minus,
+  ShoppingCart,
   Send,
   Utensils,
-  ChevronRight,
   Trash2,
   X,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  Receipt
 } from 'lucide-react-native';
+import { TipModal } from '../_components/TipModal';
 import { MB_SPACING } from '../../../constants/MB_Theme';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../../context/ThemeContext';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import Animated, { FadeInRight, FadeInUp, SlideInDown, Layout } from 'react-native-reanimated';
+import Animated, { FadeInUp, SlideInDown } from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
 
@@ -111,12 +112,14 @@ const styles = StyleSheet.create({
   cartItemInfo: { flex: 1 },
   cartItemName: { color: 'white', fontSize: 14, fontWeight: '700' },
   cartItemPrice: { fontSize: 12, fontWeight: '600' },
+  billBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, borderWidth: 1 },
+  billBtnText: { fontSize: 9, fontWeight: '900', letterSpacing: 0.5 },
 });
 
 export default function TableOrderScreen() {
   const { id } = useLocalSearchParams();
   const { restaurantId } = useAuth();
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   const router = useRouter();
 
   const [loading, setLoading] = React.useState(true);
@@ -131,6 +134,8 @@ export default function TableOrderScreen() {
   const [cart, setCart] = React.useState<any[]>([]);
   const [isPlacing, setIsPlacing] = React.useState(false);
   const [showReview, setShowReview] = React.useState(false);
+  const [showBillModal, setShowBillModal] = React.useState(false);
+  const [requestingBill, setRequestingBill] = React.useState(false);
 
   const fetchData = React.useCallback(async () => {
     if (!restaurantId || !id) return;
@@ -288,6 +293,19 @@ export default function TableOrderScreen() {
     }
   };
 
+  const handleRequestBill = async (_tableId: string, includeTip: boolean) => {
+    setRequestingBill(true);
+    try {
+      await supabase.from('tables').update({ bill_requested: true, tip_included: includeTip }).eq('id', id);
+      setShowBillModal(false);
+      fetchData();
+    } catch {
+      Alert.alert('Error', 'No se pudo solicitar la cuenta');
+    } finally {
+      setRequestingBill(false);
+    }
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'PENDING': return <Clock size={12} color="#FF9800" />;
@@ -322,6 +340,23 @@ export default function TableOrderScreen() {
               {table?.status === 'FREE' ? 'LIBRE' : 'OCUPADA'}
             </Text>
           </View>
+          {table?.status !== 'FREE' && (
+            table?.bill_requested ? (
+              <View style={[styles.billBtn, { backgroundColor: '#10b98115', borderColor: '#10b98130' }]}>
+                <Receipt size={12} color="#10b981" />
+                <Text style={[styles.billBtnText, { color: '#10b981' }]}>Cuenta pedida</Text>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={[styles.billBtn, { backgroundColor: '#FFD70015', borderColor: '#FFD70030' }]}
+                onPress={() => setShowBillModal(true)}
+                disabled={requestingBill}
+              >
+                <Receipt size={12} color="#FFD700" />
+                <Text style={[styles.billBtnText, { color: '#FFD700' }]}>Pedir Cuenta</Text>
+              </TouchableOpacity>
+            )
+          )}
         </View>
       </View>
 
@@ -489,6 +524,14 @@ export default function TableOrderScreen() {
           </View>
         </Animated.View>
       )}
+
+      <TipModal
+        table={showBillModal ? table : null}
+        colors={colors}
+        isLight={isLight}
+        onClose={() => setShowBillModal(false)}
+        onConfirm={handleRequestBill}
+      />
 
       {/* Review Modal */}
       <Modal visible={showReview} animationType="slide" transparent>

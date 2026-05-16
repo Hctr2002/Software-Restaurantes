@@ -27,7 +27,7 @@ function orderTotal(order: any): number {
   return (order.order_items ?? []).reduce((s: number, i: any) => s + Number(i.unit_price) * i.quantity, 0);
 }
 
-function groupOrders(orders: any[], billMap: Record<string, boolean>): any[] {
+function groupOrders(orders: any[], billMap: Record<string, boolean>, tipMap: Record<string, boolean>): any[] {
   const map = new Map<string, any>();
   for (const order of orders) {
     const key = order.session_id ?? order.table_id ?? order.id;
@@ -40,6 +40,7 @@ function groupOrders(orders: any[], billMap: Record<string, boolean>): any[] {
         orders:           [],
         total:            0,
         billRequested:    (order.table_id && billMap[order.table_id]) || false,
+        tipIncluded:      (order.table_id && tipMap[order.table_id]) || false,
         oldestCreatedAt:  order.createdAt,
       });
     }
@@ -98,7 +99,7 @@ export default function CashierDashboard() {
       // Table Status (for bill requested)
       const { data: tableData } = await supabase
         .from('tables')
-        .select('id, bill_requested')
+        .select('id, bill_requested, tip_included')
         .eq('restaurant_id', restaurantId);
 
       setOrders(pendingData || []);
@@ -128,14 +129,18 @@ export default function CashierDashboard() {
     };
   }, [restaurantId, fetchOrders]);
 
-  const billRequestedMap = useMemo(() => 
-    Object.fromEntries(tables.map(t => [t.id, t.bill_requested])), 
+  const billRequestedMap = useMemo(() =>
+    Object.fromEntries(tables.map(t => [t.id, t.bill_requested])),
+  [tables]);
+
+  const tipIncludedMap = useMemo(() =>
+    Object.fromEntries(tables.map(t => [t.id, t.tip_included])),
   [tables]);
 
   const groups = useMemo(() => ({
-    pending: groupOrders(orders, billRequestedMap),
-    history: groupOrders(history, billRequestedMap)
-  }), [orders, history, billRequestedMap]);
+    pending: groupOrders(orders, billRequestedMap, tipIncludedMap),
+    history: groupOrders(history, billRequestedMap, tipIncludedMap),
+  }), [orders, history, billRequestedMap, tipIncludedMap]);
 
   const totals = useMemo(() => ({
     pending: groups.pending.reduce((s, g) => s + g.total, 0),
