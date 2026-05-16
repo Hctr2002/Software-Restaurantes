@@ -37,7 +37,7 @@ import {
 
 export default function AdminDashboardScreen() {
   const { restaurantId } = useAuth();
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   const router = useRouter();
   const [refreshing, setRefreshing] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
@@ -136,7 +136,7 @@ export default function AdminDashboardScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.navy }]}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={isLight ? 'dark-content' : 'light-content'} />
       
       <ScrollView 
         showsVerticalScrollIndicator={false} 
@@ -207,7 +207,7 @@ export default function AdminDashboardScreen() {
                 { label: 'Prep.', count: stats?.flowCounts?.PREPARING ?? 0, color: colors.brandAccent },
                 { label: 'Listo', count: stats?.flowCounts?.READY ?? 0, color: '#10b981' },
               ].map((item) => (
-                <View key={item.label} style={styles.flowItem}>
+                <View key={item.label} style={[styles.flowItem, { backgroundColor: colors.glass }]}>
                   <Text style={[styles.flowCount, { color: item.color }]}>{item.count}</Text>
                   <Text style={[styles.flowLabel, { color: colors.muted }]}>{item.label}</Text>
                 </View>
@@ -360,7 +360,6 @@ export default function AdminDashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A1128',
   },
   centered: {
     justifyContent: 'center',
@@ -383,14 +382,12 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.4)',
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
   restaurantName: {
     fontSize: 24,
-    color: 'white',
     fontWeight: '900',
     letterSpacing: -0.5,
   },
@@ -402,11 +399,9 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
   },
   badge: {
     position: 'absolute',
@@ -459,11 +454,9 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   activityCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: MB_RADIUS.xl,
     padding: MB_SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.03)',
     marginBottom: MB_SPACING.xl,
   },
   emptyText: {
@@ -492,7 +485,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   statusBadge: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 8,
@@ -501,7 +493,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(114, 155, 121, 0.1)',
   },
   statusText: {
-    color: 'white',
     fontSize: 9,
     fontWeight: '900',
   },
@@ -521,24 +512,19 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
   },
   quickLabel: {
-    color: 'rgba(255,255,255,0.4)',
     fontSize: 11,
     fontWeight: '700',
   },
   glassCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: MB_RADIUS.xl,
     padding: MB_SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.03)',
     marginBottom: MB_SPACING.xl,
   },
   itemRow: {
@@ -610,18 +596,14 @@ const styles = StyleSheet.create({
     marginBottom: MB_SPACING.xl,
   },
   flowCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 24,
     padding: MB_SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.03)',
   },
   timerCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 24,
     padding: MB_SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.03)',
   },
   timerLayout: {
     flexDirection: 'row',
@@ -658,7 +640,6 @@ const styles = StyleSheet.create({
   flowItem: {
     flex: 1,
     minWidth: '22%',
-    backgroundColor: 'rgba(255,255,255,0.03)',
     borderRadius: 12,
     padding: 8,
     alignItems: 'center',
@@ -669,7 +650,6 @@ const styles = StyleSheet.create({
   },
   flowLabel: {
     fontSize: 8,
-    color: 'rgba(255,255,255,0.4)',
     fontWeight: '800',
     marginTop: 2,
   },

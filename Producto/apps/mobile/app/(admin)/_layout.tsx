@@ -69,7 +69,7 @@ export default function AdminLayout() {
           router.push('/(admin)/notifications');
         }}
       >
-        <Bell color={newOrder ? colors.brandAccent : "white"} size={20} />
+        <Bell color={newOrder ? colors.brandAccent : colors.text} size={20} />
         {newOrder && <View style={[styles.badge, { backgroundColor: colors.brandAccent, borderColor: colors.navy }]} />}
       </TouchableOpacity>
     );
@@ -84,18 +84,18 @@ export default function AdminLayout() {
         style={styles.notificationContainer}
       >
         <TouchableOpacity 
-          style={[styles.notificationToast, { borderColor: colors.brandAccent }]}
+          style={[styles.notificationToast, { backgroundColor: colors.navy, borderColor: colors.brandAccent }]}
           onPress={() => setNewOrder(null)}
         >
           <View style={[styles.notifIcon, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }]}>
             <ShoppingBag color="white" size={20} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.notifTitle}>¡NUEVO PEDIDO!</Text>
-            <Text style={styles.notifSub}>Revisa la sección de pedidos ahora</Text>
+            <Text style={[styles.notifTitle, { color: colors.text }]}>¡NUEVO PEDIDO!</Text>
+            <Text style={[styles.notifSub, { color: colors.muted }]}>Revisa la sección de pedidos ahora</Text>
           </View>
           <TouchableOpacity onPress={() => setNewOrder(null)}>
-            <Text style={styles.closeNotif}>OK</Text>
+            <Text style={[styles.closeNotif, { color: colors.text, backgroundColor: colors.glass }]}>OK</Text>
           </TouchableOpacity>
         </TouchableOpacity>
       </Animated.View>
@@ -172,7 +172,6 @@ const styles = StyleSheet.create({
   notificationToast: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#121B33', 
     padding: 16,
     borderRadius: 24,
     borderWidth: 2,
@@ -194,23 +193,19 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
   notifTitle: {
-    color: 'white',
     fontSize: 15,
     fontWeight: '900',
     letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
   notifSub: {
-    color: 'rgba(255,255,255,0.6)',
     fontSize: 12,
     fontWeight: '600',
     marginTop: 1,
   },
   closeNotif: {
-    color: 'white',
     fontWeight: '900',
     fontSize: 11,
-    backgroundColor: 'rgba(255,255,255,0.1)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 10,

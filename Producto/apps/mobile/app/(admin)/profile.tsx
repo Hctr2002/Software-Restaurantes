@@ -1,10 +1,10 @@
 import React from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { User, Mail, Save, ChevronLeft } from 'lucide-react-native';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
@@ -22,7 +22,7 @@ export default function ProfileScreen() {
   const { user } = useAuth();
   const { colors } = useTheme();
   const router = useRouter();
-  
+
   const [loading, setLoading] = React.useState(false);
   const [name, setName] = React.useState(user?.user_metadata?.full_name || '');
   const [email] = React.useState(user?.email || '');
@@ -50,12 +50,12 @@ export default function ProfileScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={[styles.container, { backgroundColor: colors.navy }]} 
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: colors.navy }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Stack.Screen options={{ 
-        headerShown: true, 
+      <Stack.Screen options={{
+        headerShown: true,
         title: 'PERFIL',
         headerStyle: { backgroundColor: colors.navy },
         headerTintColor: colors.text,
@@ -65,7 +65,7 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         )
       }} />
-      
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.avatarSection}>
           <View style={[styles.avatar, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }]}>
@@ -76,7 +76,7 @@ export default function ProfileScreen() {
 
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Información Personal</Text>
-          
+
           <View style={styles.inputGroup}>
             <View style={styles.labelRow}>
               <User size={14} color={colors.muted} />
@@ -104,7 +104,7 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.saveButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }, loading && styles.disabledButton]}
           onPress={handleSave}
           disabled={loading}
@@ -126,7 +126,6 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MB_COLORS.navy,
   },
   scrollContent: {
     padding: MB_SPACING.lg,
@@ -139,11 +138,9 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: MB_COLORS.brandAccent,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
-    shadowColor: MB_COLORS.brandAccent,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
@@ -154,7 +151,6 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   emailLabel: {
-    color: MB_COLORS.muted,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -162,7 +158,6 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   sectionTitle: {
-    color: 'white',
     fontSize: 12,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -181,34 +176,27 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   label: {
-    color: MB_COLORS.muted,
     fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',
   },
   input: {
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 16,
+    borderRadius: MB_RADIUS.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
     padding: 16,
-    color: 'white',
     fontSize: 15,
     fontWeight: '600',
   },
   disabledInput: {
-    backgroundColor: 'rgba(255,255,255,0.01)',
     borderColor: 'transparent',
   },
   saveButton: {
-    backgroundColor: MB_COLORS.brandAccent,
     height: 60,
     borderRadius: 20,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 12,
-    shadowColor: MB_COLORS.brandAccent,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 12,

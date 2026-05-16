@@ -1,10 +1,10 @@
 import React from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
@@ -13,14 +13,14 @@ import {
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { Lock, ShieldCheck, ChevronLeft } from 'lucide-react-native';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 
 export default function SecurityScreen() {
   const router = useRouter();
   const { colors } = useTheme();
-  
+
   const [loading, setLoading] = React.useState(false);
   const [password, setPassword] = React.useState('');
   const [confirmPassword, setConfirmPassword] = React.useState('');
@@ -55,12 +55,12 @@ export default function SecurityScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={[styles.container, { backgroundColor: colors.navy }]} 
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: colors.navy }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Stack.Screen options={{ 
-        headerShown: true, 
+      <Stack.Screen options={{
+        headerShown: true,
         title: 'SEGURIDAD',
         headerStyle: { backgroundColor: colors.navy },
         headerTintColor: colors.text,
@@ -70,7 +70,7 @@ export default function SecurityScreen() {
           </TouchableOpacity>
         )
       }} />
-      
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.iconHeader}>
           <View style={[styles.shieldIcon, { backgroundColor: colors.brandAccent + '20', borderColor: colors.brandAccent + '40' }]}>
@@ -112,7 +112,7 @@ export default function SecurityScreen() {
           </View>
         </View>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.saveButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }, loading && styles.disabledButton]}
           onPress={handleUpdatePassword}
           disabled={loading}
@@ -126,8 +126,8 @@ export default function SecurityScreen() {
             </>
           )}
         </TouchableOpacity>
-        
-        <Text style={styles.footerNote}>
+
+        <Text style={[styles.footerNote, { color: colors.muted }]}>
           Se recomienda usar una combinación de letras, números y símbolos para mayor seguridad.
         </Text>
       </ScrollView>
@@ -138,7 +138,6 @@ export default function SecurityScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MB_COLORS.navy,
   },
   scrollContent: {
     padding: MB_SPACING.lg,
@@ -151,21 +150,17 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 24,
-    backgroundColor: 'rgba(254, 95, 85, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(254, 95, 85, 0.2)',
     marginBottom: 20,
   },
   headerTitle: {
-    color: 'white',
     fontSize: 22,
     fontWeight: '900',
     letterSpacing: -0.5,
   },
   headerSub: {
-    color: MB_COLORS.muted,
     fontSize: 13,
     fontWeight: '600',
     marginTop: 4,
@@ -186,30 +181,24 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   label: {
-    color: MB_COLORS.muted,
     fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',
   },
   input: {
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 16,
+    borderRadius: MB_RADIUS.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
     padding: 16,
-    color: 'white',
     fontSize: 15,
     fontWeight: '600',
   },
   saveButton: {
-    backgroundColor: MB_COLORS.brandAccent,
     height: 60,
     borderRadius: 20,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 12,
-    shadowColor: MB_COLORS.brandAccent,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
@@ -225,7 +214,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   footerNote: {
-    color: 'rgba(255,255,255,0.3)',
     fontSize: 11,
     textAlign: 'center',
     marginTop: 24,

@@ -1,17 +1,17 @@
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  FlatList, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
   TextInput,
   RefreshControl,
   ActivityIndicator,
   Alert
 } from 'react-native';
 import { Users, Search, Plus } from 'lucide-react-native';
-import { MB_COLORS, MB_SPACING } from '../../constants/MB_Theme';
+import { MB_SPACING } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -21,7 +21,7 @@ import { UserModal } from '../../components/UserModal';
 export default function UsersScreen() {
   const { restaurantId } = useAuth();
   const { colors } = useTheme();
-  
+
   // States
   const [profiles, setProfiles] = React.useState<UserProfile[]>([]);
   const [filteredProfiles, setFilteredProfiles] = React.useState<UserProfile[]>([]);
@@ -31,7 +31,7 @@ export default function UsersScreen() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [page, setPage] = React.useState(0);
   const [hasMore, setHasMore] = React.useState(true);
-  
+
   // Modal State
   const [modalVisible, setModalVisible] = React.useState(false);
   const [selectedUser, setSelectedUser] = React.useState<UserProfile | null>(null);
@@ -40,7 +40,7 @@ export default function UsersScreen() {
 
   const fetchProfiles = React.useCallback(async (pageNum = 0, isRefreshing = false) => {
     if (!restaurantId) return;
-    
+
     try {
       const from = pageNum * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
@@ -55,7 +55,7 @@ export default function UsersScreen() {
       if (error) throw error;
 
       const newProfiles = data || [];
-      
+
       setProfiles(prev => {
         const updated = isRefreshing ? newProfiles : [...prev, ...newProfiles];
         setFilteredProfiles(updated);
@@ -120,7 +120,7 @@ export default function UsersScreen() {
     if (text.trim() === '') {
       setFilteredProfiles(profiles);
     } else {
-      const filtered = profiles.filter(p => 
+      const filtered = profiles.filter(p =>
         p.email.toLowerCase().includes(text.toLowerCase()) ||
         p.role.toLowerCase().includes(text.toLowerCase())
       );
@@ -150,14 +150,13 @@ export default function UsersScreen() {
           .from('users')
           .update({ role: data.role })
           .eq('id', data.id);
-        
+
         if (error) throw error;
         Alert.alert('Éxito', 'Usuario actualizado correctamente');
       } else {
         // CREATE NEW USER (vía Edge Function)
-        // La URL de la función se construye a partir de tu SUPABASE_URL
         const { data: result, error: funcError } = await supabase.functions.invoke('manage-users', {
-          body: { 
+          body: {
             action: 'create',
             email: data.email,
             password: data.password,
@@ -167,7 +166,7 @@ export default function UsersScreen() {
 
         if (funcError) throw funcError;
         if (result?.error) throw new Error(result.error);
-        
+
         Alert.alert('Éxito', 'Usuario creado correctamente en el sistema');
       }
       onRefresh();
@@ -185,8 +184,8 @@ export default function UsersScreen() {
       '¿Estás seguro de que deseas eliminar a este miembro del equipo?',
       [
         { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: 'Eliminar', 
+        {
+          text: 'Eliminar',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -194,7 +193,7 @@ export default function UsersScreen() {
               const { data: result, error: funcError } = await supabase.functions.invoke('manage-users', {
                 body: { action: 'delete', id }
               });
-              
+
               if (funcError) throw funcError;
               if (result?.error) throw new Error(result.error);
 
@@ -214,7 +213,7 @@ export default function UsersScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.navy }]}>
       <View style={styles.searchBox}>
-        <View style={[styles.searchInputContainer, { backgroundColor: colors.glass }]}>
+        <View style={[styles.searchInputContainer, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
           <Search size={18} color={colors.muted} style={styles.searchIcon} />
           <TextInput
             placeholder="Buscar por correo o rol..."
@@ -224,8 +223,8 @@ export default function UsersScreen() {
             onChangeText={handleSearch}
           />
         </View>
-        <TouchableOpacity 
-          style={[styles.addButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }]} 
+        <TouchableOpacity
+          style={[styles.addButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }]}
           onPress={handleOpenCreate}
         >
           <Plus size={24} color="white" />
@@ -241,10 +240,10 @@ export default function UsersScreen() {
         <FlatList
           data={filteredProfiles}
           renderItem={({ item, index }) => (
-            <UserCard 
-              user={item} 
-              index={index} 
-              onPress={handleOpenEdit} 
+            <UserCard
+              user={item}
+              index={index}
+              onPress={handleOpenEdit}
             />
           )}
           keyExtractor={item => item.id}
@@ -269,7 +268,7 @@ export default function UsersScreen() {
         />
       )}
 
-      <UserModal 
+      <UserModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         user={selectedUser}
@@ -283,7 +282,6 @@ export default function UsersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MB_COLORS.navy,
   },
   searchBox: {
     flexDirection: 'row',
@@ -295,30 +293,25 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: MB_COLORS.glass,
     borderRadius: 16,
     paddingHorizontal: 12,
     height: 48,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
   },
   searchIcon: {
     marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    color: 'white',
     fontSize: 14,
     fontWeight: '600',
   },
   addButton: {
     width: 48,
     height: 48,
-    backgroundColor: MB_COLORS.brandAccent,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: MB_COLORS.brandAccent,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -335,7 +328,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    color: MB_COLORS.muted,
     marginTop: 12,
     fontSize: 12,
     fontWeight: '800',
@@ -347,7 +339,6 @@ const styles = StyleSheet.create({
     marginTop: 100,
   },
   emptyText: {
-    color: MB_COLORS.muted,
     fontSize: 14,
     fontWeight: '700',
     marginTop: 16,
