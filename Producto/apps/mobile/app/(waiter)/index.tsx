@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
 
 export default function WaiterDashboard() {
   const { restaurantId, user, signOut } = useAuth();
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   const router = useRouter();
   
   const [loading, setLoading] = React.useState(true);
@@ -527,8 +527,8 @@ export default function WaiterDashboard() {
                 <Sparkles size={20} color="#4CAF50" />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.islandTitle}>PLATOS LISTOS</Text>
-                <Text style={styles.islandSub}>{readyTablesList}</Text>
+                <Text style={[styles.islandTitle, { color: '#4CAF50' }]}>PLATOS LISTOS</Text>
+                <Text style={[styles.islandSub, { color: 'rgba(76,175,80,0.7)' }]}>{readyTablesList}</Text>
               </View>
               <TouchableOpacity onPress={() => setIsIslandExpanded(!isIslandExpanded)} style={styles.islandToggle}>
                 <Animated.View style={{ transform: [{ rotate: isIslandExpanded ? '180deg' : '0deg' }] }}>
@@ -537,7 +537,7 @@ export default function WaiterDashboard() {
               </TouchableOpacity>
             </View>
             {isIslandExpanded && (
-              <View style={styles.islandContent}>
+              <View style={[styles.islandContent, { borderTopColor: colors.glassHeavy }]}>
                 {readyOrders.map(order => (
                   <TouchableOpacity 
                     key={order.id} 
@@ -633,7 +633,7 @@ export default function WaiterDashboard() {
             <View>
               <Clock size={16} color={activeTab === 'pedidos' ? 'white' : colors.muted} />
               {pendingOrders.length > 0 && (
-                <View style={styles.tabBadge}>
+                <View style={[styles.tabBadge, { borderColor: colors.navy }]}>
                   <Text style={styles.tabBadgeText}>{pendingOrders.length}</Text>
                 </View>
               )}
@@ -718,8 +718,8 @@ export default function WaiterDashboard() {
               orders.map((order, i) => (
                 <Animated.View key={order.id} entering={FadeInDown.delay(i * 50)} style={[styles.orderCard, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
                   <View style={styles.orderHeader}>
-                    <View style={styles.orderTableBadge}>
-                      <Text style={styles.orderTableText}>MESA {order.tables?.number}</Text>
+                    <View style={[styles.orderTableBadge, { backgroundColor: colors.glass }]}>
+                      <Text style={[styles.orderTableText, { color: colors.text }]}>MESA {order.tables?.number}</Text>
                     </View>
                     <View style={[styles.orderStatusBadge, { backgroundColor: getStatusColor(order.status) + '20' }]}>
                       <Text style={[styles.orderStatusText, { color: getStatusColor(order.status) }]}>{order.status}</Text>
@@ -734,7 +734,7 @@ export default function WaiterDashboard() {
                     ))}
                   </View>
 
-                    <View style={styles.orderFooter}>
+                    <View style={[styles.orderFooter, { borderTopColor: colors.glassHeavy }]}>
                     <Text style={[styles.orderTime, { color: colors.muted }]}>
                       {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </Text>
@@ -762,10 +762,10 @@ export default function WaiterDashboard() {
 
       {/* Merge Mode Bar */}
       {mergeMode && (
-        <Animated.View entering={SlideInDown} style={styles.mergeBar}>
-          <BlurView intensity={80} tint="dark" style={styles.mergeBarBlur}>
+        <Animated.View entering={SlideInDown} style={[styles.mergeBar, { borderColor: colors.glassHeavy }]}>
+          <BlurView intensity={80} tint={isLight ? 'light' : 'dark'} style={styles.mergeBarBlur}>
             <View style={styles.mergeBarInfo}>
-              <Text style={styles.mergeBarText}>GESTIÓN DE MESAS</Text>
+              <Text style={[styles.mergeBarText, { color: colors.text }]}>GESTIÓN DE MESAS</Text>
               <Text style={{ color: colors.muted, fontSize: 9, fontWeight: '700' }}>{selectedTables.length} seleccionadas</Text>
             </View>
             

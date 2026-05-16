@@ -26,7 +26,7 @@ import {
   Clock,
   CheckCircle2
 } from 'lucide-react-native';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../../constants/MB_Theme';
+import { MB_SPACING } from '../../../constants/MB_Theme';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../../context/ThemeContext';
@@ -50,11 +50,11 @@ const styles = StyleSheet.create({
   headerInfo: { alignItems: 'center' },
   tableLabel: { fontSize: 10, fontWeight: '900', letterSpacing: 2 },
   tableNumber: { fontSize: 24, fontWeight: '900' },
-  headerRight: { width: 44, alignItems: 'flex-end' },
+  headerRight: { alignItems: 'flex-end' },
   statusBadge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10 },
   statusText: { fontSize: 10, fontWeight: '900' },
 
-  sectionTitle: { fontSize: 11, fontWeight: '900', letterSpacing: 1.5, color: MB_COLORS.sage, marginBottom: 16, paddingHorizontal: MB_SPACING.lg },
+  sectionTitle: { fontSize: 11, fontWeight: '900', letterSpacing: 1.5, marginBottom: 16, paddingHorizontal: MB_SPACING.lg },
   
   // Current Consumption Section
   consumptionSection: { marginBottom: 24 },
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   cartItemRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' },
   cartItemInfo: { flex: 1 },
   cartItemName: { color: 'white', fontSize: 14, fontWeight: '700' },
-  cartItemPrice: { color: MB_COLORS.sage, fontSize: 12, fontWeight: '600' },
+  cartItemPrice: { fontSize: 12, fontWeight: '600' },
 });
 
 export default function TableOrderScreen() {
@@ -292,7 +292,7 @@ export default function TableOrderScreen() {
     switch (status) {
       case 'PENDING': return <Clock size={12} color="#FF9800" />;
       case 'READY': return <CheckCircle2 size={12} color="#4CAF50" />;
-      default: return <Clock size={12} color={MB_COLORS.sage} />;
+      default: return <Clock size={12} color={colors.muted} />;
     }
   };
 
@@ -329,10 +329,10 @@ export default function TableOrderScreen() {
         {/* Active Consumption Section */}
         {activeOrders.length > 0 && (
           <View style={styles.consumptionSection}>
-            <Text style={styles.sectionTitle}>CONSUMO ACTUAL</Text>
+            <Text style={[styles.sectionTitle, { color: colors.muted }]}>CONSUMO ACTUAL</Text>
             <View style={[styles.consumptionCard, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}>
               {activeOrders.map(order => (
-                <View key={order.id} style={{ marginBottom: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)', paddingBottom: 8 }}>
+                <View key={order.id} style={{ marginBottom: 12, borderBottomWidth: 1, borderBottomColor: colors.glassHeavy, paddingBottom: 8 }}>
                   {order.order_items.map((item: any) => (
                     <View key={item.id} style={styles.consumptionItem}>
                       <Text style={[styles.consumptionItemText, { color: colors.text }]}>
@@ -356,7 +356,7 @@ export default function TableOrderScreen() {
           </View>
         )}
 
-        <Text style={styles.sectionTitle}>AÑADIR AL PEDIDO</Text>
+        <Text style={[styles.sectionTitle, { color: colors.muted }]}>AÑADIR AL PEDIDO</Text>
         
         {/* Search Bar */}
         <View style={styles.searchSection}>
@@ -408,7 +408,7 @@ export default function TableOrderScreen() {
                     </View>
                   )}
                   {cartItem && (
-                    <View style={styles.itemBadge}>
+                    <View style={[styles.itemBadge, { borderColor: colors.navy }]}>
                       <Text style={styles.itemBadgeText}>{cartItem.quantity}</Text>
                     </View>
                   )}
@@ -449,12 +449,12 @@ export default function TableOrderScreen() {
 
       {/* Floating Cart */}
       {cart.length > 0 && (
-        <Animated.View entering={SlideInDown} style={[styles.cartContainer, { borderTopColor: colors.glassHeavy }]}>
-          <View style={[styles.cartContent, { backgroundColor: colors.glassHeavy }]}>
+        <Animated.View entering={SlideInDown} style={[styles.cartContainer, { backgroundColor: colors.navy, borderTopColor: colors.glassHeavy }]}>
+          <View style={[styles.cartContent, { backgroundColor: colors.glass }]}>
             <View style={styles.cartHeader}>
               <View style={styles.cartIconContainer}>
                 <ShoppingCart size={20} color={colors.brandAccent} />
-                <View style={[styles.cartBadge, { backgroundColor: colors.brandAccent }]}>
+                <View style={[styles.cartBadge, { backgroundColor: colors.brandAccent, borderColor: colors.navy }]}>
                   <Text style={styles.cartBadgeText}>{cartCount}</Text>
                 </View>
               </View>
@@ -468,8 +468,8 @@ export default function TableOrderScreen() {
             </View>
             
             <View style={{ flexDirection: 'row', gap: 12, marginTop: 16 }}>
-              <TouchableOpacity onPress={() => setShowReview(true)} style={styles.reviewBtn}>
-                <Text style={styles.reviewBtnText}>REVISAR ({cart.length})</Text>
+              <TouchableOpacity onPress={() => setShowReview(true)} style={[styles.reviewBtn, { backgroundColor: colors.glassHeavy }]}>
+                <Text style={[styles.reviewBtnText, { color: colors.text }]}>REVISAR ({cart.length})</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={[styles.sendBtn, { backgroundColor: colors.brandAccent, flex: 2 }]}
@@ -493,25 +493,25 @@ export default function TableOrderScreen() {
       {/* Review Modal */}
       <Modal visible={showReview} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: colors.navy }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Revisar Bandeja</Text>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Revisar Bandeja</Text>
               <TouchableOpacity onPress={() => setShowReview(false)}>
-                <X size={24} color="white" />
+                <X size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
             <ScrollView style={{ marginBottom: 20 }}>
               {cart.map(item => (
-                <View key={item.id} style={styles.cartItemRow}>
+                <View key={item.id} style={[styles.cartItemRow, { borderBottomColor: colors.glassHeavy }]}>
                   <View style={styles.cartItemInfo}>
-                    <Text style={styles.cartItemName}>{item.name}</Text>
-                    <Text style={styles.cartItemPrice}>{item.quantity}x ${item.price.toLocaleString()}</Text>
+                    <Text style={[styles.cartItemName, { color: colors.text }]}>{item.name}</Text>
+                    <Text style={[styles.cartItemPrice, { color: colors.muted }]}>{item.quantity}x ${item.price.toLocaleString()}</Text>
                   </View>
                   <View style={styles.quantityControls}>
-                    <TouchableOpacity onPress={() => removeFromCart(item.id)} style={[styles.qtyBtn, { backgroundColor: 'rgba(255,255,255,0.05)' }]}>
-                      <Minus size={14} color="white" />
+                    <TouchableOpacity onPress={() => removeFromCart(item.id)} style={[styles.qtyBtn, { backgroundColor: colors.glass }]}>
+                      <Minus size={14} color={colors.text} />
                     </TouchableOpacity>
-                    <Text style={[styles.qtyText, { color: 'white' }]}>{item.quantity}</Text>
+                    <Text style={[styles.qtyText, { color: colors.text }]}>{item.quantity}</Text>
                     <TouchableOpacity onPress={() => addToCart(item)} style={[styles.qtyBtn, { backgroundColor: colors.brandAccent }]}>
                       <Plus size={14} color="white" />
                     </TouchableOpacity>
@@ -519,10 +519,10 @@ export default function TableOrderScreen() {
                 </View>
               ))}
             </ScrollView>
-            <View style={{ borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)', paddingTop: 20 }}>
+            <View style={{ borderTopWidth: 1, borderTopColor: colors.glassHeavy, paddingTop: 20 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
                 <Text style={{ color: colors.muted, fontWeight: '700' }}>TOTAL</Text>
-                <Text style={{ color: 'white', fontSize: 20, fontWeight: '900' }}>${cartTotal.toLocaleString()}</Text>
+                <Text style={{ color: colors.text, fontSize: 20, fontWeight: '900' }}>${cartTotal.toLocaleString()}</Text>
               </View>
               <TouchableOpacity 
                 style={[styles.sendBtn, { backgroundColor: colors.brandAccent, width: '100%' }]}
