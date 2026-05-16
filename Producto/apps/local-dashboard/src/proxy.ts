@@ -34,6 +34,9 @@ export async function proxy(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
   const authUrl  = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3000';
 
+  // API routes only need token refresh — no redirects
+  if (pathname.startsWith('/api')) return response;
+
   const isPublicRoute =
     pathname === '/' ||
     pathname.startsWith('/forgot-password') ||
@@ -117,6 +120,6 @@ export async function proxy(req: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)',
   ],
 };
