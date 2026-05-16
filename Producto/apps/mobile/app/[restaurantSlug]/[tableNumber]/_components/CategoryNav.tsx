@@ -19,12 +19,14 @@ export const CategoryNav = ({
   textColor 
 }: CategoryNavProps) => {
   return (
-    <View style={[styles.categoryContainer, { backgroundColor: bgColor }]}>
+    <View style={[styles.categoryContainer, { backgroundColor: bgColor, borderBottomColor: textColor + '10' }]}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScroll}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[
-            styles.categoryChip, 
-            selectedCategory === 'all' ? { backgroundColor: primaryColor, borderColor: primaryColor } : styles.categoryChipInactive
+            styles.categoryChip,
+            selectedCategory === 'all'
+              ? { backgroundColor: primaryColor, borderColor: primaryColor }
+              : { backgroundColor: textColor + '10', borderColor: textColor + '10' }
           ]}
           onPress={() => onSelectCategory('all')}
         >
@@ -33,11 +35,13 @@ export const CategoryNav = ({
           </Text>
         </TouchableOpacity>
         {categories.map((cat) => (
-          <TouchableOpacity 
-            key={cat.id} 
+          <TouchableOpacity
+            key={cat.id}
             style={[
-              styles.categoryChip, 
-              selectedCategory === cat.id ? { backgroundColor: primaryColor, borderColor: primaryColor } : styles.categoryChipInactive
+              styles.categoryChip,
+              selectedCategory === cat.id
+                ? { backgroundColor: primaryColor, borderColor: primaryColor }
+                : { backgroundColor: textColor + '10', borderColor: textColor + '10' }
             ]}
             onPress={() => onSelectCategory(cat.id)}
           >
@@ -52,10 +56,9 @@ export const CategoryNav = ({
 };
 
 const styles = StyleSheet.create({
-  categoryContainer: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' },
+  categoryContainer: { paddingVertical: 12, borderBottomWidth: 1 },
   categoryScroll: { paddingHorizontal: 20, gap: 8 },
   categoryChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 18, borderWidth: 1 },
-  categoryChipInactive: { backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.05)' },
   categoryText: { fontWeight: '800', fontSize: 13 },
   categoryTextActive: { color: 'white' },
 });

@@ -22,20 +22,19 @@ export const MenuHeader = ({
   hasActiveOrders
 }: MenuHeaderProps) => {
   const primaryColor = theme?.primary_color || '#10b981';
-  const textColor = theme?.text_color || 'white';
 
   return (
     <View style={[styles.header, { backgroundColor: primaryColor }]}>
       {theme?.logo_url && <Image source={{ uri: theme.logo_url }} style={styles.headerBgImage} blurRadius={10} />}
       <View style={styles.headerOverlay} />
-      
+
       <View style={[styles.navBar, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity style={styles.backBtn} onPress={onBack}>
           <ChevronLeft color="white" size={24} />
         </TouchableOpacity>
 
         <View style={styles.headerActions}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.headerActionBtn, { backgroundColor: 'rgba(0,0,0,0.3)' }]}
             onPress={onOpenHistory}
           >
@@ -54,7 +53,7 @@ export const MenuHeader = ({
           </View>
         )}
         <View style={styles.headerInfo}>
-          <Text style={[styles.restaurantName, { color: textColor }]}>{restaurant?.name}</Text>
+          <Text style={styles.restaurantName}>{restaurant?.name}</Text>
           <View style={styles.metaRow}>
             <View style={styles.metaItem}>
               <Star size={14} color="#fbbf24" fill="#fbbf24" />
@@ -79,7 +78,7 @@ const styles = StyleSheet.create({
   headerContent: { padding: 24, flexDirection: 'row', alignItems: 'center', gap: 16 },
   restaurantLogo: { width: 70, height: 70, borderRadius: 20, borderWidth: 2, borderColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center' },
   headerInfo: { flex: 1 },
-  restaurantName: { fontSize: 24, fontWeight: '900', letterSpacing: -0.5 },
+  restaurantName: { fontSize: 24, fontWeight: '900', letterSpacing: -0.5, color: 'white' },
   metaRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   metaText: { color: '#cbd5e1', fontSize: 13, fontWeight: '700' },
