@@ -42,11 +42,11 @@
        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
        className={cn(
          "relative flex flex-col p-8 rounded-[2.5rem] border transition-all duration-700 overflow-hidden",
-         "glass-premium",
-         (status === "PENDING" || status === "VALIDATED") && "border-white/10 bg-white/5 shadow-2xl shadow-black/40",
-         status === "PREPARING" && (type === 'BAR' ? "border-purple-500/30 bg-purple-500/10 shadow-2xl shadow-purple-500/10" : "border-primary/30 bg-primary/10 shadow-2xl shadow-primary/10"),
-         status === "READY" && "border-emerald-500/30 bg-emerald-500/10 shadow-2xl shadow-emerald-500/10",
-         isDelayed && status !== "READY" && "ring-2 ring-destructive/50 bg-destructive/10 animate-pulse"
+         "bg-card",
+         (status === "PENDING" || status === "VALIDATED") && "border-border shadow-2xl shadow-black/10",
+         status === "PREPARING" && (type === 'BAR' ? "border-purple-500/50 bg-purple-500/5 shadow-2xl shadow-purple-500/5" : "border-primary/50 bg-primary/5 shadow-2xl shadow-primary/5"),
+         status === "READY" && "border-emerald-500/50 bg-emerald-500/5 shadow-2xl shadow-emerald-500/5",
+         isDelayed && status !== "READY" && "ring-2 ring-destructive/50 bg-destructive/5 animate-pulse"
        )}
      >
        {/* Bloom effect */}
@@ -67,17 +67,17 @@
          <div className="flex items-center space-x-5">
            <div className={cn(
              "w-20 h-20 rounded-[1.75rem] flex items-center justify-center border transition-all duration-500 group shadow-inner",
-             type === 'BAR' ? "bg-purple-500/10 border-purple-500/20" : "bg-white/5 border-white/10"
+             type === 'BAR' ? "bg-purple-500/10 border-purple-500/20" : "bg-muted/30 border-border"
            )}>
              <span className="text-4xl font-black text-foreground tracking-tighter drop-shadow-sm">{tableNumber ?? "?"}</span>
            </div>
            <div>
              <p className="text-[11px] uppercase font-black tracking-[0.25em] text-foreground/40 mb-1">Mesa</p>
-             <p className="text-[10px] font-bold text-foreground/20 font-mono tracking-widest bg-white/5 px-2 py-0.5 rounded-lg border border-white/5">#{id.slice(0, 8)}</p>
+             <p className="text-[10px] font-bold text-foreground/20 font-mono tracking-widest bg-muted/30 px-2 py-0.5 rounded-lg border border-border">#{id.slice(0, 8)}</p>
            </div>
          </div>
          <div className={cn(
-           "px-5 py-2.5 rounded-2xl flex items-center space-x-2 glass shadow-xl border-white/5",
+           "px-5 py-2.5 rounded-2xl flex items-center space-x-2 bg-muted/30 shadow-xl border border-border",
            isDelayed ? "text-destructive" : "text-foreground/60"
          )}>
            <Clock className="w-4 h-4 opacity-70" />
@@ -105,7 +105,7 @@
              animate={{ opacity: 1, x: 0 }}
              transition={{ delay: idx * 0.1, duration: 0.5, ease: "easeOut" }}
              key={item.id} 
-             className="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/5 border border-white/5 group hover:bg-white/10 hover:border-white/10 transition-all duration-300"
+             className="flex items-center justify-between p-4 rounded-[1.5rem] bg-muted/30 border border-border group hover:bg-muted/50 hover:border-border transition-all duration-300"
            >
              <div className="flex items-center space-x-4">
                <span className={cn(
@@ -130,7 +130,7 @@
 
 
         {onStatusChange && (
-          <div className="pt-8 mt-auto border-t border-white/10 relative z-10">
+          <div className="pt-8 mt-auto border-t border-border relative z-10">
             <div className="flex space-x-4">
               <AnimatePresence mode="wait">
                 {(status === "PENDING" || status === "VALIDATED") && (
@@ -168,7 +168,7 @@
                 )}
                 {status === "READY" && (
                   <div className="flex flex-1 gap-3">
-                    <div className="flex-1 py-5 bg-white/5 border border-white/10 text-emerald-500 rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.25em] flex items-center justify-center space-x-3">
+                    <div className="flex-1 py-5 bg-muted/30 border border-border text-emerald-500 rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.25em] flex items-center justify-center space-x-3">
                       <CheckCircle2 className="w-5 h-5" />
                       <span>Listo</span>
                     </div>
@@ -177,7 +177,7 @@
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={onDismiss}
-                        className="px-5 py-5 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-foreground/40 hover:text-foreground rounded-[1.5rem] transition-all duration-300 flex items-center justify-center"
+                        className="px-5 py-5 bg-muted/30 border border-border hover:bg-muted/50 hover:border-border text-foreground/40 hover:text-foreground rounded-[1.5rem] transition-all duration-300 flex items-center justify-center"
                         title="Retirar de la cola"
                       >
                         <X className="w-5 h-5" />

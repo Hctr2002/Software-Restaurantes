@@ -29,7 +29,7 @@ export function OrderGroupCard({ group, index, isPending, onClick }: Props) {
       transition={{ delay: index * 0.05 }}
       whileHover={{ y: -5, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className={`group relative bg-card/40 border border-white/5 rounded-[2.5rem] p-7 flex flex-col transition-all hover:bg-card/60 hover:border-white/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] cursor-pointer ${
+      className={`group relative bg-card border border-border rounded-[2.5rem] p-7 flex flex-col transition-all hover:border-primary/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] cursor-pointer ${
         !isPending ? "opacity-75" : ""
       } ${group.billRequested ? "ring-2 ring-yellow-500/30 shadow-[0_0_20px_rgba(234,179,8,0.1)]" : ""}`}
       onClick={onClick}
@@ -47,7 +47,7 @@ export function OrderGroupCard({ group, index, isPending, onClick }: Props) {
           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-colors ${
             group.billRequested
               ? "bg-yellow-500/10 border-yellow-500/30 text-yellow-500"
-              : "bg-white/5 border-white/10 text-primary"
+              : "bg-muted border-border text-primary"
           }`}>
             <Hash className="w-6 h-6" />
           </div>
@@ -59,7 +59,7 @@ export function OrderGroupCard({ group, index, isPending, onClick }: Props) {
           </div>
         </div>
         <div className="flex flex-col items-end gap-2">
-          <div className="flex items-center gap-1.5 bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
+          <div className="flex items-center gap-1.5 bg-muted px-2.5 py-1 rounded-lg border border-border">
             <Clock className="w-3 h-3 text-muted-foreground" />
             <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">
               {timeAgo(group.oldestCreatedAt)}
@@ -80,7 +80,7 @@ export function OrderGroupCard({ group, index, isPending, onClick }: Props) {
         {previewItems.map((item, idx) => (
           <div key={`${item.id}-${idx}`} className="flex justify-between items-center group/item">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-black text-muted-foreground bg-foreground/5 w-6 h-6 flex items-center justify-center rounded-lg">
+              <span className="text-xs font-black text-muted-foreground bg-muted w-6 h-6 flex items-center justify-center rounded-lg">
                 {item.quantity}
               </span>
               <span className="text-xs font-bold text-muted-foreground group-hover/item:text-foreground transition-colors truncate max-w-[120px]">
@@ -99,7 +99,7 @@ export function OrderGroupCard({ group, index, isPending, onClick }: Props) {
         )}
       </div>
 
-      <div className="mt-auto pt-6 border-t border-white/5 space-y-4">
+      <div className="mt-auto pt-6 border-t border-border space-y-4">
         <div className="flex justify-between items-end">
           <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total a Cobrar</span>
           <span className="text-2xl font-black text-emerald-400 tracking-tighter">{formatCLP(group.tipIncluded ? group.total * 1.1 : group.total)}</span>
@@ -114,7 +114,7 @@ export function OrderGroupCard({ group, index, isPending, onClick }: Props) {
             Procesar Pago <ChevronRight className="w-4 h-4 ml-2" />
           </Button>
         ) : (
-          <div className="flex items-center justify-center gap-2 py-3 bg-white/5 rounded-2xl border border-white/5">
+          <div className="flex items-center justify-center gap-2 py-3 bg-muted rounded-2xl border border-border">
             <CheckCircle className="w-4 h-4 text-emerald-500" />
             <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Pagado</span>
           </div>

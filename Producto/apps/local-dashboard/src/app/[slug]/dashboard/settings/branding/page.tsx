@@ -98,10 +98,10 @@ export default function BrandingPage() {
       {saveModalMode && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-background/80"
             onClick={() => setSaveModalMode(null)}
           />
-          <div className="relative w-full max-w-sm bg-card border border-white/10 rounded-[2.5rem] p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-sm bg-card border border-border rounded-[2.5rem] p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
             <div className="w-14 h-14 bg-yellow-500/10 rounded-[1.5rem] flex items-center justify-center border border-yellow-500/20 mx-auto">
               <AlertTriangle className="w-7 h-7 text-yellow-500" />
             </div>
@@ -125,7 +125,7 @@ export default function BrandingPage() {
               placeholder="Nombre del tema..."
               value={customName}
               onChange={(e) => setCustomName(e.target.value)}
-              className="w-full h-12 px-4 rounded-2xl bg-foreground/5 border border-foreground/10 text-xs font-bold uppercase tracking-widest focus:outline-none focus:ring-1 focus:ring-primary/30"
+              className="w-full h-12 px-4 rounded-2xl bg-card border border-border text-xs font-bold uppercase tracking-widest focus:outline-none focus:ring-1 focus:ring-primary/30"
             />
 
             <div className="space-y-3 pt-2">

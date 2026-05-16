@@ -87,7 +87,7 @@ export default function LoginPage() {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-background" />
 
       <main className="relative z-10 w-full max-w-md">
-        <Card className="border-foreground/5 backdrop-blur-2xl">
+        <Card className="bg-card border-border shadow-2xl">
           <CardHeader className="text-center space-y-2">
             <CardTitle className="text-4xl tracking-tighter text-foreground">
               Menu <span className="text-primary">Bites</span>
@@ -104,7 +104,7 @@ export default function LoginPage() {
                     type="email"
                     placeholder="admin@mirestaurante.com"
                     required
-                    className="pl-10 bg-foreground/5 border-foreground/10"
+                    className="pl-10 bg-background border-border"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
@@ -116,7 +116,7 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     required
-                    className="pl-10 pr-10 bg-foreground/5 border-foreground/10"
+                    className="pl-10 pr-10 bg-background border-border"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />

@@ -21,7 +21,7 @@ export function PortalCard({
     <div
       className={cn(
         "bg-card text-card-foreground border border-foreground/10 rounded-2xl overflow-hidden",
-        glass && "bg-card/95 backdrop-blur-xl",
+        glass && "bg-card shadow-xl",
         className
       )}
       // Garantiza que el texto dentro de la card use la fuente del cuerpo

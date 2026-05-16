@@ -20,7 +20,7 @@ export function RatingModal({
 }: Props) {
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center animate-in fade-in duration-300">
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-md" />
+      <div className="absolute inset-0 bg-background/95" />
       <div className="relative w-full max-w-md glass-premium rounded-t-[2.5rem] p-8 pb-10 space-y-6 animate-in slide-in-from-bottom duration-400 border-t border-foreground/10">
         {done ? (
           <div className="text-center py-4 space-y-3">

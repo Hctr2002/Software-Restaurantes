@@ -39,7 +39,7 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-slate-950">
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-background">
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 scale-105"
         style={{ backgroundImage: "url('/login_background.png')" }}
@@ -48,7 +48,7 @@ export default function ResetPasswordPage() {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-background" />
 
       <main className="relative z-10 w-full max-w-md">
-        <Card className="border-white/5 backdrop-blur-2xl">
+        <Card className="border-border bg-card">
           <CardHeader className="text-center space-y-2">
             <CardTitle className="text-2xl tracking-tighter">
               Nueva <span className="text-primary">Contraseña</span>

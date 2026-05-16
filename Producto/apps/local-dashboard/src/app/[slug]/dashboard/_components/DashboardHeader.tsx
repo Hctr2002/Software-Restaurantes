@@ -57,7 +57,7 @@ export default function DashboardHeader({ title, subtitle, onOpenMobileMenu }: D
         actions={
           <div className="flex items-center gap-4">
             <button
-              className="lg:hidden p-3 rounded-2xl glass text-foreground/60 hover:text-primary transition-colors"
+              className="lg:hidden p-3 rounded-2xl bg-card border border-border shadow-lg text-foreground/60 hover:text-primary transition-colors"
               onClick={onOpenMobileMenu}
             >
               <MenuIcon className="w-5 h-5" />

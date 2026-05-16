@@ -112,19 +112,19 @@ export default function AlertsPanel() {
       <AnimatePresence>
         {open && (
           <>
-            <div 
-              className="fixed inset-0 z-[50] bg-black/10 backdrop-blur-[2px]" 
-              onClick={() => setOpen(false)} 
-            />
-            <motion.div
-              initial={{ opacity: 0, y: -20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed right-8 top-24 w-96 bg-card/95 glass-premium border border-foreground/10 z-[60] flex flex-col shadow-[0_32px_64px_-12px_rgba(0,0,0,0.2)] rounded-[2.5rem] overflow-hidden"
-            >
+              <div 
+                className="fixed inset-0 z-[50] bg-background/60" 
+                onClick={() => setOpen(false)} 
+              />
+              <motion.div
+                initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="fixed right-8 top-24 w-96 bg-card border border-border z-[60] flex flex-col shadow-[0_32px_64px_-12px_rgba(0,0,0,0.2)] rounded-[2.5rem] overflow-hidden"
+              >
               {/* Header del Panel */}
-              <div className="flex items-center justify-between px-8 py-7 border-b border-foreground/5 bg-primary/[0.03]">
+              <div className="flex items-center justify-between px-8 py-7 border-b border-border bg-muted">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
                     <Bell className="w-5 h-5 text-primary" />
@@ -199,7 +199,7 @@ export default function AlertsPanel() {
 
               {/* Footer opcional */}
               {pendingCount > 0 && (
-                <div className="px-8 py-4 bg-foreground/5 border-t border-foreground/5 flex items-center justify-center">
+                <div className="px-8 py-4 bg-muted border-t border-border flex items-center justify-center">
                   <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em] animate-pulse">
                     Tienes {pendingCount} {pendingCount === 1 ? "atención pendiente" : "atenciones pendientes"}
                   </p>

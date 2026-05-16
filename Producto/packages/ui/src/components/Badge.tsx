@@ -18,7 +18,7 @@ export function Badge({ children, variant = "neutral", className = "" }: BadgePr
     danger:  "bg-red-500/10 text-red-500 border border-red-500/20",
     warning: "bg-amber-500/10 text-amber-500 border border-amber-500/20",
     info:    "bg-primary/10 text-primary border border-primary/20",
-    neutral: "bg-white/5 text-foreground/40 border border-white/10",
+    neutral: "bg-muted text-muted-foreground border border-border",
   };
 
   return <span className={`${base} ${variants[variant]} ${className}`}>{children}</span>;

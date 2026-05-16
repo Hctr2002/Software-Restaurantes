@@ -59,10 +59,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-slate-950">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-background" />
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-background">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-background" />
       <main className="relative z-10 w-full max-w-md">
-        <Card className="border-white/5 backdrop-blur-2xl">
+        <Card className="border-border bg-card shadow-2xl">
           <CardHeader className="text-center space-y-2">
             <CardTitle className="text-4xl tracking-tighter">
               Menu <span className="text-primary">Bites</span>

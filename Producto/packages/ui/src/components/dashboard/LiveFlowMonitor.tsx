@@ -26,7 +26,7 @@ export function LiveFlowMonitor({ orders }: LiveFlowMonitorProps) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card className="border-foreground/10 bg-card backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-lg">
+      <Card className="border-border bg-card rounded-[2.5rem] overflow-hidden shadow-lg">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-3 text-foreground text-base">
             <div className="p-2 bg-primary/10 rounded-xl">
@@ -39,12 +39,12 @@ export function LiveFlowMonitor({ orders }: LiveFlowMonitorProps) {
         <CardContent>
           <div className="grid grid-cols-4 gap-3">
             {[
-              { label: "Pendiente",   count: flowCounts.PENDING,   color: "text-yellow-600 dark:text-yellow-400",  bg: "bg-yellow-500/10 border-yellow-500/20" },
-              { label: "Validado",    count: flowCounts.VALIDATED,  color: "text-blue-600 dark:text-blue-400",    bg: "bg-blue-500/10 border-blue-500/20" },
-              { label: "Preparando",  count: flowCounts.PREPARING,  color: "text-primary",     bg: "bg-primary/10 border-primary/20" },
-              { label: "Listo",       count: flowCounts.READY,      color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
+              { label: "Pendiente",   count: flowCounts.PENDING,   color: "text-amber-500/90",  bg: "bg-amber-500/5 border-amber-500/10" },
+              { label: "Validado",    count: flowCounts.VALIDATED,  color: "text-blue-500/90",    bg: "bg-blue-500/5 border-blue-500/10" },
+              { label: "Preparando",  count: flowCounts.PREPARING,  color: "text-primary",     bg: "bg-primary/5 border-primary/10" },
+              { label: "Listo",       count: flowCounts.READY,      color: "text-emerald-500/90", bg: "bg-emerald-500/5 border-emerald-500/10" },
             ].map(({ label, count, color, bg }) => (
-              <div key={label} className={`flex flex-col items-center p-3 rounded-2xl border ${bg}`}>
+              <div key={label} className={`flex flex-col items-center p-3 rounded-2xl border transition-all duration-300 hover:scale-[1.02] ${bg}`}>
                 <span className={`text-2xl font-black tracking-tighter ${color}`}>{count}</span>
                 <span className="text-[9px] font-black text-foreground/40 uppercase tracking-widest mt-1 text-center leading-tight">{label}</span>
               </div>
@@ -53,7 +53,7 @@ export function LiveFlowMonitor({ orders }: LiveFlowMonitorProps) {
         </CardContent>
       </Card>
 
-      <Card className="border-foreground/10 bg-card backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-lg">
+      <Card className="border-border bg-card rounded-[2.5rem] overflow-hidden shadow-lg border-l-4 border-l-amber-500/30">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-3 text-foreground text-base">
             <div className="p-2 bg-amber-500/10 rounded-xl">
@@ -68,13 +68,13 @@ export function LiveFlowMonitor({ orders }: LiveFlowMonitorProps) {
             <p className="text-sm text-foreground/30 italic">Sin entregas con timestamps hoy.</p>
           ) : (
             <div className="flex items-end gap-3">
-              <span className="text-4xl font-black tracking-tighter text-amber-600 dark:text-amber-400">{avgCycleMin}</span>
+              <span className="text-4xl font-black tracking-tighter text-amber-500/90">{avgCycleMin}</span>
               <span className="text-sm font-black text-foreground/40 uppercase tracking-widest pb-1">min</span>
               <div className="ml-auto">
-                <span className={`text-[10px] font-black px-3 py-1.5 rounded-xl ${
-                  avgCycleMin > 30 ? "bg-red-500/20 text-red-600 dark:text-red-400" :
-                  avgCycleMin > 15 ? "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400" :
-                  "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                <span className={`text-[10px] font-black px-3 py-1.5 rounded-xl border ${
+                  avgCycleMin > 30 ? "bg-red-500/10 border-red-500/20 text-red-500/90" :
+                  avgCycleMin > 15 ? "bg-amber-500/10 border-amber-500/20 text-amber-500/90" :
+                  "bg-emerald-500/10 border-emerald-500/20 text-emerald-500/90"
                 }`}>
                   {avgCycleMin > 30 ? "Lento" : avgCycleMin > 15 ? "Normal" : "Óptimo"}
                 </span>

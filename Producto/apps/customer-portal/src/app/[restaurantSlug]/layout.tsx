@@ -38,7 +38,11 @@ export default function TenantLayout({ children }: { children: React.ReactNode }
       } else {
         setRestaurant(data);
         const themeData = await getThemeByRestaurant(data.id);
-        if (themeData) setTheme(themeData);
+        if (themeData) {
+          setTheme(themeData);
+          // Cachear el tema en localStorage para eliminarlo FOUC en la próxima visita
+          try { localStorage.setItem('mb-theme-' + restaurantSlug, JSON.stringify(themeData)); } catch {}
+        }
       }
       setLoading(false);
     }
@@ -58,7 +62,10 @@ export default function TenantLayout({ children }: { children: React.ReactNode }
         async (payload) => {
           if (payload.new.is_active) {
             const updated = await getThemeByRestaurant(restaurantId);
-            if (updated) setTheme(updated);
+            if (updated) {
+              setTheme(updated);
+              try { localStorage.setItem('mb-theme-' + restaurant.slug, JSON.stringify(updated)); } catch {}
+            }
           }
         }
       )

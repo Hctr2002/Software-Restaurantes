@@ -3,18 +3,16 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "@menu-bites/store";
-import { 
-  supabase, 
-  signOut, 
-  getSession, 
-  formatCLP, 
-  useCashierOrders, 
-  useTableStatus, 
-  useThemeSync,
+import {
+  supabase,
+  signOut,
+  getSession,
+  formatCLP,
+  useCashierOrders,
+  useTableStatus,
   useAlertForm
 } from "@menu-bites/auth";
-import { 
-  RestaurantThemeProvider, 
+import {
   OrderCardSkeleton,
   OrderGroupCard,
   groupOrders,
@@ -46,7 +44,6 @@ export default function CashierPage() {
   // Bloquea el botón de confirmación en PaymentSlideOver para evitar doble envío.
   const [isPaying, setIsPaying] = useState(false);
   const { tables } = useTableStatus(user?.restaurantId);
-  const theme = useThemeSync(user?.restaurantId, "cashier");
 
   const [activeTab, setActiveTab] = useState<"pending" | "history">("pending");
   const [selectedGroup, setSelectedGroup] = useState<TableGroup | null>(null);
@@ -135,8 +132,7 @@ export default function CashierPage() {
 
 
   return (
-    <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
-      <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
+    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
         <div className="p-4 sm:p-6 pt-6 sm:pt-8 pb-0">
           <CashierHeader
             userEmail={user?.email}
@@ -254,6 +250,5 @@ export default function CashierPage() {
           />
         )}
       </div>
-    </RestaurantThemeProvider>
   );
 }

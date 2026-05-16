@@ -3,8 +3,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, AlertTriangle } from "lucide-react";
-import { useAuthStore } from "@menu-bites/store";
-import { useRealtimeOrders, useRealtimeStats, useTables, STALE_ORDER_MINUTES } from "@menu-bites/auth";
+import { useLocalDashboard } from "../../../hooks/useLocalDashboard";
 
 import LocalShell from "./_components/LocalShell";
 import { 
@@ -16,15 +15,14 @@ import {
 } from "@menu-bites/ui";
 
 export default function DashboardPage() {
-  const { user } = useAuthStore();
-  const restaurantId = user?.restaurantId;
-
-  // Hooks de tiempo real centralizados
-  const { orders, loading: ordersLoading } = useRealtimeOrders(restaurantId);
-  const { stats, loading: statsLoading } = useRealtimeStats(restaurantId);
-  const { tables, loading: tablesLoading } = useTables(restaurantId);
-
-  const loading = ordersLoading || statsLoading || tablesLoading;
+  const { 
+    orders, 
+    stats, 
+    tables, 
+    loading, 
+    activeOrdersCount, 
+    staleMinutes 
+  } = useLocalDashboard();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -43,10 +41,10 @@ export default function DashboardPage() {
         className="space-y-8"
       >
         {/* KPI Section */}
-        <KpiGrid stats={stats} activeOrdersCount={orders.filter(o => ["PENDING", "PREPARING"].includes(o.status)).length} />
+        <KpiGrid stats={stats} activeOrdersCount={activeOrdersCount} />
 
         {/* Stale Orders Alerts (Unified Component) */}
-        <StaleOrdersAlert orders={orders} staleMinutes={STALE_ORDER_MINUTES} />
+        <StaleOrdersAlert orders={orders} staleMinutes={staleMinutes} />
 
         {/* Live Flow & Metrics */}
         <LiveFlowMonitor orders={orders} />

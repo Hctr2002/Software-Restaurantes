@@ -50,8 +50,8 @@ export function ProblemSection() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-40px" }}
-            className="group p-6 bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-3xl
-                       hover:border-red-500/20 transition-all duration-500"
+            className="group p-6 bg-card border border-white/5 rounded-3xl
+                       hover:border-red-500/20 transition-all duration-500 shadow-xl"
           >
             <div className={`w-12 h-12 ${p.bg} rounded-2xl flex items-center justify-center mb-4 
                             group-hover:scale-110 transition-transform duration-500`}>

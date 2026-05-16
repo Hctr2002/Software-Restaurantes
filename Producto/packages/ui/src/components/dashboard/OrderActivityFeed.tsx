@@ -24,7 +24,7 @@ function orderStatusVariant(status: string) {
 export function OrderActivityFeed({ orders, topItems }: OrderActivityFeedProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card className="border-foreground/10 bg-card backdrop-blur-xl rounded-[2.5rem] overflow-hidden group shadow-lg">
+      <Card className="border-border bg-card rounded-[2.5rem] overflow-hidden group shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-foreground">
             <div className="p-2 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform">
@@ -57,7 +57,7 @@ export function OrderActivityFeed({ orders, topItems }: OrderActivityFeedProps) 
         </CardContent>
       </Card>
 
-      <Card className="border-foreground/10 bg-card backdrop-blur-xl rounded-[2.5rem] overflow-hidden group shadow-lg">
+      <Card className="border-border bg-card rounded-[2.5rem] overflow-hidden group shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-foreground">
             <div className="p-2 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform">

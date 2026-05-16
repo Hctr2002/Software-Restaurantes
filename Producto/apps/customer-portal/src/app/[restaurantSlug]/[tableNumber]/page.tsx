@@ -14,6 +14,7 @@ import {
   CuentaSheet,
   PremiumHeader,
   PortalPrimaryButton,
+  PortalText,
 } from '@menu-bites/ui';
 import { Loader2, Store, ShoppingBag, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -173,7 +174,7 @@ export default function MenuPage({
         />
 
         {/* Bloque de Navegación Unificado Pro Max */}
-        <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-md shadow-2xl border-b border-foreground/5">
+        <div className="sticky top-0 z-50 bg-background shadow-2xl border-b border-border">
           <div className="p-4 lg:p-6 pb-2">
             <PremiumHeader
               title={restaurant?.name || ''}
@@ -182,23 +183,21 @@ export default function MenuPage({
               statusLabel="En Servicio"
               statusSubLabel={portal.table.data ? `Mesa ${portal.table.data.number}` : "Escanea tu mesa"}
               isSolid
-              className="border border-foreground/10"
+              className="border border-border"
               actions={
                 <div className="flex items-center gap-2 sm:gap-3">
                   {/* // Función para heredar el botón de búsqueda con estilo ghost dinámico */}
                   <PortalPrimaryButton 
                     variant="ghost" 
-                    className="rounded-2xl w-12 h-12 p-0 flex items-center justify-center bg-foreground/5 border-foreground/10 text-muted-foreground hover:text-foreground transition-all"
+                    className="rounded-2xl w-12 h-12 p-0 flex items-center justify-center bg-muted/30 border-border text-muted-foreground hover:text-foreground transition-all"
                   >
                     <Search className="w-5 h-5" />
                   </PortalPrimaryButton>
                   
                   <div className="relative">
                     {/* // Función para heredar el botón del carrito con el color primario del restaurante */}
-                    <PortalPrimaryButton 
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setIsCheckoutOpen(true)} 
+                    <PortalPrimaryButton
+                      onClick={() => setIsCheckoutOpen(true)}
                       className="w-12 h-12 sm:w-14 sm:h-14 p-0 rounded-2xl shadow-xl shadow-primary/30 group relative overflow-hidden"
                     >
                       <motion.div 

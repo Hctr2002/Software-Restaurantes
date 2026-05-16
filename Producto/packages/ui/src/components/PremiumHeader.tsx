@@ -37,7 +37,7 @@ export const PremiumHeader = ({
   children,
   className,
   variant = "default",
-  isSolid = false
+  isSolid = true
 }: PremiumHeaderProps) => {
   const isCompact = variant === "compact";
 
@@ -46,15 +46,13 @@ export const PremiumHeader = ({
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       className={cn(
-        isSolid ? "bg-card" : "glass-premium transition-all duration-500",
-        "relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)]",
-        "before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/5 before:to-transparent before:pointer-events-none",
+        "bg-card border border-border transition-all duration-500",
+        "relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.1)]",
         isCompact ? "rounded-[2rem] p-4 gap-4" : "rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-6 gap-4 sm:gap-6",
         "flex flex-row justify-between items-center",
         className
       )}
       // Inyectar fondo de card si es sólido
-      style={isSolid ? { backgroundColor: 'hsl(var(--card))', opacity: 1 } : undefined}
     >
       <div className="flex items-center space-x-3 sm:space-x-4 lg:space-x-6 flex-1 min-w-0">
         {/* Contenedor del Icono con color primario del tema */}
@@ -103,7 +101,7 @@ export const PremiumHeader = ({
       {/* Área de Estadísticas y Acciones */}
       <div className="flex flex-row items-center gap-3 lg:gap-6 justify-end">
         {stats && (
-          <div className="hidden sm:flex items-center divide-x divide-white/5 px-4 py-2.5 glass rounded-[1.5rem] border border-white/5 shadow-xl">
+          <div className="hidden sm:flex items-center divide-x divide-border px-4 py-2.5 bg-card rounded-[1.5rem] border border-border shadow-xl">
             {stats}
           </div>
         )}

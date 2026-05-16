@@ -116,10 +116,10 @@ export default function SavedThemes({ themes, activeThemeId, onDelete, onDeleteM
                 onClick={() => isSelectable && toggleSelect(theme.id)}
                 className={`group relative overflow-hidden rounded-[2.5rem] border transition-all duration-300 ${
                   isActive
-                    ? "bg-white/10 border-primary/50 shadow-2xl shadow-primary/10"
+                    ? "bg-card border-primary shadow-2xl shadow-primary/10"
                     : isSelected
-                    ? "bg-red-500/10 border-red-500/50 shadow-lg shadow-red-500/10"
-                    : "bg-white/5 border-white/10 hover:bg-white/10"
+                    ? "bg-destructive/5 border-destructive shadow-lg shadow-destructive/10"
+                    : "bg-card border-border hover:border-primary/30"
                 } ${isSelectable ? "cursor-pointer" : ""}`}
               >
                 {/* Checkbox de selección */}
@@ -217,7 +217,7 @@ export default function SavedThemes({ themes, activeThemeId, onDelete, onDeleteM
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 24 }}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 bg-background/90 backdrop-blur-xl border border-white/10 rounded-[2rem] shadow-2xl"
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 bg-card border border-border rounded-[2rem] shadow-2xl"
           >
             <span className="text-[10px] font-black uppercase tracking-widest text-foreground/60">
               {selectedIds.size} {selectedIds.size === 1 ? "tema seleccionado" : "temas seleccionados"}

@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-background" />
 
       <main className="relative z-10 w-full max-w-md">
-        <Card className="border-foreground/5 backdrop-blur-2xl">
+        <Card className="border-border bg-card">
           <CardHeader className="text-center space-y-2">
             <CardTitle className="text-2xl tracking-tighter text-foreground">
               Recuperar <span className="text-primary">Acceso</span>

@@ -16,7 +16,7 @@ interface CategoryNavProps {
  */
 export function CategoryNav({ categories, activeCategory, onSelectCategory }: CategoryNavProps) {
   return (
-    <nav className="px-6 overflow-x-auto no-scrollbar flex gap-2 pb-1 bg-transparent border-t border-foreground/5">
+    <nav className="px-6 overflow-x-auto no-scrollbar flex gap-2 pb-1 bg-transparent border-t border-border">
       {/* // Función para mostrar todos los platos de la carta completa */}
       <PortalPrimaryButton 
         variant="ghost"

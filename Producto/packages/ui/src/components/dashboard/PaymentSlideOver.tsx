@@ -28,7 +28,7 @@ export function PaymentSlideOver({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-background/40 backdrop-blur-md pointer-events-auto"
+          className="absolute inset-0 bg-background/80 pointer-events-auto"
           onClick={onClose}
         />
 
@@ -37,10 +37,10 @@ export function PaymentSlideOver({
           animate={{ opacity: 1, x: 0, scale: 1 }}
           exit={{ opacity: 0, x: 20, scale: 0.95 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-lg bg-card/95 backdrop-blur-xl h-[calc(100vh-3rem)] shadow-2xl border border-white/10 flex flex-col rounded-[2.5rem] pointer-events-auto"
+          className="relative w-full max-w-lg bg-card h-[calc(100vh-3rem)] shadow-2xl border border-border flex flex-col rounded-[2.5rem] pointer-events-auto"
         >
           {/* Header */}
-          <div className="p-10 border-b border-white/5 relative overflow-hidden">
+          <div className="p-10 border-b border-border relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-5">
               <Receipt className="w-32 h-32 rotate-12" />
             </div>
@@ -49,7 +49,7 @@ export function PaymentSlideOver({
                 onClick={onClose}
                 className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition-all group"
               >
-                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-all">
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center group-hover:bg-muted/80 transition-all">
                   <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-widest">Volver</span>
@@ -64,7 +64,7 @@ export function PaymentSlideOver({
               </div>
             </div>
             <div className="flex items-center gap-6 relative z-10">
-              <div className="w-20 h-20 bg-primary rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-primary/30 border border-white/20">
+              <div className="w-20 h-20 bg-primary rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-primary/30 border border-primary/20">
                 <Hash className="w-10 h-10 text-primary-foreground" />
               </div>
               <div>
@@ -100,10 +100,10 @@ export function PaymentSlideOver({
                   <motion.div
                     key={`${item.id}-${idx}`}
                     variants={{ hidden: { x: 20, opacity: 0 }, show: { x: 0, opacity: 1 } }}
-                    className="bg-white/5 border border-white/5 rounded-3xl p-5 flex justify-between items-center hover:bg-white/10 transition-all"
+                    className="bg-muted/30 border border-border/50 rounded-3xl p-5 flex justify-between items-center hover:bg-muted/50 transition-all"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 flex items-center justify-center bg-card rounded-2xl text-xs font-black text-primary border border-white/10 shadow-lg">
+                      <div className="w-10 h-10 flex items-center justify-center bg-background rounded-2xl text-xs font-black text-primary border border-border shadow-lg">
                         {item.quantity}
                       </div>
                       <div>
@@ -122,7 +122,7 @@ export function PaymentSlideOver({
             </div>
 
             {/* Totals */}
-            <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 space-y-5 relative overflow-hidden group/total">
+            <div className="bg-muted/30 border border-border rounded-[2.5rem] p-8 space-y-5 relative overflow-hidden group/total">
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[80px] -z-10 group-hover/total:bg-emerald-500/20 transition-all" />
               <div className="flex justify-between items-center text-muted-foreground/60">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Neto Consumo</span>
@@ -134,7 +134,7 @@ export function PaymentSlideOver({
                   <span className="text-sm font-black font-mono">{formatCLP(group.total * 0.1)}</span>
                 </div>
               )}
-              <div className="h-px bg-white/5" />
+              <div className="h-px bg-border" />
               <div className="flex justify-between items-center">
                 <span className="text-sm font-black text-primary uppercase tracking-[0.2em]">Total a Cobrar</span>
                 <span className="text-4xl font-black text-emerald-400 tracking-tighter drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
@@ -156,7 +156,7 @@ export function PaymentSlideOver({
                   placeholder="Ej: #998877"
                   value={paymentReference}
                   onChange={(e) => onPaymentRefChange(e.target.value)}
-                  className="w-full bg-background border border-border/10 rounded-2xl p-4 pl-12 focus:outline-none focus:border-emerald-500/50 transition-all font-mono text-sm text-foreground"
+                  className="w-full bg-background border border-border rounded-2xl p-4 pl-12 focus:outline-none focus:border-primary transition-all font-mono text-sm text-foreground"
                 />
               </div>
               <p className="text-[9px] text-muted-foreground/60 italic ml-1">Vincule el ticket físico con este registro del sistema.</p>
@@ -164,7 +164,7 @@ export function PaymentSlideOver({
           </div>
 
           {/* Footer */}
-          <div className="p-10 border-t border-white/5 bg-card/50 backdrop-blur-xl">
+          <div className="p-10 border-t border-border bg-card">
             <Button
               onClick={onConfirm}
               disabled={isProcessing}

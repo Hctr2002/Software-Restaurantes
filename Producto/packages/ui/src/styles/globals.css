@@ -49,6 +49,12 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 45 93% 47%;
+    --warning-foreground: 26 83% 14%;
+
     --border: 214 20% 90%;
     --input: 214 15% 95%;
     --ring: var(--sage);
@@ -90,6 +96,12 @@
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
 
+    --success: 142 71% 40%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 45 93% 50%;
+    --warning-foreground: 26 83% 14%;
+
     --border: 0 0% 15%;
     --input: 0 0% 12%;
     --ring: var(--sage);
@@ -117,24 +129,16 @@
 }
 
 /* ============================================
-   GLASS MORPHISM v2.0 (Pro Max)
+   SOLID SURFACE SYSTEM (Premium Minimalist)
    ============================================ */
 .glass {
-  background: hsl(var(--card) / 0.4);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: hsl(var(--card));
   border: 1px solid hsl(var(--foreground) / 0.1);
   box-shadow: 0 8px 32px 0 hsl(0 0% 0% / 0.05);
 }
 
 .glass-premium {
-  background: linear-gradient(
-    135deg,
-    hsl(var(--card) / 0.6) 0%,
-    hsl(var(--card) / 0.2) 100%
-  );
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  background: hsl(var(--card));
   border: 1px solid hsl(var(--foreground) / 0.15);
   box-shadow: 
     0 4px 24px -1px hsl(0 0% 0% / 0.1),
@@ -142,16 +146,12 @@
 }
 
 .glass-sage {
-  background: hsl(var(--sage) / 0.08);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid hsl(var(--sage) / 0.15);
+  background: hsl(var(--sage) / 0.15);
+  border: 1px solid hsl(var(--sage) / 0.2);
 }
 
 .glass-navy {
-  background: hsl(var(--navy) / 0.8);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: hsl(var(--navy));
   border: 1px solid hsl(0 0% 100% / 0.1);
 }
 
@@ -383,14 +383,8 @@
 }
 
 .glass-bar {
-  background: linear-gradient(
-    135deg,
-    hsla(270, 40%, 12%, 0.7) 0%,
-    hsla(270, 40%, 5%, 0.4) 100%
-  );
-  backdrop-filter: blur(40px) saturate(220%);
-  -webkit-backdrop-filter: blur(40px) saturate(220%);
-  border: 1px solid hsla(270, 80%, 75%, 0.2);
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--foreground) / 0.15);
   box-shadow: 
     0 10px 40px -10px rgba(0, 0, 0, 0.4),
     inset 0 0 25px 0 hsla(270, 80%, 80%, 0.05);

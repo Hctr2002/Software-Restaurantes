@@ -25,13 +25,13 @@ export function ConfirmationOverlay({ show, tableData, restaurantName, onClose }
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-8 text-center bg-background/95 backdrop-blur-2xl"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-8 text-center bg-background"
     >
       <motion.div 
         initial={{ scale: 0.5, y: 20, opacity: 0 }}
         animate={{ scale: 1, y: 0, opacity: 1 }}
         transition={{ type: "spring", delay: 0.2 }}
-        className="glass-premium p-10 sm:p-16 rounded-[3rem] sm:rounded-[4rem] border border-foreground/10 flex flex-col items-center max-w-sm sm:max-w-md w-full shadow-2xl shadow-primary/20"
+        className="bg-card p-10 sm:p-16 rounded-[3rem] sm:rounded-[4rem] border border-border flex flex-col items-center max-w-sm sm:max-w-md w-full shadow-2xl shadow-primary/20"
       >
         {/* // Función para mostrar el icono animado de éxito con efectos de brillo */}
         <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-[2rem] bg-primary flex items-center justify-center mb-6 sm:mb-8 shadow-2xl shadow-primary/40 relative">
@@ -51,7 +51,7 @@ export function ConfirmationOverlay({ show, tableData, restaurantName, onClose }
         
         {/* // Función para mostrar la información de la mesa y el restaurante */}
         {tableData && (
-          <div className="bg-foreground/5 px-4 py-2 rounded-xl mb-8 sm:mb-12 border border-foreground/5">
+          <div className="bg-muted/30 px-4 py-2 rounded-xl mb-8 sm:mb-12 border border-border">
             <PortalText as="span" font="accent" className="text-[10px] sm:text-xs font-black text-primary/60 uppercase tracking-[0.2em]">
               Mesa #{tableData.number} · {restaurantName}
             </PortalText>

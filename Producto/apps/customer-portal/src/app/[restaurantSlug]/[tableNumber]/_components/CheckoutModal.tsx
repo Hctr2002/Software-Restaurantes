@@ -31,8 +31,8 @@ export function CheckoutModal({
   return (
     <div className="fixed inset-0 z-[60] animate-in fade-in duration-300">
       {/* // Función para cerrar el modal al hacer clic en el fondo */}
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-md" onClick={onClose} />
-      <div className="absolute bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl rounded-t-[2.5rem] p-8 max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom duration-500 border-t border-foreground/10 shadow-[0_-20px_50px_rgba(0,0,0,0.3)]">
+      <div className="absolute inset-0 bg-background/95" onClick={onClose} />
+      <div className="absolute bottom-0 left-0 right-0 bg-card rounded-t-[2.5rem] p-8 max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom duration-500 border-t border-foreground/10 shadow-[0_-20px_50px_rgba(0,0,0,0.3)]">
         <div className="w-12 h-1.5 bg-foreground/10 rounded-full mx-auto mb-8" />
         
         {/* // Función para mostrar el título dinámico con la fuente del tema */}
@@ -72,7 +72,7 @@ export function CheckoutModal({
             <div className="text-right">
               {/* // Función para mostrar la etiqueta de mesa con fuente de acento heredada */}
               <PortalText as="span" muted font="accent" className="block text-[10px] uppercase font-black tracking-widest mb-1">Mesa</PortalText>
-              <PortalHeading as="span" font="accent" className="text-3xl font-black italic text-primary tracking-tighter leading-none">#{table.data.number}</PortalHeading>
+              <PortalHeading as="h2" font="accent" className="text-3xl font-black italic text-primary tracking-tighter leading-none">#{table.data.number}</PortalHeading>
             </div>
           </div>
         ) : (
@@ -99,8 +99,8 @@ export function CheckoutModal({
             </div>
           )}
           <div className="flex justify-between items-center pt-4 border-t border-foreground/10">
-            <PortalHeading as="span" className="text-foreground font-bold text-lg">Total</PortalHeading>
-            <PortalHeading as="span" className="text-primary font-black text-2xl">${cartTotal.toLocaleString()}</PortalHeading>
+            <PortalHeading as="h3" className="text-foreground font-bold text-lg">Total</PortalHeading>
+            <PortalHeading as="h3" className="text-primary font-black text-2xl">${cartTotal.toLocaleString()}</PortalHeading>
           </div>
         </div>
 

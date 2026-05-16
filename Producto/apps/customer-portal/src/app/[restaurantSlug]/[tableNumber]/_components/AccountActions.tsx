@@ -116,7 +116,7 @@ export function AccountActions({
                 {/* Lado izquierdo: Resumen de cantidades con herencia de fuente de acento */}
                 <div className="flex items-center gap-3 sm:gap-4 relative z-10">
                   <PortalText 
-                    className="bg-primary-foreground/20 backdrop-blur-md text-primary-foreground w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center font-black text-lg sm:text-xl"
+                    className="bg-primary-foreground/30 text-primary-foreground w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center font-black text-lg sm:text-xl"
                     font="accent"
                   >
                     {cartCount}

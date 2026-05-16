@@ -67,10 +67,10 @@ export function CuentaSheet({ tableLabel, orders, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-[70] animate-in fade-in duration-200">
       {/* Fondo desenfocado — usa el color de fondo del tema */}
-      <div className="absolute inset-0 bg-background/90 backdrop-blur-xl" onClick={onClose} />
+      <div className="absolute inset-0 bg-background/95" onClick={onClose} />
       
-      {/* Contenedor principal con efecto glass y bordes redondeados */}
-      <div className="absolute bottom-0 left-0 right-0 glass-panel rounded-t-[2.5rem] p-6 h-[85vh] flex flex-col animate-in slide-in-from-bottom duration-300 border-t border-white/10 shadow-2xl">
+      {/* Contenedor principal sólido y bordes redondeados */}
+      <div className="absolute bottom-0 left-0 right-0 bg-card rounded-t-[2.5rem] p-6 h-[85vh] flex flex-col animate-in slide-in-from-bottom duration-300 border-t border-foreground/10 shadow-2xl">
         
         {/* Encabezado de la hoja de cuenta */}
         <div className="flex items-center justify-between mb-6 shrink-0">
@@ -167,7 +167,7 @@ export function CuentaSheet({ tableLabel, orders, onClose }: Props) {
 
         {/* Total General — Fijo en la parte inferior */}
         {orders.length > 0 && (
-          <div className="mt-4 pt-5 border-t border-foreground/10 flex justify-between items-center bg-background/50 backdrop-blur-xl -mx-6 px-6 -mb-6 pb-6 rounded-b-[2.5rem] shrink-0">
+          <div className="mt-4 pt-5 border-t border-foreground/10 flex justify-between items-center bg-card -mx-6 px-6 -mb-6 pb-6 rounded-b-[2.5rem] shrink-0">
             <div>
               {/* // Función para mostrar el título del total general del consumo */}
               <PortalHeading as="h3" className="font-bold text-lg block">Total Acumulado</PortalHeading>

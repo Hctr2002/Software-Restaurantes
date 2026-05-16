@@ -33,8 +33,8 @@ export function DesignTabs({
 }: DesignTabsProps) {
   return (
     <div className="lg:col-span-7 space-y-8">
-      {/* Selector de Pestañas con Efecto de Cristal */}
-      <div className="flex p-1.5 bg-foreground/5 backdrop-blur-xl rounded-3xl border border-foreground/10 sticky top-24 z-30 shadow-2xl">
+      {/* Selector de Pestañas Sólido */}
+      <div className="flex p-1.5 bg-card rounded-3xl border border-border sticky top-24 z-30 shadow-2xl">
         <TabButton 
           active={activeTab === 'style'} 
           onClick={() => setActiveTab('style')} 

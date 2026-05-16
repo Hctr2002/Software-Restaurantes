@@ -13,7 +13,7 @@ interface TableStatusBoardProps {
 
 export function TableStatusBoard({ tables }: TableStatusBoardProps) {
   return (
-    <Card className="border-foreground/10 bg-card backdrop-blur-xl rounded-[2.5rem] overflow-hidden group mt-6 shadow-lg">
+    <Card className="border-border bg-card rounded-[2.5rem] overflow-hidden group mt-6 shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center gap-3 text-foreground">
           <div className="p-2 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform">
@@ -33,29 +33,29 @@ export function TableStatusBoard({ tables }: TableStatusBoardProps) {
                 whileHover={{ scale: 1.05 }}
                 key={table.id}
                 className={cn(
-                  "flex flex-col items-center justify-center p-6 rounded-[2rem] border text-center transition-all duration-300 shadow-lg",
-                  table.status === "FREE"      && "bg-emerald-500/10 border-emerald-500/20 shadow-emerald-500/5",
-                  table.status === "OCCUPIED"  && "bg-red-500/10 border-red-500/20 shadow-red-500/5",
-                  table.status === "RESERVED"  && "bg-amber-500/10 border-amber-500/20 shadow-amber-500/5",
-                  table.status === "CLEANING"  && "bg-sky-500/10 border-sky-500/20 shadow-sky-500/5",
-                  !["FREE","OCCUPIED","RESERVED","CLEANING"].includes(table.status) && "bg-foreground/[0.03] border-foreground/10"
+                  "flex flex-col items-center justify-center p-6 rounded-[2.5rem] border text-center transition-all duration-300 shadow-lg",
+                  table.status === "FREE"      && "bg-emerald-500/5 border-emerald-500/10 shadow-emerald-500/5",
+                  table.status === "OCCUPIED"  && "bg-red-500/5 border-red-500/10 shadow-red-500/5",
+                  table.status === "RESERVED"  && "bg-amber-500/5 border-amber-500/10 shadow-amber-500/5",
+                  table.status === "CLEANING"  && "bg-sky-500/5 border-sky-500/10 shadow-sky-500/5",
+                  !["FREE","OCCUPIED","RESERVED","CLEANING"].includes(table.status) && "bg-foreground/[0.03] border-foreground/5"
                 )}
               >
                 <p className={cn(
                   "text-3xl font-black tracking-tighter",
-                  table.status === "FREE"     && "text-emerald-600 dark:text-emerald-400",
-                  table.status === "OCCUPIED" && "text-red-600 dark:text-red-400",
-                  table.status === "RESERVED" && "text-amber-600 dark:text-amber-400",
-                  table.status === "CLEANING" && "text-sky-600 dark:text-sky-400",
+                  table.status === "FREE"     && "text-emerald-500/90",
+                  table.status === "OCCUPIED" && "text-red-500/90",
+                  table.status === "RESERVED" && "text-amber-500/90",
+                  table.status === "CLEANING" && "text-sky-500/90",
                 )}>
                   {table.number}
                 </p>
                 <span className={cn(
-                  "text-[10px] font-black uppercase mt-1 tracking-widest",
-                  table.status === "FREE"     && "text-emerald-700 dark:text-emerald-500",
-                  table.status === "OCCUPIED" && "text-red-700 dark:text-red-500",
-                  table.status === "RESERVED" && "text-amber-700 dark:text-amber-500",
-                  table.status === "CLEANING" && "text-sky-700 dark:text-sky-500",
+                  "text-[9px] font-black uppercase mt-1 tracking-widest leading-none",
+                  table.status === "FREE"     && "text-emerald-500/60",
+                  table.status === "OCCUPIED" && "text-red-500/60",
+                  table.status === "RESERVED" && "text-amber-500/60",
+                  table.status === "CLEANING" && "text-sky-500/60",
                 )}>
                   {table.status === "FREE" ? "Libre" : table.status === "OCCUPIED" ? "Uso" :
                    table.status === "CLEANING" ? "Limpieza" : "Resv"}

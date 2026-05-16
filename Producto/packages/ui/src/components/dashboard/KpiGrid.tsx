@@ -14,14 +14,14 @@ interface KpiGridProps {
 
 export function KpiCard({ icon, label, value, detail }: { icon: React.ReactNode; label: string; value: string; detail: string }) {
   return (
-    <Card className="border-foreground/10 bg-card backdrop-blur-xl rounded-[2.5rem] overflow-hidden relative shadow-lg transition-all duration-500 hover:shadow-xl hover:-translate-y-1">
+    <Card className="border-border bg-card rounded-[2.5rem] overflow-hidden relative shadow-lg transition-all duration-500 hover:shadow-xl hover:-translate-y-1">
       <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity group-hover:scale-150 transition-transform duration-700">
         {icon}
       </div>
       <CardContent className="pt-8 px-8 pb-8 relative z-10">
         <div className="flex items-center gap-2 mb-2">
-          <div className="p-1.5 bg-primary/10 rounded-lg">
-            {React.cloneElement(icon as React.ReactElement<any>, { className: "w-3 h-3 text-primary" })}
+          <div className="p-1.5 bg-primary rounded-lg shadow-lg shadow-primary/20">
+            {React.cloneElement(icon as React.ReactElement<any>, { className: "w-3 h-3 text-primary-foreground" })}
           </div>
           <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-black">{label}</p>
         </div>
@@ -42,7 +42,7 @@ export function KpiGrid({ stats, activeOrdersCount }: KpiGridProps) {
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
       <motion.div variants={itemVariants}>
         <KpiCard
-          icon={<Wallet className="w-5 h-5 text-emerald-400" />}
+          icon={<Wallet className="w-5 h-5 text-primary/80" />}
           label="Ingresos Hoy"
           value={formatPrice(stats?.ingresos_dia ?? 0)}
           detail={`${stats?.pedidos_dia ?? 0} pedidos hoy`}
@@ -50,7 +50,7 @@ export function KpiGrid({ stats, activeOrdersCount }: KpiGridProps) {
       </motion.div>
       <motion.div variants={itemVariants}>
         <KpiCard
-          icon={<TrendingUp className="w-5 h-5 text-primary" />}
+          icon={<TrendingUp className="w-5 h-5 text-primary/80" />}
           label="Ingresos Mes"
           value={formatPrice(stats?.ingresos_mes ?? 0)}
           detail="Ventas acumuladas"
@@ -58,7 +58,7 @@ export function KpiGrid({ stats, activeOrdersCount }: KpiGridProps) {
       </motion.div>
       <motion.div variants={itemVariants}>
         <KpiCard
-          icon={<ReceiptText className="w-5 h-5 text-amber-400" />}
+          icon={<ReceiptText className="w-5 h-5 text-primary/80" />}
           label="Ticket Promedio"
           value={formatPrice(stats?.ticket_promedio ?? 0)}
           detail="Hoy por entrega"
@@ -66,7 +66,7 @@ export function KpiGrid({ stats, activeOrdersCount }: KpiGridProps) {
       </motion.div>
       <motion.div variants={itemVariants}>
         <KpiCard
-          icon={<ClipboardList className="w-5 h-5 text-rose-400" />}
+          icon={<ClipboardList className="w-5 h-5 text-primary/80" />}
           label="Pedidos Activos"
           value={String(activeOrdersCount)}
           detail="Pendientes/Cocina"

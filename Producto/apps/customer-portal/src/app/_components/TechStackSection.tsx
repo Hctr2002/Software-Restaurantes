@@ -42,8 +42,8 @@ export function TechStackSection() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-40px" }}
-            className="p-4 bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl text-center
-                       hover:border-emerald-500/20 transition-all duration-500"
+            className="p-4 bg-card border border-white/5 rounded-2xl text-center
+                       hover:border-emerald-500/20 transition-all duration-500 shadow-lg"
           >
             <p className="text-sm font-bold text-white">{tech.name}</p>
             <p className="text-[10px] text-slate-400 mt-1">{tech.desc}</p>

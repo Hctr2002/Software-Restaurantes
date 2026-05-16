@@ -78,8 +78,8 @@ export function OperationalFlowSection() {
                 <step.icon className="w-5 h-5 text-emerald-500" />
               </div>
 
-              <div className="flex-1 p-5 bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl
-                              hover:border-emerald-500/20 transition-all duration-500">
+              <div className="flex-1 p-5 bg-card border border-white/5 rounded-2xl
+                              hover:border-emerald-500/20 transition-all duration-500 shadow-xl">
                 <div className="flex items-center gap-3 mb-2">
                   <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500/50">
                     {step.role}

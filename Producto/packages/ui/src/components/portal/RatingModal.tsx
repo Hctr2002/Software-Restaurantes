@@ -29,7 +29,7 @@ export function RatingModal({
 }: RatingModalProps) {
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center animate-in fade-in duration-300">
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-md" />
+      <div className="absolute inset-0 bg-background/95" />
       
       {/* Utilización de PortalCard para el contenedor principal */}
       <PortalCard className="relative w-full max-w-md bg-card border border-foreground/10 rounded-t-[2.5rem] p-8 pb-10 space-y-6 animate-in slide-in-from-bottom duration-400 shadow-2xl">

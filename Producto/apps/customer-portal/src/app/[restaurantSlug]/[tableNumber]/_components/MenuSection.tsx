@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { PortalMenuItemCard, PortalHeading } from "@menu-bites/ui";
+import { PortalMenuItemCard, PortalHeading, PortalText } from "@menu-bites/ui";
 import { MenuItem, Category } from "@menu-bites/auth";
 
 /**

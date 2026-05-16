@@ -89,8 +89,8 @@ export function EcosystemSection() {
             whileInView="visible"
             viewport={{ once: true, margin: "-40px" }}
             whileHover={{ y: -4, transition: { duration: 0.2 } }}
-            className={`group relative p-6 bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-3xl
-                       transition-all duration-500 ${app.border}`}
+            className={`group relative p-6 bg-card border border-white/5 rounded-3xl
+                       transition-all duration-500 shadow-xl ${app.border}`}
           >
             {/* Role badge */}
             <span className={`absolute top-4 right-4 text-[9px] font-black uppercase tracking-widest ${app.accent} opacity-40`}>

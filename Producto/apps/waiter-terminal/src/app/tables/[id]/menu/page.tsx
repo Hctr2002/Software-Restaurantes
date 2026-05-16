@@ -144,16 +144,16 @@ export default function TableMenuPage() {
   };
 
   return (
-    <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
+    <>
       {loading ? (
         <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
-          <div className="w-16 h-16 border-4 border-foreground/5 border-t-primary rounded-full animate-spin shadow-2xl shadow-primary/20" />
+          <div className="w-16 h-16 border-4 border-muted/30 border-t-primary rounded-full animate-spin shadow-2xl shadow-primary/20" />
         </div>
       ) : null}
       {!loading && (
-      <div className="min-h-screen bg-navy bg-body-gradient text-white pb-32">
+      <div className="min-h-screen wow-gradient text-foreground pb-32">
         {/* Header */}
-        <div className="px-4 py-4 sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-white/5">
+        <div className="px-4 py-4 sticky top-0 z-50 bg-background border-b border-border">
           <PremiumHeader
             title={`Mesa ${table?.number ?? "..."}`}
             statusLabel="Nuevo Pedido"
@@ -164,7 +164,7 @@ export default function TableMenuPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => router.push("/")}
-                  className="p-3 text-white/40 hover:text-white bg-white/5 rounded-2xl hover:bg-white/10 transition-colors"
+                  className="p-3 text-muted-foreground hover:text-foreground bg-muted/30 rounded-2xl hover:bg-muted/50 transition-colors"
                   title="Volver"
                 >
                   <ChevronLeft className="w-5 h-5" />
@@ -172,7 +172,7 @@ export default function TableMenuPage() {
                 <button
                   onClick={() => setShowBillModal(true)}
                   disabled={table?.status === 'FREE'}
-                  className={`flex items-center gap-2 px-4 py-3 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-2xl hover:bg-yellow-500/20 transition-all active:scale-95 ${table?.status === 'FREE' ? 'opacity-50 cursor-not-allowed' : ''
+                  className={`flex items-center gap-2 px-4 py-3 bg-warning/10 text-warning border border-warning/20 rounded-2xl hover:bg-warning/20 transition-all active:scale-95 ${table?.status === 'FREE' ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                 >
                   <Receipt className="w-4 h-4" />
@@ -210,7 +210,7 @@ export default function TableMenuPage() {
           </div>
 
           {filteredMenu.length === 0 && (
-            <div className="text-center py-24 bg-foreground/[0.02] rounded-[3rem] border border-dashed border-border/20 flex flex-col items-center mx-4">
+            <div className="text-center py-24 bg-muted/10 rounded-[3rem] border border-dashed border-border flex flex-col items-center mx-4">
               <p className="text-foreground/20 font-black uppercase tracking-widest text-xs">No se encontraron platos con ese criterio.</p>
             </div>
           )}
@@ -219,7 +219,7 @@ export default function TableMenuPage() {
         {/* Bandeja Flotante (Wow Factor) */}
         {cart.length > 0 && (
           <div className="fixed bottom-6 inset-x-4 z-50 animate-in slide-in-from-bottom-8 duration-500">
-            <div className="max-w-2xl mx-auto bg-card/80 backdrop-blur-2xl p-6 rounded-[2.5rem] shadow-2xl shadow-black/20 space-y-4 border border-white/10">
+            <div className="max-w-2xl mx-auto bg-card p-6 rounded-[2.5rem] shadow-2xl shadow-black/20 space-y-4 border border-border">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-4">
                   <div className="w-14 h-14 bg-primary/10 rounded-[1.25rem] flex items-center justify-center border border-primary/10 relative">
@@ -247,20 +247,20 @@ export default function TableMenuPage() {
                 placeholder="Nota para preparación (ej: sin sal, alergia...)"
                 value={orderNote}
                 onChange={(e) => setOrderNote(e.target.value)}
-                className="w-full text-xs px-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/20"
+                className="w-full text-xs px-4 py-3 rounded-2xl bg-muted/30 border border-border text-foreground placeholder:text-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary/20"
               />
 
               <div className="flex space-x-3">
                 <button
                   onClick={() => setCart([])}
-                  className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all border border-white/5 text-white/60"
+                  className="flex-1 py-4 bg-muted/30 hover:bg-muted/50 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all border border-border text-muted-foreground"
                 >
                   Limpiar
                 </button>
                 <button
                   onClick={handleSubmitOrder}
                   disabled={submitting}
-                  className="flex-[2] py-4 bg-sage text-navy font-black uppercase tracking-widest rounded-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center shadow-xl shadow-black/30 text-[10px] disabled:opacity-50"
+                  className="flex-[2] py-4 bg-primary text-primary-foreground font-black uppercase tracking-widest rounded-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center shadow-xl shadow-primary/30 text-[10px] disabled:opacity-50"
                 >
                   {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="mr-2 w-4 h-4" />}
                   Enviar Pedido
@@ -273,29 +273,29 @@ export default function TableMenuPage() {
         {/* Modal Pedir Cuenta */}
         {showBillModal && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
-            <div className="absolute inset-0 bg-background/80 backdrop-blur-xl" onClick={() => !requestingBill && setShowBillModal(false)} />
-            <div className="relative w-full max-w-sm bg-card border border-white/10 rounded-[3rem] p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
-              <div className="w-16 h-16 bg-yellow-500/10 rounded-[1.5rem] flex items-center justify-center border border-yellow-500/20 mx-auto">
-                <Receipt className="w-8 h-8 text-yellow-500" />
+            <div className="absolute inset-0 bg-background/60" onClick={() => !requestingBill && setShowBillModal(false)} />
+            <div className="relative w-full max-w-sm bg-card border border-border rounded-[3rem] p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
+              <div className="w-16 h-16 bg-warning/10 rounded-[1.5rem] flex items-center justify-center border border-warning/20 mx-auto">
+                <Receipt className="w-8 h-8 text-warning" />
               </div>
               <div className="text-center space-y-2">
                 <h2 className="text-2xl font-black tracking-tighter">Solicitar Cuenta</h2>
                 <p className="text-xs text-muted-foreground font-bold opacity-80">
-                  ¿El cliente desea incluir el <span className="text-yellow-500 font-black">10% de propina</span> sugerida?
+                  ¿El cliente desea incluir el <span className="text-warning font-black">10% de propina</span> sugerida?
                 </p>
               </div>
               <div className="space-y-3 pt-4">
                 <Button
                   onClick={() => handleRequestBill(true)}
                   disabled={requestingBill}
-                  className="w-full h-14 bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-[1.5rem]"
+                  className="w-full h-14 bg-warning hover:bg-warning/80 text-warning-foreground font-black uppercase text-[10px] tracking-[0.2em] rounded-[1.5rem]"
                 >
                   {requestingBill ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sí, incluir propina"}
                 </Button>
                 <button
                   onClick={() => handleRequestBill(false)}
                   disabled={requestingBill}
-                  className="w-full h-14 bg-white/10 hover:bg-white/20 text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-[1.5rem] border border-white/10 flex items-center justify-center transition-colors"
+                  className="w-full h-14 bg-muted/30 hover:bg-muted/50 text-foreground font-black uppercase text-[10px] tracking-[0.2em] rounded-[1.5rem] border border-border flex items-center justify-center transition-colors"
                 >
                   {requestingBill ? <Loader2 className="w-4 h-4 animate-spin" /> : "No incluir propina"}
                 </button>
@@ -312,6 +312,6 @@ export default function TableMenuPage() {
         )}
       </div>
       )}
-    </RestaurantThemeProvider>
+    </>
   );
 }

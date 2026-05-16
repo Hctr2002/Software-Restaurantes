@@ -32,7 +32,7 @@ export function OrderTracker({ status }: OrderTrackerProps) {
   const currentIdx = getStepIndex(status);
 
   return (
-    <div className="fixed top-[73px] left-0 right-0 z-40 px-4 py-2 bg-background/95 backdrop-blur-md border-b border-foreground/5 shadow-lg">
+    <div className="fixed top-[73px] left-0 right-0 z-40 px-4 py-2 bg-background border-b border-foreground/5 shadow-md">
       <div className="max-w-md mx-auto flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 flex-1 overflow-x-auto no-scrollbar">
           {STATUS_STEPS.map((step, idx) => {

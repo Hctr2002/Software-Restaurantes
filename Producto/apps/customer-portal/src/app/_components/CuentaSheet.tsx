@@ -47,7 +47,7 @@ export function CuentaSheet({ tableNumber, orders, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-[70] animate-in fade-in duration-200">
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-md" onClick={onClose} />
+      <div className="absolute inset-0 bg-background/95" onClick={onClose} />
       <div className="absolute bottom-0 left-0 right-0 glass-premium rounded-t-[2.5rem] p-6 max-h-[80vh] overflow-y-auto animate-in slide-in-from-bottom duration-300 border-t border-foreground/10">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-foreground flex items-center gap-2">

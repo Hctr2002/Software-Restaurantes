@@ -43,8 +43,8 @@ export function BenefitsSection() {
             whileInView="visible"
             viewport={{ once: true, margin: "-40px" }}
             whileHover={{ y: -4, transition: { duration: 0.2 } }}
-            className="group p-6 bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-3xl
-                       hover:border-emerald-500/20 transition-all duration-500"
+            className="group p-6 bg-card border border-white/5 rounded-3xl
+                       hover:border-emerald-500/20 transition-all duration-500 shadow-xl"
           >
             <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-4
                             group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all duration-500">

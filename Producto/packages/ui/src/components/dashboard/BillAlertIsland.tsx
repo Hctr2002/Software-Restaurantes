@@ -31,7 +31,7 @@ export function BillAlertIsland({ groups, onSelect }: Props) {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 300, opacity: 0 }}
             onClick={() => handleClick(g)}
-            className="pointer-events-auto cursor-pointer bg-card/90 backdrop-blur-xl border border-primary/50 rounded-2xl p-5 shadow-2xl flex items-center gap-4 w-72 hover:border-primary/80 hover:bg-card transition-colors"
+            className="pointer-events-auto cursor-pointer bg-card border border-primary/50 rounded-2xl p-5 shadow-2xl flex items-center gap-4 w-72 hover:border-primary/80 transition-colors"
           >
             <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center animate-pulse">
               <Bell className="w-5 h-5 text-primary-foreground" />

@@ -24,7 +24,7 @@ export function PortalMenuItemCard({ item, cartQuantity, onAdd, onDecrement }: P
   return (
     <motion.div
       variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
-      className="bg-card/95 glass-premium rounded-[2.5rem] sm:rounded-[3.5rem] border border-foreground/10 overflow-hidden shadow-xl flex flex-col group transition-all duration-700 hover:shadow-primary/20 hover:-translate-y-2"
+      className="bg-card rounded-[2.5rem] sm:rounded-[3.5rem] border border-foreground/5 overflow-hidden shadow-xl flex flex-col group transition-all duration-700 hover:shadow-primary/20 hover:-translate-y-2"
     >
       {/* Imagen Pro con Badge Dinámico */}
       <div className="h-44 sm:h-56 w-full relative overflow-hidden bg-foreground/[0.05]">
@@ -46,7 +46,7 @@ export function PortalMenuItemCard({ item, cartQuantity, onAdd, onDecrement }: P
               initial={{ x: 50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 50, opacity: 0 }}
-              className="absolute top-4 right-4 px-4 py-2 rounded-2xl border border-white/20 backdrop-blur-xl bg-primary shadow-2xl z-20"
+              className="absolute top-4 right-4 px-4 py-2 rounded-2xl border border-white/10 bg-primary shadow-xl z-20"
             >
               {/* // Función para mostrar el indicador de cantidad con fuente de acento heredada */}
               <PortalText 
@@ -100,7 +100,7 @@ export function PortalMenuItemCard({ item, cartQuantity, onAdd, onDecrement }: P
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 20, opacity: 0 }}
-                className="flex items-center gap-2 bg-foreground/[0.05] border border-foreground/10 rounded-[1.5rem] p-1.5 backdrop-blur-md w-full justify-between shadow-inner"
+                className="flex items-center gap-2 bg-foreground/[0.03] border border-foreground/5 rounded-[1.5rem] p-1.5 w-full justify-between shadow-inner"
               >
                 {/* // Función para disminuir la cantidad del item en el carrito */}
                 <PortalPrimaryButton

@@ -95,11 +95,11 @@
 
 @layer components {
   .glass-panel {
-    @apply bg-foreground/5 backdrop-blur-xl border border-foreground/10 shadow-2xl;
+    @apply bg-card border border-foreground/10 shadow-2xl;
   }
   
   .glass-card {
-    @apply bg-foreground/5 backdrop-blur-md border border-foreground/5 hover:border-primary/30 transition-all duration-500;
+    @apply bg-card border border-foreground/5 hover:border-primary/30 transition-all duration-500;
   }
 
   .premium-gradient {

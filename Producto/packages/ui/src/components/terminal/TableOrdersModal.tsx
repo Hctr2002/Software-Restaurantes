@@ -15,14 +15,14 @@ interface TableOrdersModalProps {
 }
 
 const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; icon: any }> = {
-  PENDING:   { label: "PENDIENTE",  color: "text-amber-400 bg-amber-400/10 border-amber-400/20", icon: Clock },
-  VALIDATED: { label: "VALIDADO",   color: "text-blue-400 bg-blue-400/10 border-blue-400/20",   icon: Timer },
-  PREPARING: { label: "PREPARANDO", color: "text-primary bg-primary/10 border-primary/20",      icon: Utensils },
-  READY:     { label: "LISTO",      color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20", icon: CheckCircle2 },
-  PARCIAL:   { label: "PARCIAL",    color: "text-orange-400 bg-orange-400/10 border-orange-400/20",  icon: Beer },
-  DELIVERED: { label: "ENTREGADO",  color: "text-sky-400 bg-sky-400/10 border-sky-400/20",      icon: Receipt },
-  COMPLETED: { label: "PAGADO",     color: "text-gray-400 bg-gray-400/10 border-gray-400/20",   icon: CheckCircle2 },
-  REJECTED:  { label: "RECHAZADO",  color: "text-red-400 bg-red-400/10 border-red-400/20",      icon: X },
+  PENDING:   { label: "PENDIENTE",  color: "text-amber-500 bg-amber-500/10 border-amber-500/30", icon: Clock },
+  VALIDATED: { label: "VALIDADO",   color: "text-blue-500 bg-blue-500/10 border-blue-500/30",   icon: Timer },
+  PREPARING: { label: "PREPARANDO", color: "text-primary bg-primary/10 border-primary/30",      icon: Utensils },
+  READY:     { label: "LISTO",      color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/30", icon: CheckCircle2 },
+  PARCIAL:   { label: "PARCIAL",    color: "text-orange-500 bg-orange-500/10 border-orange-500/30",  icon: Beer },
+  DELIVERED: { label: "ENTREGADO",  color: "text-sky-500 bg-sky-500/10 border-sky-500/30",      icon: Receipt },
+  COMPLETED: { label: "PAGADO",     color: "text-gray-500 bg-gray-500/10 border-gray-500/30",   icon: CheckCircle2 },
+  REJECTED:  { label: "RECHAZADO",  color: "text-red-500 bg-red-500/10 border-red-500/30",      icon: X },
 };
 
 export function TableOrdersModal({ isOpen, onClose, table, orders, onTakeOrder }: TableOrdersModalProps) {
@@ -37,7 +37,7 @@ export function TableOrdersModal({ isOpen, onClose, table, orders, onTakeOrder }
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-background/80 backdrop-blur-xl"
+        className="absolute inset-0 bg-background/90"
         onClick={onClose}
       />
       
@@ -45,10 +45,10 @@ export function TableOrdersModal({ isOpen, onClose, table, orders, onTakeOrder }
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 20 }}
-        className="relative w-full max-w-2xl bg-card border border-white/10 rounded-[3rem] shadow-2xl flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-2xl bg-card border border-border/40 rounded-[3rem] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
       >
         {/* Header */}
-        <div className="p-8 lg:p-10 border-b border-white/5 flex items-center justify-between shrink-0">
+        <div className="p-8 lg:p-10 border-b border-border/40 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-5">
             <div className="w-16 h-16 bg-primary/10 rounded-[1.5rem] flex items-center justify-center border border-primary/20">
               <Receipt className="w-8 h-8 text-primary" />
@@ -121,16 +121,16 @@ export function TableOrdersModal({ isOpen, onClose, table, orders, onTakeOrder }
         </div>
 
         {/* Footer */}
-        <div className="p-8 lg:p-10 border-t border-white/5 bg-white/5 rounded-b-[3rem] shrink-0">
+        <div className="p-8 lg:p-10 border-t border-border/40 bg-foreground/[0.02] rounded-b-[3rem] shrink-0">
           <div className="flex items-center justify-between mb-8">
             <span className="text-sm font-black uppercase tracking-widest text-muted-foreground">Consumo Total</span>
             <span className="text-3xl font-black tracking-tighter text-primary">${totalAmount.toLocaleString()}</span>
           </div>
           <div className="flex gap-4">
-            <Button variant="outline" onClick={onClose} className="flex-1 h-16 rounded-2xl border-white/10 font-black uppercase text-[10px] tracking-[0.2em]">
+            <Button variant="outline" onClick={onClose} className="flex-1 h-16 rounded-2xl border-border/40 font-black uppercase text-[10px] tracking-[0.2em] hover:bg-foreground/5">
               Cerrar
             </Button>
-            <Button onClick={() => onTakeOrder(table.id)} className="flex-1 h-16 bg-primary text-primary-foreground rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl shadow-primary/20">
+            <Button onClick={() => onTakeOrder(table.id)} className="flex-1 h-16 bg-primary text-primary-foreground rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl shadow-primary/20 hover:bg-primary/90">
               Tomar Comanda
             </Button>
           </div>
