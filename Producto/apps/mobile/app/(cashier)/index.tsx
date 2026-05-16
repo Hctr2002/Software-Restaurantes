@@ -162,23 +162,23 @@ export default function CashierDashboard() {
     if (!selectedGroup) return;
     setIsProcessing(true);
     try {
-      const orderIds = selectedGroup.orders.map((o: any) => o.id);
-      
-      const { error: oErr } = await supabase
-        .from('orders')
-        .update({ 
-          status: 'COMPLETED', 
-          notes: reference ? `Ref: ${reference}` : 'Pagado en Caja'
-        })
-        .in('id', orderIds);
-        
-      if (oErr) throw oErr;
+      const orderIds = selectedGroup.orders
+        .filter((o: any) => !['COMPLETED', 'REJECTED'].includes(o.status))
+        .map((o: any) => o.id);
 
-      if (selectedGroup.tableId) {
-        await supabase
-          .from('tables')
-          .update({ status: 'FREE', bill_requested: false })
-          .eq('id', selectedGroup.tableId);
+      if (orderIds.length > 0) {
+        if (reference) {
+          await supabase
+            .from('orders')
+            .update({ notes: `Ref: ${reference}` })
+            .in('id', orderIds);
+        }
+
+        const { error } = await supabase.rpc('completar_pago_mesa', {
+          p_order_ids: orderIds,
+          p_table_id: selectedGroup.tableId ?? null,
+        });
+        if (error) throw error;
       }
 
       await fetchOrders();
