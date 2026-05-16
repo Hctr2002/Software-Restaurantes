@@ -13,6 +13,7 @@ import { CartFooter } from './_components/CartFooter';
 import { CheckoutModal } from './_components/CheckoutModal';
 import { ActiveOrdersModal } from './_components/ActiveOrdersModal';
 import { SuccessOverlay } from './_components/SuccessOverlay';
+import { RatingModal } from './_components/RatingModal';
 
 interface CartItem {
   id: string;
@@ -47,6 +48,11 @@ export default function RestaurantMenuScreen() {
   const [isPlacing, setIsPlacing] = useState(false);
   const [callingWaiter, setCallingWaiter] = useState(false);
   const [requestingBill, setRequestingBill] = useState(false);
+
+  // Rating state
+  const [showRating, setShowRating] = useState(false);
+  const [ratingOrderId, setRatingOrderId] = useState<string | null>(null);
+  const prevOrderStatusesRef = useRef<Record<string, string>>({});
 
   // Sync Logic (Polling)
   const syncTableData = useCallback(async (tableId: string) => {
@@ -115,6 +121,21 @@ export default function RestaurantMenuScreen() {
     return () => clearInterval(intervalId);
   }, [table?.id, syncTableData]);
 
+  // Detect when any order transitions to DELIVERED and trigger rating
+  useEffect(() => {
+    const prev = prevOrderStatusesRef.current;
+    for (const order of activeOrders) {
+      if (order.status === 'DELIVERED' && prev[order.id] && prev[order.id] !== 'DELIVERED') {
+        setRatingOrderId(order.id);
+        setShowRating(true);
+        break;
+      }
+    }
+    const next: Record<string, string> = {};
+    for (const order of activeOrders) next[order.id] = order.status;
+    prevOrderStatusesRef.current = next;
+  }, [activeOrders]);
+
   // Handlers
   const handleCallWaiter = async () => {
     if (!table || !restaurant || callingWaiter || table.help_requested) return;
@@ -173,6 +194,27 @@ export default function RestaurantMenuScreen() {
       Alert.alert('Error', 'No se pudo enviar el pedido');
     } finally {
       setIsPlacing(false);
+    }
+  };
+
+  const handleSubmitRating = async (rating: number, comment: string) => {
+    if (!ratingOrderId || !restaurant || !table) return;
+    try {
+      const portalUrl = getApiUrl(3005);
+      await fetch(`${portalUrl}/api/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_id: ratingOrderId,
+          restaurant_id: restaurant.id,
+          table_id: table.id,
+          session_id: table.current_session_id,
+          rating,
+          comment: comment || null,
+        }),
+      });
+    } catch (err) {
+      console.error('[Rating] submit error:', err);
     }
   };
 
@@ -293,9 +335,18 @@ export default function RestaurantMenuScreen() {
         getStatusColor={getStatusColor}
       />
 
-      <SuccessOverlay 
+      <SuccessOverlay
         visible={orderSuccess}
         onClose={() => setOrderSuccess(false)}
+        primaryColor={primaryColor}
+        bgColor={bgColor}
+        textColor={textColor}
+      />
+
+      <RatingModal
+        visible={showRating}
+        onClose={() => { setShowRating(false); setRatingOrderId(null); }}
+        onSubmit={handleSubmitRating}
         primaryColor={primaryColor}
         bgColor={bgColor}
         textColor={textColor}

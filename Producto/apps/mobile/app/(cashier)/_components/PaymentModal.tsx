@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  Modal, 
-  TextInput, 
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  TextInput,
   ActivityIndicator,
   ScrollView,
   KeyboardAvoidingView,
-  Platform
+  Platform,
 } from 'react-native';
-import { X, CreditCard, ChevronRight, CheckCircle2, Receipt } from 'lucide-react-native';
+import { X, ChevronRight, Receipt, Share2 } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../../constants/MB_Theme';
 import { useTheme } from '../../../context/ThemeContext';
 import { formatCurrency } from '../../../lib/dashboard';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { shareReceipt } from '../../../lib/receipt';
 
 interface PaymentModalProps {
   visible: boolean;
@@ -29,6 +29,7 @@ interface PaymentModalProps {
 export default function PaymentModal({ visible, group, isProcessing, onClose, onConfirm }: PaymentModalProps) {
   const { colors } = useTheme();
   const [reference, setReference] = useState('');
+  const [isSharing, setIsSharing] = useState(false);
 
   if (!group) return null;
 
@@ -38,6 +39,25 @@ export default function PaymentModal({ visible, group, isProcessing, onClose, on
   const handleConfirm = async () => {
     await onConfirm(reference);
     setReference('');
+  };
+
+  const handleShare = async () => {
+    setIsSharing(true);
+    try {
+      await shareReceipt({
+        tableLabel,
+        items: allItems.map((i: any) => ({
+          name: i.menu_items?.name ?? 'Ítem',
+          quantity: i.quantity,
+          unitPrice: Number(i.unit_price),
+        })),
+        reference: reference || undefined,
+      });
+    } catch {
+      // Sharing cancelled or unavailable — no feedback needed
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   return (
@@ -100,7 +120,20 @@ export default function PaymentModal({ visible, group, isProcessing, onClose, on
             </ScrollView>
 
             <View style={styles.footer}>
-              <TouchableOpacity 
+              <TouchableOpacity
+                style={styles.shareBtn}
+                onPress={handleShare}
+                disabled={isSharing}
+              >
+                {isSharing
+                  ? <ActivityIndicator color="#94a3b8" size="small" />
+                  : <Share2 size={18} color="#94a3b8" />}
+                <Text style={styles.shareBtnText}>
+                  {isSharing ? 'Generando...' : 'Compartir recibo'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
                 style={[styles.confirmBtn, { backgroundColor: '#10b981' }]}
                 onPress={handleConfirm}
                 disabled={isProcessing}
@@ -251,5 +284,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '900',
     letterSpacing: 1,
-  }
+  },
+  shareBtn: {
+    height: 44,
+    borderRadius: 14,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  shareBtnText: {
+    color: '#94a3b8',
+    fontSize: 13,
+    fontWeight: '700',
+  },
 });

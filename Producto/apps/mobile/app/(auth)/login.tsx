@@ -9,16 +9,12 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
-  ImageBackground,
-  Dimensions,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { Mail, Lock, LogIn, ChefHat, Eye, EyeOff } from 'lucide-react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
-
-const { height } = Dimensions.get('window');
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -116,6 +112,13 @@ export default function LoginScreen() {
                 <LogIn color="white" size={20} style={{ marginLeft: 8 }} />
               </>
             )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.forgotButton}
+            onPress={() => router.push('/(auth)/forgot-password' as any)}
+          >
+            <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
           </TouchableOpacity>
         </Animated.View>
 
@@ -229,6 +232,15 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: '700',
+  },
+  forgotButton: {
+    alignItems: 'center',
+    paddingVertical: MB_SPACING.sm,
+  },
+  forgotText: {
+    color: MB_COLORS.muted,
+    fontSize: 14,
+    textDecorationLine: 'underline',
   },
   footer: {
     marginTop: MB_SPACING.xxl,
