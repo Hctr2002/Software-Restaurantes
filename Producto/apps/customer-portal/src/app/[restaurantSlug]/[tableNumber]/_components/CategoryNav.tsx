@@ -18,10 +18,9 @@ export function CategoryNav({ categories, activeCategory, onSelectCategory }: Ca
         className="relative whitespace-nowrap px-4 py-4 text-sm font-bold transition-all duration-500 group"
       >
         <span 
-          className={`relative z-10 transition-colors duration-300 text-[10px] font-black uppercase tracking-widest ${
+          className={`relative z-10 transition-colors duration-300 text-[10px] font-black uppercase tracking-widest font-accent ${
             activeCategory === null ? 'text-primary' : 'text-foreground/40 group-hover:text-foreground'
           }`}
-          style={{ fontFamily: "var(--font-accent)" }}
         >
           Carta Completa
         </span>
@@ -52,11 +51,10 @@ export function CategoryNav({ categories, activeCategory, onSelectCategory }: Ca
             className="relative whitespace-nowrap px-4 py-4 text-sm font-bold transition-all duration-500 group"
           >
             <span 
-              className={`relative z-10 transition-colors duration-300 text-[10px] font-black uppercase tracking-widest ${
+              className={`relative z-10 transition-colors duration-300 text-[10px] font-black uppercase tracking-widest font-accent ${
                 isActive ? 'text-primary' : 'text-foreground/40 group-hover:text-foreground'
               }`}
-              style={{ fontFamily: "var(--font-accent)" }}
-            >
+                >
               {cat.name}
             </span>
             {isActive && (

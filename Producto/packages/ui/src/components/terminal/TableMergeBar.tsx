@@ -51,18 +51,6 @@ export function TableMergeBar({
           Desvincular mesa seleccionada
         </button>
       )}
-
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={onToggleMode}
-        title={mergeMode ? "Cancelar fusión" : "Fusionar mesas"}
-        className={`rounded-xl w-11 h-11 shrink-0 transition-all ${
-          mergeMode ? "border-primary/40 text-primary bg-primary/10" : "border-foreground/20 bg-foreground/5 text-foreground/60 hover:bg-foreground/10 hover:text-foreground"
-        }`}
-      >
-        {mergeMode ? <Link2Off className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
-      </Button>
     </>
   );
 }

@@ -2,20 +2,18 @@
 
 import { use, useState, useEffect } from "react";
 import { 
-  useTableOrders, 
-  useCustomerOrderTracker, 
-  useThemeSync, 
+  useTableOrders,
+  useCustomerOrderTracker,
   useMenu,
-  useCustomerPortal 
+  useCustomerPortal,
 } from '@menu-bites/auth';
 import { useTenant } from '@/context/TenantContext';
-import { 
-  OrderTracker, 
-  RatingModal, 
+import {
+  OrderTracker,
+  RatingModal,
   CuentaSheet,
-  PremiumHeader, 
+  PremiumHeader,
   Button,
-  RestaurantThemeProvider
 } from '@menu-bites/ui';
 import { Loader2, Store, ShoppingBag, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -39,7 +37,6 @@ export default function MenuPage({
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const portal = useCustomerPortal(restaurant?.id, params.tableNumber);
-  const theme = useThemeSync(restaurant?.id);
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isRequestingBill, setIsRequestingBill] = useState(false);
@@ -150,7 +147,6 @@ export default function MenuPage({
   }
 
   return (
-    <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
       <div className="min-h-screen wow-gradient text-foreground pb-32">
         <ConfirmationOverlay 
           show={portal.order.success} 
@@ -278,6 +274,5 @@ export default function MenuPage({
           onConfirmBill={handleRequestBill} 
         />
       </div>
-    </RestaurantThemeProvider>
   );
 }

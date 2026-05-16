@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Store, LayoutDashboard, Users, UtensilsCrossed, Tag, TableProperties, ClipboardList, Package, Palette, BarChart2, LogOut, X } from "lucide-react";
 import { Button } from "@menu-bites/ui";
 import { NavItem } from "./NavItem";
@@ -39,14 +38,14 @@ export default function Sidebar({ user, pathname, base, isSigningOut, onSignOut,
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto py-8 px-4 space-y-8 no-scrollbar">
         <div>
-          <p className="px-4 text-[10px] font-black text-foreground/30 mb-4 tracking-[0.2em] uppercase" style={{ fontFamily: 'var(--font-accent)' }}>Principal</p>
+          <p className="px-4 text-[10px] font-black text-foreground/30 mb-4 tracking-[0.2em] uppercase" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>Principal</p>
           <nav className="space-y-1">
             <NavItem href={base} icon={<LayoutDashboard className="w-4 h-4" />} label="Resumen" active={pathname === base} onClick={onCloseMobile} />
           </nav>
         </div>
 
         <div>
-          <p className="px-4 text-[10px] font-black text-foreground/30 mb-4 tracking-[0.2em] uppercase" style={{ fontFamily: 'var(--font-accent)' }}>Gestión</p>
+          <p className="px-4 text-[10px] font-black text-foreground/30 mb-4 tracking-[0.2em] uppercase" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>Gestión</p>
           <nav className="space-y-1">
             <NavItem href={`${base}/users`}      icon={<Users className="w-4 h-4" />}           label="Usuarios"   active={pathname.startsWith(`${base}/users`)}      onClick={onCloseMobile} />
             <NavItem href={`${base}/menu`}       icon={<UtensilsCrossed className="w-4 h-4" />} label="Menú"       active={pathname.startsWith(`${base}/menu`)}       onClick={onCloseMobile} />
@@ -59,7 +58,7 @@ export default function Sidebar({ user, pathname, base, isSigningOut, onSignOut,
         </div>
 
         <div>
-          <p className="px-4 text-[10px] font-black text-foreground/30 mb-4 tracking-[0.2em] uppercase" style={{ fontFamily: 'var(--font-accent)' }}>Análisis</p>
+          <p className="px-4 text-[10px] font-black text-foreground/30 mb-4 tracking-[0.2em] uppercase" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>Análisis</p>
           <nav className="space-y-1">
             <NavItem href={`${base}/reports`} icon={<BarChart2 className="w-4 h-4" />} label="Reportes" active={pathname.startsWith(`${base}/reports`)} onClick={onCloseMobile} />
           </nav>

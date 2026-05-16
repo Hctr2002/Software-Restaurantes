@@ -143,18 +143,14 @@ export default function TableMenuPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
+  return (
+    <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
+      {loading ? (
         <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
           <div className="w-16 h-16 border-4 border-foreground/5 border-t-primary rounded-full animate-spin shadow-2xl shadow-primary/20" />
         </div>
-      </RestaurantThemeProvider>
-    );
-  }
-
-  return (
-    <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
+      ) : null}
+      {!loading && (
       <div className="min-h-screen bg-navy bg-body-gradient text-white pb-32">
         {/* Header */}
         <div className="px-4 py-4 sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-white/5">
@@ -315,6 +311,7 @@ export default function TableMenuPage() {
           </div>
         )}
       </div>
+      )}
     </RestaurantThemeProvider>
   );
 }

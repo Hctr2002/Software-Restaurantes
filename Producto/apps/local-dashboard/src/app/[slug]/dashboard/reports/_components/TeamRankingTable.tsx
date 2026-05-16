@@ -42,10 +42,10 @@ export default function TeamRankingTable({ reports }: TeamRankingTableProps) {
                 {row.email.split("@")[0]}
               </TableCell>
               <TableCell className="text-foreground/40 font-bold text-xs">
-                <span style={{ fontFamily: 'var(--font-accent)' }}>{row.orders}</span>
+                <span style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>{row.orders}</span>
               </TableCell>
               <TableCell className="font-black text-emerald-500 text-sm italic">
-                <span style={{ fontFamily: 'var(--font-accent)' }}>{formatPrice(row.revenue)}</span>
+                <span style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>{formatPrice(row.revenue)}</span>
               </TableCell>
             </TableRow>
           ))}

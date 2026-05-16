@@ -6,6 +6,10 @@
   --radius-3xl: 2.5rem;
 
   --font-outfit: "Outfit", sans-serif;
+  /* Tema dinámico — sobreescritas por RestaurantThemeProvider en runtime */
+  --font-title:  "Outfit", sans-serif;
+  --font-body:   "Outfit", sans-serif;
+  --font-accent: "Outfit", sans-serif;
 
   /* ─── Escala Tipográfica Modular (Major Third 1.25x) ─── */
   --text-hero: 5rem;          /* 80px — h1 hero */

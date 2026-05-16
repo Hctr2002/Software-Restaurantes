@@ -27,7 +27,7 @@ export function NavItem({ href, icon, label, active, onClick }: NavItemProps) {
       </div>
       <span 
         className={`text-[11px] font-bold uppercase tracking-widest ${active ? "opacity-100" : "opacity-70 group-hover:opacity-100"}`} 
-        style={{ fontFamily: 'var(--font-accent)' }}
+        style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
       >
         {label}
       </span>

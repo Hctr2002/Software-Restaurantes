@@ -38,13 +38,13 @@ export default function DailyPerformanceTable({ reports, description }: DailyPer
                 {formatShortDate(row.date)}
               </TableCell>
               <TableCell className="text-foreground/40 font-bold text-xs">
-                <span style={{ fontFamily: 'var(--font-accent)' }}>{row.orders || "—"}</span>
+                <span style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>{row.orders || "—"}</span>
               </TableCell>
               <TableCell className={`font-black text-sm italic ${row.orders > 0 ? 'text-primary' : 'text-foreground/20'}`}>
-                <span style={{ fontFamily: 'var(--font-accent)' }}>{row.orders ? formatPrice(row.revenue) : "—"}</span>
+                <span style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>{row.orders ? formatPrice(row.revenue) : "—"}</span>
               </TableCell>
               <TableCell className="font-bold text-foreground/30 text-[11px]">
-                <span style={{ fontFamily: 'var(--font-accent)' }}>{row.orders ? formatPrice(row.avg) : "—"}</span>
+                <span style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>{row.orders ? formatPrice(row.avg) : "—"}</span>
               </TableCell>
             </TableRow>
           ))}

@@ -26,8 +26,7 @@ export function MenuSection({ categoryName, activeCategory, categories, items, c
           return (
             <section key={cat.id} className="px-6 pt-10 space-y-6 first:pt-4">
               <h3 
-                className="text-lg font-black text-primary border-l-4 border-primary pl-4 uppercase tracking-[0.2em] italic"
-                style={{ fontFamily: "var(--font-title)" }}
+                className="text-lg font-black text-primary border-l-4 border-primary pl-4 uppercase tracking-[0.2em] italic font-title"
               >
                 {cat.name}
               </h3>
@@ -58,8 +57,7 @@ export function MenuSection({ categoryName, activeCategory, categories, items, c
   return (
     <section className="px-6 mt-10 space-y-6">
       <h3 
-        className="text-lg font-black text-primary border-l-4 border-primary pl-4 uppercase tracking-[0.2em] italic"
-        style={{ fontFamily: "var(--font-title)" }}
+        className="text-lg font-black text-primary border-l-4 border-primary pl-4 uppercase tracking-[0.2em] italic font-title"
       >
         {categoryName}
       </h3>

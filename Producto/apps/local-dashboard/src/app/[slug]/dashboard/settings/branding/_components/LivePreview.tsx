@@ -1,126 +1,167 @@
 "use client";
 
 import React from "react";
-import { Button, RestaurantThemeProvider } from "@menu-bites/ui";
-import { ChevronRight, Star, Clock, MapPin, Share2, Heart } from "lucide-react";
+import { getPublicImageUrl } from "@menu-bites/auth";
+import { Plus, Search, ShoppingBag } from "lucide-react";
 
 interface LivePreviewProps {
   currentTheme: any;
   sampleProduct: any;
 }
 
-/**
- * LivePreview
- * 
- * Mockup de alta fidelidad que reacciona en tiempo real a los cambios del ThemeProvider.
- * Simula la vista de un producto en el portal del cliente.
- */
+const UI_FONT = "Inter, system-ui, sans-serif";
+
 export function LivePreview({ currentTheme, sampleProduct }: LivePreviewProps) {
-  // Protección contra datos nulos durante la carga inicial o errores de fetch
   if (!sampleProduct) {
     return (
       <div className="sticky top-24 aspect-[9/16] w-full max-w-[320px] mx-auto bg-foreground/5 rounded-[3rem] border-[8px] border-foreground/10 flex items-center justify-center">
-        <p className="text-[10px] font-black uppercase tracking-widest text-foreground/20">Cargando Preview...</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-foreground/20" style={{ fontFamily: UI_FONT }}>Cargando Preview...</p>
       </div>
     );
   }
 
+  const imageUrl = getPublicImageUrl(sampleProduct.image_url ?? null);
+  const titleFont  = `"${currentTheme.fontTitle}", sans-serif`;
+  const bodyFont   = `"${currentTheme.fontBody}", sans-serif`;
+  const accentFont = `"${currentTheme.fontAccent}", sans-serif`;
+
+  const bg    = currentTheme.backgroundColor;
+  const card  = currentTheme.cardBackground;
+  const text  = currentTheme.textColor;
+  const pri   = currentTheme.primaryColor;
+
   return (
-    <div className="sticky top-24 space-y-6">
-      <div className="flex items-center justify-between px-2">
-        <div>
-          <h2 className="text-lg font-black text-foreground uppercase italic tracking-tight">Simulación Live</h2>
-          <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest">Vista previa del portal móvil</p>
-        </div>
+    <div className="sticky top-24 space-y-4">
+      <div className="px-2">
+        <h2 className="text-lg font-black text-foreground uppercase italic tracking-tight" style={{ fontFamily: UI_FONT }}>Simulación Live</h2>
+        <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest" style={{ fontFamily: UI_FONT }}>Vista previa del portal móvil</p>
       </div>
 
-      <div className="relative aspect-[9/16] w-full max-w-[320px] mx-auto bg-black rounded-[3rem] border-[8px] border-foreground/10 shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-hidden">
-        {/* Notch del simulador */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-foreground/10 rounded-b-3xl z-50" />
-        
-        {/* Contenedor del ThemeProvider para la simulación */}
-        <RestaurantThemeProvider theme={currentTheme}>
-          <div 
-            className="h-full flex flex-col p-8 space-y-8 relative z-10"
-            style={{ 
-              backgroundColor: currentTheme.backgroundColor,
-              "--font-title":  `"${currentTheme.fontTitle || 'Outfit'}", sans-serif`,
-              "--font-body": `"${currentTheme.fontBody || 'Outfit'}", sans-serif`,
-              "--font-accent": `"${currentTheme.fontAccent || 'Outfit'}", sans-serif`
-            } as any}
-          >
-            {/* Header del Mockup */}
-            <div className="flex justify-between items-start pt-4">
-              <div className="w-10 h-10 rounded-2xl bg-foreground/5 flex items-center justify-center">
-                <ChevronRight className="w-5 h-5 rotate-180" />
-              </div>
-              <div className="flex gap-2">
-                <div className="w-10 h-10 rounded-2xl bg-foreground/5 flex items-center justify-center">
-                  <Share2 className="w-4 h-4" />
-                </div>
-                <div className="w-10 h-10 rounded-2xl bg-foreground/5 flex items-center justify-center">
-                  <Heart className="w-4 h-4 text-primary" />
-                </div>
-              </div>
-            </div>
+      {/* Marco del teléfono */}
+      <div className="relative w-full max-w-[320px] mx-auto rounded-[3rem] border-[8px] border-foreground/20 shadow-2xl overflow-hidden bg-black" style={{ height: 620 }}>
+        {/* Notch */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-black rounded-b-2xl z-50" />
 
-            {/* Imagen del Producto Mockup */}
-            <div className="relative aspect-square rounded-[2rem] overflow-hidden shadow-2xl border border-foreground/10">
-              <img 
-                src={sampleProduct.image} 
-                alt="Sample" 
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-4 right-4 bg-primary px-3 py-1.5 rounded-full shadow-xl">
-                 <p className="text-[10px] font-black text-primary-foreground uppercase tracking-widest">Popular</p>
-              </div>
-            </div>
+        {/* Pantalla */}
+        <div className="h-full overflow-y-auto flex flex-col" style={{ backgroundColor: bg }}>
 
-            {/* Información del Producto */}
-            <div className="space-y-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-xl font-black italic uppercase leading-none tracking-tight" style={{ fontFamily: "var(--font-title)", color: "hsl(var(--foreground))" }}>
-                    {sampleProduct.name}
-                  </h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Star className="w-3 h-3 text-primary fill-primary" />
-                    <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">4.9 (120+ Reseñas)</span>
-                  </div>
-                </div>
-                <p className="text-xl font-black text-primary italic" style={{ fontFamily: "var(--font-accent)" }}>
-                  ${sampleProduct.price}
+          {/* Header — réplica del portal real */}
+          <div className="pt-6 px-4 pb-3 flex items-center justify-between shrink-0 border-b" style={{ borderColor: `${text}10`, backgroundColor: card }}>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-xl flex items-center justify-center" style={{ backgroundColor: pri }}>
+                <ShoppingBag className="w-3.5 h-3.5" style={{ color: bg }} />
+              </div>
+              <div>
+                <p className="text-[10px] font-black italic uppercase leading-none" style={{ color: text, fontFamily: titleFont }}>
+                  {sampleProduct.categories?.name ?? "Restaurante"}
+                </p>
+                <p className="text-[7px] font-bold uppercase tracking-widest opacity-40" style={{ color: text, fontFamily: UI_FONT }}>
+                  En servicio · Mesa 1
                 </p>
               </div>
-
-              <p className="text-xs font-medium text-foreground/60 leading-relaxed line-clamp-3" style={{ fontFamily: "var(--font-body)" }}>
-                {sampleProduct.description}
-              </p>
             </div>
-
-            {/* Detalles Rápidos */}
-            <div className="grid grid-cols-2 gap-3">
-               <div className="p-4 rounded-3xl bg-foreground/5 border border-foreground/10 flex items-center gap-3">
-                  <Clock className="w-4 h-4 text-primary" />
-                  <p className="text-[10px] font-black uppercase tracking-widest">20-30 min</p>
-               </div>
-               <div className="p-4 rounded-3xl bg-foreground/5 border border-foreground/10 flex items-center gap-3">
-                  <MapPin className="w-4 h-4 text-primary" />
-                  <p className="text-[10px] font-black uppercase tracking-widest">1.2 km</p>
-               </div>
-            </div>
-
-            {/* Botón de Acción */}
-            <div className="mt-auto">
-              <Button className="w-full h-16 rounded-[1.5rem] bg-primary text-primary-foreground font-black uppercase italic tracking-widest shadow-2xl shadow-primary/30">
-                Añadir al Carrito
-              </Button>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${text}08` }}>
+                <Search className="w-3 h-3" style={{ color: text }} />
+              </div>
             </div>
           </div>
-        </RestaurantThemeProvider>
-        
-        {/* Barra de Inicio del simulador */}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-foreground/20 rounded-full z-50" />
+
+          {/* Category tabs — réplica del portal */}
+          <div className="flex gap-3 px-4 pt-3 pb-2 shrink-0 overflow-x-auto no-scrollbar">
+            {["Carta completa", "Entrada", "Postre"].map((cat, i) => (
+              <span
+                key={cat}
+                className="text-[8px] font-black uppercase tracking-widest whitespace-nowrap pb-1 shrink-0"
+                style={{
+                  color: i === 0 ? pri : `${text}40`,
+                  fontFamily: accentFont,
+                  borderBottom: i === 0 ? `2px solid ${pri}` : "2px solid transparent",
+                }}
+              >
+                {cat}
+              </span>
+            ))}
+          </div>
+
+          {/* Section label */}
+          <div className="px-4 py-2 shrink-0 flex items-center gap-2">
+            <div className="w-0.5 h-3 rounded-full" style={{ backgroundColor: pri }} />
+            <p className="text-[8px] font-black uppercase tracking-[0.2em]" style={{ color: text, fontFamily: titleFont, opacity: 0.5 }}>
+              {sampleProduct.categories?.name ?? "Menú"}
+            </p>
+          </div>
+
+          {/* Tarjetas — réplica exacta de PortalMenuItemCard */}
+          <div className="px-3 pb-6 space-y-4">
+            {[sampleProduct, sampleProduct].map((product, idx) => (
+              <div
+                key={idx}
+                className="rounded-[1.5rem] border overflow-hidden shadow-lg flex flex-col"
+                style={{ backgroundColor: card, borderColor: `${text}12` }}
+              >
+                {/* Imagen — h-44 en portal real, escalado al mockup */}
+                <div className="relative overflow-hidden" style={{ height: 130, backgroundColor: `${text}06` }}>
+                  <img
+                    src={imageUrl}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=400&auto=format&fit=crop";
+                    }}
+                  />
+                </div>
+
+                {/* Contenido — réplica de p-6 sm:p-8 del portal */}
+                <div className="p-4 flex flex-col gap-2">
+                  {/* Nombre + precio en la misma fila */}
+                  <div className="flex justify-between items-start gap-2">
+                    <h4
+                      className="font-black leading-none tracking-tighter italic uppercase line-clamp-2 flex-1"
+                      style={{ color: text, fontFamily: titleFont, fontSize: 13 }}
+                    >
+                      {product.name}
+                    </h4>
+                    <span
+                      className="italic leading-none shrink-0 font-black"
+                      style={{ color: pri, fontFamily: accentFont, fontSize: 13 }}
+                    >
+                      ${Number(product.price).toLocaleString("es-CL")}
+                    </span>
+                  </div>
+
+                  {/* Descripción */}
+                  <p
+                    className="font-bold leading-relaxed line-clamp-2"
+                    style={{ color: text, fontFamily: bodyFont, fontSize: 9, opacity: 0.4 }}
+                  >
+                    {product.description}
+                  </p>
+
+                  {/* Botón Añadir al Carrito — réplica del portal real */}
+                  <button
+                    className="mt-1 w-full flex items-center justify-center gap-1.5 font-black uppercase tracking-widest rounded-2xl shadow-lg"
+                    style={{
+                      backgroundColor: pri,
+                      color: card,
+                      fontFamily: bodyFont,
+                      fontSize: 8,
+                      paddingTop: 10,
+                      paddingBottom: 10,
+                    }}
+                  >
+                    <Plus className="w-2.5 h-2.5" />
+                    Añadir al Carrito
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Home indicator */}
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-1 rounded-full z-50" style={{ backgroundColor: `${text}30` }} />
       </div>
     </div>
   );
