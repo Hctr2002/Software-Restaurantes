@@ -21,6 +21,7 @@ interface Props {
   children: React.ReactNode;
 }
 
+// Función para convertir colores hexadecimales a valores HSL puros
 export const hexToHslValues = (hex: string) => {
   // Eliminar el # si existe
   const cleanHex = hex.startsWith('#') ? hex.slice(1) : hex;
@@ -52,9 +53,11 @@ export const hexToHslValues = (hex: string) => {
   return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 };
 
+// Componente proveedor para inyectar dinámicamente el branding del restaurante
 export const RestaurantThemeProvider = ({ theme, children, isGlobal = false }: Props) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
+  // Efecto para aplicar los estilos cuando cambia el tema
   useEffect(() => {
     if (!theme) return;
 
@@ -69,9 +72,17 @@ export const RestaurantThemeProvider = ({ theme, children, isGlobal = false }: P
         "--accent": hexToHslValues(theme.accentColor),
         "--card": hexToHslValues(theme.cardBackground),
         "--foreground": hexToHslValues(theme.textColor),
+        // --- Tokens Derivados (Nuevos) ---
+        "--card-foreground": hexToHslValues(theme.textColor),
+        "--primary-foreground": hexToHslValues(theme.backgroundColor),
+        "--secondary-foreground": hexToHslValues(theme.textColor),
+        "--accent-foreground": hexToHslValues(theme.backgroundColor),
+        "--border": hexToHslValues(theme.secondaryColor),
+        "--muted": hexToHslValues(theme.secondaryColor),
+        "--muted-foreground": hexToHslValues(theme.textColor),
       };
 
-      // Aplicar colores base
+      // Función para aplicar colores base y derivados al elemento objetivo (html o contenedor)
       Object.entries(colors).forEach(([key, val]) => {
         target.style.setProperty(key, val);
       });
@@ -90,6 +101,7 @@ export const RestaurantThemeProvider = ({ theme, children, isGlobal = false }: P
           "--color-sand": `hsl(${colors["--foreground"]})`,
           "--color-sage": `hsl(${colors["--primary"]})`,
           "--color-accent": `hsl(${colors["--accent"]})`,
+          "--color-success": `hsl(160 84% 39%)`, // Emerald fixo por ahora o derivar si es necesario
           // Dashboards (Slate fallback)
           "--slate-950": colors["--background"],
           "--slate-900": colors["--card"],
@@ -102,6 +114,7 @@ export const RestaurantThemeProvider = ({ theme, children, isGlobal = false }: P
           "--color-slate-300": `hsl(${colors["--foreground"]})`,
         };
 
+        // Función para aplicar alias de compatibilidad
         Object.entries(aliases).forEach(([key, val]) => {
           target.style.setProperty(key, val);
         });
@@ -120,6 +133,7 @@ export const RestaurantThemeProvider = ({ theme, children, isGlobal = false }: P
           document.head.appendChild(link);
         }
         
+        // Función para construir la URL de Google Fonts y cargar las fuentes seleccionadas
         const fontParams = fontsToLoad
           .map(f => `family=${f.replace(/\s+/g, '+')}:wght@300;400;500;600;700;800;900`)
           .join('&');
@@ -128,18 +142,23 @@ export const RestaurantThemeProvider = ({ theme, children, isGlobal = false }: P
       }
       // ---------------------------------
       
+      // Función para actualizar variables de fuente (CSS Custom Properties en :root)
+      // Se usan sufijos -stack para compatibilidad con Tailwind y variables limpias para herencia directa
       if (theme.fontTitle) {
-        const titleStack = `"${theme.fontTitle}", sans-serif`;
-        target.style.setProperty("--font-outfit", titleStack);
+        const titleStack = `"${theme.fontTitle}", system-ui, sans-serif`;
+        target.style.setProperty("--font-title-stack", titleStack);
         target.style.setProperty("--font-title", titleStack);
+        target.style.setProperty("--font-outfit", titleStack); // Alias de compatibilidad
       }
       if (theme.fontBody) {
-        const bodyStack = `"${theme.fontBody}", sans-serif`;
-        target.style.setProperty("--font-inter", bodyStack);
+        const bodyStack = `"${theme.fontBody}", system-ui, sans-serif`;
+        target.style.setProperty("--font-body-stack", bodyStack);
         target.style.setProperty("--font-body", bodyStack);
+        target.style.setProperty("--font-inter", bodyStack); // Alias de compatibilidad
       }
       if (theme.fontAccent) {
-        const accentStack = `"${theme.fontAccent}", sans-serif`;
+        const accentStack = `"${theme.fontAccent}", system-ui, sans-serif`;
+        target.style.setProperty("--font-accent-stack", accentStack);
         target.style.setProperty("--font-accent", accentStack);
       }
     } catch (e) {

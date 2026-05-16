@@ -1,9 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { PortalMenuItemCard } from "@menu-bites/ui";
+import { PortalMenuItemCard, PortalHeading } from "@menu-bites/ui";
 import { MenuItem, Category } from "@menu-bites/auth";
 
+/**
+ * Propiedades del componente MenuSection.
+ */
 interface MenuSectionProps {
   categoryName: string;
   activeCategory: string | null;
@@ -14,22 +17,33 @@ interface MenuSectionProps {
   onDecrement: (id: string) => void;
 }
 
+/**
+ * Componente que renderiza las secciones del menú agrupadas por categoría.
+ * // Función para heredar el listado del menú y sincronizar encabezados con el tema dinámico.
+ */
 export function MenuSection({ categoryName, activeCategory, categories, items, cart, onAdd, onDecrement }: MenuSectionProps) {
-  // Vista "Todo": Muestra todas las categorías con sus productos
+  // Vista "Todo": Muestra todas las categorías con sus productos secuencialmente
   if (activeCategory === null) {
     return (
       <div className="space-y-4">
+        {/* // Función para iterar sobre todas las categorías disponibles */}
         {categories.map((cat) => {
+          // Filtrar items que pertenecen a esta categoría específica
           const categoryItems = items.filter(item => item.categoryId === cat.id);
           if (categoryItems.length === 0) return null;
 
           return (
             <section key={cat.id} className="px-6 pt-10 space-y-6 first:pt-4">
-              <h3 
-                className="text-lg font-black text-primary border-l-4 border-primary pl-4 uppercase tracking-[0.2em] italic font-title"
+              {/* // Función para renderizar el encabezado de categoría con estilo premium */}
+              <PortalHeading 
+                as="h3"
+                font="accent"
+                className="text-lg font-black text-primary border-l-4 border-primary pl-4 uppercase tracking-[0.2em] italic"
               >
                 {cat.name}
-              </h3>
+              </PortalHeading>
+              
+              {/* // Función para renderizar el grid de platos con animación de entrada escalonada */}
               <motion.div 
                 initial="hidden" 
                 animate="show" 
@@ -53,14 +67,19 @@ export function MenuSection({ categoryName, activeCategory, categories, items, c
     );
   }
 
-  // Vista de Categoría Individual
+  // Vista de Categoría Individual (cuando hay un filtro activo)
   return (
     <section className="px-6 mt-10 space-y-6">
-      <h3 
-        className="text-lg font-black text-primary border-l-4 border-primary pl-4 uppercase tracking-[0.2em] italic font-title"
+      {/* // Función para mostrar el nombre de la categoría filtrada actualmente */}
+      <PortalHeading 
+        as="h3"
+        font="accent"
+        className="text-lg font-black text-primary border-l-4 border-primary pl-4 uppercase tracking-[0.2em] italic"
       >
         {categoryName}
-      </h3>
+      </PortalHeading>
+
+      {/* // Función para listar los platos filtrados con efectos de transición */}
       <motion.div 
         key={activeCategory} 
         initial="hidden" 
@@ -79,8 +98,9 @@ export function MenuSection({ categoryName, activeCategory, categories, items, c
             />
           ))
         ) : (
+          /* // Función para mostrar un estado vacío amigable si no hay resultados */
           <div className="text-center py-12 col-span-full">
-            <p className="text-foreground/40 italic">No hay platos disponibles en esta categoría.</p>
+            <PortalText className="text-foreground/40 italic">No hay platos disponibles en esta categoría.</PortalText>
           </div>
         )}
       </motion.div>

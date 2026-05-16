@@ -5,6 +5,9 @@ import { cn } from "../lib/utils";
 import { LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
 
+/**
+ * Propiedades del componente PremiumHeader.
+ */
 interface PremiumHeaderProps {
   title: string;
   accentTitle?: string;
@@ -19,6 +22,10 @@ interface PremiumHeaderProps {
   className?: string;
 }
 
+/**
+ * Header premium con soporte para temas dinámicos y animaciones.
+ * // Función para heredar el encabezado premium y sincronizar la tipografía con el tema.
+ */
 export const PremiumHeader = ({
   title,
   accentTitle,
@@ -46,9 +53,11 @@ export const PremiumHeader = ({
         "flex flex-row justify-between items-center",
         className
       )}
+      // Inyectar fondo de card si es sólido
       style={isSolid ? { backgroundColor: 'hsl(var(--card))', opacity: 1 } : undefined}
     >
       <div className="flex items-center space-x-3 sm:space-x-4 lg:space-x-6 flex-1 min-w-0">
+        {/* Contenedor del Icono con color primario del tema */}
         <div 
           className={cn(
             "flex items-center justify-center shadow-2xl shadow-primary/30 shrink-0 transition-all duration-500 hover:scale-110",
@@ -60,20 +69,24 @@ export const PremiumHeader = ({
           <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
           <Icon className={cn("text-primary-foreground relative z-10", isCompact ? "w-6 h-6" : "w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10")} />
         </div>
+
         <div className="flex-1 min-w-0">
+          {/* Título Principal — Se fuerza la tipografía del tema vía style para evitar problemas de compilación de Tailwind v4 */}
           <h1 
             className={cn(
-              "font-title font-bold tracking-tight leading-tight pr-1 truncate",
+              "font-bold tracking-tight leading-tight pr-1 truncate",
               isCompact ? "text-xl sm:text-2xl" : "text-lg sm:text-2xl lg:text-3xl"
             )}
+            style={{ fontFamily: 'var(--font-title)' }}
           >
             {title} {accentTitle && <span className="text-primary">{accentTitle}</span>}
           </h1>
+          {/* Indicador de Estado */}
           <div className="flex items-center space-x-2 sm:space-x-3 text-[8px] sm:text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] sm:tracking-[0.3em] mt-0.5">
-            <span className="flex items-center gap-1.5 text-emerald-500">
+            <span className="flex items-center gap-1.5 text-success">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success/40 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
               </span>
               {statusLabel}
             </span>
@@ -87,6 +100,7 @@ export const PremiumHeader = ({
         </div>
       </div>
 
+      {/* Área de Estadísticas y Acciones */}
       <div className="flex flex-row items-center gap-3 lg:gap-6 justify-end">
         {stats && (
           <div className="hidden sm:flex items-center divide-x divide-white/5 px-4 py-2.5 glass rounded-[1.5rem] border border-white/5 shadow-xl">
@@ -102,3 +116,4 @@ export const PremiumHeader = ({
     </motion.header>
   );
 }
+
