@@ -50,12 +50,15 @@ export async function registerPushToken(userId: string): Promise<void> {
 
   const token = tokenData.data;
 
-  await supabase
+  const { error } = await supabase
     .from('users')
     .update({ push_token: token })
     .eq('id', userId);
+
+  if (error && __DEV__) console.warn('[pushNotifications] registerPushToken error:', error.message);
 }
 
 export async function clearPushToken(userId: string): Promise<void> {
-  await supabase.from('users').update({ push_token: null }).eq('id', userId);
+  const { error } = await supabase.from('users').update({ push_token: null }).eq('id', userId);
+  if (error && __DEV__) console.warn('[pushNotifications] clearPushToken error:', error.message);
 }
