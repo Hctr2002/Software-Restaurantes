@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   modalContent: { borderTopLeftRadius: 36, borderTopRightRadius: 36, height: height * 0.75, padding: 24, paddingBottom: 40 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
   modalTitle: { fontSize: 28, fontWeight: '900', letterSpacing: -1 },
-  modalClose: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
+  modalClose: { width: 40, height: 40, borderRadius: 20, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' },
   summaryList: { flex: 1 },
   summaryItem: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 18, borderBottomWidth: 1 },
   summaryItemInfo: { flex: 1 },

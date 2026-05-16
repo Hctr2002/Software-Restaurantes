@@ -127,8 +127,8 @@ export const ActiveOrdersModal = ({
                   ${activeOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0).toLocaleString()}
                 </Text>
               </View>
-              <TouchableOpacity 
-                style={[styles.confirmBtn, { backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: textColor + '10' }]} 
+              <TouchableOpacity
+                style={[styles.confirmBtn, { backgroundColor: textColor + '08', borderWidth: 1, borderColor: textColor + '10', elevation: 0 }]}
                 onPress={onClose}
               >
                 <Text style={[styles.confirmBtnText, { color: textColor }]}>Cerrar</Text>
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   modalContent: { borderTopLeftRadius: 36, borderTopRightRadius: 36, height: height * 0.75, padding: 24, paddingBottom: 40 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   modalTitle: { fontSize: 28, fontWeight: '900', letterSpacing: -1 },
-  modalClose: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
+  modalClose: { width: 40, height: 40, borderRadius: 20, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' },
   assistanceRow: { flexDirection: 'row', gap: 12, marginBottom: 24 },
   assistanceBtn: { flex: 1, height: 48, borderRadius: 16, borderWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   assistanceBtnText: { fontSize: 13, fontWeight: '800' },
