@@ -9,9 +9,10 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.105.1",
     "@menu-bites/auth": "*",
     "@menu-bites/ui": "*",
+    "@supabase/supabase-js": "^2.105.1",
+    "framer-motion": "^11.18.2",
     "next": "16.2.4",
     "react": "19.1.0",
     "react-dom": "19.1.0"

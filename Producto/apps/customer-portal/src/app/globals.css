@@ -3,9 +3,33 @@
 @theme {
   --radius-xl: 1.5rem;
   --radius-2xl: 2rem;
-  
+  --radius-3xl: 2.5rem;
+
   --font-outfit: "Outfit", sans-serif;
 
+  /* ─── Escala Tipográfica Modular (Major Third 1.25x) ─── */
+  --text-hero: 5rem;          /* 80px — h1 hero */
+  --text-display: 2.986rem;   /* ~47.8px — display sections */
+  --text-title: 2.389rem;     /* ~38.2px — h2 sección */
+  --text-heading: 1.563rem;   /* ~25px — h3 cards */
+  --text-body-lg: 1.25rem;    /* 20px — body grande */
+  --text-body: 1rem;          /* 16px — body base */
+  --text-sm: 0.8rem;          /* 12.8px — captions */
+  --text-xs: 0.64rem;         /* 10.24px — labels/badges */
+
+  /* ─── Semantic Color Tokens ─── */
+  --color-surface-0: #020617;
+  --color-surface-1: #0f172a;
+  --color-surface-2: #1e293b;
+  --color-accent-primary: #10b981;
+  --color-accent-glow: rgba(16,185,129,0.15);
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  --color-border-subtle: rgba(255,255,255,0.08);
+  --color-border-accent: rgba(16,185,129,0.25);
+
+  /* ─── Original Semantic Colors ─── */
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-card: hsl(var(--card));
@@ -54,5 +78,24 @@
 
   .premium-gradient {
     @apply bg-gradient-to-br from-primary/20 via-transparent to-foreground/5;
+  }
+
+  /* ─── Animaciones utilitarias ─── */
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.1; transform: scale(1); }
+    50% { opacity: 0.2; transform: scale(1.05); }
+  }
+
+  .glow-pulse {
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .float-animation {
+    animation: float 4s ease-in-out infinite;
   }
 }
