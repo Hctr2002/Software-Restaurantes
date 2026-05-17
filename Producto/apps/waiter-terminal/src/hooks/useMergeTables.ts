@@ -27,7 +27,14 @@ export function useMergeTables() {
     const json = await res.json();
     setMerging(false);
     if (res.ok) {
-      setMergeResult(`Mesas fusionadas — ${json.ordersUpdated} pedido(s) unificados.`);
+      if (json.alreadyMerged) {
+        setMergeResult("Estas mesas ya se encuentran fusionadas.");
+      } else {
+        const msg = json.ordersUpdated > 0 
+          ? `Mesas fusionadas — ${json.ordersUpdated} pedido(s) unificados.`
+          : `Mesas fusionadas.`;
+        setMergeResult(msg);
+      }
       setMergeMode(false);
       setSelectedForMerge(new Set());
       setTimeout(() => setMergeResult(null), 4000);
