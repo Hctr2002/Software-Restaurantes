@@ -5,6 +5,8 @@ import { useAuthStore } from "@menu-bites/store";
 import { useThemeSync } from "@menu-bites/auth";
 import { RestaurantThemeProvider, RestaurantTheme } from "@menu-bites/ui";
 
+const CACHE_KEY = 'mb-theme-bar';
+
 const THEME_VARS = [
   '--primary', '--primary-foreground',
   '--secondary', '--secondary-foreground',
@@ -25,10 +27,12 @@ export default function BarThemeWrapper({ children }: { children: React.ReactNod
   const [theme, setTheme] = useState<RestaurantTheme | undefined>(undefined);
 
   useEffect(() => {
-    if (liveTheme) setTheme(liveTheme as any);
+    if (liveTheme) {
+      setTheme(liveTheme as any);
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(liveTheme)); } catch {}
+    }
   }, [liveTheme]);
 
-  // Remove all restaurant vars when this wrapper unmounts (e.g. logout → /login)
   useEffect(() => {
     return () => {
       THEME_VARS.forEach(v => document.documentElement.style.removeProperty(v));
