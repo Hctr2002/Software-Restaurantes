@@ -1,10 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useAuthStore } from "@menu-bites/store";
 import { useThemeSync } from "@menu-bites/auth";
 import { RestaurantThemeProvider, RestaurantTheme } from "@menu-bites/ui";
+
+interface ThemePreviewEvent extends CustomEvent {
+  detail: RestaurantTheme;
+}
 
 // Tema verde salvia (Sage Green) premium e inmutable por defecto para el Super-Admin del multitenant.
 // Inspirado en el diseño premium de la paleta del customer-portal (http://localhost:3005).
@@ -31,7 +35,8 @@ const AUTH_ROUTES = ["/", "/forgot-password", "/reset-password"];
 
 export default function AdminThemeWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { user } = useAuthStore() as any;
+  const { user } = useAuthStore();
+  const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isAuthRoute = AUTH_ROUTES.includes(pathname) || pathname.startsWith("/auth/");
 
@@ -52,7 +57,7 @@ export default function AdminThemeWrapper({ children }: { children: React.ReactN
       setTheme(defaultSuperAdminTheme);
     } else if (liveTheme) {
       // Si es un admin normal asociado a un restaurante, aplicamos el tema del restaurante
-      setTheme(liveTheme as any);
+      setTheme(liveTheme);
     } else if (liveTheme === null) {
       setTheme(undefined);
     }
@@ -69,15 +74,20 @@ export default function AdminThemeWrapper({ children }: { children: React.ReactN
      * Permite que los cambios realizados en el configurador de marca se reflejen
      * inmediatamente en toda la UI del admin sin necesidad de guardar en la DB.
      */
-    const handlePreview = (event: any) => {
+    const handlePreview = (event: Event) => {
       if (isSuperAdmin) return; // El Super-Admin tiene un tema inmutable y no se ve afectado
-      if (event.detail) {
-        setTheme(event.detail);
+      const { detail } = event as ThemePreviewEvent;
+      if (detail) {
+        if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+        previewTimerRef.current = setTimeout(() => setTheme(detail), 300);
       }
     };
 
     window.addEventListener("admin-theme-preview", handlePreview);
-    return () => window.removeEventListener("admin-theme-preview", handlePreview);
+    return () => {
+      window.removeEventListener("admin-theme-preview", handlePreview);
+      if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+    };
   }, [isSuperAdmin]);
 
   if (isAuthRoute) return <>{children}</>;

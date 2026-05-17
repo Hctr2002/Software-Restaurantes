@@ -12,7 +12,7 @@
  */
 
 import { useState } from "react";
-import { useAuthStore } from "@menu-bites/store";
+import { useAuthStore, type UserIdentity } from "@menu-bites/store";
 import DashboardShell from "../../_components/DashboardShell";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
@@ -21,8 +21,7 @@ import { AlertCircle, CheckCircle2 } from "lucide-react";
 import PersonalInformation from "./_components/PersonalInformation";
 
 export default function ProfileSettingsPage() {
-  // Casting a any para acceder a user_metadata de Supabase Auth
-  const { user, setUser } = useAuthStore() as any;
+  const { user, setUser } = useAuthStore();
 
   // Estados Locales de Perfil
   const [name, setName] = useState(user?.user_metadata?.name || "");
@@ -51,11 +50,11 @@ export default function ProfileSettingsPage() {
       const { supabase: supabaseClient } = await import("@menu-bites/auth");
       const { data: { user: updatedUser } } = await supabaseClient.auth.getUser(); 
       
-      if (updatedUser) {
+      if (updatedUser && user) {
         setUser({
           ...user,
-          user_metadata: updatedUser.user_metadata
-        });
+          user_metadata: updatedUser.user_metadata,
+        } satisfies UserIdentity);
       }
 
       setMessage({ type: "success", text: "Perfil actualizado correctamente. Los cambios ahora son persistentes." });
