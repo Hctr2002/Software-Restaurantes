@@ -1,3 +1,13 @@
+/**
+ * index.ts — Store de autenticación del package @menu-bites/store.
+ * Implementa useAuthStore con Zustand + persist middleware sobre un almacenamiento
+ * AES-encriptado en localStorage. La clave de cifrado se deriva de hostname + userAgent
+ * para dificultar la extracción directa del token desde DevTools.
+ *
+ * No usar este store directamente en lógica de servidor (SSR): retorna datos vacíos
+ * cuando window es undefined (getEncryptionKey retorna un fallback).
+ */
+
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import CryptoJS from 'crypto-js';
@@ -20,6 +30,10 @@ interface AuthState {
 
 const AUTH_STORAGE_KEY = 'menu-bites-auth-storage';
 
+/**
+ * Genera la clave AES derivada del hostname y userAgent del navegador.
+ * Retorna un fallback estático en entornos sin window (SSR/test).
+ */
 function getEncryptionKey() {
   if (typeof window === 'undefined') {
     return 'menu-bites-fallback-key';
@@ -29,6 +43,11 @@ function getEncryptionKey() {
   return `${process.env.NEXT_PUBLIC_AUTH_CACHE_KEY || 'menu-bites-auth'}:${dynamicPart}`;
 }
 
+/**
+ * Adaptador de almacenamiento AES para el middleware persist de Zustand.
+ * En caso de error de descifrado (token corrupto o clave distinta) elimina la entrada
+ * y retorna null para forzar un nuevo inicio de sesión.
+ */
 const secureStorage = {
   getItem: (name: string) => {
     const encryptedValue = localStorage.getItem(name);
