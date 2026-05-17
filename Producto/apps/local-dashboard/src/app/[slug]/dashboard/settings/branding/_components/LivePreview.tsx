@@ -1,3 +1,7 @@
+/**
+ * LivePreview — Simulación del portal móvil del cliente con el tema actualmente en edición.
+ * Replica la estructura real del customer-portal para que el ADMIN vea el resultado final antes de guardar.
+ */
 "use client";
 
 import React from "react";

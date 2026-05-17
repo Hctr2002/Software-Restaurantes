@@ -1,9 +1,18 @@
+/**
+ * route.ts (api/sessions) — Gestiona la fusión y separación de mesas mediante session_id compartido.
+ * POST: une varias mesas bajo un mismo session_id, reasignando órdenes al grupo ganador.
+ * DELETE: desvincula las mesas de una sesión y restaura su estado individual.
+ */
 import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { randomUUID } from 'crypto';
 
+/**
+ * Crea un cliente Supabase con service role para actualizaciones multi-fila
+ * en tables y orders sin restricciones RLS.
+ */
 function serviceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,6 +21,10 @@ function serviceClient() {
   );
 }
 
+/**
+ * Extrae el restaurant_id del JWT del garzón autenticado mediante la cookie sb-waiter-session.
+ * Retorna null si no hay sesión activa.
+ */
 async function getRestaurantId(): Promise<string | null> {
   const cookieStore = await cookies();
   const supabase = createServerClient(

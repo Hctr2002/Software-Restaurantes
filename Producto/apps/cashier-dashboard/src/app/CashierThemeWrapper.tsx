@@ -1,47 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAuthStore } from "@menu-bites/store";
-import { useThemeSync } from "@menu-bites/auth";
-import { RestaurantThemeProvider, RestaurantTheme } from "@menu-bites/ui";
-
-const CACHE_KEY = 'mb-theme-cashier';
-
-const THEME_VARS = [
-  '--primary', '--primary-foreground',
-  '--secondary', '--secondary-foreground',
-  '--background', '--foreground',
-  '--card', '--card-foreground',
-  '--accent', '--accent-foreground',
-  '--border', '--input', '--muted', '--muted-foreground',
-  '--font-title', '--font-title-stack',
-  '--font-body', '--font-body-stack',
-  '--font-accent', '--font-accent-stack',
-  '--font-outfit', '--font-inter',
-  '--sage', '--navy', '--sand', '--brand-accent',
-];
+import { DynamicThemeWrapper } from "@menu-bites/ui";
 
 export default function CashierThemeWrapper({ children }: { children: React.ReactNode }) {
-  const { user }  = useAuthStore();
-  const liveTheme = useThemeSync(user?.restaurantId, "cashier");
-  const [theme, setTheme] = useState<RestaurantTheme | undefined>(undefined);
-
-  useEffect(() => {
-    if (liveTheme) {
-      setTheme(liveTheme as any);
-      try { localStorage.setItem(CACHE_KEY, JSON.stringify(liveTheme)); } catch {}
-    }
-  }, [liveTheme]);
-
-  useEffect(() => {
-    return () => {
-      THEME_VARS.forEach(v => document.documentElement.style.removeProperty(v));
-    };
-  }, []);
-
   return (
-    <RestaurantThemeProvider theme={theme} isGlobal>
+    <DynamicThemeWrapper appKey="cashier">
       {children}
-    </RestaurantThemeProvider>
+    </DynamicThemeWrapper>
   );
 }

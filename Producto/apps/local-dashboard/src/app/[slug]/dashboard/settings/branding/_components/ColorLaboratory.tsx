@@ -1,3 +1,7 @@
+/**
+ * ColorLaboratory — Pestaña de edición de colores del tema (primario, fondo, texto, acento, etc.).
+ * Cada cambio de color llama a setCurrentTheme marcando paletteName como "custom".
+ */
 "use client";
 
 import React from "react";

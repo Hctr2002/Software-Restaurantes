@@ -1,3 +1,8 @@
+/**
+ * BrandingPage — Laboratorio de Branding e Identidad visual del restaurante.
+ * Orquesta carrusel de inspiración, temas guardados, editor de colores/tipografías y previsualización live.
+ * Incluye modal inline de guardado para gestionar la estrategia "actualizar vs nuevo tema".
+ */
 "use client";
 
 import React from "react";

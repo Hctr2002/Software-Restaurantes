@@ -24,12 +24,38 @@ export default function TenantLayout({ children }: { children: React.ReactNode }
   const { restaurantSlug } = useParams<{ restaurantSlug: string }>();
 
   const [restaurant, setRestaurant] = useState<TenantRestaurant | null>(null);
-  const [theme, setTheme] = useState<RestaurantTheme | undefined>(undefined);
+  const [theme, setTheme] = useState<RestaurantTheme | undefined>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const pathSegments = window.location.pathname.split('/').filter(Boolean);
+        const slug = pathSegments[0];
+        if (slug) {
+          const cached = localStorage.getItem('mb-theme-' + slug);
+          if (cached) {
+            return JSON.parse(cached) as RestaurantTheme;
+          }
+        }
+      } catch (e) {
+        console.error('Error reading cached theme in customer-portal layout:', e);
+      }
+    }
+    return undefined;
+  });
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     if (!restaurantSlug) return;
+
+    // Sincronizar el tema desde localStorage inmediatamente al cambiar de slug (para transiciones SPA rápidas)
+    try {
+      const cached = localStorage.getItem('mb-theme-' + restaurantSlug);
+      if (cached) {
+        setTheme(JSON.parse(cached));
+      } else {
+        setTheme(undefined);
+      }
+    } catch {}
 
     async function resolve() {
       const data = await getRestaurantBySlug(restaurantSlug);
@@ -40,7 +66,7 @@ export default function TenantLayout({ children }: { children: React.ReactNode }
         const themeData = await getThemeByRestaurant(data.id);
         if (themeData) {
           setTheme(themeData);
-          // Cachear el tema en localStorage para eliminarlo FOUC en la próxima visita
+          // Cachear el tema en localStorage para eliminar FOUC en la próxima visita
           try { localStorage.setItem('mb-theme-' + restaurantSlug, JSON.stringify(themeData)); } catch {}
         }
       }
@@ -74,32 +100,27 @@ export default function TenantLayout({ children }: { children: React.ReactNode }
     return () => { supabase.removeChannel(channel); };
   }, [restaurant?.id]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (notFound || !restaurant) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
-        <h1 className="text-4xl font-black text-foreground mb-3">404</h1>
-        <p className="text-primary text-lg font-semibold mb-2">Restaurante no encontrado</p>
-        <p className="text-foreground/40 text-sm">
-          El restaurante <span className="text-primary/70 font-mono">"{restaurantSlug}"</span> no existe
-          o no está activo en este momento.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <RestaurantThemeProvider theme={theme} isGlobal={true}>
-      <TenantProvider restaurant={restaurant}>
-        {children}
-      </TenantProvider>
+      {loading ? (
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : notFound || !restaurant ? (
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+          <h1 className="text-4xl font-black text-foreground mb-3">404</h1>
+          <p className="text-primary text-lg font-semibold mb-2">Restaurante no encontrado</p>
+          <p className="text-foreground/40 text-sm">
+            El restaurante <span className="text-primary/70 font-mono">"{restaurantSlug}"</span> no existe
+            o no está activo en este momento.
+          </p>
+        </div>
+      ) : (
+        <TenantProvider restaurant={restaurant}>
+          {children}
+        </TenantProvider>
+      )}
     </RestaurantThemeProvider>
   );
 }
+

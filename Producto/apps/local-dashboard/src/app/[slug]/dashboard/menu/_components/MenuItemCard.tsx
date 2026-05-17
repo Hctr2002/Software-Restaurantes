@@ -1,3 +1,7 @@
+/**
+ * MenuItemCard — Tarjeta visual de un plato del menú con imagen, precio, estado y acciones.
+ * Aplica grayscale parcial cuando el ítem está desactivado para indicarlo visualmente.
+ */
 "use client";
 
 import { motion } from "framer-motion";

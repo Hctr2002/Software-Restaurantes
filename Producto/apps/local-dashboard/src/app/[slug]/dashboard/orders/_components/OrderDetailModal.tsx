@@ -1,3 +1,7 @@
+/**
+ * OrderDetailModal — Modal de detalle de una orden con listado de ítems, total y avance de estado.
+ * El botón de avance solo aparece si el estado actual tiene un siguiente estado definido en NEXT_STATUS.
+ */
 import React from "react";
 import { Modal, Badge, Button } from "@menu-bites/ui";
 import { Loader2, Clock } from "lucide-react";

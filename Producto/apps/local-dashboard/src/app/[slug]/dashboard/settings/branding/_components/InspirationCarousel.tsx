@@ -1,3 +1,7 @@
+/**
+ * InspirationCarousel — Carrusel horizontal de paletas de inspiración para el Laboratorio de Branding.
+ * Al seleccionar una tarjeta se aplica el preset completo (colores + tipografías) sin marcarlo como dirty.
+ */
 "use client";
 
 import React, { useRef, useState, useCallback } from "react";

@@ -1,3 +1,7 @@
+/**
+ * MenuPage — Gestión de ítems del menú en formato grilla de tarjetas.
+ * Permite activar/desactivar, editar y eliminar platos; soporta subida de imagen por plato.
+ */
 "use client";
 
 import React from "react";

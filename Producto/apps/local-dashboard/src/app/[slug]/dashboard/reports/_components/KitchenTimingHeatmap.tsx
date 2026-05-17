@@ -1,3 +1,8 @@
+/**
+ * KitchenTimingHeatmap — Visualización de tiempos de cocina promedio por categoría de menú.
+ * Muestra barras proporcionales para tiempo de validación, cocina y total.
+ * Las barras de cocina cambian de color según umbral (verde/amarillo/rojo).
+ */
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@menu-bites/ui";

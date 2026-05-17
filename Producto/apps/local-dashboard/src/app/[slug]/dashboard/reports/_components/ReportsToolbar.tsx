@@ -1,3 +1,7 @@
+/**
+ * ReportsToolbar — Barra de filtros del módulo de reportes.
+ * Permite seleccionar presets de período o configurar un rango personalizado y exportar a Excel.
+ */
 "use client";
 
 import { Filter, Download } from "lucide-react";

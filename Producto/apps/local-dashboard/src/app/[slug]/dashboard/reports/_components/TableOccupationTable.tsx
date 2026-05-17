@@ -1,3 +1,7 @@
+/**
+ * TableOccupationTable — Tabla de ingresos y pedidos agrupados por número de mesa.
+ * Ordenada de mayor a menor ingreso para identificar las zonas más productivas.
+ */
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, Table, TableRow, TableCell } from "@menu-bites/ui";

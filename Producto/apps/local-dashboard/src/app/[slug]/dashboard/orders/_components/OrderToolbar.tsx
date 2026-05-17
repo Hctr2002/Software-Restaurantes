@@ -1,3 +1,7 @@
+/**
+ * OrderToolbar — Barra de filtros y refresco de la página de pedidos.
+ * Permite filtrar por estado (SELECT) y forzar recarga manual de la lista.
+ */
 import React from "react";
 import { Button } from "@menu-bites/ui";
 import { RefreshCw } from "lucide-react";

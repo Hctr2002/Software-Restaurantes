@@ -1,3 +1,6 @@
+/**
+ * TopItemsTable — Los 10 platos más pedidos del período seleccionado con ventas e ingresos.
+ */
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, Table, TableRow, TableCell } from "@menu-bites/ui";

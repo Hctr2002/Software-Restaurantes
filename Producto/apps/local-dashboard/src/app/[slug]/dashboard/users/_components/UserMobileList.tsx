@@ -1,3 +1,7 @@
+/**
+ * UserMobileList — Tarjetas de usuarios para vista móvil.
+ * Confirma la eliminación con window.confirm antes de ejecutar la acción.
+ */
 "use client";
 
 import React from "react";

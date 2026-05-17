@@ -16,7 +16,7 @@ export interface RestaurantTheme {
 }
 
 interface Props {
-  theme?: RestaurantTheme;
+  theme?: RestaurantTheme | null;
   isGlobal?: boolean;
   children: React.ReactNode;
 }
@@ -66,10 +66,72 @@ export const RestaurantThemeProvider = ({ theme, children, isGlobal = false }: P
 
   // Efecto para aplicar los estilos cuando cambia el tema
   useEffect(() => {
-    if (!theme) return;
-
     const target = isGlobal ? document.documentElement : containerRef.current;
     if (!target) return;
+
+    // Listado de todas las propiedades personalizadas de CSS (CSS Custom Properties) que este proveedor puede inyectar
+    const allThemeKeys = [
+      "--primary",
+      "--secondary",
+      "--background",
+      "--accent",
+      "--card",
+      "--foreground",
+      "--card-foreground",
+      "--primary-foreground",
+      "--secondary-foreground",
+      "--accent-foreground",
+      "--border",
+      "--input",
+      "--muted",
+      "--muted-foreground",
+      "--navy-dark",
+      "--navy",
+      "--sand",
+      "--sage",
+      "--brand-accent",
+      "--color-navy-dark",
+      "--color-navy",
+      "--color-sand",
+      "--color-sage",
+      "--color-accent",
+      "--color-success",
+      "--slate-950",
+      "--slate-900",
+      "--slate-800",
+      "--slate-300",
+      "--color-slate-950",
+      "--color-slate-900",
+      "--color-slate-800",
+      "--color-slate-300",
+      "--font-title-stack",
+      "--font-title",
+      "--font-outfit",
+      "--font-body-stack",
+      "--font-body",
+      "--font-inter",
+      "--font-accent-stack",
+      "--font-accent"
+    ];
+
+    const cleanupTheme = () => {
+      // 1. Eliminar variables CSS para evitar fugas/acumulación en el elemento de destino (:root o contenedor local)
+      allThemeKeys.forEach(key => {
+        target.style.removeProperty(key);
+      });
+
+      // 2. Limpiar el tag dinámico de Google Fonts del head del documento si existiera
+      const linkId = "google-fonts-theme-dynamic";
+      const link = document.getElementById(linkId);
+      if (link) {
+        link.remove();
+      }
+    };
+
+    if (!theme) {
+      cleanupTheme();
+      return;
+    }
 
     try {
       const cardHsl = hexToHslValues(theme.cardBackground);
@@ -141,8 +203,8 @@ export const RestaurantThemeProvider = ({ theme, children, isGlobal = false }: P
       
       // --- Carga Dinámica de Fuentes ---
       const fontsToLoad = [theme.fontTitle, theme.fontBody, theme.fontAccent].filter(Boolean) as string[];
+      const linkId = "google-fonts-theme-dynamic";
       if (fontsToLoad.length > 0) {
-        const linkId = "google-fonts-theme-dynamic";
         let link = document.getElementById(linkId) as HTMLLinkElement;
         
         if (!link) {
@@ -158,6 +220,11 @@ export const RestaurantThemeProvider = ({ theme, children, isGlobal = false }: P
           .join('&');
         
         link.href = `https://fonts.googleapis.com/css2?${fontParams}&display=swap`;
+      } else {
+        const link = document.getElementById(linkId);
+        if (link) {
+          link.remove();
+        }
       }
       // ---------------------------------
       
@@ -183,6 +250,11 @@ export const RestaurantThemeProvider = ({ theme, children, isGlobal = false }: P
     } catch (e) {
       console.error("Error setting theme properties:", e);
     }
+
+    // Retornar función de limpieza para desmontaje o cuando el tema cambie
+    return () => {
+      cleanupTheme();
+    };
   }, [theme, isGlobal]);
 
   if (isGlobal) return <>{children}</>;

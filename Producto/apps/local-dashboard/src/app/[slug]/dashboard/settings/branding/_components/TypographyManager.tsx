@@ -1,3 +1,7 @@
+/**
+ * TypographyManager — Pestaña de selección de tipografías del tema (título, cuerpo, acento).
+ * Muestra cada fuente en su propio estilo dentro del selector para previsualización directa.
+ */
 "use client";
 
 import React from "react";

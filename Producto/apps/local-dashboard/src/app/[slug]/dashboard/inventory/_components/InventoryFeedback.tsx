@@ -1,3 +1,7 @@
+/**
+ * InventoryFeedback — Mensaje de resultado para la importación CSV de inventario.
+ * Muestra un banner verde en éxito o rojo en error; se oculta si no hay mensaje.
+ */
 "use client";
 
 import React from "react";

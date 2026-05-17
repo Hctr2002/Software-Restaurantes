@@ -1,3 +1,7 @@
+/**
+ * BrandingToolbar — Botón principal de aplicación de marca del Laboratorio de Branding.
+ * Cambia de color y texto según si hay cambios sin guardar (isDirty): amarillo si hay cambios, primario si no.
+ */
 "use client";
 
 import React from "react";

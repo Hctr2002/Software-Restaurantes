@@ -1,3 +1,7 @@
+/**
+ * DesignTabs — Sistema de pestañas del editor de marca: Estilo (colores), Fuentes y Negocio (logo/slug).
+ * Renderiza con AnimatePresence para transiciones suaves al cambiar de pestaña.
+ */
 "use client";
 
 import React from "react";

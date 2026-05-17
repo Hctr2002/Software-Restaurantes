@@ -1,3 +1,8 @@
+/**
+ * UserModal — Modal de creación y edición de usuarios del restaurante.
+ * La contraseña es obligatoria en modo creación y opcional en edición.
+ * Los errores lanzados por onSave se capturan localmente y se muestran en el modal.
+ */
 "use client";
 
 import React, { useState } from "react";

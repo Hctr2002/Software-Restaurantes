@@ -1,3 +1,8 @@
+/**
+ * TableGrid — Grilla de tarjetas de mesas del restaurante.
+ * Al hacer clic en una tarjeta se abre el modal de edición; el botón de eliminar aparece al hover.
+ * Exporta tableStatusVariant para uso en otros componentes.
+ */
 import React from "react";
 import { Badge } from "@menu-bites/ui";
 import { Table as TableIcon, Trash2, Loader2 } from "lucide-react";

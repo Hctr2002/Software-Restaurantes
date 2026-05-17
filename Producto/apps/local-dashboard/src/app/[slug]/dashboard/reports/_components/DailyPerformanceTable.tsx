@@ -1,3 +1,7 @@
+/**
+ * DailyPerformanceTable — Tabla de rendimiento diario: pedidos, ingresos y ticket promedio por día.
+ * Muestra "—" en días sin ventas para mantener el rango completo visible.
+ */
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, Table, TableRow, TableCell } from "@menu-bites/ui";

@@ -1,3 +1,7 @@
+/**
+ * SavedThemes — Galería de temas personalizados guardados en la base de datos.
+ * Soporta selección múltiple para eliminación en batch, activación individual y confirmación de borrado.
+ */
 "use client";
 
 import React, { useState } from "react";

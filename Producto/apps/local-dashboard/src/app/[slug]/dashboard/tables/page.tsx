@@ -1,3 +1,7 @@
+/**
+ * TablesPage — Gestión de mesas del restaurante con vista de grilla y generación de QR.
+ * La eliminación de mesas con órdenes activas devuelve error 409 y se muestra al usuario.
+ */
 "use client";
 
 import React, { useState } from "react";

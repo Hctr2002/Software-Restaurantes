@@ -1,3 +1,7 @@
+/**
+ * CategoryModal — Modal de creación y edición de categorías.
+ * Permite configurar nombre, estación de preparación (KITCHEN o BAR) y estado activo.
+ */
 import React from "react";
 import { Modal, Button, Input } from "@menu-bites/ui";
 import { Loader2 } from "lucide-react";

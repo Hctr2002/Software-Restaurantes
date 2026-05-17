@@ -1,3 +1,7 @@
+/**
+ * TeamRankingTable — Ranking de garzones por ingresos generados en el período seleccionado.
+ * Usa colores de medalla (oro/plata/bronce) para los tres primeros puestos.
+ */
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, Table, TableRow, TableCell } from "@menu-bites/ui";

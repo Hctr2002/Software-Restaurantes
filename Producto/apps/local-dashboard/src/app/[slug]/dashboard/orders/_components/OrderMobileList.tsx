@@ -1,3 +1,7 @@
+/**
+ * OrderMobileList — Tarjetas de pedidos para vista móvil.
+ * Al tocar cualquier tarjeta se abre el OrderDetailModal de esa orden.
+ */
 import React from "react";
 import { Badge } from "@menu-bites/ui";
 import { User, Clock, ShoppingBag } from "lucide-react";

@@ -145,3 +145,16 @@ export type LocalUserRecord = {
   createdAt: string;
   name?: string | null;
 };
+
+export interface RestaurantTheme {
+  primaryColor: string;
+  secondaryColor: string;
+  backgroundColor: string;
+  accentColor: string;
+  textColor: string;
+  cardBackground: string;
+  fontTitle?: string;
+  fontBody?: string;
+  fontAccent?: string;
+  logoUrl?: string | null;
+}

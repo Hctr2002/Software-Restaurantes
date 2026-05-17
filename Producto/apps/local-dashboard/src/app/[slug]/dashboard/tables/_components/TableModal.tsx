@@ -1,3 +1,7 @@
+/**
+ * TableModal — Modal de creación y edición de mesas.
+ * Cuando es edición, muestra el QR generado con la URL del portal de clientes y permite descargarlo.
+ */
 import React from "react";
 import { Modal, Button, Input, TABLE_STATUSES, TableRecord } from "@menu-bites/ui";
 import { Loader2, Download } from "lucide-react";
