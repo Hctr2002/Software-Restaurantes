@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
       .select('session_id, createdAt')
       .in('session_id', uniqueSessions)
       .eq('restaurant_id', restaurantId)
-      .not('status', 'in', '("REJECTED")')
+      .not('status', 'in', '("REJECTED","COMPLETED")')
       .order('createdAt', { ascending: true })
       .limit(1);
 
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
       .update({ session_id: winningSessionId })
       .in('session_id', losingSessionIds)
       .eq('restaurant_id', restaurantId)
-      .not('status', 'in', '("REJECTED")');
+      .not('status', 'in', '("REJECTED","COMPLETED")');
 
     if (reassignError) return NextResponse.json({ error: reassignError.message }, { status: 500 });
   }
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
     .update({ session_id: winningSessionId })
     .in('table_id', tableIds)
     .eq('restaurant_id', restaurantId)
-    .not('status', 'in', '("REJECTED")')
+    .not('status', 'in', '("REJECTED","COMPLETED")')
     .select('id');
 
   if (ordersError) return NextResponse.json({ error: ordersError.message }, { status: 500 });
@@ -134,7 +134,7 @@ export async function DELETE(req: NextRequest) {
     .update({ session_id: null })
     .eq('session_id', sessionId)
     .eq('restaurant_id', restaurantId)
-    .not('status', 'in', '("DELIVERED","REJECTED")');
+    .not('status', 'in', '("DELIVERED","REJECTED","COMPLETED")');
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
