@@ -84,6 +84,7 @@ jspm_packages/
 # Build Artifacts
 **/.next/
 **/.turbo/
+**/next-env.d.ts
 **/out/
 **/dist/
 **/.expo/

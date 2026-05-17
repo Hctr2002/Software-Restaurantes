@@ -22,7 +22,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.hrobledo.menubites"
     },
     "web": {
       "bundler": "metro",
@@ -46,6 +47,13 @@
     "experiments": {
       "typedRoutes": true,
       "autolinkingModuleResolution": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b9a845b5-6937-4b60-bca6-444641a99d76"
+      }
+    },
+    "owner": "hrobledo"
   }
 }

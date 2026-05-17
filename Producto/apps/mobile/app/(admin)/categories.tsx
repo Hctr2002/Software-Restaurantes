@@ -11,7 +11,7 @@ import {
   Alert
 } from 'react-native';
 import { Tag, Search, Plus, ChevronRight } from 'lucide-react-native';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { MB_SPACING } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -259,7 +259,6 @@ export default function CategoriesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A1128',
   },
   header: {
     paddingHorizontal: MB_SPACING.lg,
@@ -268,13 +267,11 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    color: 'white',
     fontWeight: '900',
     letterSpacing: -0.5,
   },
   headerSubtitle: {
     fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.4)',
     fontWeight: '600',
     marginTop: 2,
   },
@@ -289,30 +286,25 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 16,
     paddingHorizontal: 12,
     height: 48,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
   },
   searchIcon: {
     marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    color: 'white',
     fontSize: 14,
     fontWeight: '600',
   },
   addButton: {
     width: 48,
     height: 48,
-    backgroundColor: '#FE5F55',
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#FE5F55',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -327,16 +319,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 20,
     padding: MB_SPACING.md,
     marginBottom: MB_SPACING.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.03)',
   },
   categoryCardInactive: {
     opacity: 0.6,
-    backgroundColor: 'rgba(255,255,255,0.02)',
   },
   categoryInfo: {
     flexDirection: 'row',
@@ -347,25 +336,18 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: 'rgba(254, 95, 85, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  iconContainerInactive: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-  },
+  iconContainerInactive: {},
   categoryName: {
-    color: 'white',
     fontSize: 16,
     fontWeight: '800',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  categoryNameInactive: {
-    color: 'rgba(255, 255, 255, 0.4)',
-  },
+  categoryNameInactive: {},
   inactiveBadge: {
-    color: '#FE5F55',
     fontSize: 8,
     fontWeight: '900',
     marginTop: 2,
@@ -376,7 +358,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    color: 'rgba(255, 255, 255, 0.4)',
     marginTop: 12,
     fontSize: 12,
     fontWeight: '800',
@@ -388,7 +369,6 @@ const styles = StyleSheet.create({
     marginTop: 100,
   },
   emptyText: {
-    color: 'rgba(255, 255, 255, 0.4)',
     fontSize: 14,
     fontWeight: '700',
     marginTop: 16,

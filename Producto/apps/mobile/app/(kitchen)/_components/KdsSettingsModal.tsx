@@ -55,7 +55,7 @@ interface KdsSettingsModalProps {
 }
 
 export default function KdsSettingsModal({ visible, onClose, onSave }: KdsSettingsModalProps) {
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   const { restaurantId } = useAuth();
   
   const [activeTab, setActiveTab] = useState<Tab>("umbrales");
@@ -330,7 +330,7 @@ export default function KdsSettingsModal({ visible, onClose, onSave }: KdsSettin
 
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
-      <BlurView intensity={20} tint="dark" style={styles.overlay}>
+      <BlurView intensity={20} tint={isLight ? 'light' : 'dark'} style={styles.overlay}>
         <View style={styles.centered}>
           <TouchableOpacity style={styles.dismissArea} activeOpacity={1} onPress={onClose} />
           
@@ -350,7 +350,7 @@ export default function KdsSettingsModal({ visible, onClose, onSave }: KdsSettin
                 {TABS.map(({ key, label, Icon }) => (
                   <TouchableOpacity 
                     key={key} 
-                    style={[styles.tabBtn, activeTab === key && { backgroundColor: colors.brandAccent }]}
+                    style={[styles.tabBtn, { backgroundColor: colors.glass }, activeTab === key && { backgroundColor: colors.brandAccent }]}
                     onPress={() => setActiveTab(key)}
                   >
                     <Icon size={14} color={activeTab === key ? 'white' : colors.muted} />

@@ -12,7 +12,6 @@ import {
 import { X, Clock, ShoppingBag, Hash, ChevronRight, CheckCircle2 } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../constants/MB_Theme';
 import { useTheme } from '../context/ThemeContext';
 import { formatCurrency, timeAgo } from '../lib/dashboard';
 
@@ -57,7 +56,7 @@ export default function OrderDetailModal({
   allowDelivery = true, 
   allowCancel = true 
 }: OrderDetailProps & { allowDelivery?: boolean, allowCancel?: boolean }) {
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   if (!order) return null;
 
   const nextStatus = NEXT_STATUS[order.status as OrderStatus];
@@ -71,7 +70,7 @@ export default function OrderDetailModal({
       animationType="none"
       onRequestClose={onClose}
     >
-      <BlurView intensity={20} tint="dark" style={styles.overlay}>
+      <BlurView intensity={20} tint={isLight ? 'light' : 'dark'} style={styles.overlay}>
         <TouchableOpacity style={styles.dismissArea} activeOpacity={1} onPress={onClose} />
         
         <Animated.View 
@@ -194,7 +193,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   modalContent: {
-    backgroundColor: MB_COLORS.navy,
+    backgroundColor: '#0A1128',
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     height: SCREEN_HEIGHT * 0.85,
@@ -221,13 +220,11 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   tableText: {
-    color: MB_COLORS.navy,
     fontSize: 14,
     fontWeight: '900',
     fontStyle: 'italic',
   },
   orderId: {
-    color: MB_COLORS.muted,
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 1,
@@ -273,12 +270,10 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   timeText: {
-    color: MB_COLORS.muted,
     fontSize: 12,
     fontWeight: '600',
   },
   sectionTitle: {
-    color: MB_COLORS.muted,
     fontSize: 10,
     fontWeight: '900',
     letterSpacing: 2,
@@ -312,25 +307,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   quantityText: {
-    color: MB_COLORS.brandAccent,
     fontSize: 12,
     fontWeight: '900',
     fontStyle: 'italic',
   },
   itemName: {
-    color: 'white',
     fontSize: 14,
     fontWeight: '800',
     textTransform: 'uppercase',
     fontStyle: 'italic',
   },
   itemNotes: {
-    color: MB_COLORS.muted,
     fontSize: 11,
     marginTop: 2,
   },
   itemPrice: {
-    color: 'white',
     fontSize: 14,
     fontWeight: '900',
   },
@@ -343,14 +334,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   totalLabel: {
-    color: MB_COLORS.brandAccent,
     fontSize: 10,
     fontWeight: '900',
     letterSpacing: 3,
     marginBottom: 8,
   },
   totalValue: {
-    color: 'white',
     fontSize: 32,
     fontWeight: '900',
     fontStyle: 'italic',
@@ -361,14 +350,14 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   primaryAction: {
-    backgroundColor: MB_COLORS.brandAccent,
+    backgroundColor: '#FE5F55',
     height: 56,
     borderRadius: 18,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 12,
-    shadowColor: MB_COLORS.brandAccent,
+    shadowColor: '#FE5F55',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
@@ -392,7 +381,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.05)',
   },
   cancelText: {
-    color: MB_COLORS.muted,
     fontSize: 12,
     fontWeight: '800',
     letterSpacing: 1,
@@ -405,7 +393,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   completedText: {
-    color: MB_COLORS.sage,
     fontSize: 14,
     fontWeight: '900',
     letterSpacing: 2,

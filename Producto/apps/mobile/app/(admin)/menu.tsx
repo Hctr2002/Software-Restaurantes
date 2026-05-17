@@ -34,7 +34,7 @@ const ITEM_WIDTH = (width - 48) / COLUMN_COUNT;
 
 export default function MenuScreen() {
   const { user } = useAuth();
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   const router = useRouter();
   const [items, setItems] = React.useState<any[]>([]);
   const [categories, setCategories] = React.useState<any[]>([]);
@@ -282,7 +282,7 @@ export default function MenuScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.navy }]}>
-      <BlurView intensity={80} tint="dark" style={[styles.header, { borderBottomColor: colors.glassHeavy }]}>
+      <BlurView intensity={80} tint={isLight ? 'light' : 'dark'} style={[styles.header, { borderBottomColor: colors.glassHeavy }]}>
         <View style={styles.headerTop}>
           <View>
             <Text style={[styles.title, { color: colors.text }]}>Carta / Menú</Text>

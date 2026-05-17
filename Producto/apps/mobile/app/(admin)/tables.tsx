@@ -1,18 +1,18 @@
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  FlatList, 
-  TouchableOpacity, 
-  TextInput, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  TextInput,
   RefreshControl,
   ActivityIndicator,
   Alert,
   Dimensions
 } from 'react-native';
-import { Table as TableIcon, Search, Plus, MapPin, ChevronRight, Hash } from 'lucide-react-native';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { Table as TableIcon, Search, Plus, MapPin, ChevronRight } from 'lucide-react-native';
+import { MB_SPACING } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 import { CUSTOMER_PORTAL_URL } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
@@ -27,21 +27,21 @@ const ITEM_WIDTH = (width - 48) / COLUMN_COUNT;
 export default function TablesScreen() {
   const { restaurantId } = useAuth();
   const { colors } = useTheme();
-  
+
   // States
   const [tables, setTables] = React.useState<TableData[]>([]);
   const [filteredTables, setFilteredTables] = React.useState<TableData[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [refreshing, setRefreshing] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
-  
+
   // Modal State
   const [modalVisible, setModalVisible] = React.useState(false);
   const [selectedTable, setSelectedTable] = React.useState<TableData | null>(null);
 
   const fetchTables = React.useCallback(async () => {
     if (!restaurantId) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('tables')
@@ -100,8 +100,8 @@ export default function TablesScreen() {
     if (text.trim() === '') {
       setFilteredTables(tables);
     } else {
-      const filtered = tables.filter(t => 
-        t.number.toString().includes(text) || 
+      const filtered = tables.filter(t =>
+        t.number.toString().includes(text) ||
         (t.label && t.label.toLowerCase().includes(text.toLowerCase()))
       );
       setFilteredTables(filtered);
@@ -143,7 +143,7 @@ export default function TablesScreen() {
           .select('slug')
           .eq('id', restaurantId)
           .single();
-        
+
         const slug = rest?.slug || restaurantId;
         const qr_data = `${CUSTOMER_PORTAL_URL}/${slug}/${data.number}`;
 
@@ -166,8 +166,8 @@ export default function TablesScreen() {
       '¿Estás seguro de que deseas eliminar esta mesa? Los pedidos asociados podrían verse afectados.',
       [
         { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: 'Eliminar', 
+        {
+          text: 'Eliminar',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -175,7 +175,7 @@ export default function TablesScreen() {
                 .from('tables')
                 .delete()
                 .eq('id', id);
-              
+
               if (error) throw error;
               fetchTables();
               Alert.alert('Eliminado', 'La mesa ha sido eliminada');
@@ -194,13 +194,13 @@ export default function TablesScreen() {
       case 'OCCUPIED': return '#ef4444';
       case 'RESERVED': return '#f59e0b';
       case 'CLEANING': return '#3b82f6';
-      default: return MB_COLORS.muted;
+      default: return colors.muted;
     }
   };
 
   const renderTable = ({ item, index }: { item: TableData, index: number }) => (
     <Animated.View entering={FadeInDown.delay(index * 50)}>
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[styles.tableCard, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}
         onPress={() => handleOpenEdit(item)}
       >
@@ -210,8 +210,8 @@ export default function TablesScreen() {
           </View>
           <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor(item.status)}20` }]}>
             <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
-              {item.status === 'FREE' ? 'LIBRE' : 
-               item.status === 'OCCUPIED' ? 'OCUPADA' : 
+              {item.status === 'FREE' ? 'LIBRE' :
+               item.status === 'OCCUPIED' ? 'OCUPADA' :
                item.status === 'CLEANING' ? 'LIMPIEZA' : 'RESERVADA'}
             </Text>
           </View>
@@ -240,8 +240,8 @@ export default function TablesScreen() {
           <Text style={[styles.headerTitle, { color: colors.text }]}>Gestión de Mesas</Text>
           <Text style={[styles.headerSubtitle, { color: colors.muted }]}>{tables.length} mesas en el salón</Text>
         </View>
-        <TouchableOpacity 
-          style={[styles.addButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }]} 
+        <TouchableOpacity
+          style={[styles.addButton, { backgroundColor: colors.brandAccent, shadowColor: colors.brandAccent }]}
           onPress={handleOpenCreate}
         >
           <Plus size={24} color="white" />
@@ -288,7 +288,7 @@ export default function TablesScreen() {
         />
       )}
 
-      <TableModal 
+      <TableModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         table={selectedTable}
@@ -302,7 +302,6 @@ export default function TablesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MB_COLORS.navy,
   },
   header: {
     flexDirection: 'row',
@@ -314,7 +313,6 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    color: 'white',
     fontWeight: '900',
     letterSpacing: -0.5,
     fontStyle: 'italic',
@@ -322,18 +320,15 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     fontSize: 13,
-    color: MB_COLORS.muted,
     fontWeight: '600',
     marginTop: 2,
   },
   addButton: {
     width: 52,
     height: 52,
-    backgroundColor: MB_COLORS.brandAccent,
     borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: MB_COLORS.brandAccent,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
@@ -346,19 +341,16 @@ const styles = StyleSheet.create({
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: MB_COLORS.glass,
     borderRadius: 16,
     paddingHorizontal: 16,
     height: 52,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
   },
   searchIcon: {
     marginRight: 10,
   },
   searchInput: {
     flex: 1,
-    color: 'white',
     fontSize: 15,
     fontWeight: '600',
   },
@@ -373,11 +365,9 @@ const styles = StyleSheet.create({
   },
   tableCard: {
     width: ITEM_WIDTH,
-    backgroundColor: MB_COLORS.glass,
     borderRadius: 28,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.03)',
   },
   tableHeader: {
     flexDirection: 'row',
@@ -406,7 +396,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   tableNumber: {
-    color: 'white',
     fontSize: 20,
     fontWeight: '900',
     fontStyle: 'italic',
@@ -419,7 +408,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   tableLabel: {
-    color: MB_COLORS.muted,
     fontSize: 11,
     fontWeight: '600',
   },
@@ -429,10 +417,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.05)',
   },
   footerText: {
-    color: MB_COLORS.muted,
     fontSize: 10,
     fontWeight: '800',
     textTransform: 'uppercase',
@@ -444,7 +430,6 @@ const styles = StyleSheet.create({
     paddingTop: 100,
   },
   loadingText: {
-    color: MB_COLORS.muted,
     marginTop: 12,
     fontSize: 12,
     fontWeight: '800',
@@ -456,7 +441,6 @@ const styles = StyleSheet.create({
     marginTop: 100,
   },
   emptyText: {
-    color: MB_COLORS.muted,
     fontSize: 14,
     fontWeight: '700',
     marginTop: 16,

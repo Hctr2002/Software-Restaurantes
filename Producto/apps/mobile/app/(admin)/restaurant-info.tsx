@@ -12,8 +12,8 @@ import {
   Platform
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { Store, MapPin, Phone, Mail, Percent, Save, ChevronLeft } from 'lucide-react-native';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { Store, Save, ChevronLeft } from 'lucide-react-native';
+import { MB_SPACING } from '../../constants/MB_Theme';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
@@ -149,11 +149,9 @@ export default function RestaurantInfoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MB_COLORS.navy,
   },
   centered: {
     flex: 1,
-    backgroundColor: MB_COLORS.navy,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -167,7 +165,6 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    color: 'white',
     fontWeight: '900',
     textTransform: 'uppercase',
     fontStyle: 'italic',
@@ -177,7 +174,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.05)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -188,7 +184,6 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   sectionTitle: {
-    color: MB_COLORS.muted,
     fontSize: 10,
     fontWeight: '900',
     letterSpacing: 2,
@@ -206,18 +201,14 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   label: {
-    color: MB_COLORS.muted,
     fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',
   },
   input: {
-    backgroundColor: 'rgba(255,255,255,0.03)',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
     padding: 16,
-    color: 'white',
     fontSize: 15,
     fontWeight: '600',
   },
@@ -226,14 +217,12 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   saveButton: {
-    backgroundColor: MB_COLORS.brandAccent,
     height: 60,
     borderRadius: 20,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 12,
-    shadowColor: MB_COLORS.brandAccent,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 12,

@@ -1,30 +1,27 @@
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
-  Dimensions,
   TextInput,
   Modal
 } from 'react-native';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Users, 
-  Package, 
-  Calendar as CalendarIcon, 
-  DollarSign, 
+import {
+  BarChart3,
+  TrendingUp,
+  Users,
+  Package,
+  Calendar as CalendarIcon,
+  DollarSign,
   Clock,
-  ChevronRight,
-  Target,
   LayoutGrid,
   X
 } from 'lucide-react-native';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { MB_SPACING } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -340,7 +337,7 @@ export default function AdminReportsScreen() {
                   </View>
                 ))
               ) : (
-                <Text style={styles.emptyText}>No hay datos disponibles</Text>
+                <Text style={[styles.emptyText, { color: colors.muted }]}>No hay datos disponibles</Text>
               )}
             </Animated.View>
 
@@ -364,7 +361,7 @@ export default function AdminReportsScreen() {
                   </View>
                 ))
               ) : (
-                <Text style={styles.emptyText}>No hay datos de mesas</Text>
+                <Text style={[styles.emptyText, { color: colors.muted }]}>No hay datos de mesas</Text>
               )}
             </Animated.View>
 
@@ -386,7 +383,7 @@ export default function AdminReportsScreen() {
                   </View>
                 ))
               ) : (
-                <Text style={styles.emptyText}>No hay datos disponibles</Text>
+                <Text style={[styles.emptyText, { color: colors.muted }]}>No hay datos disponibles</Text>
               )}
             </Animated.View>
 
@@ -417,7 +414,7 @@ export default function AdminReportsScreen() {
                   </View>
                 ))
               ) : (
-                <Text style={styles.emptyText}>Sin datos de tiempos</Text>
+                <Text style={[styles.emptyText, { color: colors.muted }]}>Sin datos de tiempos</Text>
               )}
             </Animated.View>
           </>
@@ -431,7 +428,6 @@ export default function AdminReportsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A1128', // Fallback to Navy
   },
   header: {
     paddingHorizontal: MB_SPACING.lg,
@@ -440,13 +436,11 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    color: 'white',
     fontWeight: '900',
     letterSpacing: -0.5,
   },
   headerSubtitle: {
     fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.4)', // Fallback to Muted
     fontWeight: '600',
     marginTop: 2,
   },
@@ -461,21 +455,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-  },
-  presetChipActive: {
-    backgroundColor: MB_COLORS.brandAccent,
-    borderColor: MB_COLORS.brandAccent,
   },
   presetText: {
-    color: MB_COLORS.muted,
     fontSize: 12,
     fontWeight: '800',
-  },
-  presetTextActive: {
-    color: 'white',
   },
   customDateDisplay: {
     flexDirection: 'row',
@@ -485,7 +469,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   customDateDisplayText: {
-    color: MB_COLORS.brandAccent,
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1,
@@ -497,10 +480,8 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   modalContent: {
-    backgroundColor: MB_COLORS.navy,
     borderRadius: 32,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
     overflow: 'hidden',
   },
   modalHeader: {
@@ -509,10 +490,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 24,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
   },
   modalTitle: {
-    color: 'white',
     fontSize: 18,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -524,21 +503,17 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   inputLabel: {
-    color: MB_COLORS.muted,
     fontSize: 10,
     fontWeight: '900',
     marginBottom: 8,
   },
   dateInput: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderRadius: 12,
     padding: 16,
-    color: 'white',
     fontSize: 16,
     fontWeight: '700',
   },
   applyButton: {
-    backgroundColor: MB_COLORS.brandAccent,
     height: 56,
     borderRadius: 16,
     justifyContent: 'center',
@@ -559,12 +534,10 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   kpiCard: {
-    backgroundColor: MB_COLORS.glass,
     borderRadius: 16,
     padding: 16,
     borderLeftWidth: 4,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.03)',
   },
   kpiHeader: {
     flexDirection: 'row',
@@ -580,14 +553,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   kpiTitle: {
-    color: MB_COLORS.muted,
     fontSize: 10,
     fontWeight: '900',
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
   kpiValue: {
-    color: 'white',
     fontSize: 24,
     fontWeight: '900',
   },
@@ -602,28 +573,23 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    color: 'white',
     fontSize: 14,
     fontWeight: '900',
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
   tableContainer: {
-    backgroundColor: MB_COLORS.glass,
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.03)',
   },
   tableHeaderRow: {
     flexDirection: 'row',
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
     marginBottom: 8,
   },
   tableHead: {
-    color: MB_COLORS.muted,
     fontSize: 9,
     fontWeight: '900',
     flex: 1,
@@ -632,10 +598,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.03)',
   },
   tableCell: {
-    color: MB_COLORS.muted,
     fontSize: 12,
     fontWeight: '700',
     flex: 1,
@@ -643,31 +607,26 @@ const styles = StyleSheet.create({
   rankingItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.02)',
     padding: 12,
     borderRadius: 12,
     marginBottom: 8,
     gap: 12,
   },
   rankingPos: {
-    color: MB_COLORS.muted,
     fontSize: 14,
     fontWeight: '900',
     width: 20,
   },
   rankingName: {
-    color: 'white',
     fontSize: 14,
     fontWeight: '800',
     textTransform: 'uppercase',
   },
   rankingSub: {
-    color: MB_COLORS.muted,
     fontSize: 10,
     fontWeight: '600',
   },
   rankingValue: {
-    color: 'white',
     fontSize: 14,
     fontWeight: '900',
   },
@@ -687,13 +646,11 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   timingItem: {
-    backgroundColor: 'rgba(255,255,255,0.02)',
     padding: 16,
     borderRadius: 16,
     marginBottom: 12,
   },
   timingCat: {
-    color: 'white',
     fontSize: 12,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -708,14 +665,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   timingStepLabel: {
-    color: MB_COLORS.muted,
     fontSize: 8,
     fontWeight: '900',
     textTransform: 'uppercase',
     marginBottom: 4,
   },
   timingStepValue: {
-    color: 'white',
     fontSize: 14,
     fontWeight: '800',
   },
@@ -724,14 +679,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loaderText: {
-    color: MB_COLORS.muted,
     marginTop: 12,
     fontSize: 12,
     fontWeight: '800',
     textTransform: 'uppercase',
   },
   emptyText: {
-    color: MB_COLORS.muted,
     fontSize: 11,
     textAlign: 'center',
     paddingVertical: 20,
