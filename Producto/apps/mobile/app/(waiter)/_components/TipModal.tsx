@@ -3,10 +3,20 @@ import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { Receipt } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
+import { TIP_COLOR } from '../../../constants/MB_Theme';
+import { ThemeColors } from '../../../context/ThemeContext';
+
+interface Table {
+  id: string;
+  number: number;
+  status: string;
+  bill_requested: boolean;
+  tip_included: boolean;
+}
 
 interface TipModalProps {
-  table: any | null;
-  colors: any;
+  table: Table | null;
+  colors: ThemeColors;
   isLight: boolean;
   onClose: () => void;
   onConfirm: (tableId: string, includeTip: boolean) => void;
@@ -19,8 +29,8 @@ export function TipModal({ table, colors, isLight, onClose, onConfirm }: TipModa
         <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />
         <Animated.View entering={FadeInDown.springify()} style={[styles.tipSheet, { backgroundColor: colors.navy, borderTopColor: colors.glassHeavy }]}>
           <View style={styles.tipHeader}>
-            <View style={[styles.tipIconBox, { backgroundColor: 'rgba(255,215,0,0.1)' }]}>
-              <Receipt size={20} color="#FFD700" />
+            <View style={[styles.tipIconBox, { backgroundColor: TIP_COLOR + '1A' }]}>
+              <Receipt size={20} color={TIP_COLOR} />
             </View>
             <View>
               <Text style={[styles.tipTitle, { color: colors.text }]}>PROPINA — MESA {table?.number}</Text>
@@ -31,7 +41,7 @@ export function TipModal({ table, colors, isLight, onClose, onConfirm }: TipModa
             <TouchableOpacity style={[styles.tipBtn, { backgroundColor: colors.glass }]} onPress={() => onConfirm(table!.id, false)}>
               <Text style={[styles.tipBtnText, { color: colors.muted }]}>No incluir</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.tipBtn, { backgroundColor: '#FFD700' }]} onPress={() => onConfirm(table!.id, true)}>
+            <TouchableOpacity style={[styles.tipBtn, { backgroundColor: TIP_COLOR }]} onPress={() => onConfirm(table!.id, true)}>
               <Text style={[styles.tipBtnText, { color: '#000' }]}>Sí, incluir propina</Text>
             </TouchableOpacity>
           </View>

@@ -8,6 +8,9 @@ export const MB_COLORS = {
   muted: 'rgba(255, 255, 255, 0.4)',
 };
 
+export const TIP_RATE = 0.10;
+export const TIP_COLOR = '#FFD700';
+
 export const MB_SPACING = {
   xs: 8,
   sm: 12,

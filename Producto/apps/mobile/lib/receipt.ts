@@ -1,5 +1,6 @@
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import { TIP_RATE } from '../constants/MB_Theme';
 
 interface ReceiptItem {
   name: string;
@@ -28,7 +29,7 @@ function buildHtml(data: ReceiptData): string {
   const { tableLabel, restaurantName, items, tipIncluded, reference, date = new Date() } = data;
 
   const subtotal = items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
-  const tipAmount = tipIncluded ? Math.round(subtotal * 0.10) : 0;
+  const tipAmount = tipIncluded ? Math.round(subtotal * TIP_RATE) : 0;
   const total = subtotal + tipAmount;
   const dateStr = date.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 

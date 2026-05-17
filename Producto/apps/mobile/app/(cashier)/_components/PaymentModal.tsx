@@ -17,6 +17,7 @@ import { useTheme } from '../../../context/ThemeContext';
 import { formatCurrency } from '../../../lib/dashboard';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { shareReceipt } from '../../../lib/receipt';
+import { TIP_RATE, TIP_COLOR } from '../../../constants/MB_Theme';
 
 interface PaymentModalProps {
   visible: boolean;
@@ -36,7 +37,7 @@ export default function PaymentModal({ visible, group, isProcessing, onClose, on
   const allItems = group.orders.flatMap((o: any) => o.order_items ?? []);
   const tableLabel = group.sessionId ? "Mesas fusionadas" : `Mesa ${group.tableNumber ?? "S/N"}`;
   const subtotal = group.total;
-  const tipAmount = group.tipIncluded ? Math.round(subtotal * 0.10) : 0;
+  const tipAmount = group.tipIncluded ? Math.round(subtotal * TIP_RATE) : 0;
   const totalToPay = subtotal + tipAmount;
 
   const handleConfirm = async () => {
@@ -99,9 +100,9 @@ export default function PaymentModal({ visible, group, isProcessing, onClose, on
                 <Text style={[styles.summaryLabel, { color: colors.muted }]}>TOTAL A COBRAR</Text>
                 <Text style={[styles.summaryValue, { color: colors.text }]}>{formatCurrency(totalToPay)}</Text>
                 {group.tipIncluded && (
-                  <View style={[styles.tipRow, { backgroundColor: '#FFD70015', borderColor: '#FFD70030' }]}>
-                    <Text style={[styles.tipLabel, { color: '#FFD700' }]}>Propina 10%</Text>
-                    <Text style={[styles.tipValue, { color: '#FFD700' }]}>+{formatCurrency(tipAmount)}</Text>
+                  <View style={[styles.tipRow, { backgroundColor: TIP_COLOR + '15', borderColor: TIP_COLOR + '30' }]}>
+                    <Text style={[styles.tipLabel, { color: TIP_COLOR }]}>Propina 10%</Text>
+                    <Text style={[styles.tipValue, { color: TIP_COLOR }]}>+{formatCurrency(tipAmount)}</Text>
                   </View>
                 )}
               </View>
@@ -136,9 +137,9 @@ export default function PaymentModal({ visible, group, isProcessing, onClose, on
                 disabled={isSharing}
               >
                 {isSharing
-                  ? <ActivityIndicator color="#94a3b8" size="small" />
-                  : <Share2 size={18} color="#94a3b8" />}
-                <Text style={styles.shareBtnText}>
+                  ? <ActivityIndicator color={colors.muted} size="small" />
+                  : <Share2 size={18} color={colors.muted} />}
+                <Text style={[styles.shareBtnText, { color: colors.muted }]}>
                   {isSharing ? 'Generando...' : 'Compartir recibo'}
                 </Text>
               </TouchableOpacity>
@@ -306,7 +307,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   shareBtnText: {
-    color: '#94a3b8',
     fontSize: 13,
     fontWeight: '700',
   },

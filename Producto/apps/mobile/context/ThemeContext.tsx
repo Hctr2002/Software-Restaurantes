@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 import { MB_COLORS as DEFAULT_COLORS } from '../constants/MB_Theme';
 
-interface ThemeColors {
+export interface ThemeColors {
   navy: string;
   brandAccent: string;
   secondary: string;
@@ -28,7 +28,10 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 function isLightColor(hex: string): boolean {
-  const clean = hex.replace('#', '');
+  let clean = hex.replace('#', '');
+  if (clean.length === 3) {
+    clean = clean.split('').map(c => c + c).join('');
+  }
   if (clean.length !== 6) return false;
   const r = parseInt(clean.slice(0, 2), 16);
   const g = parseInt(clean.slice(2, 4), 16);
