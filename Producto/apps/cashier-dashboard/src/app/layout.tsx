@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { cn, ThemeReset } from "@menu-bites/ui";
+import { cn } from "@menu-bites/ui";
 import "@menu-bites/ui/styles/globals.css";
 export const metadata: Metadata = {
   title: "Menu Bites | Caja",
@@ -15,7 +15,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: FOUC_SCRIPT }} />
       </head>
       <body className={cn("font-sans antialiased bg-background text-foreground min-h-screen")}>
-        <ThemeReset />
         {children}
       </body>
     </html>

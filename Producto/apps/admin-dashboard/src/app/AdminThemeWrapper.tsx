@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useAuthStore } from "@menu-bites/store";
 import { useThemeSync } from "@menu-bites/auth";
 import { RestaurantThemeProvider, RestaurantTheme } from "@menu-bites/ui";
@@ -9,11 +10,11 @@ import { RestaurantThemeProvider, RestaurantTheme } from "@menu-bites/ui";
 // Inspirado en el diseño premium de la paleta del customer-portal (http://localhost:3005).
 const defaultSuperAdminTheme: RestaurantTheme = {
   primaryColor: "#75a388",     // Verde Salvia (Sage Green)
-  backgroundColor: "#02142c",  // Deep Slate-Blue Canvas
+  backgroundColor: "#020617",  // Slate-Black Canvas (Coincide con customer-portal #020617)
   textColor: "#f8f8f6",        // Warm Foreground Off-white
   accentColor: "#f49d25",       // Amber/Gold Accent
-  cardBackground: "#021d41",   // Slate-Navy Cards
-  secondaryColor: "#0b3265",   // Subtle Slate-Blue Borders
+  cardBackground: "#0f172a",   // Slate-900 Cards (Coincide con customer-portal #0f172a)
+  secondaryColor: "#1e293b",   // Slate-800 Borders (Coincide con customer-portal #1e293b)
   fontTitle: "Outfit",
   fontBody: "Inter"
 };
@@ -26,9 +27,14 @@ const defaultSuperAdminTheme: RestaurantTheme = {
  * 2. Cargar el tema neutro/personalizado para el Super-Admin del multitenant.
  * 3. Reaccionar a cambios "en vivo" del Laboratorio de Branding sin necesidad de guardarlos.
  */
+const AUTH_ROUTES = ["/", "/forgot-password", "/reset-password"];
+
 export default function AdminThemeWrapper({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const { user } = useAuthStore() as any;
-  
+
+  const isAuthRoute = AUTH_ROUTES.includes(pathname) || pathname.startsWith("/auth/");
+
   const isSuperAdmin = user?.role === "SUPER_ADMIN" || !user?.restaurantId;
   
   // Sincronización en tiempo real con la base de datos para temas del restaurante (slug/tenant)
@@ -71,8 +77,9 @@ export default function AdminThemeWrapper({ children }: { children: React.ReactN
     return () => window.removeEventListener("admin-theme-preview", handlePreview);
   }, [isSuperAdmin]);
 
+  if (isAuthRoute) return <>{children}</>;
+
   return (
-    // Proveedor que propaga el tema y aplica las variables CSS globales
     <RestaurantThemeProvider theme={theme} isGlobal={true}>
       {children}
     </RestaurantThemeProvider>
