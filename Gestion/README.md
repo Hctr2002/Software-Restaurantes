@@ -10,7 +10,8 @@
 |---|---|---|
 | [Integrantes.txt](Integrantes.txt) | Identificación detallada del equipo, RUTs y roles específicos | Finalizado |
 | [1.1.2_Planificacion_y_Gestion.md](1.1.2_Planificacion_y_Gestion.md) | Estrategia, problemática y planificación detallada | Finalizado |
-| [REPORTE_AVANCE_2026-05-07.md](REPORTE_AVANCE_2026-05-07.md) | Último reporte de avance técnico y estabilización Fase 2 | Finalizado |
+| [REPORTE_AVANCE_2026-05-17.md](REPORTE_AVANCE_2026-05-17.md) | Reporte de documentación JSDoc v2.5.0 — comentarios en todo el monorepo | Finalizado |
+| [REPORTE_AVANCE_2026-05-07.md](REPORTE_AVANCE_2026-05-07.md) | Reporte de avance técnico y estabilización Fase 2 | Finalizado |
 | [HISTORIA_TECNICA_BRANDING_V3.md](HISTORIA_TECNICA_BRANDING_V3.md) | Documentación de la evolución del branding del sistema | Archivado |
 | [HISTORIA_TECNICA_MULTITENANT_SLUG.md](HISTORIA_TECNICA_MULTITENANT_SLUG.md) | Detalles de implementación de la arquitectura Multi-tenant | Archivado |
 

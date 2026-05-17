@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# customer-portal — Portal del Cliente
 
-## Getting Started
+Aplicación Next.js 16 (App Router) de acceso público. El cliente escanea el código QR de su mesa y accede al menú digital del restaurante para hacer pedidos, seguirlos en tiempo real y solicitar la cuenta.
 
-First, run the development server:
+## Puerto de desarrollo
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```text
+http://localhost:3005
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Acceso
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Público (sin autenticación requerida). La URL tiene el formato:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```text
+/{restaurantSlug}/{tableNumber}
+```
 
-## Learn More
+Ejemplo: `/mi-restaurante/4`
 
-To learn more about Next.js, take a look at the following resources:
+## Responsabilidades
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+* Mostrar el menú filtrado por restaurante (multitenant via slug)
+* Gestionar el carrito y confirmar pedidos
+* Seguimiento en tiempo real del estado del pedido (PENDING → READY)
+* Solicitud de cuenta y asistencia del garzón
+* Valoración del servicio tras la entrega
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Arquitectura especial
 
-## Deploy on Vercel
+* **Sin autenticación:** usa el rol `anon` de Supabase con políticas RLS públicas.
+* **Tema dinámico:** `RestaurantThemeProvider` inyecta los colores y tipografías del restaurante en `:root` al cargar.
+* **Anti-FOUC:** script bloqueante en `<head>` aplica el tema cacheado en localStorage antes del primer paint.
+* **Creación de pedidos server-side:** `/api/orders` usa la `SUPABASE_SERVICE_ROLE_KEY` para bypasear RLS — el cliente anónimo no puede insertar directamente.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Comandos
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Ejecutar desde la raíz del monorepo (`Producto/`):
+
+```bash
+turbo dev --filter=customer-portal
+```
+
+## Estructura relevante
+
+```text
+src/
+  app/
+    [restaurantSlug]/
+      layout.tsx              # Resuelve el tenant y aplica el tema
+      [tableNumber]/
+        page.tsx              # Página principal del menú
+        _components/          # CheckoutModal, CategoryNav, AccountActions, etc.
+    api/
+      orders/route.ts         # Crea sub-pedidos KITCHEN y BAR
+      bill-request/route.ts
+      help-request/route.ts
+      reviews/route.ts
+  context/
+    TenantContext.tsx          # Proveedor del restaurante activo
+  lib/
+    tenant.ts                 # Queries filtradas por restaurant_id
+```
+
+## Dependencias internas
+
+* `@menu-bites/auth` — cliente Supabase, useCustomerPortal, useCustomerOrderTracker, useMenu
+* `@menu-bites/ui` — PortalMenuItemCard, PortalPrimaryButton, PortalHeading, PortalText, RestaurantThemeProvider, PremiumHeader, RatingModal, CuentaSheet, OrderTracker
