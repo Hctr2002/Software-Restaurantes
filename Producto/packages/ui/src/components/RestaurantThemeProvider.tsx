@@ -21,6 +21,13 @@ interface Props {
   children: React.ReactNode;
 }
 
+// Ajusta la luminosidad de un string HSL ("h s% l%") en ±delta puntos porcentuales
+const adjustHslLightness = (hslStr: string, delta: number): string => {
+  const [h, s, lRaw] = hslStr.split(' ');
+  const l = Math.min(97, Math.max(3, parseInt(lRaw) + delta));
+  return `${h} ${s} ${l}%`;
+};
+
 // Función para convertir colores hexadecimales a valores HSL puros
 export const hexToHslValues = (hex: string) => {
   // Eliminar el # si existe
@@ -65,21 +72,33 @@ export const RestaurantThemeProvider = ({ theme, children, isGlobal = false }: P
     if (!target) return;
 
     try {
+      const cardHsl = hexToHslValues(theme.cardBackground);
+      const cardL   = parseInt(cardHsl.split(' ')[2]);
+      // Muted: superficie sutil derivada del card (±6 puntos de luminosidad)
+      const mutedHsl = adjustHslLightness(cardHsl, cardL > 50 ? -6 : 6);
+      // Border: aún más sutil que muted (±10 puntos)
+      const borderHsl = adjustHslLightness(cardHsl, cardL > 50 ? -10 : 10);
+      // Muted-foreground: textColor atenuado (±20 puntos hacia el centro)
+      const textHsl  = hexToHslValues(theme.textColor);
+      const textL    = parseInt(textHsl.split(' ')[2]);
+      const mutedFgHsl = adjustHslLightness(textHsl, textL > 50 ? -20 : 20);
+
       const colors = {
         "--primary": hexToHslValues(theme.primaryColor),
         "--secondary": hexToHslValues(theme.secondaryColor),
         "--background": hexToHslValues(theme.backgroundColor),
         "--accent": hexToHslValues(theme.accentColor),
-        "--card": hexToHslValues(theme.cardBackground),
-        "--foreground": hexToHslValues(theme.textColor),
-        // --- Tokens Derivados (Nuevos) ---
-        "--card-foreground": hexToHslValues(theme.textColor),
+        "--card": cardHsl,
+        "--foreground": textHsl,
+        // --- Tokens Derivados ---
+        "--card-foreground": textHsl,
         "--primary-foreground": hexToHslValues(theme.backgroundColor),
-        "--secondary-foreground": hexToHslValues(theme.textColor),
+        "--secondary-foreground": textHsl,
         "--accent-foreground": hexToHslValues(theme.backgroundColor),
-        "--border": hexToHslValues(theme.secondaryColor),
-        "--muted": hexToHslValues(theme.secondaryColor),
-        "--muted-foreground": hexToHslValues(theme.textColor),
+        "--border":           borderHsl,
+        "--input":            borderHsl,
+        "--muted":            mutedHsl,
+        "--muted-foreground": mutedFgHsl,
       };
 
       // Función para aplicar colores base y derivados al elemento objetivo (html o contenedor)
