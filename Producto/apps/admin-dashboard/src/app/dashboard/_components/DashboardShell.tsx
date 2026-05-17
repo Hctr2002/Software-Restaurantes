@@ -46,7 +46,7 @@ export default function DashboardShell({ title, subtitle, children }: DashboardS
           <Store className="w-5 h-5 text-primary-foreground" />
         </div>
         <div>
-          <h2 className="text-base font-black text-foreground tracking-tighter uppercase italic">Menu <span className="text-primary">Bites</span></h2>
+          <h2 className="text-base font-black text-foreground tracking-tighter uppercase">Menu <span className="text-primary">Bites</span></h2>
           <p className="text-[9px] text-muted-foreground font-bold tracking-[0.2em] uppercase">Admin Hub</p>
         </div>
       </div>
@@ -174,7 +174,7 @@ export default function DashboardShell({ title, subtitle, children }: DashboardS
             <div className="max-w-6xl mx-auto space-y-8">
               {/* Encabezado Principal de la Página */}
               <div className="flex flex-col space-y-1 mb-10">
-                <h1 className="text-4xl font-black text-foreground tracking-tighter uppercase italic">{subtitle}</h1>
+                <h1 className="text-4xl font-black text-foreground tracking-tighter uppercase">{subtitle}</h1>
                 <div className="h-1.5 w-12 bg-primary rounded-full shadow-lg shadow-primary/20" />
               </div>
               

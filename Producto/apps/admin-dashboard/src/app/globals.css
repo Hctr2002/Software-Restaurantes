@@ -3,35 +3,21 @@
 @tailwind utilities;
 
 :root {
-  /* Brand Tokens (OKLCH format for light/dark scaling) */
-  --navy: 15% 0.1 260;
-  --sage: 65% 0.05 145;
-  --sand: 98.15% 0.005 141.69;
-  --brand-accent: 65% 0.15 45;
-
-  /* Shadcn standard overrides */
-  --background: 98% 0.005 80;
-  --foreground: 15% 0.1 260;
-  --card: 100% 0 0;
-  --card-foreground: 15% 0.1 260;
-  --border: 15% 0.1 260 / 0.1;
-  --primary: 65% 0.05 145;
-  --primary-foreground: 100% 0 0;
+  /* Sage Green and Deep Slate-Blue Palette inspired by customer-portal (http://localhost:3005) */
+  --background: 214 90% 9%;
+  --foreground: 60 14% 97%;
+  --card: 214 95% 13%;
+  --card-foreground: 60 14% 97%;
+  --border: 214 80% 22% / 0.1;
+  --primary: 145 20% 55%;           /* Verde Salvia (Sage Green) */
+  --primary-foreground: 214 90% 9%;
   --radius: 2rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: 10% 0.02 260;
-    --foreground: 98% 0.005 80;
-    --card: 15% 0.05 260;
-    --border: 98% 0.005 80 / 0.1;
-  }
-}
 
 body {
-  color: oklch(var(--foreground));
-  background: oklch(var(--background));
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
   font-family: 'Outfit', sans-serif;
   -webkit-font-smoothing: antialiased;
 }

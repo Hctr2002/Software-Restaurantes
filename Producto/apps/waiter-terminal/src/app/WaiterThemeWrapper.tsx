@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import { useAuthStore } from "@menu-bites/store";
 import { useThemeSync } from "@menu-bites/auth";
 import { RestaurantThemeProvider, RestaurantTheme } from "@menu-bites/ui";
@@ -21,36 +20,30 @@ const THEME_VARS = [
 ];
 
 export default function WaiterThemeWrapper({ children }: { children: React.ReactNode }) {
-  const pathname  = usePathname();
   const { user }  = useAuthStore();
   const liveTheme = useThemeSync(user?.restaurantId, "waiter");
   const [theme, setTheme] = useState<RestaurantTheme | undefined>(undefined);
 
-  const isPublicRoute = pathname === '/login' || pathname.startsWith('/auth/');
+  useEffect(() => {
+    if (liveTheme) setTheme(liveTheme as any);
+  }, [liveTheme]);
 
   useEffect(() => {
-    if (isPublicRoute) {
+    return () => {
       THEME_VARS.forEach(v => document.documentElement.style.removeProperty(v));
-      setTheme(undefined);
-    }
-  }, [isPublicRoute]);
-
-  useEffect(() => {
-    if (!isPublicRoute && liveTheme) {
-      setTheme(liveTheme as any);
-    }
-  }, [liveTheme, isPublicRoute]);
-
-  useEffect(() => {
-    const handleThemeUpdate = (e: CustomEvent<RestaurantTheme>) => {
-      if (e.detail && !isPublicRoute) setTheme(e.detail);
     };
-    window.addEventListener('admin-theme-preview', handleThemeUpdate as any);
-    return () => window.removeEventListener('admin-theme-preview', handleThemeUpdate as any);
-  }, [isPublicRoute]);
+  }, []);
+
+  useEffect(() => {
+    const handlePreview = (e: CustomEvent<RestaurantTheme>) => {
+      if (e.detail) setTheme(e.detail);
+    };
+    window.addEventListener('admin-theme-preview', handlePreview as any);
+    return () => window.removeEventListener('admin-theme-preview', handlePreview as any);
+  }, []);
 
   return (
-    <RestaurantThemeProvider theme={isPublicRoute ? undefined : theme} isGlobal>
+    <RestaurantThemeProvider theme={theme} isGlobal>
       {children}
     </RestaurantThemeProvider>
   );

@@ -208,16 +208,16 @@ function KpiCard({ label, value, detail, icon, variant = "primary" }: {
           {React.cloneElement(icon as React.ReactElement<any>, { className: "w-16 h-16" })}
         </div>
         
-        <CardContent className="pt-8 px-8 pb-8 relative z-10">
+        <CardContent className="pt-8 px-6 pb-8 relative z-10">
           <div className="flex items-center gap-2 mb-3">
             <div className={`p-2 rounded-xl ${variant === "primary" ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
               {React.cloneElement(icon as React.ReactElement<any>, { className: "w-4 h-4" })}
             </div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-black">{label}</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-black">{label}</p>
           </div>
           
           <p className="text-4xl font-black tracking-tighter text-foreground mb-1">{value}</p>
-          <p className={`text-[10px] font-bold mt-1 uppercase tracking-widest ${variant === "primary" ? "text-primary/60" : "text-destructive/60"}`}>
+          <p className={`text-[10px] font-bold mt-1 uppercase tracking-wider ${variant === "primary" ? "text-primary/60" : "text-destructive/60"}`}>
             {detail}
           </p>
         </CardContent>

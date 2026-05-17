@@ -44,7 +44,7 @@ export default function PersonalInformation({
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-black text-foreground uppercase italic tracking-tight">Identidad</h2>
+              <h2 className="text-lg font-black text-foreground uppercase tracking-tight">Identidad</h2>
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Gestión de Credenciales</p>
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function PersonalInformation({
             <Button 
               type="submit" 
               disabled={loading} 
-              className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase italic tracking-widest rounded-2xl shadow-xl shadow-primary/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group/btn"
+              className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group/btn"
             >
               {loading ? (
                 <div className="flex items-center gap-2">

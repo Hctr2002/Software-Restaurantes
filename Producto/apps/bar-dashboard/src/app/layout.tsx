@@ -7,15 +7,11 @@ export const metadata: Metadata = {
   description: "Bar Display System",
 };
 
-import BarThemeWrapper from "./BarThemeWrapper";
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className="dark">
       <body className={cn("font-sans antialiased bg-background text-foreground min-h-screen")}>
-        <BarThemeWrapper>
-          {children}
-        </BarThemeWrapper>
+        {children}
         {/* W6.1: registro del service worker para modo offline */}
         <script dangerouslySetInnerHTML={{ __html: `
           if ('serviceWorker' in navigator) {

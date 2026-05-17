@@ -11,13 +11,11 @@ export async function PUT(req: NextRequest) {
   const body = await req.json();
   const name = body.name ? String(body.name).trim() : undefined;
   const password = body.password ? String(body.password) : undefined;
-  const theme = body.theme;
 
   const updatePayload: {
     password?: string;
     user_metadata?: {
       name?: string;
-      theme?: any;
     };
   } = {
     user_metadata: {}
@@ -25,7 +23,6 @@ export async function PUT(req: NextRequest) {
 
   if (password) updatePayload.password = password;
   if (name !== undefined) updatePayload.user_metadata!.name = name;
-  if (theme !== undefined) updatePayload.user_metadata!.theme = theme;
 
   const supabase = createServiceClient();
   const { data, error } = await supabase.auth.admin.updateUserById(auth.user.id, updatePayload);
