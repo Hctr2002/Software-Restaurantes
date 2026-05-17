@@ -14,13 +14,14 @@ function groupOrdersByTable(orders: Order[]): Order[] {
     const key = order.tableId ?? order.id;
     const existing = map.get(key);
     if (!existing) {
-      const merged = { ...order, orderItems: [...(order.orderItems ?? [])] } as any;
-      merged.order_items = [...(order.orderItems ?? [])];
+      const items = [...(order.orderItems ?? (order as any).order_items ?? [])];
+      const merged = { ...order, orderItems: items } as any;
+      merged.order_items = items;
       if (order.station === 'BAR') merged.barSubOrderId = order.id;
       else merged.kitchenSubOrderId = order.id;
       map.set(key, merged);
     } else {
-      const newItems = order.orderItems ?? [];
+      const newItems = [...(order.orderItems ?? (order as any).order_items ?? [])];
       existing.orderItems = [...(existing.orderItems ?? []), ...newItems];
       (existing as any).order_items = existing.orderItems;
       const priority: Record<string, number> = { READY: 4, PREPARING: 3, VALIDATED: 2, PENDING: 1 };

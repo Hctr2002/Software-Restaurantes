@@ -93,13 +93,22 @@ export default function CashierPage() {
   const handleMarkDelivered = async (group: TableGroup) => {
     setIsPaying(true);
     try {
-      // Delegar el cierre de órdenes y actualización de mesa a la función
-      // RPC completar_pago_mesa. Esta función ejecuta todo en una única
-      // transacción atómica en la base de datos, eliminando el riesgo de
-      // estados inconsistentes que existía con el bucle secuencial anterior.
-      const orderIds = group.orders
-        .filter((o) => o.status !== "COMPLETED" && o.status !== "REJECTED")
-        .map((o) => o.id);
+      // 1. VALIDACIÓN ESTRICTA (ESTILO MILITAR)
+      // Solo se puede cobrar si no hay pedidos activos fuera del estado DELIVERED
+      const uncompletedOrders = group.orders.filter(
+        (o) => o.status !== "COMPLETED" && o.status !== "REJECTED"
+      );
+      
+      const hasUnfinishedOrders = uncompletedOrders.some((o) => o.status !== "DELIVERED");
+
+      if (hasUnfinishedOrders) {
+        alert("ALERTA: Operación denegada. Esta mesa tiene pedidos pendientes en cocina/bar o sin entregar por el garzón. Regularice el flujo antes de intentar cobrar.");
+        setIsPaying(false);
+        return;
+      }
+
+      // 2. EJECUCIÓN DEL COBRO (ATÓMICO)
+      const orderIds = uncompletedOrders.map((o) => o.id);
 
       if (orderIds.length > 0) {
         const { error } = await supabase.rpc("completar_pago_mesa", {

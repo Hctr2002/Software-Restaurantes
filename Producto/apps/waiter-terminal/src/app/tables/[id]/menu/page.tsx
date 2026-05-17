@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { useAuthStore } from "@menu-bites/store";
-import { useMenu, useTable, supabase, useThemeSync } from "@menu-bites/auth";
+import { useMenu, useTable, supabase, useThemeSync, useTableOrders } from "@menu-bites/auth";
 import { MenuItemCard, ProductSearchBar, CategoryTabs, Button, RestaurantThemeProvider, PremiumHeader } from "@menu-bites/ui";
 import { useParams, useRouter } from "next/navigation";
 import { ChevronLeft, ShoppingBag, Send, Trash2, Loader2, Receipt } from "lucide-react";
@@ -15,6 +15,7 @@ export default function TableMenuPage() {
 
   const { menu, categories, loading: menuLoading } = useMenu(user?.restaurantId);
   const { table, loading: tableLoading } = useTable(tableId);
+  const { orders: tableOrders, loading: ordersLoading } = useTableOrders(tableId, table?.current_session_id);
   const theme = useThemeSync(user?.restaurantId, "waiter");
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,7 +27,7 @@ export default function TableMenuPage() {
   const [requestingBill, setRequestingBill] = useState(false);
   const [orderNotes, setOrderNotes] = useState("");
 
-  const loading = menuLoading || tableLoading;
+  const loading = menuLoading || tableLoading || ordersLoading;
 
   // Filtrado de menú
   const filteredMenu = useMemo(() => {
@@ -170,7 +171,17 @@ export default function TableMenuPage() {
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
-                  onClick={() => setShowBillModal(true)}
+                  onClick={() => {
+                    if (tableOrders.length === 0) {
+                      alert("Validación Estricta: La mesa no tiene productos pedidos.");
+                      return;
+                    }
+                    if (tableOrders.some(o => o.status !== 'DELIVERED')) {
+                      alert("Validación Estricta: Todos los pedidos deben estar ENTREGADOS antes de pedir la cuenta.");
+                      return;
+                    }
+                    setShowBillModal(true);
+                  }}
                   disabled={table?.status === 'FREE'}
                   className={`flex items-center gap-2 px-4 py-3 bg-warning/10 text-warning border border-warning/20 rounded-2xl hover:bg-warning/20 transition-all active:scale-95 ${table?.status === 'FREE' ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
