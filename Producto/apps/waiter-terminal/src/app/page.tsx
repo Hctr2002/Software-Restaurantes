@@ -227,7 +227,7 @@ export default function WaiterDashboard() {
           <AnimatePresence mode="wait">
             {activeTab === "mesas" ? (
               <motion.div key="mesas" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-10">
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                   <div>
                     <h2 className="text-3xl sm:text-5xl font-black tracking-tighter">Gestión de <span className="text-primary">Salón</span></h2>
                     <p className="text-muted-foreground text-[10px] font-black uppercase tracking-widest opacity-60 mt-2 italic">
@@ -236,7 +236,7 @@ export default function WaiterDashboard() {
                   </div>
                   <button 
                     onClick={merge.toggleMode} 
-                    className={`relative flex items-center justify-center gap-3 px-8 py-4.5 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all overflow-hidden group ${
+                    className={`relative flex items-center justify-center gap-3 px-6 sm:px-10 py-3.5 sm:py-4 rounded-[1.75rem] text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] transition-all overflow-hidden group w-full sm:w-auto ${
                       merge.mergeMode 
                         ? "bg-destructive text-white shadow-2xl shadow-destructive/30 hover:bg-destructive/90" 
                         : "bg-primary text-primary-foreground shadow-2xl shadow-primary/30 hover:bg-primary/90"
@@ -244,7 +244,7 @@ export default function WaiterDashboard() {
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
                     {merge.mergeMode ? <Link2Off className="w-5 h-5" /> : <Link2 className="w-5 h-5" />}
-                    <span className="hidden sm:block">{merge.mergeMode ? "Cancelar Fusión" : "Fusionar Mesas"}</span>
+                    <span>{merge.mergeMode ? "Cancelar Fusión" : "Fusionar Mesas"}</span>
                   </button>
                 </div>
                 <TableMergeBar 

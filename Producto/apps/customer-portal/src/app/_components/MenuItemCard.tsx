@@ -42,7 +42,7 @@ export function MenuItemCard({ item, cartQuantity, onAdd, onDecrement }: Props) 
         </div>
 
         <div className="flex items-center justify-between mt-2">
-          <span className="text-primary font-black text-base">${item.price.toLocaleString()}</span>
+          <span className="font-accent text-primary font-black text-base">${item.price.toLocaleString()}</span>
 
           {cartQuantity > 0 ? (
             <div className="flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-2 py-1">

@@ -36,15 +36,20 @@ export const BODY_FONTS = [
 ];
 
 export const ACCENT_FONTS = [
-  { value: "Homemade Apple", label: "Homemade Apple — Mercadito" },
-  { value: "La Belle Aurore", label: "La Belle Aurore — Artesano" },
+  // Condensadas bold — máxima legibilidad a cualquier tamaño
+  { value: "Russo One", label: "Russo One — Brasa & Fuerza" },
+  { value: "Oswald", label: "Oswald — Latina Bold" },
+  { value: "Fjalla One", label: "Fjalla One — Energía Directa" },
+  { value: "Barlow Condensed", label: "Barlow Condensed — Urbano Denso" },
+  // Elegantes — lujo y distinción sin perder legibilidad
+  { value: "Cinzel", label: "Cinzel — Gourmet Clásico" },
+  { value: "Josefin Sans", label: "Josefin Sans — Art Déco Delicado" },
+  { value: "Josefin Slab", label: "Josefin Slab — Artesanal Costero" },
+  // Técnicas / diferenciadoras
   { value: "Space Mono", label: "Space Mono — Cyber Tech" },
-  { value: "Great Vibes", label: "Great Vibes — Caligrafía Lujo" },
-  { value: "Dancing Script", label: "Dancing Script — Movimiento" },
-  { value: "Caveat", label: "Caveat — Pizarra" },
-  { value: "Cookie", label: "Cookie — Pastelería Retro" },
-  { value: "Pacifico", label: "Pacifico — Tropical Fun" },
-  { value: "Italianno", label: "Italianno — Trattoria" },
-  { value: "Satisfy", label: "Satisfy — Aroma" },
-  { value: "Mea Culpa", label: "Mea Culpa — Cava Misterio" },
+  { value: "JetBrains Mono", label: "JetBrains Mono — Dev Night" },
+  { value: "Noto Serif JP", label: "Noto Serif JP — Minimal Oriente" },
+  // Con carácter — legibles desde 10px
+  { value: "Permanent Marker", label: "Permanent Marker — Garage Bold" },
+  { value: "Caveat", label: "Caveat — Pizarra Orgánica" },
 ];

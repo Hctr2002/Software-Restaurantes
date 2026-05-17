@@ -32,9 +32,8 @@ export function NavItem({ href, icon, label, active, onClick }: NavItemProps) {
       </div>
 
       {/* Etiqueta de texto: Configurada con tracking-widest para una estética limpia y legible */}
-      <span 
-        className={`text-[11px] font-bold uppercase tracking-widest ${active ? "opacity-100" : "opacity-70 group-hover:opacity-100"}`} 
-        style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+      <span
+        className={`font-accent text-[11px] font-bold uppercase tracking-widest ${active ? "opacity-100" : "opacity-70 group-hover:opacity-100"}`}
       >
         {label}
       </span>

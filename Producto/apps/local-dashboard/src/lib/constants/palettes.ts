@@ -54,7 +54,7 @@ export const PALETTE_TEMPLATES: PaletteTemplate[] = [
     cardBackground: "#161B22",
     fontTitle: "Playfair Display",
     fontBody: "Jost",
-    fontAccent: "Pinyon Script",
+    fontAccent: "Cinzel",
   },
   {
     id: "seafood",
@@ -68,7 +68,7 @@ export const PALETTE_TEMPLATES: PaletteTemplate[] = [
     cardBackground: "#FFFFFF",
     fontTitle: "Fraunces",
     fontBody: "Outfit",
-    fontAccent: "Pacifico",
+    fontAccent: "Josefin Slab",
   },
   {
     id: "steakhouse",
@@ -110,7 +110,7 @@ export const PALETTE_TEMPLATES: PaletteTemplate[] = [
     cardBackground: "#FFFFFF",
     fontTitle: "Bebas Neue",
     fontBody: "DM Sans",
-    fontAccent: "Pacifico",
+    fontAccent: "Oswald",
   },
   {
     id: "zen",
@@ -138,6 +138,6 @@ export const PALETTE_TEMPLATES: PaletteTemplate[] = [
     cardBackground: "#FFFFFF",
     fontTitle: "Quicksand",
     fontBody: "Nunito",
-    fontAccent: "Sacramento",
+    fontAccent: "Josefin Sans",
   },
 ];
