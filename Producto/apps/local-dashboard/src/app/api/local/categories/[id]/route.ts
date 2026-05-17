@@ -1,3 +1,8 @@
+/**
+ * /api/local/categories/[id] — Operaciones sobre una categoría específica.
+ * PUT: Actualiza nombre, estado activo y/o estación de preparación.
+ * DELETE: Elimina la categoría (puede fallar si hay ítems asociados por FK).
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createServiceClient, ensureServiceConfig } from "@/lib/localApi";
 

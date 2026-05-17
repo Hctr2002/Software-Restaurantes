@@ -1,3 +1,7 @@
+/**
+ * useUsers — Hook de gestión de usuarios del restaurante.
+ * Permite al ADMIN crear, editar y eliminar cuentas de su equipo via /api/local/users.
+ */
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -5,6 +9,10 @@ import { LocalUserRecord, LOCAL_ROLES } from "@/app/[slug]/dashboard/_components
 
 const EMPTY_FORM = { email: "", password: "", role: "GARZON" };
 
+/**
+ * Los errores de guardado se relanzán (throw) para que el componente los capture en el modal.
+ * La contraseña es obligatoria en creación y opcional en edición.
+ */
 export function useUsers() {
   const [users, setUsers] = useState<LocalUserRecord[]>([]);
   const [loading, setLoading] = useState(true);

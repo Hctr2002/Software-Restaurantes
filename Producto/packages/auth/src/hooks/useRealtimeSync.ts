@@ -66,9 +66,12 @@ export function useRealtimeSync<T>(
     // If this effect runs before onAuthStateChange fires, the Realtime WebSocket
     // connects without a token and RLS silently blocks all events.
     // Fix: explicitly set the auth token before subscribing.
-    supabase.auth.getSession().then(({ data: sessionData }) => {
+    supabase.auth.getSession()
+      .then(({ data: sessionData }) => sessionData.session?.access_token ?? null)
+      .catch(() => null) // expected for anonymous users in public apps (no refresh token)
+      .then((token) => {
       if (intentionallyClosed) return; // effect was cleaned up while awaiting
-      supabase.realtime.setAuth(sessionData.session?.access_token ?? null);
+      supabase.realtime.setAuth(token);
 
       const channel = supabase.channel(name)
         .on("postgres_changes", { event: "*", schema: "public", table: tableName, filter: f },

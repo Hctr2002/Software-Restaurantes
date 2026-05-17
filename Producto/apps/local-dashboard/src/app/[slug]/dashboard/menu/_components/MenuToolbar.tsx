@@ -1,3 +1,7 @@
+/**
+ * MenuToolbar — Barra de acciones de la página de menú.
+ * Actualmente solo expone el botón de agregar nuevo ítem.
+ */
 "use client";
 
 import { Button } from "@menu-bites/ui";

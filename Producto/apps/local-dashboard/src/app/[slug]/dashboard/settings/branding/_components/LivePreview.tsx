@@ -1,108 +1,171 @@
+/**
+ * LivePreview — Simulación del portal móvil del cliente con el tema actualmente en edición.
+ * Replica la estructura real del customer-portal para que el ADMIN vea el resultado final antes de guardar.
+ */
 "use client";
 
 import React from "react";
-import { Button, RestaurantThemeProvider } from "@menu-bites/ui";
-import { Monitor, Smartphone, Sparkles } from "lucide-react";
-import { hexToHslValues } from "@/lib/brandingUtils";
+import { getPublicImageUrl } from "@menu-bites/auth";
+import { Plus, Search, ShoppingBag } from "lucide-react";
 
-/**
- * Propiedades del Simulador Live
- * @param currentTheme - Tema que se está previsualizando
- * @param sampleProduct - Producto real del menú para mostrar en el simulador
- */
 interface LivePreviewProps {
   currentTheme: any;
   sampleProduct: any;
 }
 
-/**
- * LivePreview
- * 
- * Renderiza un mockup de iPhone que previsualiza los cambios de branding en tiempo real.
- * Inyecta las fuentes de Google y los colores dinámicamente mediante variables CSS.
- */
-export default function LivePreview({ currentTheme, sampleProduct }: LivePreviewProps) {
+const UI_FONT = "Inter, system-ui, sans-serif";
+
+export function LivePreview({ currentTheme, sampleProduct }: LivePreviewProps) {
+  if (!sampleProduct) {
+    return (
+      <div className="sticky top-24 aspect-[9/16] w-full max-w-[320px] mx-auto bg-foreground/5 rounded-[3rem] border-[8px] border-foreground/10 flex items-center justify-center">
+        <p className="text-[10px] font-black uppercase tracking-widest text-foreground/20" style={{ fontFamily: UI_FONT }}>Cargando Preview...</p>
+      </div>
+    );
+  }
+
+  const imageUrl = getPublicImageUrl(sampleProduct.image_url ?? null);
+  const titleFont  = `"${currentTheme.fontTitle}", sans-serif`;
+  const bodyFont   = `"${currentTheme.fontBody}", sans-serif`;
+  const accentFont = `"${currentTheme.fontAccent}", sans-serif`;
+
+  const bg    = currentTheme.backgroundColor;
+  const card  = currentTheme.cardBackground;
+  const text  = currentTheme.textColor;
+  const pri   = currentTheme.primaryColor;
+
   return (
-    <div className="sticky top-24 space-y-6">
-      {/* Indicadores de Estado y Dispositivo */}
-      <div className="flex items-center justify-between px-2">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <h2 className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em]">Simulación Live</h2>
-        </div>
-        <div className="flex gap-2">
-           <div className="p-1.5 rounded-lg bg-white/5 text-foreground/20"><Monitor className="w-3 h-3" /></div>
-           <div className="p-1.5 rounded-lg bg-primary/20 text-primary"><Smartphone className="w-3 h-3" /></div>
-        </div>
+    <div className="sticky top-24 space-y-4">
+      <div className="px-2">
+        <h2 className="text-lg font-black text-foreground uppercase italic tracking-tight" style={{ fontFamily: UI_FONT }}>Simulación Live</h2>
+        <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-widest" style={{ fontFamily: UI_FONT }}>Vista previa del portal móvil</p>
       </div>
 
-      {/* Mockup del Dispositivo con Borde de Pantalla Premium */}
-      <div className="rounded-[3.5rem] border-[12px] border-black shadow-[0_50px_100px_-20px_rgba(0,0,0,0.8)] overflow-hidden aspect-[9/18.5] relative bg-background transition-all duration-700">
-        <RestaurantThemeProvider theme={currentTheme}>
-          <div 
-            className="h-full flex flex-col p-8 space-y-8 relative z-10"
-            style={{
-              backgroundColor: `hsl(${hexToHslValues(currentTheme.backgroundColor)})`,
-              "--font-title":  `"${currentTheme.fontTitle || 'Outfit'}", sans-serif`,
-              "--font-body":   `"${currentTheme.fontBody  || 'Inter'}",  sans-serif`,
-              "--font-accent": `"${currentTheme.fontAccent || 'Outfit'}", sans-serif`,
-            } as any}
-          >
-            {/* Barra de Estado (Mock) */}
-            <div className="flex justify-between items-center opacity-30 px-2">
-              <span className="text-[10px] font-black">9:41</span>
-              <div className="flex gap-1.5">
-                <div className="w-3.5 h-2.5 border border-foreground/50 rounded-[2px]" />
-                <div className="w-3.5 h-3.5 bg-foreground rounded-full" />
+      {/* Marco del teléfono */}
+      <div className="relative w-full max-w-[320px] mx-auto rounded-[3rem] border-[8px] border-foreground/20 shadow-2xl overflow-hidden bg-black" style={{ height: 620 }}>
+        {/* Notch */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-black rounded-b-2xl z-50" />
+
+        {/* Pantalla */}
+        <div className="h-full overflow-y-auto flex flex-col" style={{ backgroundColor: bg }}>
+
+          {/* Header — réplica del portal real */}
+          <div className="pt-6 px-4 pb-3 flex items-center justify-between shrink-0 border-b" style={{ borderColor: `${text}10`, backgroundColor: card }}>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-xl flex items-center justify-center" style={{ backgroundColor: pri }}>
+                <ShoppingBag className="w-3.5 h-3.5" style={{ color: bg }} />
+              </div>
+              <div>
+                <p className="text-[10px] font-black italic uppercase leading-none" style={{ color: text, fontFamily: titleFont }}>
+                  {sampleProduct.categories?.name ?? "Restaurante"}
+                </p>
+                <p className="text-[7px] font-bold uppercase tracking-widest opacity-40" style={{ color: text, fontFamily: UI_FONT }}>
+                  En servicio · Mesa 1
+                </p>
               </div>
             </div>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${text}08` }}>
+                <Search className="w-3 h-3" style={{ color: text }} />
+              </div>
+            </div>
+          </div>
 
-            {/* Contenido Principal de la App simulada */}
-            <div className="flex-1 flex flex-col justify-start space-y-6 pt-4">
-              {/* Tarjeta de Producto con Imagen Real del Bucket */}
-              <div className="glass rounded-[3rem] border-white/10 overflow-hidden shadow-2xl flex flex-col group">
-                <div className="h-48 w-full relative overflow-hidden">
-                  {sampleProduct?.image_url ? (
-                    <img 
-                      src={sampleProduct.image_url} 
-                      alt={sampleProduct.name} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                       <Sparkles className="w-12 h-12 text-primary/40 animate-pulse" />
-                    </div>
-                  )}
-                  {/* Badge de Acento que usa la fuente seleccionada */}
-                  <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full border border-white/20 backdrop-blur-md shadow-xl" style={{ backgroundColor: "hsl(var(--accent))" }}>
-                     <span className="text-[9px] font-black text-background uppercase tracking-widest" style={{ fontFamily: "var(--font-accent)" }}>Destacado</span>
-                  </div>
+          {/* Category tabs — réplica del portal */}
+          <div className="flex gap-3 px-4 pt-3 pb-2 shrink-0 overflow-x-auto no-scrollbar">
+            {["Carta completa", "Entrada", "Postre"].map((cat, i) => (
+              <span
+                key={cat}
+                className="text-[8px] font-black uppercase tracking-widest whitespace-nowrap pb-1 shrink-0"
+                style={{
+                  color: i === 0 ? pri : `${text}40`,
+                  fontFamily: accentFont,
+                  borderBottom: i === 0 ? `2px solid ${pri}` : "2px solid transparent",
+                }}
+              >
+                {cat}
+              </span>
+            ))}
+          </div>
+
+          {/* Section label */}
+          <div className="px-4 py-2 shrink-0 flex items-center gap-2">
+            <div className="w-0.5 h-3 rounded-full" style={{ backgroundColor: pri }} />
+            <p className="text-[8px] font-black uppercase tracking-[0.2em]" style={{ color: text, fontFamily: titleFont, opacity: 0.5 }}>
+              {sampleProduct.categories?.name ?? "Menú"}
+            </p>
+          </div>
+
+          {/* Tarjetas — réplica exacta de PortalMenuItemCard */}
+          <div className="px-3 pb-6 space-y-4">
+            {[sampleProduct, sampleProduct].map((product, idx) => (
+              <div
+                key={idx}
+                className="rounded-[1.5rem] border overflow-hidden shadow-lg flex flex-col"
+                style={{ backgroundColor: card, borderColor: `${text}12` }}
+              >
+                {/* Imagen — h-44 en portal real, escalado al mockup */}
+                <div className="relative overflow-hidden" style={{ height: 130, backgroundColor: `${text}06` }}>
+                  <img
+                    src={imageUrl}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=400&auto=format&fit=crop";
+                    }}
+                  />
                 </div>
 
-                <div className="p-6 space-y-4">
-                  <div className="flex justify-between items-start gap-4">
-                    <h3 className="text-xl font-black italic uppercase leading-none tracking-tight" style={{ fontFamily: "var(--font-title)", color: "hsl(var(--foreground))" }}>
-                      {sampleProduct?.name || "Plato Estrella"}
-                    </h3>
-                    <span className="text-lg font-black text-primary shrink-0" style={{ fontFamily: "var(--font-accent)" }}>
-                       {sampleProduct?.price ? `$${new Intl.NumberFormat("es-CL").format(sampleProduct.price)}` : "$9.990"}
+                {/* Contenido — réplica de p-6 sm:p-8 del portal */}
+                <div className="p-4 flex flex-col gap-2">
+                  {/* Nombre + precio en la misma fila */}
+                  <div className="flex justify-between items-start gap-2">
+                    <h4
+                      className="font-black leading-none tracking-tighter italic uppercase line-clamp-2 flex-1"
+                      style={{ color: text, fontFamily: titleFont, fontSize: 13 }}
+                    >
+                      {product.name}
+                    </h4>
+                    <span
+                      className="italic leading-none shrink-0 font-black"
+                      style={{ color: pri, fontFamily: accentFont, fontSize: 13 }}
+                    >
+                      ${Number(product.price).toLocaleString("es-CL")}
                     </span>
                   </div>
-                  <p className="text-[11px] font-bold text-foreground/40 leading-relaxed line-clamp-2" style={{ fontFamily: "var(--font-body)" }}>
-                     {sampleProduct?.description || "Una experiencia sensorial única preparada con los mejores ingredientes locales."}
+
+                  {/* Descripción */}
+                  <p
+                    className="font-bold leading-relaxed line-clamp-2"
+                    style={{ color: text, fontFamily: bodyFont, fontSize: 9, opacity: 0.4 }}
+                  >
+                    {product.description}
                   </p>
-                  {/* Botón de Acción Principal con Color Primario */}
-                  <Button className="w-full h-12 bg-primary text-primary-foreground rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/20">
-                     Añadir al Carrito
-                  </Button>
+
+                  {/* Botón Añadir al Carrito — réplica del portal real */}
+                  <button
+                    className="mt-1 w-full flex items-center justify-center gap-1.5 font-black uppercase tracking-widest rounded-2xl shadow-lg"
+                    style={{
+                      backgroundColor: pri,
+                      color: card,
+                      fontFamily: bodyFont,
+                      fontSize: 8,
+                      paddingTop: 10,
+                      paddingBottom: 10,
+                    }}
+                  >
+                    <Plus className="w-2.5 h-2.5" />
+                    Añadir al Carrito
+                  </button>
                 </div>
               </div>
-            </div>
-
-            {/* Home Indicator (Mock) */}
-            <div className="h-1 w-1/3 bg-foreground/10 rounded-full mx-auto mt-auto mb-2" />
+            ))}
           </div>
-        </RestaurantThemeProvider>
+        </div>
+
+        {/* Home indicator */}
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-1 rounded-full z-50" style={{ backgroundColor: `${text}30` }} />
       </div>
     </div>
   );

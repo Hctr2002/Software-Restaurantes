@@ -58,11 +58,24 @@ export default function LoginPage() {
     }
   };
 
+  const institutionalTheme = {
+    '--background': '222 47% 5%', '--foreground': '60 14% 97%',
+    '--card': '222 47% 11%',      '--card-foreground': '60 14% 97%',
+    '--popover': '222 47% 11%',   '--popover-foreground': '60 14% 97%',
+    '--primary': '145 20% 55%',   '--primary-foreground': '222 47% 5%',
+    '--secondary': '60 14% 97%',  '--secondary-foreground': '222 47% 5%',
+    '--muted': '222 47% 9%',      '--muted-foreground': '0 0% 65%',
+    '--accent': '145 20% 55%',    '--accent-foreground': '222 47% 5%',
+    '--border': '217 33% 18%',    '--input': '217 33% 15%',
+    '--ring': '145 20% 55%',
+    '--destructive': '0 62% 50%', '--destructive-foreground': '0 0% 100%',
+  } as React.CSSProperties;
+
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-slate-950">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-background" />
+    <div style={institutionalTheme} className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-background">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-background" />
       <main className="relative z-10 w-full max-w-md">
-        <Card className="border-white/5 backdrop-blur-2xl">
+        <Card className="border-border bg-card shadow-2xl">
           <CardHeader className="text-center space-y-2">
             <CardTitle className="text-4xl tracking-tighter">
               Menu <span className="text-primary">Bites</span>

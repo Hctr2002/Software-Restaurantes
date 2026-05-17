@@ -1,3 +1,8 @@
+/**
+ * /api/local/menu/[id] — Operaciones sobre un plato específico.
+ * PUT: Actualiza los campos del plato; valida con menuSchema.
+ * DELETE: Elimina el plato del menú del restaurante.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, ensureServiceConfig } from "@/lib/localApi";
 import { menuService } from "@/lib/services/menuService";

@@ -1,3 +1,7 @@
+/**
+ * UserTable — Tabla de usuarios del restaurante para vista de escritorio.
+ * Muestra email, rol con badge coloreado, fecha de creación y acciones de editar/eliminar.
+ */
 "use client";
 
 import React from "react";

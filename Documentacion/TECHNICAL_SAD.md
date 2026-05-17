@@ -632,5 +632,50 @@ rm -rf apps/local-dashboard/.next && turbo dev --filter=local-dashboard
 
 ---
 
+### 7.14 Auditoría de Tokens Residuales y Primitivos del Portal (v2.5.0)
+
+En la versión 2.5.0 se consolidó la arquitectura temática del sistema, permitiendo una personalización profunda y dinámica de la identidad visual de cada restaurante, garantizando al mismo tiempo la coherencia técnica y estética (FCTO 5/5).
+
+#### 7.14.1 Motor de Tematización Dinámica (Branding Engine)
+
+El sistema utiliza un motor de inyección de CSS Variables en tiempo de ejecución. El componente `RestaurantThemeProvider` en `@menu-bites/ui` consume la configuración de la tabla `restaurant_themes` y la inyecta en el `:root` del documento.
+
+**Arquitectura de Fuentes Estabilizada:**
+- **Variables de Stack:** Se utilizan variables de stack completas (`--font-title-stack`, `--font-body-stack`, `--font-accent-stack`) que incluyen fallbacks nativos (`system-ui`, `sans-serif`), evitando parpadeos de fuente (FOUT) y garantizando herencia reactiva.
+- **Alias de Compatibilidad:** Se inyectan alias como `--font-outfit` y `--font-inter` vinculados dinámicamente a las fuentes elegidas, asegurando que componentes heredados o de terceros sigan respondiendo al tema global.
+- **Herencia en Body:** El `globals.css` fuerza la herencia de `--font-body-stack` en todo el documento, eliminando la necesidad de aplicar clases de fuente manualmente en la mayoría de los contenedores.
+
+**Variables Semánticas Inyectadas:**
+- **Colores:** `--primary`, `--primary-foreground`, `--background`, `--card`, `--card-foreground`, `--success`, `--destructive`.
+- **Tipografía:** `--font-title` (Encabezados), `--font-body` (Cuerpo), `--font-accent` (Acentos/Botones).
+- **Efectos:** `--radius` (Bordes), `--glass-opacity` (Nivel de desenfoque).
+
+#### 7.14.2 Primitivos de UI del Portal (`Portal Primitives`)
+
+Para garantizar que todos los componentes del portal de clientes hereden correctamente el tema dinámico y eviten estilos "hardcodeados", se crearon primitivos semánticos en `packages/ui/src/components/portal/primitives/`:
+
+| Componente | Función |
+|---|---|
+| `PortalHeading` | Encabezados (h1-h6) que heredan automáticamente `--font-title`. |
+| `PortalText` | Bloques de texto que heredan `--font-body`. Soporta variante `muted`. |
+| `PortalPrimaryButton` | Botones de acción principal que heredan `--font-accent` y colores primarios. |
+| `PortalCard` | Contenedores con efectos de glassmorphism y bordes dinámicos. |
+
+**Beneficios:**
+1. **Mantenibilidad:** Los cambios en el sistema de diseño se realizan en un solo lugar.
+2. **Consistencia:** Se garantiza que la tipografía de un botón coincida con el acento del restaurante.
+3. **Clean Code:** Se reemplazaron etiquetas HTML nativas con estilos manuales por componentes semánticos con nombres descriptivos.
+
+#### 7.14.3 Estándar de Documentación de Código (Clean Code)
+
+Se adoptó un estándar de comentarios descriptivos para facilitar la presentación y auditoría del código:
+- **Patrón:** `// Función para [descripción de la lógica visual o de negocio]`
+- **Objetivo:** Permitir que cualquier desarrollador (o evaluador académico) comprenda el propósito de un bloque de código sin necesidad de navegar por toda la jerarquía de componentes.
+
+---
+
 ## 8. CONCLUSIÓN
-El sistema Menu Bites v2.4.0 incorpora una arquitectura dual-estación completa que permite la operación simultánea e independiente de Cocina y Barra sobre el mismo flujo de pedidos. La adición de `bar-dashboard` completa el ecosistema de aplicaciones operativas, con siete apps productivas que cubren todos los roles del sistema: SUPER_ADMIN, ADMIN, GARZON, COCINA, CAJERO, BAR y CLIENTE.
+El sistema Menu Bites v2.5.0 incorpora una arquitectura dual-estación completa y un motor de branding dinámico que garantiza la excelencia visual y operativa. Con la introducción de los **Primitivos del Portal**, el sistema alcanza un nivel de madurez técnica superior, facilitando la escalabilidad y el mantenimiento de la interfaz de cliente bajo estándares de diseño "Pro Max".
+
+### 9. APÉNDICE DE SEGURIDAD Y CUMPLIMIENTO
+Próximamente se integrará el módulo de auditoría de logs centralizada en el Data Warehouse para asegurar trazabilidad completa ante incidentes críticos (Wave 10).

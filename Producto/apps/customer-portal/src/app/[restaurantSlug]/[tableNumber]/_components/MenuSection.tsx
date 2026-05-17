@@ -1,9 +1,20 @@
 "use client";
 
+/**
+ * MenuSection — Sección del menú agrupada por categoría.
+ * Soporta dos modos:
+ * - activeCategory === null → muestra todas las categorías con sus ítems.
+ * - activeCategory !== null → filtra y muestra solo esa categoría.
+ * Usa animación escalonada (stagger) de framer-motion en la grilla de tarjetas.
+ */
+
 import { motion } from "framer-motion";
-import { PortalMenuItemCard } from "@menu-bites/ui";
+import { PortalMenuItemCard, PortalHeading, PortalText } from "@menu-bites/ui";
 import { MenuItem, Category } from "@menu-bites/auth";
 
+/**
+ * Propiedades del componente MenuSection.
+ */
 interface MenuSectionProps {
   categoryName: string;
   activeCategory: string | null;
@@ -14,23 +25,31 @@ interface MenuSectionProps {
   onDecrement: (id: string) => void;
 }
 
+/**
+ * Renderiza las secciones del menú agrupadas por categoría.
+ * Los encabezados y tarjetas heredan tipografía y colores del tema dinámico del restaurante.
+ */
 export function MenuSection({ categoryName, activeCategory, categories, items, cart, onAdd, onDecrement }: MenuSectionProps) {
-  // Vista "Todo": Muestra todas las categorías con sus productos
+  // Vista "Todo": Muestra todas las categorías con sus productos secuencialmente
   if (activeCategory === null) {
     return (
       <div className="space-y-4">
         {categories.map((cat) => {
+          // Filtrar items que pertenecen a esta categoría específica
           const categoryItems = items.filter(item => item.categoryId === cat.id);
           if (categoryItems.length === 0) return null;
 
           return (
             <section key={cat.id} className="px-6 pt-10 space-y-6 first:pt-4">
-              <h3 
-                className="text-lg font-black text-primary border-l-4 border-primary pl-4 uppercase tracking-[0.2em] italic"
-                style={{ fontFamily: "var(--font-title)" }}
+              <PortalHeading 
+                as="h3"
+                font="accent"
+                className="text-[10px] font-black text-foreground/50 border-l-2 border-primary pl-3 uppercase tracking-[0.2em]"
               >
                 {cat.name}
-              </h3>
+              </PortalHeading>
+              
+              {/* Grilla con animación escalonada (stagger 50ms por tarjeta) */}
               <motion.div 
                 initial="hidden" 
                 animate="show" 
@@ -54,15 +73,18 @@ export function MenuSection({ categoryName, activeCategory, categories, items, c
     );
   }
 
-  // Vista de Categoría Individual
+  // Vista de Categoría Individual (cuando hay un filtro activo)
   return (
     <section className="px-6 mt-10 space-y-6">
-      <h3 
+      <PortalHeading 
+        as="h3"
+        font="accent"
         className="text-lg font-black text-primary border-l-4 border-primary pl-4 uppercase tracking-[0.2em] italic"
-        style={{ fontFamily: "var(--font-title)" }}
       >
         {categoryName}
-      </h3>
+      </PortalHeading>
+
+      {/* key=activeCategory fuerza reanimar la grilla al cambiar de categoría */}
       <motion.div 
         key={activeCategory} 
         initial="hidden" 
@@ -81,8 +103,9 @@ export function MenuSection({ categoryName, activeCategory, categories, items, c
             />
           ))
         ) : (
+          /* Estado vacío: categoría sin ítems activos */
           <div className="text-center py-12 col-span-full">
-            <p className="text-sand/40 italic">No hay platos disponibles en esta categoría.</p>
+            <PortalText className="text-foreground/40 italic">No hay platos disponibles en esta categoría.</PortalText>
           </div>
         )}
       </motion.div>

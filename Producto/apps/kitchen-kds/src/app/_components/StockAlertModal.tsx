@@ -39,9 +39,9 @@ export function StockAlertModal({ restaurantId, userId, userEmail, onClose }: Pr
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60" onClick={onClose} />
       <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
-        className="w-full max-w-lg glass-premium rounded-[3rem] p-10 space-y-8 relative shadow-2xl border border-white/10">
+        className="w-full max-w-lg bg-card rounded-[3rem] p-10 space-y-8 relative shadow-2xl border border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-yellow-500/10 rounded-2xl">
@@ -49,7 +49,7 @@ export function StockAlertModal({ restaurantId, userId, userEmail, onClose }: Pr
             </div>
             <h2 className="text-xl font-black text-foreground tracking-tighter uppercase italic">Reportar Quiebre</h2>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl glass hover:text-foreground transition-colors">
+          <button onClick={onClose} className="p-2 rounded-xl bg-muted/30 border border-border hover:text-foreground transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -62,7 +62,7 @@ export function StockAlertModal({ restaurantId, userId, userEmail, onClose }: Pr
               placeholder="Ej. Salmón Ahumado..."
               value={alertItem}
               onChange={(e) => setAlertItem(e.target.value)}
-              className="w-full px-6 py-4 rounded-2xl bg-foreground/5 border border-foreground/10 text-foreground font-bold placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+              className="w-full px-6 py-4 rounded-2xl bg-muted/30 border border-border text-foreground font-bold placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
             />
           </div>
           <div className="space-y-2">
@@ -72,7 +72,7 @@ export function StockAlertModal({ restaurantId, userId, userEmail, onClose }: Pr
               placeholder="Indica el motivo o cantidad restante..."
               value={alertMsg}
               onChange={(e) => setAlertMsg(e.target.value)}
-              className="w-full px-6 py-4 rounded-2xl bg-foreground/5 border border-foreground/10 text-foreground font-bold placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-500/50 resize-none"
+              className="w-full px-6 py-4 rounded-2xl bg-muted/30 border border-border text-foreground font-bold placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-500/50 resize-none"
             />
           </div>
         </div>

@@ -23,8 +23,8 @@ export function TableMergeBar({
   return (
     <>
       {mergeResult && (
-        <div className="flex items-center gap-2 p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black">
-          <CheckCircle className="w-4 h-4 shrink-0" />
+        <div className="flex items-center gap-2 p-4 rounded-2xl bg-success/10 border border-success/30 text-success text-xs font-black shadow-lg shadow-success/5">
+          <CheckCircle className="w-5 h-5 shrink-0" />
           {mergeResult}
         </div>
       )}
@@ -33,14 +33,14 @@ export function TableMergeBar({
         <button
           onClick={onConfirmMerge}
           disabled={merging || isAlreadyMerged}
-          className={`w-full relative flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl transition-all hover:scale-[1.01] active:scale-95 disabled:pointer-events-none group overflow-hidden ${
+          className={`w-full relative flex items-center justify-center gap-3 px-8 py-5 rounded-[2rem] font-black text-[11px] uppercase tracking-[0.2em] shadow-2xl transition-all active:scale-[0.98] disabled:pointer-events-none group overflow-hidden ${
             isAlreadyMerged
-              ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-red-500/20"
-              : "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-primary/20 disabled:opacity-50"
+              ? "bg-destructive text-destructive-foreground shadow-destructive/30"
+              : "bg-primary text-primary-foreground shadow-primary/30 hover:bg-primary/90 disabled:opacity-50"
           }`}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
-          {merging ? <Loader2 className="w-5 h-5 animate-spin" /> : (isAlreadyMerged ? <Link2Off className="w-5 h-5 drop-shadow-md" /> : <Link2 className="w-5 h-5 drop-shadow-md" />)}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
+          {merging ? <Loader2 className="w-5 h-5 animate-spin" /> : (isAlreadyMerged ? <Link2Off className="w-5 h-5" /> : <Link2 className="w-5 h-5" />)}
           {isAlreadyMerged ? "Mesas ya fusionadas" : `Fusionar ${selectedCount} mesas seleccionadas`}
         </button>
       )}
@@ -49,10 +49,10 @@ export function TableMergeBar({
         <button
           onClick={onConfirmUnlink}
           disabled={merging}
-          className="w-full relative flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-red-500 to-red-600 text-white font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-red-500/20 transition-all hover:scale-[1.01] active:scale-95 disabled:opacity-50 disabled:pointer-events-none group overflow-hidden"
+          className="w-full relative flex items-center justify-center gap-3 px-8 py-5 rounded-[2rem] bg-destructive text-destructive-foreground font-black text-[11px] uppercase tracking-[0.2em] shadow-2xl shadow-destructive/30 transition-all hover:bg-destructive/90 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none group overflow-hidden"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
-          {merging ? <Loader2 className="w-5 h-5 animate-spin" /> : <Link2Off className="w-5 h-5 drop-shadow-md" />}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
+          {merging ? <Loader2 className="w-5 h-5 animate-spin" /> : <Link2Off className="w-5 h-5" />}
           Desvincular mesa seleccionada
         </button>
       )}

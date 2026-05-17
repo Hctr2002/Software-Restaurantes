@@ -1,5 +1,9 @@
-import { 
-  formatDateTime as formatDate, 
+/**
+ * localShared.ts — Re-exportaciones y constantes compartidas dentro del dashboard local.
+ * Centraliza tipos, formateadores y constantes de dominio para evitar importaciones dispersas.
+ */
+import {
+  formatDateTime as formatDate,
   formatCLP as formatPrice, 
   timeAgo 
 } from "@menu-bites/auth";

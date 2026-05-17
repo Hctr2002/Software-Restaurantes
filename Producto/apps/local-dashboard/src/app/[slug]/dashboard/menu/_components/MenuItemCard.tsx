@@ -1,7 +1,11 @@
+/**
+ * MenuItemCard — Tarjeta visual de un plato del menú con imagen, precio, estado y acciones.
+ * Aplica grayscale parcial cuando el ítem está desactivado para indicarlo visualmente.
+ */
 "use client";
 
 import { motion } from "framer-motion";
-import { Badge, Button } from "@menu-bites/ui";
+import { Badge, Button, cn } from "@menu-bites/ui";
 import { ImagePlus, Power, Pencil, Trash2, Loader2 } from "lucide-react";
 import { formatPrice, MenuItem } from "@/app/[slug]/dashboard/_components/localShared";
 
@@ -18,26 +22,34 @@ export function MenuItemCard({ item, onToggleActive, onEdit, onDelete, isDeletin
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className={`glass rounded-[2rem] border-white/5 overflow-hidden flex flex-col group transition-all duration-300 ${!item.is_active && 'opacity-60 grayscale-[0.5]'}`}
+      className={`glass-premium rounded-[2.5rem] border-foreground/10 overflow-hidden flex flex-col group transition-all duration-300 shadow-xl ${!item.is_active && 'opacity-60 grayscale-[0.5]'}`}
     >
       {/* Image Header */}
       <div className="relative h-48 overflow-hidden">
         {item.image_url ? (
           <img src={item.image_url} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
         ) : (
-          <div className="w-full h-full bg-white/5 flex items-center justify-center">
+          <div className="w-full h-full bg-foreground/5 flex items-center justify-center">
             <ImagePlus className="w-8 h-8 text-foreground/10" />
           </div>
         )}
         <div className="absolute top-4 left-4">
-          <Badge variant={item.is_active ? "success" : "neutral"} className="px-3 py-1 text-[9px] font-black uppercase tracking-widest bg-background/80 backdrop-blur-md border-white/10">
+          <Badge 
+            variant={item.is_active ? "success" : "neutral"} 
+            className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-widest border-none shadow-lg ${item.is_active ? 'bg-primary text-primary-foreground' : 'bg-[#f59e0b] text-white'}`}
+          >
             {item.is_active ? "En Venta" : "Pausado"}
           </Badge>
         </div>
         <div className="absolute top-4 right-4 flex gap-2">
           <button
             onClick={() => onToggleActive(item)}
-            className={`h-9 w-9 rounded-xl flex items-center justify-center transition-all ${item.is_active ? "bg-primary/20 text-primary hover:bg-primary hover:text-white" : "bg-white/10 text-white hover:bg-primary"}`}
+            className={cn(
+              "h-10 w-10 rounded-2xl flex items-center justify-center transition-all shadow-xl active:scale-95",
+              item.is_active 
+                ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                : "bg-amber-100 text-amber-600 hover:bg-amber-200"
+            )}
           >
             <Power className="w-4 h-4" />
           </button>
@@ -55,16 +67,16 @@ export function MenuItemCard({ item, onToggleActive, onEdit, onDelete, isDeletin
           {item.description && <p className="text-xs text-foreground/40 font-medium line-clamp-2 leading-relaxed">{item.description}</p>}
         </div>
 
-        <div className="pt-6 mt-auto border-t border-white/5 flex gap-2">
+        <div className="pt-6 mt-auto border-t border-foreground/5 flex gap-2">
           <Button 
-            className="flex-1 bg-white/5 hover:bg-primary/10 hover:text-primary border-white/5 rounded-xl h-10 text-[10px] font-black uppercase tracking-widest transition-all"
+            className="flex-1 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground border-primary/20 rounded-xl h-10 text-[10px] font-black uppercase tracking-widest transition-all"
             onClick={() => onEdit(item)}
           >
             <Pencil className="w-3.5 h-3.5 mr-2" /> Editar
           </Button>
           <Button 
             variant="ghost"
-            className="aspect-square p-0 bg-white/5 hover:bg-destructive/10 hover:text-destructive border-white/5 rounded-xl h-10 w-10 transition-all"
+            className="aspect-square p-0 bg-foreground/5 hover:bg-destructive/10 hover:text-destructive border-foreground/5 rounded-xl h-10 w-10 transition-all"
             onClick={() => onDelete(item.id)}
             disabled={isDeleting}
           >

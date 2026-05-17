@@ -14,7 +14,7 @@ interface MenuItemCardProps {
 
 export const MenuItemCard = ({ name, price, imageUrl, description, onAdd }: MenuItemCardProps) => {
   return (
-    <div className="group relative flex flex-col bg-white/5 border border-white/10 rounded-2xl overflow-hidden glass transition-all hover:bg-white/10">
+    <div className="group relative flex flex-col bg-card border border-border rounded-2xl overflow-hidden transition-all hover:bg-muted/30">
       {imageUrl && (
         <div className="h-32 w-full overflow-hidden">
           <img src={imageUrl} alt={name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -28,7 +28,7 @@ export const MenuItemCard = ({ name, price, imageUrl, description, onAdd }: Menu
         {description && <p className="text-[10px] text-muted-foreground line-clamp-2 leading-relaxed">{description}</p>}
         <button 
           onClick={onAdd}
-          className="w-full mt-2 flex items-center justify-center py-2 bg-primary/20 hover:bg-primary text-primary-foreground text-xs font-bold rounded-lg transition-all"
+          className="w-full mt-2 flex items-center justify-center py-2 bg-primary text-primary-foreground text-xs font-bold rounded-lg transition-all"
         >
           <Plus className="w-3 h-3 mr-1" /> Añadir
         </button>
@@ -44,7 +44,7 @@ export const ProductSearchBar = ({ value, onChange, onClear }: { value: string, 
       <input
         type="text"
         placeholder="Buscar plato, bebida..."
-        className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-10 text-sm text-white placeholder:text-muted-foreground/50 outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+        className="w-full bg-muted/30 border border-border rounded-xl py-3 pl-10 pr-10 text-sm text-white placeholder:text-muted-foreground/50 outline-none focus:ring-2 focus:ring-primary/50 transition-all"
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />

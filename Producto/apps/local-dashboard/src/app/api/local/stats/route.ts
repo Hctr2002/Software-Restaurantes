@@ -1,3 +1,8 @@
+/**
+ * /api/local/stats — KPIs del día y del mes para el dashboard principal.
+ * GET: Calcula ingresos del día, del mes, ticket promedio y top 3 ítems más pedidos hoy.
+ * Considera solo órdenes DELIVERED o COMPLETED y usa unit_price (snapshot al momento del pedido).
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createServiceClient, ensureServiceConfig } from "@/lib/localApi";
 

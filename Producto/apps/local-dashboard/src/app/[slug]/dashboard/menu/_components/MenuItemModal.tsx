@@ -78,7 +78,7 @@ export function MenuItemModal({
           <Button
             variant="ghost"
             onClick={onClose}
-            className="text-foreground/50 hover:bg-white/5 hover:text-foreground rounded-xl font-bold uppercase tracking-widest text-[10px]"
+            className="text-foreground/50 hover:bg-foreground/5 hover:text-foreground rounded-xl font-bold uppercase tracking-widest text-[10px]"
           >
             Cancelar
           </Button>

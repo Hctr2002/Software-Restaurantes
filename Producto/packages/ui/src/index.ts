@@ -16,3 +16,4 @@ export * from "./components/terminal";
 export * from "./components/portal";
 export { PremiumHeader } from "./components/PremiumHeader";
 export { HeaderStat } from "./components/HeaderStat";
+export * from "./components/DynamicThemeWrapper";

@@ -1,3 +1,7 @@
+/**
+ * InventoryCriticalSection — Sección de alertas visuales de stock agotado y bajo.
+ * Se renderiza solo si existen ítems críticos; no muestra nada cuando todo está OK.
+ */
 "use client";
 
 import { AlertTriangle, Package } from "lucide-react";

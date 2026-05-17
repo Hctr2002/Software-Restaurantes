@@ -1,3 +1,8 @@
+/**
+ * ResetPasswordPage — Formulario para definir una nueva contraseña tras recuperación.
+ * Valida que ambas contraseñas coincidan y llama a updateUserPassword de Supabase.
+ * Redirige automáticamente al login tras 3 segundos en caso de éxito.
+ */
 "use client";
 
 import React, { useState } from "react";
@@ -37,7 +42,7 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-slate-950">
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-background">
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 scale-105"
         style={{ backgroundImage: "url('/login_background.png')" }}
@@ -45,23 +50,23 @@ export default function ResetPasswordPage() {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-background" />
 
       <main className="relative z-10 w-full max-w-md">
-        <Card className="border-white/5 backdrop-blur-2xl">
+        <Card className="border-border bg-card shadow-2xl">
           <CardHeader className="text-center space-y-2">
-            <CardTitle className="text-2xl tracking-tighter">
+            <CardTitle className="text-2xl tracking-tighter text-foreground">
               Nueva <span className="text-primary">Contraseña</span>
             </CardTitle>
-            <CardDescription>Define tu nueva clave de acceso</CardDescription>
+            <CardDescription className="text-foreground/60">Define tu nueva clave de acceso</CardDescription>
           </CardHeader>
 
           <CardContent>
             {isSuccess ? (
               <div className="text-center space-y-6 py-4 animate-in fade-in zoom-in">
-                <div className="mx-auto w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center border border-emerald-500/20">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                <div className="mx-auto w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center border border-primary/20">
+                  <CheckCircle2 className="w-8 h-8 text-primary" />
                 </div>
                 <div className="space-y-2">
-                  <p className="text-sm font-bold text-emerald-200 uppercase tracking-widest">¡Contraseña Actualizada!</p>
-                  <p className="text-xs text-muted-foreground">Redirigiendo a la pantalla de acceso...</p>
+                  <p className="text-sm font-bold text-foreground uppercase tracking-widest">¡Contraseña Actualizada!</p>
+                  <p className="text-xs text-foreground/40">Redirigiendo a la pantalla de acceso...</p>
                 </div>
                 <Button asChild variant="outline" className="w-full">
                   <Link href="/">Ir al Login ahora</Link>
@@ -71,23 +76,23 @@ export default function ResetPasswordPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-4">
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/50 z-10" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/20 z-10" />
                     <Input
                       type="password"
                       placeholder="Nueva contraseña"
                       required
-                      className="pl-10"
+                      className="pl-10 bg-foreground/5 border-foreground/10"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
                   </div>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/50 z-10" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/20 z-10" />
                     <Input
                       type="password"
                       placeholder="Confirmar contraseña"
                       required
-                      className="pl-10"
+                      className="pl-10 bg-foreground/5 border-foreground/10"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                     />

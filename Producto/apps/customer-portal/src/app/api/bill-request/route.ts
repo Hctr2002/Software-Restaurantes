@@ -1,3 +1,11 @@
+/**
+ * API Route: POST /api/bill-request
+ * Registra la solicitud de cuenta de una mesa:
+ * 1. Marca la mesa con bill_requested = true.
+ * 2. Inserta una alerta tipo BILL_REQUEST para notificar al staff.
+ * Requiere: table_id, restaurant_id, table_number en el cuerpo.
+ */
+
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 

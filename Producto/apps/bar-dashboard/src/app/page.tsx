@@ -1,93 +1,91 @@
 "use client";
 
+/**
+ * BarDashboardPage: Monitor premium para la gestión de pedidos de barra.
+ * 
+ * Implementa una arquitectura de columnas KDS (Kitchen Display System) con
+ * efectos de Glassmorphism, alertas sonoras y sincronización en tiempo real.
+ */
+
 import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@menu-bites/store";
-import { useBarOrders, updateOrderStatus, signOut, useThemeSync } from "@menu-bites/auth";
-import { OrderTicket, Button, RestaurantThemeProvider, KDSColumn, TicketWrapper, PremiumHeader, HeaderStat } from "@menu-bites/ui";
-import { GlassWater, Bell, Settings, LogOut, AlertTriangle, Activity } from "lucide-react";
+import { useBarOrders, updateOrderStatus, signOut } from "@menu-bites/auth";
+import { OrderTicket, Button, KDSColumn, TicketWrapper, PremiumHeader, HeaderStat, cn } from "@menu-bites/ui";
+import { GlassWater, Settings, LogOut, AlertTriangle, Activity } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { AnimatePresence } from "framer-motion";
-
-
+import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { StockAlertModal } from "./_components/StockAlertModal";
 import { SettingsErrorBoundary } from "./_components/ErrorBoundary";
-import { loadSettings, saveSettings, getTicketUrgency, DEFAULT_SETTINGS, type KDSSettings } from "../lib/kdsSettings";
+import { loadSettings, saveSettings, DEFAULT_SETTINGS, type KDSSettings } from "../lib/kdsSettings";
+import { useMonitorNotifications } from "../hooks/useMonitorNotifications";
 
 const SettingsModal = dynamic(
   () => import("./_components/SettingsModal").then((m) => ({ default: m.SettingsModal })),
   { ssr: false }
 );
 
-const NEW_TICKET_SFX = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
-const CRITICAL_SFX   = "https://assets.mixkit.co/active_storage/sfx/2997/2997-preview.mp3";
-
-function playSound(url: string) { new Audio(url).play().catch(() => {}); }
-
 export default function BarDashboardPage() {
   const { user, logout: clearAuth } = useAuthStore();
   const { orders: liveOrders, loading: liveLoading, refetch } = useBarOrders(user?.restaurantId);
+  
+  // Estados de UI y configuración
   const [clearedOrders, setClearedOrders] = useState<Set<string>>(new Set());
   const [settings, setSettings] = useState<KDSSettings>(DEFAULT_SETTINGS);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const theme = useThemeSync(user?.restaurantId, "kds");
   const [tick, setTick] = useState(0);
-
-  const prevCount       = useRef(0);
-  const criticalAlerted = useRef<Set<string>>(new Set());
-  const autoClearTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
-  const router          = useRouter();
-
-  const orders    = liveOrders.filter((o) => !clearedOrders.has(o.id));
   const [mounted, setMounted] = useState(false);
+  const [activeCol, setActiveCol] = useState("preparing");
 
+  const autoClearTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const router = useRouter();
+
+  // Filtrado de pedidos activos (no despachados manualmente)
+  const orders = liveOrders.filter((o) => !clearedOrders.has(o.id));
+
+  // Inicialización y hidratación
   useEffect(() => { setMounted(true); }, []);
 
+  // Redirección de seguridad
   useEffect(() => {
     if (mounted && !user) router.replace("/login");
   }, [mounted, user, router]);
 
+  // Carga de configuración persistente
   useEffect(() => { loadSettings().then(setSettings); }, []);
+  
+  // Reloj interno para refrescar urgencia de tickets
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 30_000);
     return () => clearInterval(id);
   }, []);
 
-  useEffect(() => {
-    if (orders.length > prevCount.current && settings.sounds.newTicket) playSound(NEW_TICKET_SFX);
-    prevCount.current = orders.length;
-  }, [orders.length, settings.sounds.newTicket]);
+  // Gestión de notificaciones y sonidos vía Hook dedicado
+  useMonitorNotifications({ 
+    ordersCount: orders.length, 
+    orders, 
+    settings, 
+    tick 
+  });
 
-  useEffect(() => {
-    if (!settings.sounds.criticalAlert) return;
-    orders.forEach((order) => {
-      if (["VALIDATED", "READY", "DELIVERED"].includes(order.status)) return;
-      const urgency = getTicketUrgency(order.createdAt, settings.thresholds);
-      if (urgency === "red" && !criticalAlerted.current.has(order.id)) {
-        criticalAlerted.current.add(order.id);
-        playSound(CRITICAL_SFX);
-      }
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tick, orders.length, settings.sounds.criticalAlert, settings.thresholds]);
-
+  // Handlers de negocio
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
       const { error } = await updateOrderStatus(orderId, newStatus);
-      if (error) {
-        alert(`Error al actualizar el pedido: ${error.message}`);
-        return;
-      }
+      if (error) throw error;
       refetch();
 
       if (newStatus === "READY" && settings.autoClear.enabled) {
-        const timer = setTimeout(() => setClearedOrders((prev) => new Set([...prev, orderId])), settings.autoClear.delaySeconds * 1000);
+        const timer = setTimeout(() => 
+          setClearedOrders((prev) => new Set([...prev, orderId])), 
+          settings.autoClear.delaySeconds * 1000
+        );
         autoClearTimers.current.set(orderId, timer);
       }
     } catch (err) {
-      alert("Ocurrió un error inesperado al procesar el cambio de estado.");
+      console.error("Error al actualizar pedido:", err);
     }
   };
 
@@ -106,95 +104,153 @@ export default function BarDashboardPage() {
     }
   };
 
+  // Clasificación de pedidos por columna
   const pendingOrders   = orders.filter((o) => o.status === "VALIDATED");
   const preparingOrders = orders.filter((o) => o.status === "PREPARING");
   const readyOrders     = orders.filter((o) => o.status === "READY");
 
   const columns = [
-    { key: "pending", title: "Pedidos Nuevos", orders: pendingOrders, icon: <Bell className="w-5 h-5 text-muted-foreground" />, active: false },
-    { key: "preparing", title: "En Barra", orders: preparingOrders, icon: <GlassWater className="w-5 h-5 text-primary" />, active: true },
-    { key: "ready", title: "Para Despacho", orders: readyOrders, icon: <Activity className="w-5 h-5 text-emerald-500" />, active: false },
+    { key: "pending", title: "Nuevos", orders: pendingOrders, active: activeCol === "pending" },
+    { key: "preparing", title: "Barra", orders: preparingOrders, active: activeCol === "preparing" },
+    { key: "ready", title: "Listos", orders: readyOrders, active: activeCol === "ready" },
   ];
 
   if (!mounted || !user || liveLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-primary shadow-2xl shadow-primary/20" />
+        <motion.div 
+          animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="h-24 w-24 rounded-3xl bg-primary/20 flex items-center justify-center"
+        >
+          <Activity className="h-10 w-10 text-primary" />
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
-      <div className="min-h-screen bar-gradient text-foreground overflow-hidden flex flex-col p-4 lg:p-6 gap-6">
-        <PremiumHeader
-          title="Bar"
-          accentTitle="Station"
-          icon={GlassWater}
-          statusSubLabel="Operación en Tiempo Real"
-          stats={
-            <>
-              <HeaderStat label="Nuevos" value={pendingOrders.length} color="text-foreground/40" />
-              <HeaderStat label="En Barra"  value={preparingOrders.length} color="text-purple-400" />
-              <HeaderStat label="Listos"    value={readyOrders.length} color="text-emerald-500" />
-            </>
-          }
-          actions={
-            <div className="flex items-center gap-3">
-              <Button 
-                variant="outline" 
-                onClick={() => setAlertOpen(true)}
-                className="rounded-2xl h-14 px-8 border-yellow-500/10 bg-yellow-500/5 text-yellow-500 hover:bg-yellow-500/10 hover:border-yellow-500/30 gap-3 font-black uppercase tracking-widest text-[10px] transition-all duration-300"
-              >
-                <AlertTriangle className="w-5 h-5" />
-                Alerta Stock
-              </Button>
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className="rounded-2xl w-14 h-14 border-white/5 bg-white/5 hover:bg-white/10 transition-all duration-300" 
-                onClick={() => setSettingsOpen(true)}
-              >
-                <Settings className="w-6 h-6 text-foreground/40" />
-              </Button>
-              <Button 
-                variant="destructive" 
-                size="icon" 
-                onClick={handleSignOut} 
-                disabled={isSigningOut} 
-                className="rounded-2xl w-14 h-14 shadow-2xl shadow-destructive/20 hover:scale-105 active:scale-95 transition-all duration-300"
-              >
-                <LogOut className="w-6 h-6" />
-              </Button>
-            </div>
-          }
-        />
+    <div className="min-h-screen bar-gradient text-foreground overflow-hidden flex flex-col p-4 lg:p-6 gap-6 selection:bg-primary/30">
+      
+      {/* Cabecera Premium con Glassmorphism */}
+      <PremiumHeader
+        title="BAR"
+        accentTitle="MONITOR"
+        icon={GlassWater}
+        statusSubLabel="OPERACIÓN ACTIVA"
+        stats={
+          <div className="flex items-center gap-6">
+            <HeaderStat label="Nuevos" value={pendingOrders.length} color="text-foreground/40" />
+            <HeaderStat label="En Barra" value={preparingOrders.length} color="text-primary" />
+            <HeaderStat label="Listos" value={readyOrders.length} color="text-success" />
+          </div>
+        }
+        actions={
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => setAlertOpen(true)}
+              className="rounded-2xl h-12 sm:h-14 px-2 sm:px-8 border-primary/10 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/30 gap-1.5 font-black uppercase tracking-widest text-[10px]"
+            >
+              <AlertTriangle className="w-5 h-5" />
+              <span className="hidden md:inline">Alerta Stock</span>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="rounded-2xl w-12 h-12 sm:w-14 sm:h-14 border-foreground/5 bg-foreground/5 hover:bg-foreground/10" 
+              onClick={() => setSettingsOpen(true)}
+            >
+              <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-foreground/40" />
+            </Button>
+            
+            <Button 
+              variant="destructive" 
+              size="icon" 
+              onClick={handleSignOut} 
+              disabled={isSigningOut} 
+              className="rounded-2xl w-12 h-12 sm:w-14 sm:h-14 shadow-2xl shadow-destructive/20"
+            >
+              <LogOut className="w-5 h-5 sm:w-6 sm:h-6" />
+            </Button>
+          </div>
+        }
+      />
 
-        <main className="flex-1 grid grid-cols-3 gap-6 overflow-hidden">
-          <AnimatePresence mode="popLayout">
-            {columns.map((col) => (
-              <KDSColumn key={col.key} title={col.title} count={col.orders.length} icon={col.icon} active={col.active}>
-                {col.orders.map((order) => (
-                  <TicketWrapper key={`${col.key}-${order.id}`} createdAt={order.createdAt} thresholds={settings.thresholds} status={order.status}>
-                    <OrderTicket type="BAR" id={order.id} tableNumber={order.table?.number ?? 0} status={order.status} createdAt={order.createdAt} items={order.orderItems || []} notes={order.notes} onStatusChange={(s) => handleStatusChange(order.id, s)} onDismiss={() => setClearedOrders((prev) => new Set([...prev, order.id]))} />
-                  </TicketWrapper>
-                ))}
+      {/* Navegación Mobile-First */}
+      <div className="md:hidden">
+        <div className="flex p-1 bg-card border border-border/40 rounded-2xl gap-1 shadow-lg">
+          {columns.map((col) => (
+            <button
+              key={col.key}
+              onClick={() => setActiveCol(col.key)}
+              className={cn(
+                "flex-1 flex flex-col items-center justify-center py-3 rounded-xl transition-all duration-500",
+                activeCol === col.key ? "bg-primary text-primary-foreground shadow-xl" : "text-muted-foreground hover:bg-foreground/5"
+              )}
+            >
+              <span className="text-[10px] font-black uppercase tracking-widest relative">
+                {col.title}
+                {col.orders.length > 0 && (
+                  <span className="absolute -top-1 -right-3 w-1.5 h-1.5 bg-destructive rounded-full" />
+                )}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Grid de Columnas Pro Max */}
+      <main className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 overflow-hidden">
+        <AnimatePresence mode="popLayout">
+          {columns.map((col) => (
+            <motion.div 
+              key={col.key} 
+              layout
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className={cn("h-full", activeCol !== col.key && "hidden md:block")}
+            >
+              <KDSColumn title={col.title} count={col.orders.length} active={col.active}>
+                <div className="flex flex-col gap-4 pb-12">
+                  {col.orders.map((order) => (
+                    <TicketWrapper 
+                      key={`${col.key}-${order.id}`} 
+                      createdAt={order.createdAt} 
+                      thresholds={settings.thresholds} 
+                      status={order.status}
+                    >
+                      <OrderTicket 
+                        type="BAR" 
+                        id={order.id} 
+                        tableNumber={order.table?.number ?? 0} 
+                        status={order.status} 
+                        createdAt={order.createdAt} 
+                        items={order.orderItems || []} 
+                        notes={order.notes} 
+                        onStatusChange={(s) => handleStatusChange(order.id, s)} 
+                        onDismiss={() => setClearedOrders((prev) => new Set([...prev, order.id]))} 
+                      />
+                    </TicketWrapper>
+                  ))}
+                </div>
               </KDSColumn>
-            ))}
-          </AnimatePresence>
-        </main>
-
-        <AnimatePresence>
-          {alertOpen && (
-            <StockAlertModal
-              restaurantId={user?.restaurantId}
-              userId={user?.id}
-              userEmail={user?.email}
-              onClose={() => setAlertOpen(false)}
-            />
-          )}
+            </motion.div>
+          ))}
         </AnimatePresence>
+      </main>
 
+      {/* Modales Reactivos */}
+      <AnimatePresence>
+        {alertOpen && (
+          <StockAlertModal
+            restaurantId={user?.restaurantId}
+            userId={user?.id}
+            userEmail={user?.email}
+            onClose={() => setAlertOpen(false)}
+          />
+        )}
         {settingsOpen && (
           <SettingsErrorBoundary>
             <SettingsModal
@@ -206,7 +262,14 @@ export default function BarDashboardPage() {
             />
           </SettingsErrorBoundary>
         )}
+      </AnimatePresence>
+
+      {/* Indicador de conexión */}
+      <div className="fixed bottom-6 left-6 flex items-center gap-2 opacity-30 hover:opacity-100 transition-opacity">
+        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        <span className="text-[9px] font-black uppercase tracking-tighter">Real-time Stream Active</span>
       </div>
-    </RestaurantThemeProvider>
+
+    </div>
   );
 }

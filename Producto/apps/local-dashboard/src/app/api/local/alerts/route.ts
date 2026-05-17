@@ -1,3 +1,7 @@
+/**
+ * /api/local/alerts — Endpoint para consultar alertas pendientes del restaurante.
+ * GET: Retorna alertas filtradas por status (por defecto PENDING), limitadas a 50.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createServiceClient, ensureServiceConfig } from "@/lib/localApi";
 

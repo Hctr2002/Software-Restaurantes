@@ -1,3 +1,7 @@
+/**
+ * useReportsData — Hook de analítica que carga y procesa órdenes históricas para el módulo de Reportes.
+ * Soporta presets de período (7D, 14D, 30D, 90D) y rangos personalizados.
+ */
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
@@ -23,6 +27,10 @@ export type TimingStats  = {
   count:          number;
 };
 
+/**
+ * Carga órdenes con estado DELIVERED o COMPLETED y las distribuye en cinco vistas:
+ * rendimiento diario, top ítems, ocupación por mesa, ranking de garzones y tiempos de cocina.
+ */
 export function useReportsData() {
   const [dailyReports,  setDailyReports]  = useState<DayReport[]>([]);
   const [topItems,      setTopItems]      = useState<TopItem[]>([]);

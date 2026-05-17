@@ -2,23 +2,35 @@
 
 import React from "react";
 
+/**
+ * Variantes de color permitidas para el Badge.
+ */
 type BadgeVariant = "success" | "danger" | "warning" | "neutral" | "info";
 
+/**
+ * Props para el componente Badge.
+ */
 interface BadgeProps {
   children: React.ReactNode;
   variant?: BadgeVariant;
   className?: string;
 }
 
+/**
+ * Componente Badge para mostrar estados o etiquetas.
+ * Utiliza un diseño de "vidrio" (glassmorphism) sutil que se adapta al fondo del tema.
+ * Se han mapeado variantes a variables semánticas (ej. info -> primary).
+ */
 export function Badge({ children, variant = "neutral", className = "" }: BadgeProps) {
-  const baseClasses = "px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider inline-flex items-center justify-center";
+  const baseClasses = "px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest inline-flex items-center justify-center transition-all";
   
+  // Mapeo de variantes a clases de Tailwind con variables semánticas
   const variants = {
-    success: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20",
-    danger: "bg-red-500/10 text-red-500 border border-red-500/20",
-    warning: "bg-amber-500/10 text-amber-500 border border-amber-500/20",
+    success: "bg-success/10 text-success border border-success/20",
+    danger: "bg-destructive/10 text-destructive border border-destructive/20",
+    warning: "bg-warning/10 text-warning border border-warning/20",
     info: "bg-primary/10 text-primary border border-primary/20",
-    neutral: "bg-white/5 text-foreground/40 border border-white/10",
+    neutral: "bg-muted/50 text-muted-foreground border border-border",
   };
 
   return (

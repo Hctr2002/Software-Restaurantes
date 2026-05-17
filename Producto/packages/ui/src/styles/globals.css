@@ -49,32 +49,45 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 45 93% 47%;
+    --warning-foreground: 26 83% 14%;
+
     --border: 214 20% 90%;
     --input: 214 15% 95%;
     --ring: var(--sage);
 
     --radius: 2rem;
+
+    /* Typography Defaults */
+    --font-title: 'Outfit', sans-serif;
+    --font-body: 'Outfit', sans-serif;
+    --font-accent: 'Outfit', sans-serif;
+    --font-outfit: 'Outfit', sans-serif;
+    --font-inter: 'Inter', sans-serif;
   }
 
-  /* Dark mode — neutral basis to avoid blue legacy */
+  /* Dark mode — paleta institucional Menu Bites (coincide con admin-dashboard) */
   .dark {
     --brand-accent: 35 90% 60%;
-    --background: 0 0% 5%; /* Pure dark neutral */
+    --background: 222 47% 5%; /* Slate-Black azulado */
     --foreground: var(--sand);
 
-    --card: 0 0% 8%; /* Deep neutral grey/black */
+    --card: 222 47% 11%; /* Slate-900 */
     --card-foreground: var(--sand);
 
-    --popover: 0 0% 8%;
+    --popover: 222 47% 11%;
     --popover-foreground: var(--sand);
 
     --primary: var(--sage);
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: 222 47% 5%;
 
     --secondary: var(--sand);
-    --secondary-foreground: 0 0% 5%;
+    --secondary-foreground: 222 47% 5%;
 
-    --muted: 0 0% 15%;
+    --muted: 222 47% 9%; /* Entre background y card */
     --muted-foreground: 0 0% 65%;
 
     --accent: var(--sage);
@@ -83,8 +96,14 @@
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 15%;
-    --input: 0 0% 12%;
+    --success: 142 71% 40%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 45 93% 50%;
+    --warning-foreground: 26 83% 14%;
+
+    --border: 217 33% 18%; /* Slate-800 */
+    --input:  217 33% 15%;
     --ring: var(--sage);
   }
 }
@@ -95,39 +114,31 @@
     box-sizing: border-box;
   }
   html {
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-body);
     line-height: 1.6;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-title);
     font-weight: 700;
   }
 }
 
 /* ============================================
-   GLASS MORPHISM v2.0 (Pro Max)
+   SOLID SURFACE SYSTEM (Premium Minimalist)
    ============================================ */
 .glass {
-  background: hsl(var(--card) / 0.4);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: hsl(var(--card));
   border: 1px solid hsl(var(--foreground) / 0.1);
   box-shadow: 0 8px 32px 0 hsl(0 0% 0% / 0.05);
 }
 
 .glass-premium {
-  background: linear-gradient(
-    135deg,
-    hsl(var(--card) / 0.6) 0%,
-    hsl(var(--card) / 0.2) 100%
-  );
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  background: hsl(var(--card));
   border: 1px solid hsl(var(--foreground) / 0.15);
   box-shadow: 
     0 4px 24px -1px hsl(0 0% 0% / 0.1),
@@ -135,16 +146,12 @@
 }
 
 .glass-sage {
-  background: hsl(var(--sage) / 0.08);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid hsl(var(--sage) / 0.15);
+  background: hsl(var(--sage) / 0.15);
+  border: 1px solid hsl(var(--sage) / 0.2);
 }
 
 .glass-navy {
-  background: hsl(var(--navy) / 0.8);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: hsl(var(--navy));
   border: 1px solid hsl(0 0% 100% / 0.1);
 }
 
@@ -212,7 +219,19 @@
    TYPOGRAPHY UTILITIES
    ============================================ */
 .font-outfit {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit);
+}
+
+.font-title {
+  font-family: var(--font-title);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-accent {
+  font-family: var(--font-accent);
 }
 
 .tracking-brand {
@@ -345,8 +364,8 @@
    ============================================ */
 .bar-gradient {
   background:
-    radial-gradient(circle at 10% 20%, hsla(270, 80%, 60%, 0.12) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, hsla(240, 80%, 60%, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 10% 20%, hsl(var(--primary) / 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, hsl(var(--primary) / 0.08) 0%, transparent 40%),
     hsl(var(--background));
   position: relative;
   overflow-x: hidden;
@@ -356,22 +375,16 @@
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: 
-    radial-gradient(circle at 50% 50%, hsla(270, 80%, 60%, 0.05) 0%, transparent 60%);
+  background:
+    radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.05) 0%, transparent 60%);
   filter: blur(120px);
   z-index: -1;
   animation: mesh-float 25s infinite alternate ease-in-out;
 }
 
 .glass-bar {
-  background: linear-gradient(
-    135deg,
-    hsla(270, 40%, 12%, 0.7) 0%,
-    hsla(270, 40%, 5%, 0.4) 100%
-  );
-  backdrop-filter: blur(40px) saturate(220%);
-  -webkit-backdrop-filter: blur(40px) saturate(220%);
-  border: 1px solid hsla(270, 80%, 75%, 0.2);
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--foreground) / 0.15);
   box-shadow: 
     0 10px 40px -10px rgba(0, 0, 0, 0.4),
     inset 0 0 25px 0 hsla(270, 80%, 80%, 0.05);

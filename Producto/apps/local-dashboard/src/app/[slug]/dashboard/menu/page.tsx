@@ -1,3 +1,7 @@
+/**
+ * MenuPage — Gestión de ítems del menú en formato grilla de tarjetas.
+ * Permite activar/desactivar, editar y eliminar platos; soporta subida de imagen por plato.
+ */
 "use client";
 
 import React from "react";
@@ -45,7 +49,7 @@ export default function MenuPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {items.length === 0 && (
-            <div className="col-span-full py-20 text-center glass rounded-[2.5rem] border-white/5">
+            <div className="col-span-full py-20 text-center glass rounded-[2.5rem] border-foreground/5">
               <p className="text-foreground/40 font-bold uppercase tracking-widest text-xs">No hay platos registrados todavía.</p>
             </div>
           )}

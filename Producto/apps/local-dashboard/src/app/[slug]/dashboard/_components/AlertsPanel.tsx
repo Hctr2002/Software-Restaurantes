@@ -96,12 +96,12 @@ export default function AlertsPanel() {
         
         <button
           onClick={() => setOpen((v) => !v)}
-          className="relative p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+          className="relative p-2 rounded-xl text-foreground/60 hover:text-primary hover:bg-primary/10 transition-all duration-300"
           aria-label="Alertas"
         >
           <Bell className="w-5 h-5" />
           {pendingCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center animate-pulse">
+            <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-primary-foreground text-[10px] font-black flex items-center justify-center animate-pulse shadow-lg shadow-red-500/20">
               {pendingCount > 9 ? "9+" : pendingCount}
             </span>
           )}
@@ -112,19 +112,19 @@ export default function AlertsPanel() {
       <AnimatePresence>
         {open && (
           <>
-            <div 
-              className="fixed inset-0 z-[50] bg-black/20 backdrop-blur-sm" 
-              onClick={() => setOpen(false)} 
-            />
-            <motion.div
-              initial={{ opacity: 0, y: -20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed right-8 top-24 w-96 bg-[#0a0a0b] border border-primary/20 z-[60] flex flex-col shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] rounded-[2.5rem] overflow-hidden"
-            >
+              <div 
+                className="fixed inset-0 z-[50] bg-background/60" 
+                onClick={() => setOpen(false)} 
+              />
+              <motion.div
+                initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="fixed right-8 top-24 w-96 bg-card border border-border z-[60] flex flex-col shadow-[0_32px_64px_-12px_rgba(0,0,0,0.2)] rounded-[2.5rem] overflow-hidden"
+              >
               {/* Header del Panel */}
-              <div className="flex items-center justify-between px-8 py-7 border-b border-white/5 bg-primary/[0.03]">
+              <div className="flex items-center justify-between px-8 py-7 border-b border-border bg-muted">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
                     <Bell className="w-5 h-5 text-primary" />
@@ -137,7 +137,7 @@ export default function AlertsPanel() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setIsMuted(!isMuted)}
-                    className={`p-3 rounded-2xl transition-all ${isMuted ? 'text-red-500 bg-red-500/10' : 'text-foreground/40 hover:text-foreground hover:bg-white/10'}`}
+                    className={`p-3 rounded-2xl transition-all ${isMuted ? 'text-red-500 bg-red-500/10' : 'text-foreground/40 hover:text-foreground hover:bg-foreground/5'}`}
                     title={isMuted ? "Quitar silencio" : "Silenciar alertas"}
                     aria-label={isMuted ? "Quitar silencio" : "Silenciar alertas"}
                   >
@@ -145,7 +145,7 @@ export default function AlertsPanel() {
                   </button>
                   <button
                     onClick={() => setOpen(false)}
-                    className="p-3 rounded-2xl text-foreground/40 hover:text-foreground hover:bg-white/10 transition-all"
+                    className="p-3 rounded-2xl text-foreground/40 hover:text-foreground hover:bg-foreground/5 transition-all"
                     aria-label="Cerrar panel de alertas"
                   >
                     <X className="w-5 h-5" />
@@ -175,7 +175,7 @@ export default function AlertsPanel() {
 
                 {alerts.length === 0 && (
                   <div className="flex flex-col items-center justify-center h-48 text-foreground/20 gap-4">
-                    <div className="w-16 h-16 rounded-[2rem] bg-white/5 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-[2rem] bg-foreground/5 flex items-center justify-center">
                       <CheckCircle className="w-8 h-8" />
                     </div>
                     <p className="text-[10px] font-black uppercase tracking-[0.2em]">Todo bajo control</p>
@@ -199,7 +199,7 @@ export default function AlertsPanel() {
 
               {/* Footer opcional */}
               {pendingCount > 0 && (
-                <div className="px-8 py-4 bg-white/5 border-t border-white/5 flex items-center justify-center">
+                <div className="px-8 py-4 bg-muted border-t border-border flex items-center justify-center">
                   <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em] animate-pulse">
                     Tienes {pendingCount} {pendingCount === 1 ? "atención pendiente" : "atenciones pendientes"}
                   </p>

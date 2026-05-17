@@ -1,3 +1,8 @@
+/**
+ * /api/local/tables — CRUD de mesas del restaurante validado con Zod.
+ * GET: Lista todas las mesas ordenadas por número.
+ * POST: Crea una mesa y genera automáticamente su URL de QR para el portal de clientes.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, ensureServiceConfig } from "@/lib/localApi";
 import { tableService } from "@/lib/services/tableService";

@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * MenuItemCard — Tarjeta de producto para la landing page del portal (no el menú del restaurante).
+ * Muestra imagen, nombre, descripción, precio y controles de cantidad +/−.
+ * Cuando cartQuantity > 0 cambia al modo de edición de cantidad; de lo contrario muestra "Añadir".
+ * Las animaciones de entrada se controlan desde el padre (variants hidden/show).
+ */
+
 import { motion } from "framer-motion";
 import { Minus, Plus } from "lucide-react";
 import { getPublicImageUrl, MenuItem } from "@menu-bites/auth";
@@ -16,10 +23,10 @@ export function MenuItemCard({ item, cartQuantity, onAdd, onDecrement }: Props) 
   return (
     <motion.div
       variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }}
-      className="glass-card rounded-2xl overflow-hidden flex h-40 group border border-white/5 hover:border-sage/20 transition-colors duration-300"
+      className="glass-premium rounded-2xl overflow-hidden flex h-40 group border border-foreground/10 hover:border-primary/20 transition-colors duration-300"
     >
       {/* Imagen */}
-      <div className="w-2/5 relative overflow-hidden bg-navy-light/20 shrink-0">
+      <div className="w-2/5 relative overflow-hidden bg-foreground/5 shrink-0">
         <img
           src={getPublicImageUrl(item.imageUrl)}
           width={400}
@@ -31,31 +38,31 @@ export function MenuItemCard({ item, cartQuantity, onAdd, onDecrement }: Props) 
               "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=400&auto=format&fit=crop";
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-navy-dark/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-background/30" />
       </div>
 
       {/* Contenido */}
       <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
         <div>
-          <h4 className="font-bold text-sand leading-tight line-clamp-1 text-[15px]">{item.name}</h4>
-          <p className="text-[11px] text-sand/50 mt-1 line-clamp-2 leading-relaxed">{item.description}</p>
+          <h4 className="font-bold text-foreground leading-tight line-clamp-1 text-[15px]">{item.name}</h4>
+          <p className="text-[11px] text-foreground/50 mt-1 line-clamp-2 leading-relaxed">{item.description}</p>
         </div>
 
         <div className="flex items-center justify-between mt-2">
-          <span className="text-sage font-black text-base">${item.price.toLocaleString()}</span>
+          <span className="font-accent text-primary font-black text-base">${item.price.toLocaleString()}</span>
 
           {cartQuantity > 0 ? (
-            <div className="flex items-center gap-2 bg-sage/10 border border-sage/30 rounded-full px-2 py-1">
+            <div className="flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-2 py-1">
               <button
                 onClick={() => onDecrement(item.id)}
-                className="w-5 h-5 flex items-center justify-center text-sage hover:text-accent transition-colors"
+                className="w-5 h-5 flex items-center justify-center text-primary hover:text-foreground transition-colors"
               >
                 <Minus className="w-3 h-3" />
               </button>
-              <span className="text-sand font-black text-sm w-4 text-center">{cartQuantity}</span>
+              <span className="text-foreground font-black text-sm w-4 text-center">{cartQuantity}</span>
               <button
                 onClick={() => onAdd(item)}
-                className="w-5 h-5 flex items-center justify-center text-sage hover:text-accent transition-colors"
+                className="w-5 h-5 flex items-center justify-center text-primary hover:text-foreground transition-colors"
               >
                 <Plus className="w-3 h-3" />
               </button>
@@ -64,7 +71,7 @@ export function MenuItemCard({ item, cartQuantity, onAdd, onDecrement }: Props) 
             <button
               onClick={() => onAdd(item)}
               aria-label={`Añadir ${item.name} al pedido`}
-              className="flex items-center gap-1.5 bg-sage/10 hover:bg-sage text-sand hover:text-navy-dark px-3 py-1.5 rounded-full border border-sage/30 transition-all duration-200 text-xs font-bold active:scale-90"
+              className="flex items-center gap-1.5 bg-primary/10 hover:bg-primary text-foreground hover:text-primary-foreground px-3 py-1.5 rounded-full border border-primary/30 transition-all duration-200 text-xs font-bold active:scale-90"
             >
               <Plus className="w-3 h-3" />
               Añadir

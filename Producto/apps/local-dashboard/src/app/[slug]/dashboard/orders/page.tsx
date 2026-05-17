@@ -1,3 +1,7 @@
+/**
+ * OrdersPage — Vista de gestión de pedidos con filtro por estado y detalle en modal.
+ * Se actualiza en tiempo real via suscripción Realtime del hook useOrders.
+ */
 "use client";
 
 import React from "react";

@@ -41,14 +41,14 @@ export function AlertModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-background/80 backdrop-blur-xl"
+        className="absolute inset-0 bg-background/95"
         onClick={onClose}
       />
       <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 20 }}
-        className="relative w-full max-w-lg bg-card border border-white/10 rounded-[3rem] p-10 shadow-2xl space-y-8"
+        className="relative w-full max-w-lg bg-card border border-foreground/10 rounded-[3rem] p-10 shadow-2xl space-y-8"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -62,7 +62,7 @@ export function AlertModal({
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="p-3 rounded-2xl text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all">
+          <button onClick={onClose} className="p-3 rounded-2xl text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -75,7 +75,7 @@ export function AlertModal({
               className={`px-5 py-4 rounded-[1.5rem] border text-[10px] font-black uppercase tracking-widest transition-all text-center ${
                 alertType === opt.type
                   ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20"
-                  : "bg-white/5 border-white/5 text-muted-foreground hover:text-foreground hover:bg-white/10"
+                  : "bg-foreground/5 border-foreground/5 text-muted-foreground hover:text-foreground hover:bg-foreground/10"
               }`}
             >
               {opt.label}
@@ -94,7 +94,7 @@ export function AlertModal({
               placeholder="Ej. 5"
               value={tableNum}
               onChange={(e) => setTableNum(e.target.value)}
-              className="w-full bg-background border border-white/5 rounded-[1.5rem] p-5 focus:outline-none focus:border-yellow-500/50 transition-all font-bold text-sm"
+              className="w-full bg-background border border-foreground/10 rounded-[1.5rem] p-5 focus:outline-none focus:border-yellow-500/50 transition-all font-bold text-sm"
             />
           </div>
           <div>
@@ -107,13 +107,13 @@ export function AlertModal({
               placeholder="Escribe los detalles aquí..."
               value={alertMsg}
               onChange={(e) => setAlertMsg(e.target.value)}
-              className="w-full bg-background border border-white/5 rounded-[1.5rem] p-5 focus:outline-none focus:border-yellow-500/50 transition-all font-bold text-sm resize-none"
+              className="w-full bg-background border border-foreground/10 rounded-[1.5rem] p-5 focus:outline-none focus:border-yellow-500/50 transition-all font-bold text-sm resize-none"
             />
           </div>
         </div>
 
         <div className="flex gap-4 pt-2">
-          <Button variant="outline" onClick={onClose} className="flex-1 h-16 rounded-[1.5rem] border-white/5 font-black uppercase text-[10px] tracking-[0.2em]">
+          <Button variant="outline" onClick={onClose} className="flex-1 h-16 rounded-[1.5rem] border-foreground/10 font-black uppercase text-[10px] tracking-[0.2em]">
             Cancelar
           </Button>
           <Button

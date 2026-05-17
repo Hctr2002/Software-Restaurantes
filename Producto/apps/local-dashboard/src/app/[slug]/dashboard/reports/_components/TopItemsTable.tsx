@@ -1,3 +1,6 @@
+/**
+ * TopItemsTable — Los 10 platos más pedidos del período seleccionado con ventas e ingresos.
+ */
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, Table, TableRow, TableCell } from "@menu-bites/ui";
@@ -11,7 +14,7 @@ interface TopItemsTableProps {
 
 export default function TopItemsTable({ items }: TopItemsTableProps) {
   return (
-    <Card className="glass rounded-[2.5rem] border-white/5 overflow-hidden">
+    <Card className="glass rounded-[2.5rem] border-foreground/5 overflow-hidden">
       <CardHeader className="p-8 pb-4">
          <div className="flex items-center gap-3 mb-2">
           <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-500">
