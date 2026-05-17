@@ -56,7 +56,7 @@ export function PaymentSlideOver({
               </button>
               <div className="flex items-center gap-2">
                 {group.billRequested && (
-                  <span className="bg-yellow-500/20 text-yellow-500 text-[9px] font-black px-3 py-1.5 rounded-full border border-yellow-500/30 animate-pulse">
+                  <span className="bg-warning/20 text-warning text-[9px] font-black px-3 py-1.5 rounded-full border border-warning/30 animate-pulse">
                     CUENTA SOLICITADA
                   </span>
                 )}
@@ -123,7 +123,7 @@ export function PaymentSlideOver({
 
             {/* Totals */}
             <div className="bg-muted/30 border border-border rounded-[2.5rem] p-8 space-y-5 relative overflow-hidden group/total">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[80px] -z-10 group-hover/total:bg-emerald-500/20 transition-all" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-success/10 blur-[80px] -z-10 group-hover/total:bg-success/20 transition-all" />
               <div className="flex justify-between items-center text-muted-foreground/60">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Neto Consumo</span>
                 <span className="text-sm font-black font-mono">{formatCLP(group.total)}</span>
@@ -137,7 +137,7 @@ export function PaymentSlideOver({
               <div className="h-px bg-border" />
               <div className="flex justify-between items-center">
                 <span className="text-sm font-black text-primary uppercase tracking-[0.2em]">Total a Cobrar</span>
-                <span className="text-4xl font-black text-emerald-400 tracking-tighter drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
+                <span className="text-4xl font-black text-success tracking-tighter drop-shadow-[0_0_15px_hsl(var(--success)/0.3)]">
                   {formatCLP(group.tipIncluded ? group.total * 1.1 : group.total)}
                 </span>
               </div>
@@ -149,7 +149,7 @@ export function PaymentSlideOver({
                 Referencia de Baucher / Pago
               </label>
               <div className="relative group">
-                <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-emerald-500 transition-colors" />
+                <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-success transition-colors" />
                 <input
                   id="payment_ref"
                   type="text"
@@ -168,7 +168,7 @@ export function PaymentSlideOver({
             <Button
               onClick={onConfirm}
               disabled={isProcessing}
-              className="w-full h-20 bg-emerald-600 hover:bg-emerald-500 text-white rounded-3xl font-black text-sm uppercase tracking-[0.2em] transition-all shadow-2xl shadow-emerald-600/30 gap-4 disabled:opacity-50 active:scale-95 group/pay"
+              className="w-full h-20 bg-success hover:bg-success/90 text-success-foreground rounded-3xl font-black text-sm uppercase tracking-[0.2em] transition-all shadow-2xl shadow-success/30 gap-4 disabled:opacity-50 active:scale-95 group/pay"
             >
               {isProcessing ? (
                 <Loader2 className="w-6 h-6 animate-spin" />

@@ -172,7 +172,7 @@ export default function CashierPage() {
           <div className="flex items-center gap-4 sm:gap-8">
             <div className="flex flex-col">
               <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Caja Pendiente</span>
-              <span className="text-lg sm:text-xl font-black text-emerald-400"><AnimatedNumber value={totals.pending} formatFn={formatCLP} /></span>
+              <span className="text-lg sm:text-xl font-black text-success"><AnimatedNumber value={totals.pending} formatFn={formatCLP} /></span>
             </div>
             <div className="h-10 w-px bg-white/5" />
             <div className="flex flex-col">
@@ -192,7 +192,7 @@ export default function CashierPage() {
             ) : filtered.length === 0 ? (
               <motion.div key="empty" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="flex flex-col items-center justify-center py-32 gap-6 text-muted-foreground">
                 <div className="w-24 h-24 bg-card rounded-[2.5rem] flex items-center justify-center border border-border/10">
-                  {activeTab === "pending" ? <CheckCircle className="w-10 h-10 text-emerald-500/20" /> : <History className="w-10 h-10 text-slate-700" />}
+                  {activeTab === "pending" ? <CheckCircle className="w-10 h-10 text-success/20" /> : <History className="w-10 h-10 text-muted-foreground/30" />}
                 </div>
                 <p className="text-sm font-bold tracking-tight">
                   {searchQuery ? "No se encontraron resultados" : activeTab === "pending" ? "No hay cuentas listas para cobro" : "Sin cobros hoy"}

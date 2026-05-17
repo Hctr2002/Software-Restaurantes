@@ -31,14 +31,14 @@ export function OrderGroupCard({ group, index, isPending, onClick }: Props) {
       whileTap={{ scale: 0.98 }}
       className={`group relative bg-card border border-border rounded-[2.5rem] p-7 flex flex-col transition-all hover:border-primary/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] cursor-pointer ${
         !isPending ? "opacity-75" : ""
-      } ${group.billRequested ? "ring-2 ring-yellow-500/30 shadow-[0_0_20px_rgba(234,179,8,0.1)]" : ""}`}
+      } ${group.billRequested ? "ring-2 ring-warning/30 shadow-[0_0_20px_hsl(var(--warning)/0.1)]" : ""}`}
       onClick={onClick}
     >
       {group.billRequested && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="absolute -inset-0.5 bg-yellow-500/20 rounded-[2.6rem] blur animate-pulse -z-10"
+          className="absolute -inset-0.5 bg-warning/20 rounded-[2.6rem] blur animate-pulse -z-10"
         />
       )}
 
@@ -46,7 +46,7 @@ export function OrderGroupCard({ group, index, isPending, onClick }: Props) {
         <div className="flex items-center gap-4">
           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-colors ${
             group.billRequested
-              ? "bg-yellow-500/10 border-yellow-500/30 text-yellow-500"
+              ? "bg-warning/10 border-warning/30 text-warning"
               : "bg-muted border-border text-primary"
           }`}>
             <Hash className="w-6 h-6" />
@@ -69,7 +69,7 @@ export function OrderGroupCard({ group, index, isPending, onClick }: Props) {
             {isPending ? "READY" : "PAGADO"}
           </Badge>
           {group.billRequested && (
-            <span className="flex items-center gap-1 text-[9px] font-black text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 px-2 py-0.5 rounded-lg animate-pulse">
+            <span className="flex items-center gap-1 text-[9px] font-black text-warning bg-warning/10 border border-warning/20 px-2 py-0.5 rounded-lg animate-pulse">
               <Bell className="w-3 h-3" />CUENTA
             </span>
           )}
@@ -102,14 +102,14 @@ export function OrderGroupCard({ group, index, isPending, onClick }: Props) {
       <div className="mt-auto pt-6 border-t border-border space-y-4">
         <div className="flex justify-between items-end">
           <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total a Cobrar</span>
-          <span className="text-2xl font-black text-emerald-400 tracking-tighter">{formatCLP(group.tipIncluded ? group.total * 1.1 : group.total)}</span>
+          <span className="text-2xl font-black text-success tracking-tighter">{formatCLP(group.tipIncluded ? group.total * 1.1 : group.total)}</span>
         </div>
 
         {isPending ? (
           <Button className={`w-full h-16 rounded-[1.5rem] font-black text-[11px] uppercase tracking-[0.2em] transition-all shadow-xl ${
             group.billRequested
-              ? "bg-yellow-500 text-black hover:bg-yellow-400 shadow-yellow-500/20"
-              : "bg-white text-slate-950 hover:bg-primary hover:text-white shadow-black/20"
+              ? "bg-warning text-warning-foreground hover:bg-warning/90 shadow-warning/20"
+              : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20"
           }`}>
             Procesar Pago <ChevronRight className="w-4 h-4 ml-2" />
           </Button>
