@@ -61,9 +61,9 @@ export default function LocalShell({ title, subtitle, children }: LocalShellProp
       .channel(`localshell-theme-${restaurantId}`)
       .on(
         "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "restaurant_themes", filter: `restaurant_id=eq.${restaurantId}` },
+        { event: "*", schema: "public", table: "restaurant_themes", filter: `restaurant_id=eq.${restaurantId}` },
         async (payload) => {
-          if (payload.new.is_active) {
+          if ((payload.new as any)?.is_active) {
             const updated = await getRestaurantTheme(restaurantId);
             if (updated) setTheme(updated);
           }

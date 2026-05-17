@@ -90,10 +90,11 @@ export function useBranding() {
     setCustomName("");
   };
 
-  /** Edición del tema actual desde los tabs — marca como dirty */
+  /** Edición del tema actual desde los tabs — marca como dirty y dispara preview */
   const editCurrentTheme = (theme: any) => {
     setCurrentTheme(theme);
     setIsDirty(true);
+    window.dispatchEvent(new CustomEvent('admin-theme-preview', { detail: theme }));
   };
 
   /**

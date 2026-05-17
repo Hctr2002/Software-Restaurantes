@@ -102,8 +102,8 @@ export default function BrandingPage() {
             onClick={() => setSaveModalMode(null)}
           />
           <div className="relative w-full max-w-sm bg-card border border-border rounded-[2.5rem] p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
-            <div className="w-14 h-14 bg-yellow-500/10 rounded-[1.5rem] flex items-center justify-center border border-yellow-500/20 mx-auto">
-              <AlertTriangle className="w-7 h-7 text-yellow-500" />
+            <div className="w-14 h-14 bg-warning/10 rounded-[1.5rem] flex items-center justify-center border border-warning/20 mx-auto">
+              <AlertTriangle className="w-7 h-7 text-warning" />
             </div>
 
             <div className="text-center space-y-2">
