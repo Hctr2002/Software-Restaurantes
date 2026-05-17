@@ -27,7 +27,7 @@ function orderTotal(order: any): number {
   return (order.order_items ?? []).reduce((s: number, i: any) => s + Number(i.unit_price) * i.quantity, 0);
 }
 
-function groupOrders(orders: any[], billMap: Record<string, boolean>): any[] {
+function groupOrders(orders: any[], billMap: Record<string, boolean>, tipMap: Record<string, boolean>): any[] {
   const map = new Map<string, any>();
   for (const order of orders) {
     const key = order.session_id ?? order.table_id ?? order.id;
@@ -40,6 +40,7 @@ function groupOrders(orders: any[], billMap: Record<string, boolean>): any[] {
         orders:           [],
         total:            0,
         billRequested:    (order.table_id && billMap[order.table_id]) || false,
+        tipIncluded:      (order.table_id && tipMap[order.table_id]) || false,
         oldestCreatedAt:  order.createdAt,
       });
     }
@@ -52,7 +53,7 @@ function groupOrders(orders: any[], billMap: Record<string, boolean>): any[] {
 
 export default function CashierDashboard() {
   const { restaurantId, user, signOut } = useAuth();
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   
   const [activeTab, setActiveTab] = useState<CashierTab>('pending');
   const [orders, setOrders] = useState<any[]>([]);
@@ -98,7 +99,7 @@ export default function CashierDashboard() {
       // Table Status (for bill requested)
       const { data: tableData } = await supabase
         .from('tables')
-        .select('id, bill_requested')
+        .select('id, bill_requested, tip_included')
         .eq('restaurant_id', restaurantId);
 
       setOrders(pendingData || []);
@@ -128,14 +129,18 @@ export default function CashierDashboard() {
     };
   }, [restaurantId, fetchOrders]);
 
-  const billRequestedMap = useMemo(() => 
-    Object.fromEntries(tables.map(t => [t.id, t.bill_requested])), 
+  const billRequestedMap = useMemo(() =>
+    Object.fromEntries(tables.map(t => [t.id, t.bill_requested])),
+  [tables]);
+
+  const tipIncludedMap = useMemo(() =>
+    Object.fromEntries(tables.map(t => [t.id, t.tip_included])),
   [tables]);
 
   const groups = useMemo(() => ({
-    pending: groupOrders(orders, billRequestedMap),
-    history: groupOrders(history, billRequestedMap)
-  }), [orders, history, billRequestedMap]);
+    pending: groupOrders(orders, billRequestedMap, tipIncludedMap),
+    history: groupOrders(history, billRequestedMap, tipIncludedMap),
+  }), [orders, history, billRequestedMap, tipIncludedMap]);
 
   const totals = useMemo(() => ({
     pending: groups.pending.reduce((s, g) => s + g.total, 0),
@@ -162,23 +167,23 @@ export default function CashierDashboard() {
     if (!selectedGroup) return;
     setIsProcessing(true);
     try {
-      const orderIds = selectedGroup.orders.map((o: any) => o.id);
-      
-      const { error: oErr } = await supabase
-        .from('orders')
-        .update({ 
-          status: 'COMPLETED', 
-          notes: reference ? `Ref: ${reference}` : 'Pagado en Caja'
-        })
-        .in('id', orderIds);
-        
-      if (oErr) throw oErr;
+      const orderIds = selectedGroup.orders
+        .filter((o: any) => !['COMPLETED', 'REJECTED'].includes(o.status))
+        .map((o: any) => o.id);
 
-      if (selectedGroup.tableId) {
-        await supabase
-          .from('tables')
-          .update({ status: 'FREE', bill_requested: false })
-          .eq('id', selectedGroup.tableId);
+      if (orderIds.length > 0) {
+        if (reference) {
+          await supabase
+            .from('orders')
+            .update({ notes: `Ref: ${reference}` })
+            .in('id', orderIds);
+        }
+
+        const { error } = await supabase.rpc('completar_pago_mesa', {
+          p_order_ids: orderIds,
+          p_table_id: selectedGroup.tableId ?? null,
+        });
+        if (error) throw error;
       }
 
       await fetchOrders();
@@ -262,7 +267,7 @@ export default function CashierDashboard() {
             autoFocus
           />
           {searchQuery !== '' && (
-            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearSearch}>
+            <TouchableOpacity onPress={() => setSearchQuery('')} style={[styles.clearSearch, { backgroundColor: colors.glassHeavy }]}>
               <X size={16} color={colors.muted} />
             </TouchableOpacity>
           )}
@@ -314,7 +319,7 @@ export default function CashierDashboard() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.navy }]}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={isLight ? 'dark-content' : 'light-content'} />
       {renderHeader()}
       {renderTabs()}
 
@@ -427,7 +432,6 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.05)',
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -44,16 +44,16 @@ export function RatingModal({ visible, onClose, onSubmit, primaryColor, bgColor,
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
       <View style={styles.overlay}>
-        <Animated.View entering={ZoomIn.duration(300)} style={[styles.card, { backgroundColor: bgColor }]}>
+        <Animated.View entering={ZoomIn.duration(300)} style={[styles.card, { backgroundColor: bgColor, borderColor: textColor + '10' }]}>
           <TouchableOpacity style={styles.closeBtn} onPress={handleClose}>
-            <X color="rgba(255,255,255,0.4)" size={20} />
+            <X color={textColor + '40'} size={20} />
           </TouchableOpacity>
 
           {done ? (
             <Animated.View entering={FadeIn} style={styles.doneContainer}>
               <Text style={styles.emoji}>🎉</Text>
               <Text style={[styles.doneTitle, { color: textColor }]}>¡Gracias por tu valoración!</Text>
-              <Text style={styles.doneSubtitle}>Tu opinión nos ayuda a mejorar</Text>
+              <Text style={[styles.doneSubtitle, { color: textColor + '40' }]}>Tu opinión nos ayuda a mejorar</Text>
               <TouchableOpacity style={[styles.doneButton, { backgroundColor: primaryColor }]} onPress={handleClose}>
                 <Text style={styles.doneButtonText}>Cerrar</Text>
               </TouchableOpacity>
@@ -62,14 +62,14 @@ export function RatingModal({ visible, onClose, onSubmit, primaryColor, bgColor,
             <>
               <Text style={styles.emoji}>⭐</Text>
               <Text style={[styles.title, { color: textColor }]}>¿Cómo fue tu experiencia?</Text>
-              <Text style={styles.subtitle}>Tu pedido fue entregado. Cuéntanos qué te pareció.</Text>
+              <Text style={[styles.subtitle, { color: textColor + '40' }]}>Tu pedido fue entregado. Cuéntanos qué te pareció.</Text>
 
               <View style={styles.starsRow}>
                 {[1, 2, 3, 4, 5].map(n => (
                   <TouchableOpacity key={n} onPress={() => setRating(n)} style={styles.starBtn}>
                     <Star
                       size={38}
-                      color={n <= rating ? '#f59e0b' : 'rgba(255,255,255,0.2)'}
+                      color={n <= rating ? '#f59e0b' : textColor + '20'}
                       fill={n <= rating ? '#f59e0b' : 'transparent'}
                     />
                   </TouchableOpacity>
@@ -79,9 +79,9 @@ export function RatingModal({ visible, onClose, onSubmit, primaryColor, bgColor,
               {rating > 0 && (
                 <Animated.View entering={FadeIn} style={styles.commentContainer}>
                   <TextInput
-                    style={[styles.commentInput, { color: textColor, borderColor: primaryColor + '66' }]}
+                    style={[styles.commentInput, { color: textColor, borderColor: primaryColor + '66', backgroundColor: textColor + '08' }]}
                     placeholder="Deja un comentario (opcional)"
-                    placeholderTextColor="rgba(255,255,255,0.3)"
+                    placeholderTextColor={textColor + '30'}
                     value={comment}
                     onChangeText={setComment}
                     multiline
@@ -106,7 +106,7 @@ export function RatingModal({ visible, onClose, onSubmit, primaryColor, bgColor,
               </TouchableOpacity>
 
               <TouchableOpacity onPress={handleClose} style={styles.skipBtn}>
-                <Text style={styles.skipText}>Omitir</Text>
+                <Text style={[styles.skipText, { color: textColor + '30' }]}>Omitir</Text>
               </TouchableOpacity>
             </>
           )}
@@ -130,7 +130,6 @@ const styles = StyleSheet.create({
     padding: 28,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
   },
   closeBtn: {
     position: 'absolute',
@@ -150,7 +149,6 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 13,
-    color: 'rgba(255,255,255,0.4)',
     textAlign: 'center',
     marginBottom: 24,
     lineHeight: 18,
@@ -174,7 +172,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     minHeight: 80,
     textAlignVertical: 'top',
-    backgroundColor: 'rgba(255,255,255,0.05)',
   },
   submitButton: {
     width: '100%',
@@ -196,7 +193,6 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   skipText: {
-    color: 'rgba(255,255,255,0.3)',
     fontSize: 13,
   },
   doneContainer: {
@@ -209,7 +205,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   doneSubtitle: {
-    color: 'rgba(255,255,255,0.4)',
     fontSize: 13,
     textAlign: 'center',
   },

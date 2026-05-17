@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Clock, ChevronRight, X } from 'lucide-react-native';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../../constants/MB_Theme';
+import { MB_SPACING, MB_RADIUS } from '../../../constants/MB_Theme';
 import { useTheme } from '../../../context/ThemeContext';
 import { timeAgo } from '../../../lib/dashboard';
 
@@ -26,7 +26,7 @@ export default function KitchenOrderCard({
     const elapsedMinutes = (new Date().getTime() - new Date(order.createdAt).getTime()) / 60000;
     if (elapsedMinutes > thresholds.red) return '#ef4444'; // Red
     if (elapsedMinutes > thresholds.yellow) return '#f59e0b'; // Amber
-    return colors.brandAccent || MB_COLORS.brandAccent;
+    return colors.brandAccent;
   };
 
   const urgencyColor = getUrgencyColor();

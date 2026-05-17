@@ -44,7 +44,7 @@ export const ActiveOrdersModal = ({
               <Text style={[styles.modalTitle, { color: textColor }]}>Mi Mesa</Text>
               <Text style={{ color: textColor + '60', fontSize: 14 }}>Estado de tus pedidos</Text>
             </View>
-            <TouchableOpacity onPress={onClose} style={styles.modalClose}>
+            <TouchableOpacity onPress={onClose} style={[styles.modalClose, { backgroundColor: textColor + '10' }]}>
               <Plus color={textColor} size={28} style={{ transform: [{ rotate: '45deg' }] }} />
             </TouchableOpacity>
           </View>
@@ -53,10 +53,10 @@ export const ActiveOrdersModal = ({
           <View style={styles.assistanceRow}>
             <TouchableOpacity 
               style={[
-                styles.assistanceBtn, 
-                { 
-                  backgroundColor: table?.help_requested ? primaryColor + '20' : 'rgba(255,255,255,0.05)', 
-                  borderColor: table?.help_requested ? primaryColor : 'rgba(255,255,255,0.1)' 
+                styles.assistanceBtn,
+                {
+                  backgroundColor: table?.help_requested ? primaryColor + '20' : textColor + '08',
+                  borderColor: table?.help_requested ? primaryColor : textColor + '15'
                 }
               ]} 
               onPress={onCallWaiter}
@@ -70,10 +70,10 @@ export const ActiveOrdersModal = ({
             
             <TouchableOpacity 
               style={[
-                styles.assistanceBtn, 
-                { 
-                  backgroundColor: table?.bill_requested ? '#10b98120' : 'rgba(255,255,255,0.05)', 
-                  borderColor: table?.bill_requested ? '#10b981' : 'rgba(255,255,255,0.1)' 
+                styles.assistanceBtn,
+                {
+                  backgroundColor: table?.bill_requested ? '#10b98120' : textColor + '08',
+                  borderColor: table?.bill_requested ? '#10b981' : textColor + '15'
                 }
               ]} 
               onPress={onConfirmBill}
@@ -94,7 +94,7 @@ export const ActiveOrdersModal = ({
               </View>
             ) : (
               activeOrders.map(order => (
-                <View key={order.id} style={[styles.activeOrderCard, { borderColor: textColor + '10' }]}>
+                <View key={order.id} style={[styles.activeOrderCard, { backgroundColor: textColor + '08', borderColor: textColor + '10' }]}>
                   <View style={styles.orderCardHeader}>
                     <View style={[styles.statusBadge, { backgroundColor: getStatusColor(order.status) + '20' }]}>
                       <Timer size={12} color={getStatusColor(order.status)} />
@@ -127,8 +127,8 @@ export const ActiveOrdersModal = ({
                   ${activeOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0).toLocaleString()}
                 </Text>
               </View>
-              <TouchableOpacity 
-                style={[styles.confirmBtn, { backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: textColor + '10' }]} 
+              <TouchableOpacity
+                style={[styles.confirmBtn, { backgroundColor: textColor + '08', borderWidth: 1, borderColor: textColor + '10', elevation: 0 }]}
                 onPress={onClose}
               >
                 <Text style={[styles.confirmBtnText, { color: textColor }]}>Cerrar</Text>
@@ -146,12 +146,12 @@ const styles = StyleSheet.create({
   modalContent: { borderTopLeftRadius: 36, borderTopRightRadius: 36, height: height * 0.75, padding: 24, paddingBottom: 40 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   modalTitle: { fontSize: 28, fontWeight: '900', letterSpacing: -1 },
-  modalClose: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.05)', justifyContent: 'center', alignItems: 'center' },
+  modalClose: { width: 40, height: 40, borderRadius: 20, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' },
   assistanceRow: { flexDirection: 'row', gap: 12, marginBottom: 24 },
   assistanceBtn: { flex: 1, height: 48, borderRadius: 16, borderWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   assistanceBtnText: { fontSize: 13, fontWeight: '800' },
   summaryList: { flex: 1 },
-  activeOrderCard: { backgroundColor: 'rgba(255, 255, 255, 0.03)', borderRadius: 24, padding: 20, marginBottom: 16, borderWidth: 1 },
+  activeOrderCard: { borderRadius: 24, padding: 20, marginBottom: 16, borderWidth: 1 },
   orderCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   statusBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
   statusText: { fontSize: 12, fontWeight: '900', letterSpacing: 0.5 },

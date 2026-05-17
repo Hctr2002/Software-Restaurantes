@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { QrCode, User, Utensils } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { MB_COLORS } from '../constants/MB_Theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function LandingHeader() {

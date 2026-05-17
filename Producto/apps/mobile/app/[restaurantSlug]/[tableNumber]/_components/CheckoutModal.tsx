@@ -33,7 +33,7 @@ export const CheckoutModal = ({
         <View style={[styles.modalContent, { backgroundColor: bgColor }]}>
           <View style={styles.modalHeader}>
             <Text style={[styles.modalTitle, { color: textColor }]}>Tu Pedido</Text>
-            <TouchableOpacity onPress={onClose} style={styles.modalClose}>
+            <TouchableOpacity onPress={onClose} style={[styles.modalClose, { backgroundColor: textColor + '10' }]}>
               <Plus color={textColor} size={28} style={{ transform: [{ rotate: '45deg' }] }} />
             </TouchableOpacity>
           </View>
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   modalContent: { borderTopLeftRadius: 36, borderTopRightRadius: 36, height: height * 0.75, padding: 24, paddingBottom: 40 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
   modalTitle: { fontSize: 28, fontWeight: '900', letterSpacing: -1 },
-  modalClose: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.05)', justifyContent: 'center', alignItems: 'center' },
+  modalClose: { width: 40, height: 40, borderRadius: 20, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' },
   summaryList: { flex: 1 },
   summaryItem: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 18, borderBottomWidth: 1 },
   summaryItemInfo: { flex: 1 },

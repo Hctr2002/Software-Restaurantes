@@ -16,7 +16,6 @@ import {
   Share
 } from 'react-native';
 import { X, Hash, Trash2, MapPin, Share as ShareIcon } from 'lucide-react-native';
-import { MB_COLORS, MB_RADIUS, MB_SPACING } from '../constants/MB_Theme';
 import { useTheme } from '../context/ThemeContext';
 
 export interface TableData {
@@ -248,7 +247,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   content: {
-    backgroundColor: MB_COLORS.navy,
+    backgroundColor: '#0A1128',
     borderRadius: 32,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
@@ -281,7 +280,6 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   label: {
-    color: MB_COLORS.muted,
     fontSize: 10,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -325,7 +323,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   statusBtnText: {
-    color: MB_COLORS.muted,
     fontSize: 9,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -351,7 +348,6 @@ const styles = StyleSheet.create({
     height: 160,
   },
   qrHint: {
-    color: MB_COLORS.muted,
     fontSize: 10,
     textAlign: 'center',
     paddingHorizontal: 40,
@@ -367,19 +363,18 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   shareQRText: {
-    color: MB_COLORS.brandAccent,
     fontSize: 12,
     fontWeight: '900',
     textTransform: 'uppercase',
   },
   saveButton: {
-    backgroundColor: MB_COLORS.brandAccent,
+    backgroundColor: '#FE5F55',
     height: 56,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 32,
-    shadowColor: MB_COLORS.brandAccent,
+    shadowColor: '#FE5F55',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -400,7 +395,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   deleteButtonText: {
-    color: MB_COLORS.brandAccent,
     fontSize: 12,
     fontWeight: '800',
     textTransform: 'uppercase',

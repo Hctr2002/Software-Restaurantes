@@ -121,6 +121,28 @@ export default function RestaurantMenuScreen() {
     return () => clearInterval(intervalId);
   }, [table?.id, syncTableData]);
 
+  // Realtime theme updates
+  useEffect(() => {
+    if (!restaurant?.id) return;
+    const channel = supabase
+      .channel(`customer-theme-${restaurant.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'restaurant_themes', filter: `restaurant_id=eq.${restaurant.id}` },
+        async () => {
+          const { data } = await supabase
+            .from('restaurant_themes')
+            .select('*')
+            .eq('restaurant_id', restaurant.id)
+            .eq('is_active', true)
+            .single();
+          if (data) setTheme(data);
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [restaurant?.id]);
+
   // Detect when any order transitions to DELIVERED and trigger rating
   useEffect(() => {
     const prev = prevOrderStatusesRef.current;
@@ -240,8 +262,17 @@ export default function RestaurantMenuScreen() {
 
   const primaryColor = theme?.primary_color || '#10b981';
   const bgColor = theme?.background_color || '#020617';
-  const textColor = theme?.text_color || 'white';
+  const textColor = theme?.text_color || '#ffffff';
   const accentColor = theme?.accent_color || primaryColor;
+
+  const isLightBg = (() => {
+    const hex = bgColor.replace('#', '');
+    if (hex.length !== 6) return false;
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.5;
+  })();
 
   const getStatusText = (s: string) => {
     const map: any = { PENDING: 'Esperando Garzón', VALIDATED: 'En Cocina', PREPARING: 'Preparando', READY: '¡Listo!', DELIVERED: 'Entregado' };
@@ -262,7 +293,7 @@ export default function RestaurantMenuScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={isLightBg ? 'dark-content' : 'light-content'} />
       <Stack.Screen options={{ headerShown: false }} />
 
       <MenuHeader 

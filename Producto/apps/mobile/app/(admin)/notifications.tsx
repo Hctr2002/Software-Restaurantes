@@ -1,15 +1,15 @@
 import React from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  Text, 
-  FlatList, 
-  TouchableOpacity, 
+import {
+  StyleSheet,
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
   ActivityIndicator,
   RefreshControl
 } from 'react-native';
-import { Bell, ShoppingBag, Clock, ChevronRight, CheckCircle2, Trash2 } from 'lucide-react-native';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { Bell, ShoppingBag, CheckCircle2, Trash2 } from 'lucide-react-native';
+import { MB_SPACING } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -50,14 +50,14 @@ export default function NotificationsScreen() {
 
   const fetchNotifications = React.useCallback(async () => {
     if (!restaurantId) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('orders')
         .select(`
-          id, 
-          status, 
-          createdAt, 
+          id,
+          status,
+          createdAt,
           table_id,
           tables(number),
           order_items(unit_price, quantity)
@@ -103,14 +103,14 @@ export default function NotificationsScreen() {
 
   const renderItem = ({ item, index }: { item: any, index: number }) => {
     const total = (item.order_items || []).reduce((sum: number, oi: any) => sum + (oi.unit_price * oi.quantity), 0);
-    
+
     return (
-      <Animated.View 
+      <Animated.View
         entering={FadeInDown.delay(index * 50)}
         exiting={FadeOutRight}
       >
         <View style={styles.notifCardContainer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.notifCard, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}
             onPress={() => router.push('/(admin)/orders')}
           >
@@ -129,8 +129,8 @@ export default function NotificationsScreen() {
               </View>
             </View>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={[styles.checkButton, { backgroundColor: colors.brandAccent + '20' }]}
             onPress={() => dismissNotification(item.id)}
           >
@@ -153,7 +153,7 @@ export default function NotificationsScreen() {
             <Text style={[styles.subtitle, { color: colors.muted }]}>{visibleNotifications.length} pendientes</Text>
           </View>
         </View>
-        
+
         {visibleNotifications.length > 0 && (
           <TouchableOpacity style={[styles.clearAllButton, { backgroundColor: colors.glass }]} onPress={clearAll}>
             <Trash2 size={16} color={colors.text} />
@@ -191,7 +191,6 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MB_COLORS.navy,
   },
   header: {
     flexDirection: 'row',
@@ -201,7 +200,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
   },
   headerInfo: {
     flexDirection: 'row',
@@ -212,18 +210,15 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 16,
-    backgroundColor: MB_COLORS.brandAccent,
     justifyContent: 'center',
     alignItems: 'center',
   },
   title: {
-    color: 'white',
     fontSize: 20,
     fontWeight: '900',
     letterSpacing: -0.5,
   },
   subtitle: {
-    color: MB_COLORS.muted,
     fontSize: 12,
     fontWeight: '600',
   },
@@ -231,13 +226,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(255,255,255,0.05)',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 12,
   },
   clearAllText: {
-    color: 'white',
     fontSize: 10,
     fontWeight: '800',
     textTransform: 'uppercase',
@@ -256,17 +249,14 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: MB_COLORS.glass,
     borderRadius: 24,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.03)',
   },
   iconContainer: {
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.05)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -281,17 +271,14 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   notifTitle: {
-    color: 'white',
     fontSize: 14,
     fontWeight: '800',
   },
   notifTime: {
-    color: MB_COLORS.muted,
     fontSize: 10,
     fontWeight: '600',
   },
   notifSub: {
-    color: MB_COLORS.muted,
     fontSize: 12,
     fontWeight: '500',
     marginBottom: 8,
@@ -307,7 +294,6 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   statusText: {
-    color: 'white',
     fontSize: 10,
     fontWeight: '900',
     letterSpacing: 1,
@@ -316,7 +302,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(254, 95, 85, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -331,13 +316,11 @@ const styles = StyleSheet.create({
     paddingTop: 100,
   },
   emptyText: {
-    color: 'white',
     fontSize: 18,
     fontWeight: '900',
     marginTop: 20,
   },
   emptySub: {
-    color: MB_COLORS.muted,
     fontSize: 13,
     fontWeight: '500',
     marginTop: 4,

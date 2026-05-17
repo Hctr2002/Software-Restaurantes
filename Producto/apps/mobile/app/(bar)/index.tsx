@@ -24,7 +24,7 @@ type BarTab = 'Nuevos' | 'Preparando' | 'Listos';
 
 export default function BarDashboard() {
   const { restaurantId, signOut } = useAuth();
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   
   const [activeTab, setActiveTab] = useState<BarTab>('Nuevos');
   const [orders, setOrders] = useState<any[]>([]);
@@ -254,7 +254,7 @@ export default function BarDashboard() {
               styles.badge, 
               { backgroundColor: activeTab === tab ? '#3b82f6' : colors.glassHeavy }
             ]}>
-              <Text style={styles.badgeText}>{getTabCount(tab)}</Text>
+              <Text style={[styles.badgeText, { color: activeTab === tab ? 'white' : colors.text }]}>{getTabCount(tab)}</Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -264,7 +264,7 @@ export default function BarDashboard() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.navy }]}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={isLight ? 'dark-content' : 'light-content'} />
       {renderHeader()}
       {renderTabs()}
 

@@ -11,7 +11,7 @@ import {
   Alert
 } from 'react-native';
 import { Package, Search, Plus, ChevronRight, AlertTriangle } from 'lucide-react-native';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -267,7 +267,6 @@ export default function InventoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MB_COLORS.navy,
   },
   header: {
     paddingHorizontal: MB_SPACING.lg,
@@ -276,13 +275,11 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    color: 'white',
     fontWeight: '900',
     letterSpacing: -0.5,
   },
   headerSubtitle: {
     fontSize: 13,
-    color: MB_COLORS.muted,
     fontWeight: '600',
     marginTop: 2,
   },
@@ -297,30 +294,25 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: MB_COLORS.glass,
     borderRadius: 16,
     paddingHorizontal: 12,
     height: 48,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
   },
   searchIcon: {
     marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    color: 'white',
     fontSize: 14,
     fontWeight: '600',
   },
   addButton: {
     width: 48,
     height: 48,
-    backgroundColor: MB_COLORS.brandAccent,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: MB_COLORS.brandAccent,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -335,12 +327,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: MB_COLORS.glass,
     borderRadius: MB_RADIUS.lg,
     padding: MB_SPACING.md,
     marginBottom: MB_SPACING.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.03)',
   },
   itemInfo: {
     flexDirection: 'row',
@@ -351,7 +341,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: 'rgba(254, 95, 85, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -359,7 +348,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 152, 0, 0.1)',
   },
   itemName: {
-    color: 'white',
     fontSize: 16,
     fontWeight: '800',
     textTransform: 'uppercase',
@@ -372,7 +360,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   stockValue: {
-    color: MB_COLORS.muted,
     fontSize: 14,
     fontWeight: '700',
   },
@@ -399,7 +386,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    color: MB_COLORS.muted,
     marginTop: 12,
     fontSize: 12,
     fontWeight: '800',
@@ -411,7 +397,6 @@ const styles = StyleSheet.create({
     marginTop: 100,
   },
   emptyText: {
-    color: MB_COLORS.muted,
     fontSize: 14,
     fontWeight: '700',
     marginTop: 16,
