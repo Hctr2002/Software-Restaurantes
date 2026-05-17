@@ -5,6 +5,8 @@ import { useAuthStore } from "@menu-bites/store";
 import { useThemeSync } from "@menu-bites/auth";
 import { RestaurantThemeProvider, RestaurantTheme } from "@menu-bites/ui";
 
+const CACHE_KEY = 'mb-theme-cashier';
+
 const THEME_VARS = [
   '--primary', '--primary-foreground',
   '--secondary', '--secondary-foreground',
@@ -25,7 +27,10 @@ export default function CashierThemeWrapper({ children }: { children: React.Reac
   const [theme, setTheme] = useState<RestaurantTheme | undefined>(undefined);
 
   useEffect(() => {
-    if (liveTheme) setTheme(liveTheme as any);
+    if (liveTheme) {
+      setTheme(liveTheme as any);
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(liveTheme)); } catch {}
+    }
   }, [liveTheme]);
 
   useEffect(() => {

@@ -69,25 +69,25 @@
     --font-inter: 'Inter', sans-serif;
   }
 
-  /* Dark mode — neutral basis to avoid blue legacy */
+  /* Dark mode — paleta institucional Menu Bites (coincide con admin-dashboard) */
   .dark {
     --brand-accent: 35 90% 60%;
-    --background: 0 0% 5%; /* Pure dark neutral */
+    --background: 222 47% 5%; /* Slate-Black azulado */
     --foreground: var(--sand);
 
-    --card: 0 0% 8%; /* Deep neutral grey/black */
+    --card: 222 47% 11%; /* Slate-900 */
     --card-foreground: var(--sand);
 
-    --popover: 0 0% 8%;
+    --popover: 222 47% 11%;
     --popover-foreground: var(--sand);
 
     --primary: var(--sage);
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: 222 47% 5%;
 
     --secondary: var(--sand);
-    --secondary-foreground: 0 0% 5%;
+    --secondary-foreground: 222 47% 5%;
 
-    --muted: 0 0% 15%;
+    --muted: 222 47% 9%; /* Entre background y card */
     --muted-foreground: 0 0% 65%;
 
     --accent: var(--sage);
@@ -102,8 +102,8 @@
     --warning: 45 93% 50%;
     --warning-foreground: 26 83% 14%;
 
-    --border: 0 0% 15%;
-    --input: 0 0% 12%;
+    --border: 217 33% 18%; /* Slate-800 */
+    --input:  217 33% 15%;
     --ring: var(--sage);
   }
 }
