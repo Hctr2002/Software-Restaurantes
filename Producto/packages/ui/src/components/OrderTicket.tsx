@@ -1,6 +1,12 @@
 "use client";
- 
- import React, { useState, useEffect } from "react";
+
+/**
+ * OrderTicket — Ticket de pedido completo para el KDS (cocina y bar).
+ * Muestra ítems, tiempo transcurrido, estado y botones de avance de estado.
+ * Cambia de color según urgencia (normal, warning, critical) basado en tiempo.
+ */
+
+import React, { useState, useEffect } from "react";
  import { cn } from "../lib/utils";
  import { Clock, CheckCircle2, PlayCircle, Utensils, AlertCircle, GlassWater, MessageSquare, X } from "lucide-react";
  import { motion, AnimatePresence } from "framer-motion";

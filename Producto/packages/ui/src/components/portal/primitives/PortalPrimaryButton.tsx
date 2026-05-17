@@ -1,4 +1,11 @@
 "use client";
+
+/**
+ * PortalPrimaryButton — Botón primario del portal del cliente con soporte para variantes.
+ * Hereda el color primario del tema dinámico del restaurante.
+ * Variantes: default (filled), ghost (outline), success (verde confirmación).
+ */
+
 import React from "react";
 import { motion } from "framer-motion";
 import { cn } from "../../../lib/utils";

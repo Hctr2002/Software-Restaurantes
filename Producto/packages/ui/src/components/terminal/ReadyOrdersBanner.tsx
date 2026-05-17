@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * ReadyOrdersBanner — Banner destacado para pedidos listos (READY) pendientes de entrega.
+ * Aparece en la parte superior del terminal del garzón cuando hay pedidos que deben llevarse.
+ */
+
 import React from "react";
 import { UtensilsCrossed, CheckCircle } from "lucide-react";
 

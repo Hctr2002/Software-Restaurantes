@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * OrderActivityFeed — Feed de actividad de pedidos recientes para el dashboard.
+ * Lista los últimos pedidos con su estado, mesa y tiempo transcurrido.
+ * Muestra un estado vacío cuando no hay pedidos activos.
+ */
+
 import React from "react";
 import { motion } from "framer-motion";
 import { UtensilsCrossed, ClipboardList } from "lucide-react";

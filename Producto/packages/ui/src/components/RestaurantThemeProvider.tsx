@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * RestaurantThemeProvider — Proveedor de tema dinámico del restaurante.
+ * Convierte los colores hex del restaurante a tokens HSL y los inyecta como
+ * CSS Custom Properties en document.documentElement (isGlobal=true) o en un
+ * contenedor local. También carga fuentes Google Fonts de forma dinámica.
+ * hexToHslValues: convierte #RRGGBB a "H S% L%" para uso directo en Tailwind.
+ */
+
 import React, { useEffect } from "react";
 
 export interface RestaurantTheme {

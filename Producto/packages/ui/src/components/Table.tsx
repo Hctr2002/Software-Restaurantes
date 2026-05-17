@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Table — Componente de tabla genérica reutilizable en los dashboards.
+ * Acepta columnas tipadas y filas de datos; soporta estado de carga y vacío.
+ */
+
 import React from "react";
 
 interface TableProps {

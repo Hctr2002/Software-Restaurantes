@@ -1,3 +1,7 @@
+/**
+ * input.tsx — Primitivo Input estilizado con Tailwind y compatibilidad con formularios.
+ */
+
 import * as React from "react";
 import { cn } from "../../lib/utils";
 

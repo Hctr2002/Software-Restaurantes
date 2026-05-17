@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * KDSColumn — Columna de tickets para el Kitchen Display System.
+ * Renderiza una lista de pedidos en una estación (KITCHEN o BAR) con animación de entrada.
+ * Expone acciones de avance de estado (PREPARING → READY) por ticket.
+ */
+
 import React from "react";
 import { motion } from "framer-motion";
 import { Activity } from "lucide-react";

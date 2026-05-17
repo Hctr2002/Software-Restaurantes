@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * RatingModal (portal/ui) — Modal de valoración del servicio del package @menu-bites/ui.
+ * Se muestra tras la entrega del pedido. Soporta 1-5 estrellas y comentario opcional.
+ */
+
 import React from "react";
 import { Loader2 } from "lucide-react";
 import { PortalHeading } from "./primitives/PortalHeading";

@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * TableStatusBoard — Panel visual del estado de todas las mesas del restaurante.
+ * Muestra una grilla de tarjetas de mesa con su estado (FREE, OCCUPIED, RESERVED, CLEANING)
+ * y solicitudes pendientes (cuenta, asistencia). Usado en el dashboard del dueño y en el terminal.
+ */
+
 import React from "react";
 import { motion } from "framer-motion";
 import { TableProperties } from "lucide-react";

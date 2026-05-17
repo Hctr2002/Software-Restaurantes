@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * TicketWrapper — Contenedor animado para tickets del KDS (cocina y bar).
+ * Aplica animación de entrada/salida y estilos de borde según la prioridad del pedido.
+ */
+
 import React from "react";
 import { motion } from "framer-motion";
 import { cn } from "../../lib/utils";

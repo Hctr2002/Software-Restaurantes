@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * AlertModal — Modal de confirmación de alertas para el terminal del garzón.
+ * Permite al staff enviar alertas (HELP_REQUEST, STOCK_SHORTAGE, etc.) hacia el sistema.
+ * Usa useAlertForm de @menu-bites/auth para el estado del formulario.
+ */
+
 import React from "react";
 import { AlertTriangle, Loader2, X } from "lucide-react";
 import { motion } from "framer-motion";

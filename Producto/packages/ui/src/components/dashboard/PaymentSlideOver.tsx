@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * PaymentSlideOver — Panel deslizable de procesamiento de pago para la caja.
+ * Muestra el resumen del pedido, permite ingresar referencia de pago y confirmar el cobro.
+ * Llama a markDelivered de useCashierOrders al confirmar.
+ */
+
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, CreditCard, Hash, Loader2, Receipt } from "lucide-react";

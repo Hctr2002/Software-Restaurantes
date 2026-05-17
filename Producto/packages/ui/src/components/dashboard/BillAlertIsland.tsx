@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * BillAlertIsland — Isla flotante de alertas de cuenta solicitada.
+ * Aparece cuando alguna mesa ha solicitado la cuenta (bill_requested = true).
+ * Permite al staff descartar la alerta o ir directamente a la caja.
+ */
+
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bell } from "lucide-react";

@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * StaleOrdersAlert — Alerta de pedidos estancados (sin avanzar de estado en demasiado tiempo).
+ * Se muestra cuando algún pedido lleva más de STALE_ORDER_MINUTES sin actualizarse.
+ * Ayuda al personal a identificar tickets olvidados antes de que impacten al cliente.
+ */
+
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle } from "lucide-react";

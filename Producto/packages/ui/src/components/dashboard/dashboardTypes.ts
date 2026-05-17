@@ -1,3 +1,9 @@
+/**
+ * dashboardTypes.ts — Tipos locales del package @menu-bites/ui para el dashboard.
+ * Re-exporta los tipos de @menu-bites/auth y extiende Order con aliases de compatibilidad.
+ * TableGroup: agrupación de órdenes por mesa usada en el terminal del garzón y la caja.
+ */
+
 import { Order as AuthOrder, OrderItem as AuthOrderItem, TableRecord as AuthTableRecord } from "@menu-bites/auth";
 
 export type StatsData = {

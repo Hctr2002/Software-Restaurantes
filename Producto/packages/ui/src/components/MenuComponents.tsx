@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * MenuComponents — Componentes de interfaz para la gestión del menú en local-dashboard.
+ * Incluye: barra de búsqueda, botón de agregar y tarjeta de ítem del menú con acciones.
+ */
+
 import React from "react";
 import { cn } from "../lib/utils";
 import { Plus, Search, X } from "lucide-react";

@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * Modal — Componente de modal genérico con overlay y animación.
+ * Cierra al presionar Escape o al hacer clic fuera del contenido.
+ * Bloquea el scroll del body mientras está abierto.
+ */
+
 import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "./ui/button";

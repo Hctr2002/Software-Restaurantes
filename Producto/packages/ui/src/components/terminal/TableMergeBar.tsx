@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * TableMergeBar — Barra de acción para fusionar/desagrupar mesas en el terminal.
+ * Se activa cuando el garzón selecciona múltiples mesas para unir sus pedidos.
+ * Llama a la lógica de fusión del hook useRealtimeWaiterOrders.
+ */
+
 import React from "react";
 import { Button } from "../ui/button";
 import { CheckCircle, Link2, Link2Off, Loader2 } from "lucide-react";

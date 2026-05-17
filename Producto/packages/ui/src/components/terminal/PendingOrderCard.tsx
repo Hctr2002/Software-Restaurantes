@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * PendingOrderCard — Tarjeta de pedido pendiente para el terminal del garzón.
+ * Muestra los ítems de cocina y bar por separado, campos de notas editables y
+ * botones de validar/rechazar. Usado en la columna "Solicitados" del terminal.
+ */
+
 import React from "react";
 import { CheckCircle, Loader2, MessageSquare, Wine, XCircle } from "lucide-react";
 import { Button } from "../ui/button";

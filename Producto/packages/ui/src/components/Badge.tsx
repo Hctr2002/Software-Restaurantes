@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * Badge — Componente de etiqueta de estado con variantes semánticas.
+ * Variantes: success, danger, warning, neutral, info.
+ * Usado para mostrar estados de pedidos, mesas e inventario en toda la interfaz.
+ */
+
 import React from "react";
 
 export type BadgeVariant = "success" | "danger" | "warning" | "neutral" | "info";

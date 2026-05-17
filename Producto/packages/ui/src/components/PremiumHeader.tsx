@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * PremiumHeader — Encabezado premium compartido entre todas las apps operacionales.
+ * Variantes: default (hero con gradiente) y compact (barra fija de navegación).
+ * Acepta un icono, título, etiquetas de estado y un slot de acciones personalizadas.
+ */
+
 import React from "react";
 import { cn } from "../lib/utils";
 import { LucideIcon } from "lucide-react";

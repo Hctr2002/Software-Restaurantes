@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * OrderTracker (portal/ui) — Barra de progreso de estado del pedido para el portal.
+ * Versión del package de OrderTracker: muestra los pasos PENDING→READY bajo el header.
+ */
+
 import React from "react";
 import { PortalText } from "./primitives/PortalText";
 
