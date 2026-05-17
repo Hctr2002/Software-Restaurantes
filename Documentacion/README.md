@@ -46,6 +46,7 @@
 
 | Versión | Fecha | Cambios principales |
 |---|---|---|
+| v2.5.0 | 2026-05-17 | Documentación JSDoc en español en todos los archivos TypeScript del monorepo (~280 archivos); estándar de cabeceras de archivo, JSDoc de funciones/hooks/componentes, comentarios de sección y comentarios inline; paquetes `@menu-bites/auth`, `@menu-bites/ui` y `@menu-bites/store` completamente documentados |
 | v2.4.0 | 2026-05-10 | Bar Dashboard (rol BAR, puerto 3006); arquitectura dual-estación KITCHEN/BAR; campo `target_station` en categorías; `kds_settings` polimórfico; `bar_ready`/`bar_preparing` en órdenes |
 | v2.3.0 | anterior | Refactor UX/UI Pro Max; flujo de pedido automatizado; motor de marca dinámica |
 | v2.0.0 | anterior | Monorepo multitenant completo; RLS; Realtime; Web Push |

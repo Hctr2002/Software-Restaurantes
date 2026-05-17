@@ -1,5 +1,5 @@
 # Documento de Arquitectura de Software (SAD) — Menu Bites
-**Versión:** 2.4.0 | **Alcance:** Arquitectura técnica, patrones de diseño e infraestructura del sistema de gestión de restaurantes Menu Bites.
+**Versión:** 2.5.0 | **Alcance:** Arquitectura técnica, patrones de diseño e infraestructura del sistema de gestión de restaurantes Menu Bites.
 
 ---
 
@@ -39,9 +39,9 @@ El proyecto utiliza una arquitectura de monorepo gestionada con **Turborepo** y 
 
 | Paquete | Descripción |
 |---|---|
-| `@menu-bites/ui` | Biblioteca de componentes React compartidos (`Button`, `Modal`, `Table`, `Badge`, `OrderTicket`, `Card`, `cn`, etc.) |
-| `@menu-bites/auth` | Cliente Supabase instanciado y helpers de sesión (`getSession`, `signOut`, `supabase`) |
-| `@menu-bites/store` | Estado global compartido (Zustand o similar) para datos cross-app |
+| `@menu-bites/ui` | Biblioteca de componentes React compartidos: primitivos (`Button`, `Card`, `Badge`, `Input`), componentes del dashboard (`KpiGrid`, `LiveFlowMonitor`, `KDSColumn`, `OrderGroupCard`, `PaymentSlideOver`, `TableStatusBoard`), componentes del terminal (`PendingOrderCard`, `TableCard`, `TableMergeBar`), componentes del portal (`PortalMenuItemCard`, `PortalPrimaryButton`, `PortalHeading`, `PortalText`, `PortalCard`), `RestaurantThemeProvider` y `DynamicThemeWrapper`. |
+| `@menu-bites/auth` | Cliente Supabase (`createBrowserClient`), helpers de sesión (`getSession`, `signOut`, `updateOrderStatus`, `sendAlert`, `getRestaurantTheme`), todos los hooks Realtime (`useRealtimeSync`, `useRealtimeOrders`, `useKitchenOrders`, `useBarOrders`, `useTables`, `useMenu`, `useRealtimeAlerts`, `useCashierOrders`, `useThemeSync`, `useRealtimeWaiterOrders`, `useCustomerPortal`, `useCustomerOrderTracker`) y todos los tipos del modelo de datos. |
+| `@menu-bites/store` | Store Zustand `useAuthStore` con persistencia AES-encriptada en localStorage. La clave de cifrado se deriva de `hostname + userAgent` para prevenir extracción directa del token. |
 
 #### Diagrama de Estructura del Monorepo
 
@@ -668,9 +668,71 @@ Para garantizar que todos los componentes del portal de clientes hereden correct
 
 #### 7.14.3 Estándar de Documentación de Código (Clean Code)
 
-Se adoptó un estándar de comentarios descriptivos para facilitar la presentación y auditoría del código:
-- **Patrón:** `// Función para [descripción de la lógica visual o de negocio]`
-- **Objetivo:** Permitir que cualquier desarrollador (o evaluador académico) comprenda el propósito de un bloque de código sin necesidad de navegar por toda la jerarquía de componentes.
+A partir de la v2.5.0 se implementó un sistema de comentarios JSDoc en español en todos los archivos TypeScript del monorepo (~280 archivos entre `apps/` y `packages/`). El objetivo es permitir que cualquier desarrollador comprenda el propósito de cada módulo, función y componente sin necesidad de navegar por toda la jerarquía.
+
+**Tipos de comentarios aplicados:**
+
+**1. Cabecera de archivo** — todo archivo `.ts` / `.tsx` comienza con un bloque que describe su responsabilidad, contexto y relaciones:
+```typescript
+/**
+ * useRealtimeSync — Hook base de sincronización en tiempo real con Supabase Postgres Changes.
+ * Realiza un fetch inicial y luego suscribe a cambios de la tabla indicada filtrando por
+ * restaurant_id. Incluye reconexión automática con backoff exponencial (hasta MAX_RETRIES).
+ * Todos los hooks de datos del sistema se construyen sobre este hook.
+ */
+```
+
+**2. JSDoc de función / hook / componente exportado** — describe el comportamiento, side effects y parámetros no obvios:
+```typescript
+/**
+ * Agrupa sub-órdenes (KITCHEN y BAR) por mesa en un único objeto Order fusionado.
+ * El status resultante es el de mayor prioridad: READY > PREPARING > VALIDATED > PENDING.
+ * @param restaurantId - UUID del restaurante obtenido del JWT.
+ */
+export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
+```
+
+**3. Comentarios de sección** — en archivos con múltiples responsabilidades:
+```typescript
+// ─────────────────────────────────────────
+// QUERIES DE LECTURA
+// ─────────────────────────────────────────
+```
+
+**4. Comentarios inline** — solo para lógica no obvia (decisiones de seguridad, workarounds, invariantes del sistema):
+```typescript
+// El token de anon puede ser null en rutas públicas — es intencional para tablas
+// con RLS SELECT abierto. El hook silencia este error.
+```
+
+**5. Documentación de props** — en interfaces de componentes React:
+```typescript
+interface Props {
+  /** Slug del restaurante; se usa para resolver el tenant en RLS */
+  restaurantSlug: string
+}
+```
+
+**Cobertura alcanzada (v2.5.0):**
+
+| Scope | Archivos comentados |
+|---|---|
+| `apps/customer-portal` | 27 archivos |
+| `apps/local-dashboard` | ~98 archivos |
+| `apps/waiter-terminal` | Completado |
+| `apps/kitchen-kds` | Completado |
+| `apps/cashier-dashboard` | Completado |
+| `apps/bar-dashboard` | Completado |
+| `apps/admin-dashboard` | Completado |
+| `packages/auth` | 14 archivos |
+| `packages/ui` | 47 archivos |
+| `packages/store` | 1 archivo |
+
+**Reglas de integridad:**
+- Todo `/**` debe cerrarse con `*/` antes de la declaración que documenta.
+- Los comentarios inline no se insertan dentro de objetos literales, arrays ni template strings.
+- Los divisores `// ─── ` van entre declaraciones, nunca dentro de una función abierta.
+- Los comentarios no describen el QUÉ (ya lo hace el nombre) sino el POR QUÉ y el CONTEXTO.
 
 ---
 
