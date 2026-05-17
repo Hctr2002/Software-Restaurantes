@@ -106,7 +106,9 @@ export function useRealtimeStats(restaurantId: string | undefined) {
         const json = await response.json();
         return { data: json.data, error: null };
       }
-      return { data: null, error: "Failed to fetch stats" };
+      // 401 is transient during token refresh — proxy handles renewal, no noise
+      if (response.status === 401) return { data: null, error: null };
+      return { data: null, error: `stats HTTP ${response.status}` };
     } catch (err) {
       return { data: null, error: err };
     }
