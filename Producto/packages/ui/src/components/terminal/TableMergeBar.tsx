@@ -13,11 +13,12 @@ interface TableMergeBarProps {
   onConfirmMerge: () => void;
   onConfirmUnlink?: () => void;
   canUnlink?: boolean;
+  isAlreadyMerged?: boolean;
 }
 
 export function TableMergeBar({
   mergeMode, selectedCount, merging, mergeResult,
-  onToggleMode, onConfirmMerge, onConfirmUnlink, canUnlink,
+  onToggleMode, onConfirmMerge, onConfirmUnlink, canUnlink, isAlreadyMerged,
 }: TableMergeBarProps) {
   return (
     <>
@@ -31,12 +32,16 @@ export function TableMergeBar({
       {mergeMode && selectedCount >= 2 && (
         <button
           onClick={onConfirmMerge}
-          disabled={merging}
-          className="w-full relative flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-primary/20 transition-all hover:scale-[1.01] active:scale-95 disabled:opacity-50 disabled:pointer-events-none group overflow-hidden"
+          disabled={merging || isAlreadyMerged}
+          className={`w-full relative flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl transition-all hover:scale-[1.01] active:scale-95 disabled:pointer-events-none group overflow-hidden ${
+            isAlreadyMerged
+              ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-red-500/20"
+              : "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-primary/20 disabled:opacity-50"
+          }`}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
-          {merging ? <Loader2 className="w-5 h-5 animate-spin" /> : <Link2 className="w-5 h-5 drop-shadow-md" />}
-          Fusionar {selectedCount} mesas seleccionadas
+          {merging ? <Loader2 className="w-5 h-5 animate-spin" /> : (isAlreadyMerged ? <Link2Off className="w-5 h-5 drop-shadow-md" /> : <Link2 className="w-5 h-5 drop-shadow-md" />)}
+          {isAlreadyMerged ? "Mesas ya fusionadas" : `Fusionar ${selectedCount} mesas seleccionadas`}
         </button>
       )}
 

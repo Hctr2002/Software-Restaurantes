@@ -265,6 +265,14 @@ export default function WaiterDashboard() {
                     const table = tables.find(t => t.id === selectedId);
                     return !!table?.current_session_id;
                   })()}
+                  isAlreadyMerged={(() => {
+                    if (merge.selectedForMerge.size < 2) return false;
+                    const selectedIds = Array.from(merge.selectedForMerge);
+                    const selectedTables = selectedIds.map(id => tables.find(t => t.id === id)).filter(Boolean);
+                    const firstSession = selectedTables[0]?.current_session_id;
+                    if (!firstSession) return false;
+                    return selectedTables.every(t => t.current_session_id === firstSession);
+                  })()}
                 />
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                   {tables.map((table) => (
