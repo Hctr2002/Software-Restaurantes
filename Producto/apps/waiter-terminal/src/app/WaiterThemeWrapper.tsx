@@ -1,56 +1,56 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useAuthStore } from "@menu-bites/store";
 import { useThemeSync } from "@menu-bites/auth";
 import { RestaurantThemeProvider, RestaurantTheme } from "@menu-bites/ui";
 
-/**
- * WaiterThemeWrapper - Proveedor dinámico de temas para la Terminal de Garzón.
- * 
- * Este componente asegura que la terminal móvil herede correctamente la identidad
- * visual del restaurante (colores, tipografías) en tiempo real.
- * 
- * Funcionalidades:
- * - Sincronización automática con Supabase Realtime.
- * - Soporte para previsualización de marca desde el laboratorio administrativo.
- * - Inyección global de estilos CSS para asegurar coherencia en toda la navegación.
- */
+const THEME_VARS = [
+  '--primary', '--primary-foreground',
+  '--secondary', '--secondary-foreground',
+  '--background', '--foreground',
+  '--card', '--card-foreground',
+  '--accent', '--accent-foreground',
+  '--border', '--input', '--muted', '--muted-foreground',
+  '--font-title', '--font-title-stack',
+  '--font-body', '--font-body-stack',
+  '--font-accent', '--font-accent-stack',
+  '--font-outfit', '--font-inter',
+  '--sage', '--navy', '--sand', '--brand-accent',
+];
+
 export default function WaiterThemeWrapper({ children }: { children: React.ReactNode }) {
-  // Obtenemos el usuario autenticado para saber qué restaurante estamos operando
-  const { user } = useAuthStore();
-  
-  // Hook de sincronización que escucha cambios en el branding del restaurante
+  const pathname  = usePathname();
+  const { user }  = useAuthStore();
   const liveTheme = useThemeSync(user?.restaurantId, "waiter");
-  
-  // Estado local para el tema actual
   const [theme, setTheme] = useState<RestaurantTheme | undefined>(undefined);
 
-  // Actualizamos el tema local cuando hay cambios en el servidor
+  const isPublicRoute = pathname === '/login' || pathname.startsWith('/auth/');
+
   useEffect(() => {
-    if (liveTheme) {
+    if (isPublicRoute) {
+      THEME_VARS.forEach(v => document.documentElement.style.removeProperty(v));
+      setTheme(undefined);
+    }
+  }, [isPublicRoute]);
+
+  useEffect(() => {
+    if (!isPublicRoute && liveTheme) {
       setTheme(liveTheme as any);
     }
-  }, [liveTheme]);
+  }, [liveTheme, isPublicRoute]);
 
-  /**
-   * Escucha de eventos para previsualización en vivo.
-   * Útil para que los diseñadores vean cómo se ve la terminal mientras editan el tema.
-   */
   useEffect(() => {
     const handleThemeUpdate = (e: CustomEvent<RestaurantTheme>) => {
-      if (e.detail) {
-        setTheme(e.detail);
-      }
+      if (e.detail && !isPublicRoute) setTheme(e.detail);
     };
-
     window.addEventListener('admin-theme-preview', handleThemeUpdate as any);
     return () => window.removeEventListener('admin-theme-preview', handleThemeUpdate as any);
-  }, []);
+  }, [isPublicRoute]);
 
   return (
-    // Inyectamos el tema globalmente en el documento
-    <RestaurantThemeProvider theme={theme} isGlobal>
+    <RestaurantThemeProvider theme={isPublicRoute ? undefined : theme} isGlobal>
       {children}
     </RestaurantThemeProvider>
   );

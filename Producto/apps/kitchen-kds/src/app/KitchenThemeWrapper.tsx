@@ -1,57 +1,56 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useAuthStore } from "@menu-bites/store";
 import { useThemeSync } from "@menu-bites/auth";
 import { RestaurantThemeProvider, RestaurantTheme } from "@menu-bites/ui";
 
-/**
- * KitchenThemeWrapper - Proveedor dinámico de temas para el KDS de Cocina.
- * 
- * Este componente es el corazón visual del monitor de cocina. Su función es:
- * 1. Conectarse a Supabase Realtime para recibir actualizaciones de marca al instante.
- * 2. Inyectar variables CSS (HSL) globales que Tailwind utiliza para renderizar colores.
- * 3. Permitir que el administrador previsualice cambios de diseño sin guardarlos.
- */
+const THEME_VARS = [
+  '--primary', '--primary-foreground',
+  '--secondary', '--secondary-foreground',
+  '--background', '--foreground',
+  '--card', '--card-foreground',
+  '--accent', '--accent-foreground',
+  '--border', '--input', '--muted', '--muted-foreground',
+  '--font-title', '--font-title-stack',
+  '--font-body', '--font-body-stack',
+  '--font-accent', '--font-accent-stack',
+  '--font-outfit', '--font-inter',
+  '--sage', '--navy', '--sand', '--brand-accent',
+];
+
 export default function KitchenThemeWrapper({ children }: { children: React.ReactNode }) {
-  // Obtenemos el usuario actual para identificar a qué restaurante pertenece
-  const { user } = useAuthStore();
-  
-  // Hook personalizado que maneja la suscripción a canales de PostgreSQL Realtime.
-  // Filtra por restaurantId y el perfil específico 'kitchen'.
+  const pathname  = usePathname();
+  const { user }  = useAuthStore();
   const liveTheme = useThemeSync(user?.restaurantId, "kitchen");
-  
-  // Estado local para manejar el tema, permitiendo cambios rápidos por eventos de preview
   const [theme, setTheme] = useState<RestaurantTheme | undefined>(undefined);
 
-  // Sincroniza el estado local cada vez que la base de datos emite un cambio de branding
+  const isPublicRoute = pathname === '/login' || pathname.startsWith('/auth/');
+
   useEffect(() => {
-    if (liveTheme) {
+    if (isPublicRoute) {
+      THEME_VARS.forEach(v => document.documentElement.style.removeProperty(v));
+      setTheme(undefined);
+    }
+  }, [isPublicRoute]);
+
+  useEffect(() => {
+    if (!isPublicRoute && liveTheme) {
       setTheme(liveTheme as any);
     }
-  }, [liveTheme]);
+  }, [liveTheme, isPublicRoute]);
 
-  /**
-   * Manejador de eventos para el Laboratorio de Diseño.
-   * Permite que la aplicación reaccione a cambios en el editor de temas del Admin
-   * sin necesidad de persistir los cambios en la base de datos todavía.
-   */
   useEffect(() => {
     const handleThemeUpdate = (e: CustomEvent<RestaurantTheme>) => {
-      if (e.detail) {
-        setTheme(e.detail);
-      }
+      if (e.detail && !isPublicRoute) setTheme(e.detail);
     };
-
-    // Escuchamos el evento personalizado emitido por el componente LivePreview
     window.addEventListener('admin-theme-preview', handleThemeUpdate as any);
     return () => window.removeEventListener('admin-theme-preview', handleThemeUpdate as any);
-  }, []);
+  }, [isPublicRoute]);
 
   return (
-    // RestaurantThemeProvider inyecta los tokens de diseño (colores, fuentes, bordes)
-    // El flag isGlobal asegura que se apliquen al <html> y <body> del documento.
-    <RestaurantThemeProvider theme={theme} isGlobal>
+    <RestaurantThemeProvider theme={isPublicRoute ? undefined : theme} isGlobal>
       {children}
     </RestaurantThemeProvider>
   );
