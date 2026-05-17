@@ -116,31 +116,39 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-slate-950">
-      {/* Premium Background Layer */}
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-background">
+      {/* 
+        Capa de Fondo Premium: 
+        Utiliza variables del tema para asegurar que el fondo se adapte a la marca del restaurante.
+      */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 scale-105"
         style={{ backgroundImage: "url('/login_background.png')" }}
       />
       
+      {/* Gradiente dinámico que hereda el color primario de la marca */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-background" />
 
       <main className="relative z-10 w-full max-w-md">
-        <Card className="border-white/5 backdrop-blur-2xl">
+        {/* Tarjeta de Login: Usa bordes y fondos semánticos para coherencia visual */}
+        <Card className="border-border/40 bg-card shadow-2xl">
           <CardHeader className="text-center space-y-2">
-            <CardTitle className="text-4xl tracking-tighter">
+            <CardTitle className="text-4xl tracking-tighter text-foreground">
               Menu <span className="text-primary">Bites</span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-muted-foreground font-medium">
               Enterprise Gastronomic Management
             </CardDescription>
           </CardHeader>
 
           <CardContent>
+            {/* Función para manejar el envío del formulario de autenticación */}
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-4">
                 <div className="relative">
+                  {/* Icono con color suavizado basado en el tema */}
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/50 z-10" aria-hidden="true" />
+                  {/* Input de correo: utiliza fondo translúcido y bordes semánticos */}
                   <Input
                     type="email"
                     name="email"
@@ -148,13 +156,14 @@ export default function LoginPage() {
                     placeholder="admin@menubites.com"
                     aria-label="Correo electrónico"
                     required
-                    className="pl-10"
+                    className="pl-10 bg-foreground/5 border-foreground/10"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
 
                 <div className="relative group">
+                  {/* El color del icono cambia dinámicamente al enfocar, heredando el color primario */}
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/50 z-10 transition-colors group-focus-within:text-primary" aria-hidden="true" />
                   <Input
                     type={showPassword ? "text" : "password"}
@@ -163,15 +172,16 @@ export default function LoginPage() {
                     placeholder="••••••••"
                     aria-label="Contraseña"
                     required
-                    className="pl-10 pr-10"
+                    className="pl-10 pr-10 bg-foreground/5 border-foreground/10"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
+                  {/* Botón para alternar visibilidad de contraseña */}
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-white transition-colors z-10"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-foreground transition-colors z-10"
                     tabIndex={-1}
                   >
                     {showPassword ? (
@@ -183,12 +193,14 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              {/* Mensaje de error con estilos destructivos del tema */}
               {error && (
                 <p className="text-destructive text-xs text-center font-bold bg-destructive/10 p-3 rounded-xl border border-destructive/20 animate-in fade-in zoom-in duration-300">
                   {error}
                 </p>
               )}
 
+              {/* Botón de login con variante premium para destacar la acción principal */}
               <Button
                 type="submit"
                 disabled={isLoading}
@@ -208,15 +220,17 @@ export default function LoginPage() {
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-4 pt-0">
+            {/* Enlace para recuperación de contraseña con herencia de color primario en hover */}
             <Link 
               href="/forgot-password"
               className="text-[10px] text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest font-black"
             >
               ¿Olvidaste tus credenciales?
             </Link>
+            {/* Pie de página con identificador de versión del sistema */}
             <div className="flex items-center justify-center space-x-2 opacity-30">
               <span className="w-1 h-1 bg-primary rounded-full" />
-              <span className="text-[8px] text-white uppercase tracking-tighter font-bold">
+              <span className="text-[8px] text-foreground uppercase tracking-tighter font-bold">
                 Gastro Analytics 360 v1.0.4
               </span>
               <span className="w-1 h-1 bg-primary rounded-full" />

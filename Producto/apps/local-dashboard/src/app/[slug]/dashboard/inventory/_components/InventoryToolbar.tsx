@@ -1,3 +1,7 @@
+/**
+ * InventoryToolbar — Barra de acciones del inventario: exportar CSV, importar CSV y crear insumo.
+ * El botón de importar actúa como label de un input file oculto referenciado por fileInputRef.
+ */
 "use client";
 
 import { Download, Upload, Loader2, Plus } from "lucide-react";

@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * useOrderHooks — Hooks de pedidos en tiempo real para las distintas apps.
+ * useRealtimeOrders: lista configurable de pedidos (estado, límite, estación).
+ * useKitchenOrders / useBarOrders: atajos preconfigurados para KITCHEN y BAR.
+ * useRealtimeStats: métricas del día vía /api/local/stats (re-emitidas en Realtime).
+ */
+
 import { useCallback } from "react";
 import { supabase } from "../index";
 import type { Order, StatsData, StationType } from "../types";
@@ -13,6 +20,11 @@ export interface RealtimeOrdersOptions {
   station?: StationType;
 }
 
+/**
+ * Hook genérico de pedidos con filtrado por estado, estación y límite.
+ * Incluye lógica de compatibilidad para órdenes legacy (station IS NULL)
+ * que se filtran por el target_station de la categoría de sus ítems.
+ */
 export function useRealtimeOrders(restaurantId: string | undefined, options: RealtimeOrdersOptions = {}) {
   const { statuses, limit = 50, ascending = false, station } = options;
   const statusesStr = JSON.stringify(statuses);
@@ -81,6 +93,7 @@ export function useRealtimeOrders(restaurantId: string | undefined, options: Rea
   return { orders, loading, refetch };
 }
 
+/** Pedidos activos de cocina (VALIDATED, PREPARING, READY) ordenados por creación ascendente. */
 export function useKitchenOrders(restaurantId: string | undefined) {
   return useRealtimeOrders(restaurantId, {
     statuses: ["VALIDATED", "PREPARING", "READY"],
@@ -89,6 +102,7 @@ export function useKitchenOrders(restaurantId: string | undefined) {
   });
 }
 
+/** Pedidos activos del bar (VALIDATED, PREPARING, READY) ordenados por creación ascendente. */
 export function useBarOrders(restaurantId: string | undefined) {
   return useRealtimeOrders(restaurantId, {
     statuses: ["VALIDATED", "PREPARING", "READY"],
@@ -97,6 +111,10 @@ export function useBarOrders(restaurantId: string | undefined) {
   });
 }
 
+/**
+ * Métricas del día (ingresos, ticket promedio, top ítems) obtenidas vía /api/local/stats.
+ * Se re-suscribe a cambios en 'orders' para refrescar automáticamente cuando llegan pedidos.
+ */
 export function useRealtimeStats(restaurantId: string | undefined) {
   const fetchFn = useCallback(async () => {
     if (!restaurantId) return { data: null, error: null };
@@ -106,7 +124,9 @@ export function useRealtimeStats(restaurantId: string | undefined) {
         const json = await response.json();
         return { data: json.data, error: null };
       }
-      return { data: null, error: "Failed to fetch stats" };
+      // 401 is transient during token refresh — proxy handles renewal, no noise
+      if (response.status === 401) return { data: null, error: null };
+      return { data: null, error: `stats HTTP ${response.status}` };
     } catch (err) {
       return { data: null, error: err };
     }

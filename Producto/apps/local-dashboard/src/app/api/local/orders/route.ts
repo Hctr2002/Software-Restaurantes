@@ -1,3 +1,8 @@
+/**
+ * /api/local/orders — Consulta de órdenes del restaurante con filtros opcionales.
+ * GET: Soporta filtros por fecha (from/to en ISO), estado y límite de resultados (máx. 2000).
+ * Incluye relaciones con tablas, usuarios e ítems de orden con sus categorías.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createServiceClient, ensureServiceConfig } from "@/lib/localApi";
 

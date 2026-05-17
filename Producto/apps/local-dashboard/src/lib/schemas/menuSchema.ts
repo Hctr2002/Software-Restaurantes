@@ -1,3 +1,7 @@
+/**
+ * menuSchema — Esquema de validación Zod para ítems del menú.
+ * Usado en las rutas API POST/PUT /api/local/menu y /api/local/menu/[id].
+ */
 import { z } from "zod";
 
 export const menuSchema = z.object({

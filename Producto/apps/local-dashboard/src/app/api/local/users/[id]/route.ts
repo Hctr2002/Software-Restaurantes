@@ -1,3 +1,8 @@
+/**
+ * /api/local/users/[id] — Operaciones sobre un usuario específico del restaurante.
+ * PUT: Actualiza email, contraseña y/o rol. Verifica que el usuario pertenezca al mismo restaurante.
+ * DELETE: Elimina el usuario de Supabase Auth. Bloquea la auto-eliminación del admin autenticado.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createServiceClient, createSessionClient, ensureServiceConfig } from "@/lib/localApi";
 

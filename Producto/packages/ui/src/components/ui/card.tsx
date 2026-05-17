@@ -1,3 +1,8 @@
+/**
+ * card.tsx — Componente de tarjeta base con sub-componentes (CardHeader, CardContent, CardFooter, etc.).
+ * Usado como contenedor visual primario en todos los dashboards.
+ */
+
 import * as React from "react";
 import { cn } from "../../lib/utils";
 
@@ -8,7 +13,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "glass rounded-3xl border border-white/5 bg-black/20 text-white shadow-2xl",
+      "rounded-3xl border border-border/40 bg-card text-card-foreground shadow-2xl",
       className
     )}
     {...props}

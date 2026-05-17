@@ -1,3 +1,7 @@
+/**
+ * UserToolbar — Barra de acciones de la página de usuarios.
+ * Actualmente solo expone el botón de crear nuevo usuario.
+ */
 "use client";
 
 import { Button } from "@menu-bites/ui";

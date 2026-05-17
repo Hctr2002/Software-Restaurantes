@@ -1,3 +1,7 @@
+/**
+ * InventoryMobileList — Tarjetas de insumos para vista móvil (visible en lg:hidden).
+ * Colorea el stock según umbral (verde/amarillo/rojo) y expone acciones de ajuste y eliminación.
+ */
 "use client";
 
 import { motion } from "framer-motion";

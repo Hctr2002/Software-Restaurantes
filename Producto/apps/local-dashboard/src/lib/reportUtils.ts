@@ -1,17 +1,24 @@
 /**
- * Utility functions for Reports logic and Export functionality
+ * reportUtils — Funciones de cálculo, procesamiento y exportación para la sección de Reportes.
+ * Procesa órdenes brutas en estructuras diarias, por ítem, por mesa y por garzón.
  */
 
+/**
+ * Calcula la diferencia en minutos entre dos timestamps ISO.
+ * Retorna null si alguno de los valores es nulo o indefinido.
+ */
 export function diffMinutes(a: string | null | undefined, b: string | null | undefined): number | null {
   if (!a || !b) return null;
   return (new Date(b).getTime() - new Date(a).getTime()) / 60000;
 }
 
+/** Promedia un arreglo de números. Retorna 0 si el arreglo está vacío. */
 export function avgOrNull(vals: number[]): number {
   if (!vals.length) return 0;
   return Math.round(vals.reduce((s, v) => s + v, 0) / vals.length);
 }
 
+/** Retorna la fecha de hoy en formato ISO YYYY-MM-DD (hora local). */
 export function todayISO() {
   const d = new Date();
   const year = d.getFullYear();
@@ -20,6 +27,10 @@ export function todayISO() {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * Retorna la fecha de hace n días en formato ISO YYYY-MM-DD.
+ * @param n - Número de días hacia atrás (1 = ayer).
+ */
 export function daysAgoISO(n: number) {
   const d = new Date();
   d.setDate(d.getDate() - (n - 1));
@@ -29,12 +40,17 @@ export function daysAgoISO(n: number) {
   return `${year}-${month}-${day}`;
 }
 
+/** Formatea un ISO date a texto corto localizado en es-CL (ej: "lun. 15/05"). */
 export function formatShortDate(iso: string) {
   return new Date(iso + "T12:00:00").toLocaleDateString("es-CL", {
     weekday: "short", day: "2-digit", month: "2-digit",
   });
 }
 
+/**
+ * Retorna la clase Tailwind del color de medalla según posición en el ranking.
+ * @param i - Índice base-0 (0=oro, 1=plata, 2=bronce).
+ */
 export function medalColor(i: number) {
   if (i === 0) return "text-yellow-400";
   if (i === 1) return "text-slate-300";
@@ -46,6 +62,10 @@ export function orderItemTotal(it: any): number {
   return Number(it.unitPrice ?? 0) * (it.quantity ?? 1);
 }
 
+/**
+ * Agrupa las órdenes por día dentro del rango [from, to] y calcula
+ * pedidos, ingresos y ticket promedio para cada fecha.
+ */
 export function processDailyReports(orders: any[], from: string, to: string) {
   const dayMap: Record<string, { orders: number; revenue: number }> = {};
   const cursor = new Date(from + "T12:00:00");
@@ -72,6 +92,7 @@ export function processDailyReports(orders: any[], from: string, to: string) {
   }));
 }
 
+/** Extrae los 10 ítems más pedidos con su conteo e ingresos totales. */
 export function processTopItems(orders: any[]) {
   const itemMap: Record<string, { count: number; revenue: number }> = {};
   orders.forEach((order) => {
@@ -90,6 +111,7 @@ export function processTopItems(orders: any[]) {
     .slice(0, 10);
 }
 
+/** Agrupa ingresos y pedidos por número de mesa, ordenados por mayor ingreso. */
 export function processTableReports(orders: any[]) {
   const tblMap: Record<number, { orders: number; revenue: number }> = {};
   orders.forEach((order) => {
@@ -106,6 +128,7 @@ export function processTableReports(orders: any[]) {
     .sort((a, b) => b.revenue - a.revenue);
 }
 
+/** Agrupa ingresos y pedidos por email de garzón, ordenados por mayor ingreso. */
 export function processStaffReports(orders: any[]) {
   const garzonMap: Record<string, { orders: number; revenue: number }> = {};
   orders.forEach((order) => {
@@ -155,6 +178,10 @@ function xmlSheet(name: string, headers: string[], rows: Array<Array<string | nu
   </Worksheet>`;
 }
 
+/**
+ * Construye el XML completo en formato SpreadsheetML (compatible con Excel)
+ * con cuatro hojas: ventas diarias, ranking de garzones, top ítems y mesas.
+ */
 export function buildSpreadsheetML(
   periodLabel: string,
   daily: any[],
@@ -201,6 +228,11 @@ export function buildSpreadsheetML(
   return `${header}${sheetDaily}${sheetGarzones}${sheetItems}${sheetTables}\n</Workbook>`;
 }
 
+/**
+ * Dispara la descarga del contenido XML como archivo en el navegador.
+ * @param content - XML como string.
+ * @param filename - Nombre del archivo a descargar.
+ */
 export function downloadXML(content: string, filename: string) {
   const blob = new Blob([content], { type: "application/vnd.ms-excel;charset=utf-8" });
   const url  = URL.createObjectURL(blob);
@@ -213,6 +245,10 @@ export function downloadXML(content: string, filename: string) {
   URL.revokeObjectURL(url);
 }
 
+/**
+ * Calcula los promedios de tiempos de cocina agrupados por categoría.
+ * Requiere que las órdenes tengan timestamps validatedAt y readyAt.
+ */
 export function buildTimingStats(orders: any[]): any[] {
   const map = new Map<string, { val: number[]; kit: number[]; tot: number[] }>();
 

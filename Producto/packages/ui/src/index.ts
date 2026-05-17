@@ -1,3 +1,9 @@
+/**
+ * index.ts — Punto de entrada del package @menu-bites/ui.
+ * Re-exporta todos los componentes compartidos: tablas, menú, portal, dashboard y terminal.
+ * Importar desde '@menu-bites/ui' en cualquier app del monorepo.
+ */
+
 export * from "./components/TableGrid";
 export * from "./components/MenuComponents";
 export * from "./components/CategoryTabs";
@@ -16,3 +22,4 @@ export * from "./components/terminal";
 export * from "./components/portal";
 export { PremiumHeader } from "./components/PremiumHeader";
 export { HeaderStat } from "./components/HeaderStat";
+export * from "./components/DynamicThemeWrapper";

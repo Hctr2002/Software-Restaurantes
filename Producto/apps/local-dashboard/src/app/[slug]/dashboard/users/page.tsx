@@ -1,3 +1,7 @@
+/**
+ * UsersPage — Gestión de usuarios del restaurante (CRUD).
+ * El ADMIN puede crear, editar rol/email y eliminar cuentas de su equipo.
+ */
 "use client";
 
 import React from "react";

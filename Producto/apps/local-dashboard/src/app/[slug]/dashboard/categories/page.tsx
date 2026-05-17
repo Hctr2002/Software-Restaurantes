@@ -1,3 +1,7 @@
+/**
+ * CategoriesPage — Gestión de categorías del menú (CRUD).
+ * Orquesta el hook useCategories y delega la presentación a sub-componentes modularizados.
+ */
 "use client";
 
 import React, { useState } from "react";

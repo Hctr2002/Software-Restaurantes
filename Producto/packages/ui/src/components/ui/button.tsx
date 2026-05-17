@@ -1,3 +1,9 @@
+/**
+ * button.tsx — Primitivo Button basado en Radix UI Slot y class-variance-authority.
+ * Variantes: default, destructive, outline, secondary, ghost, link.
+ * Tamaños: default, sm, lg, icon.
+ */
+
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -12,12 +18,12 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg shadow-destructive/20",
         outline:
-          "border border-white/10 bg-white/5 hover:bg-white/10 hover:text-accent-foreground text-white",
+          "border border-foreground/15 bg-foreground/5 hover:bg-foreground/10 text-foreground",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        premium: "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:scale-[1.02] shadow-[0_0_20px_-5px_rgba(var(--primary),0.3)] border border-white/5",
+        premium: "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:scale-[1.02] shadow-[0_0_20px_-5px_rgba(var(--primary),0.3)] border border-foreground/10",
       },
       size: {
         default: "h-12 px-6 py-2",

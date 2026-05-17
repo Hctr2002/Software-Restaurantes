@@ -1,3 +1,12 @@
+/**
+ * index.ts — Punto de entrada del package @menu-bites/auth.
+ * Exporta: cliente Supabase (browser), helpers de autenticación, funciones de datos
+ * (updateOrderStatus, sendAlert, getRestaurantTheme), todos los tipos y hooks.
+ *
+ * La cookie de sesión se nombra con NEXT_PUBLIC_APP_KEY para aislar sesiones
+ * entre las distintas apps que corren simultáneamente en localhost.
+ */
+
 import { createBrowserClient } from '@supabase/ssr';
 import { AlertType } from './types';
 
@@ -11,6 +20,7 @@ export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey, {
   cookieOptions: { name: `sb-${appKey}-session` },
 });
 
+/** Retorna la sesión activa del usuario o null si no está autenticado. */
 export const getSession = async () => {
   const { data: { session } } = await supabase.auth.getSession();
   return session;
@@ -60,6 +70,10 @@ export const updateUserPassword = async (password: string) => {
 
 export * from "./types";
 
+/**
+ * Inserta una alerta en la tabla 'alerts'. Fallback silencioso: registra en consola
+ * pero no lanza excepción para no interrumpir el flujo principal.
+ */
 export const sendAlert = async (params: {
   restaurantId: string;
   userId?: string;
@@ -96,6 +110,7 @@ export const sendAlert = async (params: {
   return { error };
 };
 
+/** Retorna el tema activo del restaurante mapeado a camelCase, o null si no existe. */
 export const getRestaurantTheme = async (restaurantId: string) => {
   const { data, error } = await supabase
     .from('restaurant_themes')

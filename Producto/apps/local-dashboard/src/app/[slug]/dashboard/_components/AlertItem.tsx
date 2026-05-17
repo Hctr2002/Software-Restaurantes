@@ -1,3 +1,7 @@
+/**
+ * AlertItem — Tarjeta individual de alerta para el panel de notificaciones.
+ * Muestra tipo, mensaje, remitente y acciones contextuales según el tipo de alerta.
+ */
 "use client";
 
 import React from "react";
@@ -15,9 +19,11 @@ const TYPE_CONFIG: Record<AlertType, { label: string; variant: "danger" | "warni
 
 interface AlertItemProps {
   alert: Alert;
+  /** true mientras se está resolviendo esta alerta específica */
   isActing: boolean;
   onResolve: (id: string, action?: "disable_item", menuItemId?: string | null) => void;
   onNavigate: (path: string) => void;
+  /** Ruta base del dashboard, ej: "/mi-restaurante/dashboard" */
   basePath: string;
 }
 
@@ -36,7 +42,7 @@ export default function AlertItem({
   const cfg = TYPE_CONFIG[alert.type] || { label: "Alerta", variant: "neutral" };
 
   return (
-    <div className="p-6 rounded-[2rem] border border-primary/10 bg-white/[0.04] backdrop-blur-md space-y-4 group hover:border-primary/50 hover:bg-white/[0.08] transition-all shadow-xl">
+    <div className="p-6 rounded-[2.5rem] border border-border bg-card space-y-4 group hover:border-primary/30 transition-all shadow-lg">
       {/* Header de la alerta */}
       <div className="flex items-start justify-between gap-4">
         <Badge variant={cfg.variant} className="px-3 py-1 text-[9px] font-black uppercase tracking-widest shadow-sm">
@@ -67,7 +73,7 @@ export default function AlertItem({
           <button
             disabled={isActing}
             onClick={() => onResolve(alert.id, "disable_item", alert.menu_item_id)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-background border border-red-500/30 text-red-500 text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-primary-foreground transition-all disabled:opacity-50"
           >
             <PowerOff className="w-3.5 h-3.5" /> Deshabilitar
           </button>
@@ -76,7 +82,7 @@ export default function AlertItem({
         {alert.type === "STOCK_SHORTAGE" && (
           <button
             onClick={() => onNavigate(`${basePath}/inventory`)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/5 border border-primary/10 text-primary text-[10px] font-black uppercase tracking-widest hover:bg-primary/10 transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-background border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-primary-foreground transition-all"
           >
             <Package className="w-3.5 h-3.5" /> Inventario
           </button>
@@ -85,7 +91,7 @@ export default function AlertItem({
         {(alert.type === "TABLE_ISSUE" || alert.type === "BILL_REQUEST") && (
           <button
             onClick={() => onNavigate(`${basePath}/orders`)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/5 border border-primary/10 text-primary text-[10px] font-black uppercase tracking-widest hover:bg-primary/10 transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-background border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-primary-foreground transition-all"
           >
             <ClipboardList className="w-3.5 h-3.5" /> Pedidos
           </button>

@@ -56,7 +56,7 @@ export function loadGoogleFonts(titleFont: string, bodyFont: string, accentFont?
   if (existing) existing.remove();
   
   const families = toLoad
-    .map(f => `family=${encodeURIComponent(f as string)}:wght@300;400;600;700;800;900`)
+    .map(f => `family=${encodeURIComponent(f as string)}:wght@300;400;500;600;700;800;900`)
     .join("&");
     
   const link = document.createElement("link");

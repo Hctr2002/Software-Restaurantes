@@ -242,6 +242,7 @@ export interface RestaurantTheme {
   cardBackground: string;
   fontTitle?: string;
   fontBody?: string;
+  fontAccent?: string;
   logoUrl?: string | null;
 }
 
@@ -264,6 +265,7 @@ export async function getThemeByRestaurant(restaurantId: string): Promise<Restau
     cardBackground: data.card_background,
     fontTitle: data.font_title,
     fontBody: data.font_body,
+    fontAccent: data.font_accent,
     logoUrl: data.logo_url,
   };
 }

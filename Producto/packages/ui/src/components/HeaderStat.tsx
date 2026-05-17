@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * HeaderStat — Estadística compacta animada para el encabezado de páginas del dashboard.
+ * Muestra un valor numérico con etiqueta y animación de entrada/cambio.
+ */
+
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../lib/utils";
 

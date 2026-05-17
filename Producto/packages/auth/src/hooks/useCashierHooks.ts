@@ -1,11 +1,22 @@
 "use client";
 
+/**
+ * useCashierHooks — Hook de caja con pedidos activos e historial del día.
+ * useCashierOrders: suscribe a pedidos activos (PENDING→DELIVERED) y el historial COMPLETED
+ * del día. markDelivered cierra pedidos, libera la mesa y refuerza el estado.
+ */
+
 import { useCallback, useState } from "react";
 import { supabase } from "../index";
 import type { Order } from "../types";
 import { mapOrder } from "../utils";
 import { useRealtimeSync } from "./useRealtimeSync";
 
+/**
+ * Retorna pedidos activos e historial del día del restaurante.
+ * markDelivered marca los pedidos como COMPLETED, libera la mesa y ejecuta refetch.
+ * Omite pedidos ya en estado terminal (COMPLETED/REJECTED) para evitar conflictos.
+ */
 export function useCashierOrders(restaurantId: string | undefined) {
   const [history, setHistory] = useState<Order[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);

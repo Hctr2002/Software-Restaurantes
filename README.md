@@ -9,17 +9,19 @@ Menu Bites es una plataforma SaaS multitenant de vanguardia diseñada para trans
 ### Ecosistema Multitarea
 
 * **Customer Portal:** Acceso instantáneo mediante QR. Pedidos en mesa, seguimiento en tiempo real y solicitud de cuenta sin esperas.
-* **Waiter Terminal:** Gestión ágil de mesas, toma de pedidos optimizada y notificaciones push para platos listos.
-* **Kitchen KDS (Kitchen Display System):** Visualización inteligente de tickets por prioridad, tiempos de preparación y comunicación directa con sala.
+* **Waiter Terminal:** Gestión ágil de mesas, toma de pedidos optimizada y notificaciones de platos listos.
+* **Kitchen KDS (Kitchen Display System):** Visualización inteligente de tickets de cocina por prioridad, tiempos de preparación y comunicación directa con sala.
+* **Bar Dashboard:** KDS dedicado para la estación de barra. Gestión de bebidas y cócteles separada del flujo de cocina.
 * **Cashier Dashboard:** Cierre de cuentas, gestión de métodos de pago y facturación rápida.
 * **Local Dashboard:** Control total del restaurante: gestión de menú, inventario, reportes de ventas y configuración de marca.
 * **Admin Dashboard:** Panel global para la gestión de suscripciones, soporte y monitoreo de la plataforma SaaS.
+* **App Mobile (React Native / Expo):** App nativa multi-rol para iOS y Android. Concentra todos los dashboards en una sola app — cliente, garzón, cocina, barra, caja, admin y super-admin — con push notifications, escáner QR integrado y alertas de audio para el KDS.
 
 ### Tecnología Realtime
 
 Olvídese de las recargas manuales. Gracias al **Realtime Sync Engine** basado en Supabase, cada cambio de estado (Pedido recibido -> En preparación -> Listo -> Pagado) se refleja instantáneamente en todos los dispositivos conectados.
 
-### Diseño Premium & UX (v2.3.0 Pro Max)
+### Diseño Premium & UX (v2.5.0)
 
 * **Branding Dinámico:** Personalización total de colores y estilos para cada restaurante.
 * **Interfaz Pro Max:** Navegación sólida unificada y animaciones fluidas con Framer Motion.
@@ -156,6 +158,8 @@ graph TD
         A --> E[waiter-terminal]
         A --> F[cashier-dashboard]
         A --> G[customer-portal]
+        A --> H[bar-dashboard]
+        A --> I[mobile]
 
         P[Packages Shared] --> UI["@menu-bites/ui"]
         P --> AUTH["@menu-bites/auth"]
@@ -167,11 +171,12 @@ graph TD
 
 ### Stack Tecnológico
 
-* **Frontend:** React 19, Next.js 16, TailwindCSS v4, Framer Motion.
+* **Frontend Web:** React 19, Next.js 16, TailwindCSS v4, Framer Motion.
+* **Frontend Mobile:** React Native 0.81, Expo SDK 54, Expo Router v6.
 * **Backend & DB:** Supabase (PostgreSQL, Auth, Realtime, Storage).
 * **ORM:** Prisma.
 * **Monorepo:** Turborepo, npm Workspaces.
-* **Notificaciones:** Web Push API (VAPID).
+* **Notificaciones:** Web Push API (VAPID) + Expo Notifications (iOS/Android).
 
 ---
 
@@ -218,6 +223,20 @@ graph TD
 ## Seguridad y Privacidad
 
 El sistema implementa **Row Level Security (RLS)** a nivel de base de datos, garantizando que cada restaurante solo pueda acceder a su propia información mediante tokens JWT validados por Supabase Auth.
+
+---
+
+---
+
+## Documentación del Código (v2.5.0)
+
+Todos los archivos TypeScript del monorepo cuentan con comentarios JSDoc en español que documentan el propósito de cada módulo, función, hook y componente. Esto incluye:
+
+* Cabeceras de archivo con contexto y responsabilidades
+* JSDoc de todas las funciones y hooks exportados
+* Documentación de props en interfaces de componentes React
+
+Para más detalles, consulte la sección 7.14.3 del [TECHNICAL_SAD.md](Documentacion/TECHNICAL_SAD.md).
 
 ---
 

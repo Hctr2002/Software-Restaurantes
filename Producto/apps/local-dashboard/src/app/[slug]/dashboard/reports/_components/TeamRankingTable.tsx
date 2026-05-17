@@ -1,3 +1,7 @@
+/**
+ * TeamRankingTable — Ranking de garzones por ingresos generados en el período seleccionado.
+ * Usa colores de medalla (oro/plata/bronce) para los tres primeros puestos.
+ */
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, Table, TableRow, TableCell } from "@menu-bites/ui";
@@ -12,7 +16,7 @@ interface TeamRankingTableProps {
 
 export default function TeamRankingTable({ reports }: TeamRankingTableProps) {
   return (
-    <Card className="glass rounded-[2.5rem] border-white/5 overflow-hidden">
+    <Card className="glass rounded-[2.5rem] border-foreground/5 overflow-hidden">
       <CardHeader className="p-8 pb-4">
          <div className="flex items-center gap-3 mb-2">
           <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-500">
@@ -42,10 +46,10 @@ export default function TeamRankingTable({ reports }: TeamRankingTableProps) {
                 {row.email.split("@")[0]}
               </TableCell>
               <TableCell className="text-foreground/40 font-bold text-xs">
-                <span style={{ fontFamily: 'var(--font-accent)' }}>{row.orders}</span>
+                <span>{row.orders}</span>
               </TableCell>
               <TableCell className="font-black text-emerald-500 text-sm italic">
-                <span style={{ fontFamily: 'var(--font-accent)' }}>{formatPrice(row.revenue)}</span>
+                <span>{formatPrice(row.revenue)}</span>
               </TableCell>
             </TableRow>
           ))}

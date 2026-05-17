@@ -1,3 +1,7 @@
+/**
+ * DailyPerformanceTable — Tabla de rendimiento diario: pedidos, ingresos y ticket promedio por día.
+ * Muestra "—" en días sin ventas para mantener el rango completo visible.
+ */
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, Table, TableRow, TableCell } from "@menu-bites/ui";
@@ -13,7 +17,7 @@ interface DailyPerformanceTableProps {
 
 export default function DailyPerformanceTable({ reports, description }: DailyPerformanceTableProps) {
   return (
-    <Card className="glass rounded-[2.5rem] border-white/5 overflow-hidden">
+    <Card className="glass rounded-[2.5rem] border-foreground/5 overflow-hidden">
       <CardHeader className="p-8 pb-4">
         <div className="flex items-center gap-3 mb-2">
           <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">
@@ -38,13 +42,13 @@ export default function DailyPerformanceTable({ reports, description }: DailyPer
                 {formatShortDate(row.date)}
               </TableCell>
               <TableCell className="text-foreground/40 font-bold text-xs">
-                <span style={{ fontFamily: 'var(--font-accent)' }}>{row.orders || "—"}</span>
+                <span>{row.orders || "—"}</span>
               </TableCell>
               <TableCell className={`font-black text-sm italic ${row.orders > 0 ? 'text-primary' : 'text-foreground/20'}`}>
-                <span style={{ fontFamily: 'var(--font-accent)' }}>{row.orders ? formatPrice(row.revenue) : "—"}</span>
+                <span>{row.orders ? formatPrice(row.revenue) : "—"}</span>
               </TableCell>
               <TableCell className="font-bold text-foreground/30 text-[11px]">
-                <span style={{ fontFamily: 'var(--font-accent)' }}>{row.orders ? formatPrice(row.avg) : "—"}</span>
+                <span>{row.orders ? formatPrice(row.avg) : "—"}</span>
               </TableCell>
             </TableRow>
           ))}

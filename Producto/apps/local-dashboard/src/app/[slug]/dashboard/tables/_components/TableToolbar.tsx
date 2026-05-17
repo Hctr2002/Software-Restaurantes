@@ -1,3 +1,7 @@
+/**
+ * TableToolbar — Barra de acciones de la página de mesas.
+ * Actualmente solo expone el botón de crear nueva mesa.
+ */
 import React from "react";
 import { Button } from "@menu-bites/ui";
 import { Plus } from "lucide-react";

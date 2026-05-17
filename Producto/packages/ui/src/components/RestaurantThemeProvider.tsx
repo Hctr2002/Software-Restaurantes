@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * RestaurantThemeProvider — Proveedor de tema dinámico del restaurante.
+ * Convierte los colores hex del restaurante a tokens HSL y los inyecta como
+ * CSS Custom Properties en document.documentElement (isGlobal=true) o en un
+ * contenedor local. También carga fuentes Google Fonts de forma dinámica.
+ * hexToHslValues: convierte #RRGGBB a "H S% L%" para uso directo en Tailwind.
+ */
+
 import React, { useEffect } from "react";
 
 export interface RestaurantTheme {
@@ -16,11 +24,24 @@ export interface RestaurantTheme {
 }
 
 interface Props {
-  theme?: RestaurantTheme;
+  theme?: RestaurantTheme | null;
   isGlobal?: boolean;
   children: React.ReactNode;
 }
 
+// Ajusta la luminosidad de un string HSL ("h s% l%") en ±delta puntos porcentuales
+const adjustHslLightness = (hslStr: string, delta: number): string => {
+  const [h, s, lRaw] = hslStr.split(' ');
+  const l = Math.min(97, Math.max(3, parseInt(lRaw) + delta));
+  return `${h} ${s} ${l}%`;
+};
+
+// Regex para validar colores hex de 6 dígitos y prevenir CSS injection
+const HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
+
+const safeHex = (color: string): string => (HEX_COLOR_RE.test(color) ? color : "#000000");
+
+// Función para convertir colores hexadecimales a valores HSL puros
 export const hexToHslValues = (hex: string) => {
   // Eliminar el # si existe
   const cleanHex = hex.startsWith('#') ? hex.slice(1) : hex;
@@ -52,26 +73,110 @@ export const hexToHslValues = (hex: string) => {
   return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 };
 
+// Componente proveedor para inyectar dinámicamente el branding del restaurante
 export const RestaurantThemeProvider = ({ theme, children, isGlobal = false }: Props) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
+  // Efecto para aplicar los estilos cuando cambia el tema
   useEffect(() => {
-    if (!theme) return;
-
     const target = isGlobal ? document.documentElement : containerRef.current;
     if (!target) return;
 
+    // Listado de todas las propiedades personalizadas de CSS (CSS Custom Properties) que este proveedor puede inyectar
+    const allThemeKeys = [
+      "--primary",
+      "--secondary",
+      "--background",
+      "--accent",
+      "--card",
+      "--foreground",
+      "--card-foreground",
+      "--primary-foreground",
+      "--secondary-foreground",
+      "--accent-foreground",
+      "--border",
+      "--input",
+      "--muted",
+      "--muted-foreground",
+      "--navy-dark",
+      "--navy",
+      "--sand",
+      "--sage",
+      "--brand-accent",
+      "--color-navy-dark",
+      "--color-navy",
+      "--color-sand",
+      "--color-sage",
+      "--color-accent",
+      "--color-success",
+      "--slate-950",
+      "--slate-900",
+      "--slate-800",
+      "--slate-300",
+      "--color-slate-950",
+      "--color-slate-900",
+      "--color-slate-800",
+      "--color-slate-300",
+      "--font-title-stack",
+      "--font-title",
+      "--font-outfit",
+      "--font-body-stack",
+      "--font-body",
+      "--font-inter",
+      "--font-accent-stack",
+      "--font-accent"
+    ];
+
+    const cleanupTheme = () => {
+      // 1. Eliminar variables CSS para evitar fugas/acumulación en el elemento de destino (:root o contenedor local)
+      allThemeKeys.forEach(key => {
+        target.style.removeProperty(key);
+      });
+
+      // 2. Limpiar el tag dinámico de Google Fonts del head del documento si existiera
+      const linkId = "google-fonts-theme-dynamic";
+      const link = document.getElementById(linkId);
+      if (link) {
+        link.remove();
+      }
+    };
+
+    if (!theme) {
+      cleanupTheme();
+      return;
+    }
+
     try {
+      const cardHsl = hexToHslValues(safeHex(theme.cardBackground));
+      const cardL   = parseInt(cardHsl.split(' ')[2]);
+      // Muted: superficie sutil derivada del card (±6 puntos de luminosidad)
+      const mutedHsl = adjustHslLightness(cardHsl, cardL > 50 ? -6 : 6);
+      // Border: aún más sutil que muted (±10 puntos)
+      const borderHsl = adjustHslLightness(cardHsl, cardL > 50 ? -10 : 10);
+      // Muted-foreground: textColor atenuado (±20 puntos hacia el centro)
+      const textHsl  = hexToHslValues(safeHex(theme.textColor));
+      const textL    = parseInt(textHsl.split(' ')[2]);
+      const mutedFgHsl = adjustHslLightness(textHsl, textL > 50 ? -20 : 20);
+
       const colors = {
-        "--primary": hexToHslValues(theme.primaryColor),
-        "--secondary": hexToHslValues(theme.secondaryColor),
-        "--background": hexToHslValues(theme.backgroundColor),
-        "--accent": hexToHslValues(theme.accentColor),
-        "--card": hexToHslValues(theme.cardBackground),
-        "--foreground": hexToHslValues(theme.textColor),
+        "--primary": hexToHslValues(safeHex(theme.primaryColor)),
+        "--secondary": hexToHslValues(safeHex(theme.secondaryColor)),
+        "--background": hexToHslValues(safeHex(theme.backgroundColor)),
+        "--accent": hexToHslValues(safeHex(theme.accentColor)),
+        "--card": cardHsl,
+        "--foreground": textHsl,
+        // --- Tokens Derivados ---
+        "--card-foreground": textHsl,
+        "--primary-foreground": hexToHslValues(theme.backgroundColor),
+        "--secondary-foreground": textHsl,
+        "--accent-foreground": hexToHslValues(theme.backgroundColor),
+        "--border":           borderHsl,
+        "--input":            borderHsl,
+        "--muted":            mutedHsl,
+        "--muted-foreground": mutedFgHsl,
       };
 
-      // Aplicar colores base
+      // Función para aplicar colores base y derivados al elemento objetivo (html o contenedor)
       Object.entries(colors).forEach(([key, val]) => {
         target.style.setProperty(key, val);
       });
@@ -90,6 +195,7 @@ export const RestaurantThemeProvider = ({ theme, children, isGlobal = false }: P
           "--color-sand": `hsl(${colors["--foreground"]})`,
           "--color-sage": `hsl(${colors["--primary"]})`,
           "--color-accent": `hsl(${colors["--accent"]})`,
+          "--color-success": `hsl(160 84% 39%)`, // Emerald fixo por ahora o derivar si es necesario
           // Dashboards (Slate fallback)
           "--slate-950": colors["--background"],
           "--slate-900": colors["--card"],
@@ -102,28 +208,66 @@ export const RestaurantThemeProvider = ({ theme, children, isGlobal = false }: P
           "--color-slate-300": `hsl(${colors["--foreground"]})`,
         };
 
+        // Función para aplicar alias de compatibilidad
         Object.entries(aliases).forEach(([key, val]) => {
           target.style.setProperty(key, val);
         });
       }
       
+      // --- Carga Dinámica de Fuentes ---
+      const fontsToLoad = [theme.fontTitle, theme.fontBody, theme.fontAccent].filter(Boolean) as string[];
+      const linkId = "google-fonts-theme-dynamic";
+      if (fontsToLoad.length > 0) {
+        let link = document.getElementById(linkId) as HTMLLinkElement;
+        
+        if (!link) {
+          link = document.createElement("link");
+          link.id = linkId;
+          link.rel = "stylesheet";
+          document.head.appendChild(link);
+        }
+        
+        // Función para construir la URL de Google Fonts y cargar las fuentes seleccionadas
+        const fontParams = fontsToLoad
+          .map(f => `family=${f.replace(/\s+/g, '+')}:wght@300;400;500;600;700;800;900`)
+          .join('&');
+        
+        link.href = `https://fonts.googleapis.com/css2?${fontParams}&display=swap`;
+      } else {
+        const link = document.getElementById(linkId);
+        if (link) {
+          link.remove();
+        }
+      }
+      // ---------------------------------
+      
+      // Función para actualizar variables de fuente (CSS Custom Properties en :root)
+      // Se usan sufijos -stack para compatibilidad con Tailwind y variables limpias para herencia directa
       if (theme.fontTitle) {
-        const titleStack = `"${theme.fontTitle}", sans-serif`;
-        target.style.setProperty("--font-outfit", titleStack);
+        const titleStack = `"${theme.fontTitle}", system-ui, sans-serif`;
+        target.style.setProperty("--font-title-stack", titleStack);
         target.style.setProperty("--font-title", titleStack);
+        target.style.setProperty("--font-outfit", titleStack); // Alias de compatibilidad
       }
       if (theme.fontBody) {
-        const bodyStack = `"${theme.fontBody}", sans-serif`;
-        target.style.setProperty("--font-inter", bodyStack);
+        const bodyStack = `"${theme.fontBody}", system-ui, sans-serif`;
+        target.style.setProperty("--font-body-stack", bodyStack);
         target.style.setProperty("--font-body", bodyStack);
+        target.style.setProperty("--font-inter", bodyStack); // Alias de compatibilidad
       }
       if (theme.fontAccent) {
-        const accentStack = `"${theme.fontAccent}", sans-serif`;
+        const accentStack = `"${theme.fontAccent}", system-ui, sans-serif`;
+        target.style.setProperty("--font-accent-stack", accentStack);
         target.style.setProperty("--font-accent", accentStack);
       }
     } catch (e) {
       console.error("Error setting theme properties:", e);
     }
+
+    // Retornar función de limpieza para desmontaje o cuando el tema cambie
+    return () => {
+      cleanupTheme();
+    };
   }, [theme, isGlobal]);
 
   if (isGlobal) return <>{children}</>;

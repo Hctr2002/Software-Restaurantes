@@ -62,10 +62,10 @@ export function SettingsModal({ settings: initial, restaurantId, onSave, onClose
   const showSave = !TABS_WITHOUT_SAVE.includes(tab);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="w-full max-w-2xl bg-card border border-foreground/10 rounded-3xl shadow-2xl flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="w-full max-w-2xl bg-card border border-border rounded-3xl shadow-2xl flex flex-col max-h-[90vh]">
 
-        <div className="flex items-center justify-between px-8 py-6 border-b border-foreground/5">
+        <div className="flex items-center justify-between px-8 py-6 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-xl">
               <ChefHat className="w-6 h-6 text-primary" />
@@ -77,11 +77,11 @@ export function SettingsModal({ settings: initial, restaurantId, onSave, onClose
           </button>
         </div>
 
-        <div className="flex space-x-1 px-8 py-4 border-b border-foreground/5 overflow-x-auto no-scrollbar">
+        <div className="flex space-x-1 px-8 py-4 border-b border-border overflow-x-auto no-scrollbar">
           {TABS.map(({ key, label, Icon }) => (
             <button key={key} onClick={() => setTab(key)}
               className={cn("flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-all",
-                tab === key ? "bg-primary text-primary-foreground" : "text-foreground/40 hover:text-foreground hover:bg-foreground/5")}>
+                tab === key ? "bg-primary text-primary-foreground" : "text-foreground/40 hover:text-foreground hover:bg-muted/30")}>
               <Icon className="w-3.5 h-3.5" />
               <span>{label}</span>
             </button>
@@ -97,7 +97,7 @@ export function SettingsModal({ settings: initial, restaurantId, onSave, onClose
           {tab === "inventario" && <InventoryTab restaurantId={restaurantId} />}
         </div>
 
-        <div className="px-8 py-5 border-t border-foreground/5 flex justify-end space-x-3">
+        <div className="px-8 py-5 border-t border-border flex justify-end space-x-3">
           <button onClick={onClose} className="px-6 py-3 rounded-xl text-foreground/40 text-xs font-bold uppercase tracking-widest hover:text-foreground transition-colors">
             {showSave ? "Cancelar" : "Cerrar"}
           </button>

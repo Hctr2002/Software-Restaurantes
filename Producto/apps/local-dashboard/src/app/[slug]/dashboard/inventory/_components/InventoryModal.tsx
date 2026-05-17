@@ -1,3 +1,7 @@
+/**
+ * InventoryModal — Modal de creación y ajuste de insumos de inventario.
+ * Muestra advertencia de stock crítico si el ítem editado está bajo el umbral LOW_STOCK_THRESHOLD.
+ */
 "use client";
 
 import { Modal, Button, Input } from "@menu-bites/ui";

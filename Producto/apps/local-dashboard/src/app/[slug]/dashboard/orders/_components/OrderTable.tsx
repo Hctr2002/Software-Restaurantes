@@ -1,3 +1,7 @@
+/**
+ * OrderTable — Tabla de pedidos para escritorio.
+ * Exporta helpers reutilizados por OrderDetailModal: orderStatusVariant, orderTotal y garzonLabel.
+ */
 import React from "react";
 import { Table, TableRow, TableCell, Badge, Button } from "@menu-bites/ui";
 import { User } from "lucide-react";

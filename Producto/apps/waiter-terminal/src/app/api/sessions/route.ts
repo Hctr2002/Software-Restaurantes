@@ -1,9 +1,18 @@
+/**
+ * route.ts (api/sessions) — Gestiona la fusión y separación de mesas mediante session_id compartido.
+ * POST: une varias mesas bajo un mismo session_id, reasignando órdenes al grupo ganador.
+ * DELETE: desvincula las mesas de una sesión y restaura su estado individual.
+ */
 import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { randomUUID } from 'crypto';
 
+/**
+ * Crea un cliente Supabase con service role para actualizaciones multi-fila
+ * en tables y orders sin restricciones RLS.
+ */
 function serviceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,6 +21,10 @@ function serviceClient() {
   );
 }
 
+/**
+ * Extrae el restaurant_id del JWT del garzón autenticado mediante la cookie sb-waiter-session.
+ * Retorna null si no hay sesión activa.
+ */
 async function getRestaurantId(): Promise<string | null> {
   const cookieStore = await cookies();
   const supabase = createServerClient(
@@ -54,6 +67,11 @@ export async function POST(req: NextRequest) {
     ),
   ];
 
+  // VALIDACIÓN DE REDUNDANCIA: Si todas las mesas seleccionadas comparten la misma sesión.
+  if (uniqueSessions.length === 1 && (tables ?? []).every(t => t.current_session_id === uniqueSessions[0])) {
+    return NextResponse.json({ ok: true, alreadyMerged: true });
+  }
+
   let winningSessionId: string;
 
   if (uniqueSessions.length === 0) {
@@ -73,7 +91,7 @@ export async function POST(req: NextRequest) {
       .select('session_id, createdAt')
       .in('session_id', uniqueSessions)
       .eq('restaurant_id', restaurantId)
-      .not('status', 'in', '("REJECTED")')
+      .not('status', 'in', '("REJECTED","COMPLETED")')
       .order('createdAt', { ascending: true })
       .limit(1);
 
@@ -91,7 +109,7 @@ export async function POST(req: NextRequest) {
       .update({ session_id: winningSessionId })
       .in('session_id', losingSessionIds)
       .eq('restaurant_id', restaurantId)
-      .not('status', 'in', '("REJECTED")');
+      .not('status', 'in', '("REJECTED","COMPLETED")');
 
     if (reassignError) return NextResponse.json({ error: reassignError.message }, { status: 500 });
   }
@@ -112,7 +130,7 @@ export async function POST(req: NextRequest) {
     .update({ session_id: winningSessionId })
     .in('table_id', tableIds)
     .eq('restaurant_id', restaurantId)
-    .not('status', 'in', '("REJECTED")')
+    .not('status', 'in', '("REJECTED","COMPLETED")')
     .select('id');
 
   if (ordersError) return NextResponse.json({ error: ordersError.message }, { status: 500 });
@@ -129,23 +147,55 @@ export async function DELETE(req: NextRequest) {
   if (!sessionId) return NextResponse.json({ error: 'sessionId requerido' }, { status: 400 });
 
   const db = serviceClient();
+  // 1. Obtener las mesas de esta sesión
+  const { data: tables, error: tablesQueryError } = await db
+    .from('tables')
+    .select('id')
+    .eq('current_session_id', sessionId)
+    .eq('restaurant_id', restaurantId);
+
+  if (tablesQueryError) return NextResponse.json({ error: tablesQueryError.message }, { status: 500 });
+
+  // 2. Limpiar session_id en los pedidos activos
   const { error } = await db
     .from('orders')
     .update({ session_id: null })
     .eq('session_id', sessionId)
     .eq('restaurant_id', restaurantId)
-    .not('status', 'in', '("DELIVERED","REJECTED")');
+    .not('status', 'in', '("DELIVERED","REJECTED","COMPLETED")');
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Limpiar current_session_id en la tabla tables
-  const { error: tablesError } = await db
-    .from('tables')
-    .update({ current_session_id: null })
-    .eq('current_session_id', sessionId)
-    .eq('restaurant_id', restaurantId);
+  // 3. Restaurar estado de cada mesa individualmente
+  const tableIds = (tables || []).map(t => t.id);
+  
+  if (tableIds.length > 0) {
+    const { data: activeOrders, error: activeOrdersError } = await db
+      .from('orders')
+      .select('table_id')
+      .in('table_id', tableIds)
+      .eq('restaurant_id', restaurantId)
+      .not('status', 'in', '("COMPLETED","REJECTED")');
 
-  if (tablesError) return NextResponse.json({ error: tablesError.message }, { status: 500 });
+    if (activeOrdersError) return NextResponse.json({ error: activeOrdersError.message }, { status: 500 });
+
+    const tablesWithOrders = new Set(activeOrders?.map(o => o.table_id));
+
+    const freeTableIds = tableIds.filter(id => !tablesWithOrders.has(id));
+    const occupiedTableIds = tableIds.filter(id => tablesWithOrders.has(id));
+
+    if (freeTableIds.length > 0) {
+      await db.from('tables')
+        .update({ current_session_id: null, status: 'FREE' })
+        .in('id', freeTableIds);
+    }
+    
+    if (occupiedTableIds.length > 0) {
+      await db.from('tables')
+        .update({ current_session_id: null, status: 'OCCUPIED' })
+        .in('id', occupiedTableIds);
+    }
+  }
 
   return NextResponse.json({ ok: true });
 }

@@ -1,3 +1,8 @@
+/**
+ * /api/local/users — Gestión de usuarios del restaurante via Supabase Auth Admin API.
+ * GET: Lista los usuarios del restaurante con sus roles.
+ * POST: Crea un usuario de Auth con email confirmado y lo vincula al restaurante via app_metadata.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createServiceClient, ensureServiceConfig } from "@/lib/localApi";
 

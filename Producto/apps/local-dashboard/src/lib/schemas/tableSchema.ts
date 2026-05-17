@@ -1,3 +1,7 @@
+/**
+ * tableSchema — Esquema de validación Zod para mesas del restaurante.
+ * Usado en las rutas API POST/PUT /api/local/tables y /api/local/tables/[id].
+ */
 import { z } from "zod";
 
 export const tableSchema = z.object({

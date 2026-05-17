@@ -38,13 +38,13 @@ export default function MenuFormFields({
           Imagen del Plato
         </label>
         {imagePreview ? (
-          <div className="relative w-full h-48 rounded-[2rem] overflow-hidden border border-white/10 group">
+          <div className="relative w-full h-48 rounded-[2rem] overflow-hidden border border-foreground/10 group">
             <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <button
                 type="button"
                 onClick={onClearImage}
-                className="p-3 rounded-full bg-destructive text-white hover:scale-110 transition-transform"
+                className="p-3 rounded-full bg-destructive text-primary-foreground hover:scale-110 transition-transform"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -54,9 +54,9 @@ export default function MenuFormFields({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="w-full h-40 rounded-[2rem] border-2 border-dashed border-white/10 bg-white/5 flex flex-col items-center justify-center gap-3 text-foreground/20 hover:border-primary/50 hover:text-primary transition-all group"
+            className="w-full h-40 rounded-[2rem] border-2 border-dashed border-foreground/10 bg-foreground/5 flex flex-col items-center justify-center gap-3 text-foreground/20 hover:border-primary/50 hover:text-primary transition-all group"
           >
-            <div className="p-4 rounded-2xl bg-white/5 group-hover:scale-110 transition-transform">
+            <div className="p-4 rounded-2xl bg-foreground/5 group-hover:scale-110 transition-transform">
               <ImagePlus className="w-6 h-6" />
             </div>
             <div className="text-center">
@@ -83,7 +83,7 @@ export default function MenuFormFields({
         </label>
         <Input 
           placeholder="Ej. Lomo a la plancha" 
-          className="bg-white/5 border-white/10 h-12 rounded-2xl focus-visible:ring-primary text-foreground font-medium" 
+          className="bg-foreground/5 border-foreground/10 h-12 rounded-2xl focus-visible:ring-primary text-foreground font-medium" 
           value={form.name} 
           onChange={(e) => setForm({ ...form, name: e.target.value })} 
         />
@@ -95,7 +95,7 @@ export default function MenuFormFields({
         </label>
         <Input 
           placeholder="Descripción para el cliente" 
-          className="bg-white/5 border-white/10 h-12 rounded-2xl focus-visible:ring-primary text-foreground font-medium" 
+          className="bg-foreground/5 border-foreground/10 h-12 rounded-2xl focus-visible:ring-primary text-foreground font-medium" 
           value={form.description} 
           onChange={(e) => setForm({ ...form, description: e.target.value })} 
         />
@@ -111,7 +111,7 @@ export default function MenuFormFields({
             type="number" 
             min="0" 
             placeholder="0" 
-            className="bg-white/5 border-white/10 h-12 rounded-2xl focus-visible:ring-primary text-foreground font-black" 
+            className="bg-foreground/5 border-foreground/10 h-12 rounded-2xl focus-visible:ring-primary text-foreground font-black" 
             value={form.price} 
             onChange={(e) => setForm({ ...form, price: e.target.value })} 
           />
@@ -123,11 +123,11 @@ export default function MenuFormFields({
           <select
             value={form.categoryId}
             onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-            className="w-full h-12 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-foreground font-bold focus:outline-none focus:ring-2 focus:ring-primary appearance-none cursor-pointer"
+            className="w-full h-12 rounded-2xl border border-foreground/10 bg-foreground/5 px-4 text-sm text-foreground font-bold focus:outline-none focus:ring-2 focus:ring-primary appearance-none cursor-pointer"
           >
-            <option value="" className="bg-background text-foreground/50">Categoría...</option>
+            <option value="" className="bg-card text-foreground/50">Categoría...</option>
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.id} className="bg-background text-foreground">
+              <option key={cat.id} value={cat.id} className="bg-card text-foreground">
                 {cat.name}
               </option>
             ))}
@@ -136,13 +136,13 @@ export default function MenuFormFields({
       </div>
 
       {/* Estado Activo */}
-      <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5">
+      <div className="flex items-center gap-3 p-4 rounded-2xl bg-foreground/5 border border-foreground/5">
         <input
           type="checkbox"
           id="is_active"
           checked={form.is_active}
           onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-          className="w-5 h-5 rounded-lg accent-primary border-white/10 bg-white/5 cursor-pointer"
+          className="w-5 h-5 rounded-lg accent-primary border-foreground/10 bg-foreground/5 cursor-pointer"
         />
         <label 
           htmlFor="is_active" 

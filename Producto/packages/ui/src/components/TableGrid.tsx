@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * TableGrid — Grilla de mesas del restaurante para el local-dashboard.
+ * Muestra tarjetas de mesa con estado, número de comensales y acciones de edición/eliminación.
+ */
+
 import React from "react";
 import { cn } from "../lib/utils";
 import { Users } from "lucide-react";

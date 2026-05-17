@@ -1,3 +1,8 @@
+/**
+ * /api/local/inventory — CRUD de inventario de insumos.
+ * GET: Lista todos los insumos ordenados por nombre.
+ * POST: Crea un nuevo insumo con nombre, stock inicial y unidad de medida.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createServiceClient, ensureServiceConfig } from "@/lib/localApi";
 

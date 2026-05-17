@@ -1,3 +1,11 @@
+/**
+ * utils.ts — Utilidades del package @menu-bites/ui.
+ * cn: combina clases Tailwind con clsx + tailwind-merge.
+ * formatDate: fecha ISO a 'dd/mm/aaaa hh:mm' locale chileno.
+ * formatPrice: número a CLP con símbolo de moneda.
+ * timeAgo: tiempo relativo legible (ej. 'Hace 3 min').
+ */
+
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 

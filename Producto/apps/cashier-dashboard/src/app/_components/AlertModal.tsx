@@ -19,12 +19,12 @@ export function AlertModal({
   onTableNumChange, onMsgChange, onSend, onClose,
 }: Props) {
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-xl z-[60] flex items-center justify-center p-6">
+    <div className="fixed inset-0 bg-background/90 z-[60] flex items-center justify-center p-6">
       <div className="w-full max-w-md bg-card border border-border/10 rounded-[2.5rem] p-8 shadow-2xl space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-yellow-500/10 rounded-xl flex items-center justify-center border border-yellow-500/20">
-              <AlertTriangle className="w-5 h-5 text-yellow-500" />
+            <div className="w-10 h-10 bg-warning/10 rounded-xl flex items-center justify-center border border-warning/20">
+              <AlertTriangle className="w-5 h-5 text-warning" />
             </div>
             <h2 className="text-lg font-black tracking-tight text-foreground">Alerta al Admin</h2>
           </div>
@@ -48,7 +48,7 @@ export function AlertModal({
               placeholder="Ej. 3"
               value={tableNum}
               onChange={(e) => onTableNumChange(e.target.value)}
-              className="w-full px-5 py-4 rounded-2xl bg-input border border-border/10 text-foreground text-sm font-bold focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all"
+              className="w-full px-5 py-4 rounded-2xl bg-input border border-border/10 text-foreground text-sm font-bold focus:outline-none focus:ring-2 focus:ring-warning/50 transition-all"
             />
           </div>
           <div>
@@ -61,7 +61,7 @@ export function AlertModal({
               placeholder="Explica el problema aquí..."
               value={alertMsg}
               onChange={(e) => onMsgChange(e.target.value)}
-              className="w-full px-5 py-4 rounded-2xl bg-input border border-border/10 text-foreground text-sm font-bold focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all resize-none"
+              className="w-full px-5 py-4 rounded-2xl bg-input border border-border/10 text-foreground text-sm font-bold focus:outline-none focus:ring-2 focus:ring-warning/50 transition-all resize-none"
             />
           </div>
         </div>
@@ -79,7 +79,7 @@ export function AlertModal({
               onSend();
             }}
             disabled={!alertMsg?.trim() || sendingAlert || alertSent}
-            className="flex-1 h-14 bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase text-[10px] tracking-widest shadow-lg shadow-yellow-500/10"
+            className="flex-1 h-14 bg-warning hover:bg-warning/90 text-warning-foreground font-black uppercase text-[10px] tracking-widest shadow-lg shadow-warning/10"
           >
             {alertSent ? "✓ Enviado" : sendingAlert ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enviar Alerta"}
           </Button>

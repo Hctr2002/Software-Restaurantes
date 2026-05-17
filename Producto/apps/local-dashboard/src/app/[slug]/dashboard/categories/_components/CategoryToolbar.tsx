@@ -1,3 +1,7 @@
+/**
+ * CategoryToolbar — Barra de acciones de la página de categorías.
+ * Actualmente solo expone el botón de crear nueva categoría.
+ */
 import React from "react";
 import { Button } from "@menu-bites/ui";
 import { Plus } from "lucide-react";

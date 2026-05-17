@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * ReadyOrdersBanner — Banner destacado para pedidos listos (READY) pendientes de entrega.
+ * Aparece en la parte superior del terminal del garzón cuando hay pedidos que deben llevarse.
+ */
+
 import React from "react";
 import { UtensilsCrossed, CheckCircle } from "lucide-react";
 
@@ -19,51 +24,53 @@ export function ReadyOrdersBanner({ orders, onDeliver }: ReadyOrdersBannerProps)
   if (orders.length === 0) return null;
 
   return (
-    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 space-y-3 w-full">
-      <div className="flex items-center gap-2 mb-2">
-        <UtensilsCrossed className="w-5 h-5 text-emerald-400" />
-        <h3 className="font-black text-sm text-emerald-400 uppercase tracking-widest">
+    <div className="bg-card border border-emerald-500/30 rounded-[2.5rem] p-6 space-y-4 w-full shadow-xl shadow-emerald-500/5">
+      <div className="flex items-center gap-3 mb-2 px-2">
+        <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+          <UtensilsCrossed className="w-5 h-5 text-emerald-500" />
+        </div>
+        <h3 className="font-black text-sm text-emerald-500 uppercase tracking-widest">
           Listos para servir ({orders.length})
         </h3>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {orders.map((order) => (
           <div
             key={order.id}
-            className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4 flex flex-col gap-4 shadow-lg shadow-emerald-500/5"
+            className="bg-foreground/[0.02] border border-border/40 rounded-[2rem] p-6 flex flex-col gap-5 transition-all hover:border-emerald-500/40"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-black text-foreground text-lg tracking-tighter">Mesa {order.table?.number ?? "—"}</p>
-                <div className="flex gap-2 mt-1">
+                <p className="font-black text-foreground text-xl tracking-tighter">Mesa {order.table?.number ?? "—"}</p>
+                <div className="flex gap-2 mt-1.5">
                   {(order.station === 'KITCHEN' || !order.station) && (
-                    <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 uppercase tracking-widest">Cocina</span>
+                    <span className="text-[8px] font-black px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-widest">Cocina</span>
                   )}
                   {(order.station === 'BAR' || !order.station) && (
-                    <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 uppercase tracking-widest">Bar</span>
+                    <span className="text-[8px] font-black px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-500 border border-purple-500/20 uppercase tracking-widest">Bar</span>
                   )}
                 </div>
               </div>
-              <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-lg uppercase tracking-wider">
+              <span className="text-[9px] font-black text-emerald-600 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-full uppercase tracking-wider">
                 LISTO
               </span>
             </div>
             
-            <div className="space-y-1">
+            <div className="space-y-2">
               {(order.orderItems ?? []).slice(0, 3).map((item: any) => (
-                <p key={item.id} className="text-xs text-foreground/60 truncate font-medium flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/40" />
-                  {item.quantity}x {item.menuItem?.name || item.menu_items?.name}
-                </p>
+                <div key={item.id} className="flex items-center gap-3 text-xs text-foreground/70 font-medium">
+                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                   <span className="truncate">{item.quantity}x {item.menuItem?.name || item.menu_items?.name}</span>
+                </div>
               ))}
               {(order.orderItems ?? []).length > 3 && (
-                <p className="text-[9px] text-muted-foreground italic">...y {(order.orderItems ?? []).length - 3} más</p>
+                <p className="text-[9px] text-muted-foreground italic pl-4">...y {(order.orderItems ?? []).length - 3} más</p>
               )}
             </div>
 
             <button
               onClick={() => onDeliver(order.id, order)}
-              className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[10px] uppercase tracking-widest py-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+              className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[10px] uppercase tracking-widest py-4 rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
             >
               <CheckCircle className="w-4 h-4" />
               Entregar Pedido

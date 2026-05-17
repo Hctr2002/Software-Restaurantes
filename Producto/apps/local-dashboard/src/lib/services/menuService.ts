@@ -1,3 +1,8 @@
+/**
+ * menuService — Capa de acceso a datos para la tabla menu_items.
+ * Todas las operaciones filtran por restaurant_id para garantizar aislamiento multi-tenant.
+ * Usa el cliente de servicio (sin RLS) por lo que la verificación de tenant es obligatoria en cada método.
+ */
 import { createServiceClient } from "../localApi";
 import { MenuInput } from "../schemas/menuSchema";
 

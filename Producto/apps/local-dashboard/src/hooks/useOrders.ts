@@ -1,6 +1,14 @@
+/**
+ * useOrders — Hook de gestión de pedidos con suscripción Realtime a la tabla orders.
+ * Carga las órdenes desde /api/local/orders y se sincroniza automáticamente via Supabase.
+ */
 import { useCallback, useEffect, useState } from "react";
 import { supabase, Order, OrderStatus } from "@menu-bites/auth";
 
+/**
+ * Provee lista filtrable de órdenes, selección de detalle y actualización de estado.
+ * Side effect: suscripción Realtime al canal "orders_changes" durante el montaje.
+ */
 export function useOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
