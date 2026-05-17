@@ -46,6 +46,13 @@ export const DynamicThemeWrapper = ({ appKey, children }: DynamicThemeWrapperPro
       } catch (e) {
         console.error(`[ThemeWrapper-${appKey}] Error al guardar en caché:`, e);
       }
+    } else if (liveTheme === null) {
+      setTheme(undefined);
+      try {
+        localStorage.removeItem(cacheKey);
+      } catch (e) {
+        console.error(`[ThemeWrapper-${appKey}] Error al limpiar caché:`, e);
+      }
     }
   }, [liveTheme, cacheKey, appKey]);
 

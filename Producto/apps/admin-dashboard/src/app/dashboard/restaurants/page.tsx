@@ -150,7 +150,7 @@ export default function RestaurantsPage() {
   };
 
   return (
-    <DashboardShell title="Directorio" subtitle="Administración de Organizaciones">
+    <DashboardShell title="Directorio" subtitle="Organizaciones">
       {/* Notificaciones de Error con AnimatePresence */}
       <AnimatePresence>
         {error && (

@@ -215,12 +215,7 @@ function NavItem({ href, icon, label, active }: { href: string; icon: React.Reac
 
         {/* Indicador visual lateral para resaltar la selección activa */}
         {active && (
-          <motion.div 
-            layoutId="activeNav"
-            className="absolute left-0 w-1 h-6 bg-primary rounded-r-full"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          />
+          <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />
         )}
       </Link>
     </div>

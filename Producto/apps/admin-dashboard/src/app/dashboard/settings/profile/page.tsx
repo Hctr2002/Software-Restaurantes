@@ -71,7 +71,7 @@ export default function ProfileSettingsPage() {
   };
 
   return (
-    <DashboardShell title="Configuración" subtitle="Personaliza tu experiencia administrativa">
+    <DashboardShell title="Sistema" subtitle="Configuración">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

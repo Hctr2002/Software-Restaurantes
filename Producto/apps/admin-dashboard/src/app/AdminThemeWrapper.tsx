@@ -35,8 +35,9 @@ export default function AdminThemeWrapper({ children }: { children: React.ReactN
 
   const isAuthRoute = AUTH_ROUTES.includes(pathname) || pathname.startsWith("/auth/");
 
-  const isSuperAdmin = user?.role === "SUPER_ADMIN" || !user?.restaurantId;
-  
+  const hasLoadedUser = user !== undefined && user !== null;
+  const isSuperAdmin = user?.role === "SUPER_ADMIN" || (hasLoadedUser && !user?.restaurantId);
+
   // Sincronización en tiempo real con la base de datos para temas del restaurante (slug/tenant)
   // Solo se activa si el usuario NO es Super-Admin del multitenant
   const liveTheme = useThemeSync(isSuperAdmin ? undefined : user?.restaurantId, "admin");
@@ -52,8 +53,10 @@ export default function AdminThemeWrapper({ children }: { children: React.ReactN
     } else if (liveTheme) {
       // Si es un admin normal asociado a un restaurante, aplicamos el tema del restaurante
       setTheme(liveTheme as any);
+    } else if (liveTheme === null) {
+      setTheme(undefined);
     }
-  }, [liveTheme, user, isSuperAdmin]);
+  }, [liveTheme, isSuperAdmin]);
 
   /**
    * Escuchar eventos de previsualización instantánea.
