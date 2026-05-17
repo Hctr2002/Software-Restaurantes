@@ -7,7 +7,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export async function proxy(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   let response = NextResponse.next({ request: { headers: req.headers } });
 
   if (req.nextUrl.pathname.startsWith('/auth/callback')) return response;

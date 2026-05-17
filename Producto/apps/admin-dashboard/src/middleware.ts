@@ -13,7 +13,7 @@ const ROLE_URLS: Record<string, string | undefined> = {
 /**
  * Proxy middleware for authentication and role-based redirection.
  */
-export async function proxy(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   let response = NextResponse.next({ request: { headers: req.headers } });
 
   const supabase = createServerClient(
