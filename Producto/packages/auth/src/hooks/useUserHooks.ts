@@ -1,5 +1,17 @@
 "use client";
 
+/**
+ * useUserHooks — Hooks de alto nivel para las apps con interacción de usuarios.
+ *
+ * useRealtimeWaiterOrders: estado completo para el terminal del garzón.
+ *   Agrupa sub-órdenes por mesa (groupOrdersByTable), expone acciones de validar,
+ *   rechazar, entregar, guardar notas y limpiar mesa.
+ *
+ * useCustomerPortal: estado del portal del cliente (mesa, carrito, colocación de pedido).
+ *
+ * useCustomerOrderTracker: suscribe al estado de un pedido específico para el tracker en vivo.
+ */
+
 import { useCallback, useState, useEffect, useMemo } from "react";
 import { supabase, updateOrderStatus } from "../index";
 import type { Order, TableRecord } from "../types";
@@ -8,6 +20,11 @@ import { useRealtimeSync } from "./useRealtimeSync";
 import { useTables } from "./useTableHooks";
 import { useRealtimeOrders } from "./useOrderHooks";
 
+/**
+ * Agrupa sub-órdenes (KITCHEN y BAR) por mesa en un único objeto Order fusionado.
+ * El status resultante es el de mayor prioridad entre los sub-órdenes: READY > PREPARING > VALIDATED > PENDING.
+ * Almacena barSubOrderId / kitchenSubOrderId para que las acciones puedan operar sobre cada sub-orden.
+ */
 function groupOrdersByTable(orders: Order[]): Order[] {
   const map = new Map<string, Order>();
   for (const order of orders) {
@@ -187,6 +204,10 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
   };
 }
 
+/**
+ * Estado completo del portal del cliente: mesa (validación, realtime), carrito y colocación de pedido.
+ * @param tableNumber - Número de mesa leído de la URL; se valida automáticamente al montar.
+ */
 export function useCustomerPortal(restaurantId: string | undefined, tableNumber?: string) {
   const [table, setTable] = useState({
     input: tableNumber ?? "",
@@ -315,6 +336,10 @@ export function useCustomerPortal(restaurantId: string | undefined, tableNumber?
   };
 }
 
+/**
+ * Suscribe al estado de un pedido específico para el tracker en tiempo real del portal.
+ * Retorna null hasta que el pedido exista o el orderId sea proporcionado.
+ */
 export function useCustomerOrderTracker(orderId: string | null) {
   const fetchFn = useCallback(async () => {
     if (!orderId) return { data: null, error: null };

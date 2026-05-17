@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * useThemeHooks — Hook de sincronización de tema del restaurante.
+ * useThemeSync: retorna el tema activo y lo actualiza en tiempo real ante cambios
+ * en la tabla restaurant_themes. Usado por los ThemeWrapper de cada app operacional.
+ */
+
 import { useCallback } from "react";
 import { getRestaurantTheme } from "../index";
 import { useRealtimeSync } from "./useRealtimeSync";

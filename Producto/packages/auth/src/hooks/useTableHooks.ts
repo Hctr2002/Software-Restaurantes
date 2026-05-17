@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * useTableHooks — Hooks de mesas en tiempo real.
+ * useTable: suscribe a una mesa específica por ID.
+ * useTables: lista de todas las mesas del restaurante.
+ * useTableOrders: pedidos activos de una mesa (filtra por session_id si está disponible).
+ */
+
 import { useCallback } from "react";
 import { supabase } from "../index";
 import type { TableRecord, Order } from "../types";
@@ -50,6 +57,10 @@ export function useTables(restaurantId: string | undefined) {
   return { tables, loading, refetch };
 }
 
+/**
+ * Pedidos activos de una mesa (excluye REJECTED y COMPLETED).
+ * Si sessionId está disponible filtra por sesión para soportar múltiples turnos en la misma mesa.
+ */
 export function useTableOrders(tableId: string | undefined, sessionId?: string | null) {
   const fetchFn = useCallback(async () => {
     if (!tableId) return { data: [], error: null };
