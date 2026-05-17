@@ -1,5 +1,5 @@
 # Documento de Arquitectura de Software (SAD) — Menu Bites
-**Versión:** 2.5.0 | **Alcance:** Arquitectura técnica, patrones de diseño e infraestructura del sistema de gestión de restaurantes Menu Bites.
+**Versión:** 2.6.0 | **Alcance:** Arquitectura técnica, patrones de diseño e infraestructura del sistema de gestión de restaurantes Menu Bites.
 
 ---
 
@@ -33,7 +33,7 @@ El proyecto utiliza una arquitectura de monorepo gestionada con **Turborepo** y 
 | `cashier-dashboard` | 3004 | CAJERO | Panel de caja para cierre de cuentas y cobro |
 | `customer-portal` | 3005 | CLIENTE | Portal web del cliente final, accedido vía código QR de mesa |
 | `bar-dashboard` | 3006 | BAR | KDS dedicado para la estación de barra (bebidas y cócteles) |
-| `mobile` | — | GARZON / CLIENTE | Aplicación móvil (en desarrollo) |
+| `mobile` | — | TODOS LOS ROLES | App nativa React Native / Expo. Soporta los 7 roles del sistema: SUPER_ADMIN, ADMIN, GARZON, COCINA, CAJERO, BAR, CLIENTE. Dashboard completo por rol, menú QR interactivo, KDS con audio, push notifications, branding dinámico. |
 
 #### Paquetes Compartidos (`packages/`):
 
@@ -735,6 +735,123 @@ interface Props {
 - Los comentarios no describen el QUÉ (ya lo hace el nombre) sino el POR QUÉ y el CONTEXTO.
 
 ---
+
+---
+
+## 7.15 App Mobile (React Native / Expo)
+
+### 7.15.1 Visión General
+
+La app `mobile` es una aplicación React Native construida con Expo SDK 54 y Expo Router v6 (file-based routing). Es una réplica funcional nativa de todo el ecosistema web, con soporte para los 7 roles del sistema y características exclusivas del dispositivo móvil (cámara, push notifications, audio, haptics).
+
+| Propiedad | Valor |
+|---|---|
+| Framework | React Native 0.81.5 + Expo SDK 54 |
+| Router | Expo Router v6 (file-based) |
+| Lenguaje | TypeScript 5.9.2 |
+| Estado | Context API (AuthContext, ThemeContext) |
+| Backend | Supabase (Auth + Realtime + Storage) |
+| Persistencia | Expo SecureStore (tokens JWT) |
+
+### 7.15.2 Roles y Módulos Implementados
+
+| Rol | Ruta | Pantallas | Funcionalidades clave |
+| --- | --- | --- | --- |
+| `CLIENTE` | `[restaurantSlug]/[tableNumber]/` | Menú QR | Menú por categoría, carrito, checkout, llamar garzón, pedir cuenta, rating de orden |
+| `GARZON` | `(waiter)/` | Dashboard mesas + pedidos | Grid de mesas con estado live, fusión de mesas (merge mode), isla de órdenes listas |
+| `COCINA` | `(kitchen)/` | KDS 3 tabs | VALIDATED → PREPARING → READY, alertas de audio, auto-clear, umbrales configurables |
+| `BAR` | `(bar)/` | KDS barra | Idéntico a Cocina filtrado por `station: 'BAR'` |
+| `CAJERO` | `(cashier)/` | Tabs pendientes/historial | Agrupa por mesa/sesión, modal de pago, actualiza estado a COMPLETED, libera mesa |
+| `ADMIN` | `(admin)/` | 11 pantallas | Dashboard KPI, órdenes, mesas, menú, inventario, categorías, usuarios, notificaciones, reportes, branding, configuración |
+| `SUPER_ADMIN` | `(super-admin)/` | 6 pantallas | Dashboard global, organizaciones, usuarios, planes de suscripción |
+
+### 7.15.3 Arquitectura de Autenticación Mobile
+
+La autenticación mobile difiere de la web en el mecanismo de persistencia de sesión:
+
+```text
+lib/supabase.ts
+  ↓ createClient con ExpoSecureStoreAdapter
+  ↓ Tokens JWT almacenados en expo-secure-store (encriptado nativo)
+
+context/AuthContext.tsx
+  ↓ getSession() al montar
+  ↓ onAuthStateChange() para cambios
+  ↓ Extrae role + restaurantId desde session.user.app_metadata
+  ↓ Registra push token al login → users.push_token
+  ↓ Deep linking menubites://reset-password para recuperación
+```
+
+El rol determina la ruta de navegación automática al iniciar sesión:
+
+| Rol | Ruta destino |
+|---|---|
+| `CLIENTE` | `/(tabs)` |
+| `GARZON` | `/(waiter)` |
+| `COCINA` | `/(kitchen)` |
+| `BAR` | `/(bar)` |
+| `CAJERO` | `/(cashier)` |
+| `ADMIN` | `/(admin)` |
+| `SUPER_ADMIN` | `/(super-admin)` |
+
+### 7.15.4 Tema Dinámico Mobile
+
+El sistema de branding dinámico funciona a través de `ThemeContext.tsx`, que lee la tabla `restaurant_themes` y expone los colores como un objeto de tema React Native. Usa el tema institucional `MB_Theme.ts` (navy/emerald) como fallback.
+
+A diferencia de la web, el tema mobile NO usa CSS Variables — aplica los colores directamente como `StyleSheet` props de React Native.
+
+### 7.15.5 Funcionalidades Nativas Exclusivas
+
+| Feature | Librería | Uso |
+| --- | --- | --- |
+| Push Notifications | `expo-notifications` | Alertas de órdenes para staff, actualizaciones de estado para cliente |
+| Escáner QR | `expo-camera` | `scanner/index.tsx` → navega a `[restaurantSlug]/[tableNumber]/` |
+| Alertas de audio | `expo-av` | KDS: sonido al recibir orden, sonido urgente al superar umbral crítico |
+| Haptics | `expo-haptics` | Feedback táctil en acciones críticas |
+| Impresión | `expo-print` | Impresión de recibos desde la caja |
+| Selección de imágenes | `expo-image-picker` | Upload de imágenes de menú en el módulo Admin |
+
+### 7.15.6 Descubrimiento de APIs
+
+La app mobile consume las mismas APIs REST que las apps web a través de `lib/api.ts`:
+
+```typescript
+// En desarrollo: auto-detecta IP local (10.0.2.2 Android / localhost iOS)
+// En producción: lee EXPO_PUBLIC_*_URL del .env
+SUPERADMIN_API      → puerto 3000 (admin-dashboard)
+LOCALADMIN_API      → puerto 3003 (local-dashboard)
+CUSTOMER_PORTAL_API → puerto 3005 (customer-portal)
+```
+
+### 7.15.7 Estructura de Carpetas
+
+```text
+apps/mobile/
+  app/
+    (admin)/          # 11 pantallas de gestión del restaurante
+    (auth)/           # login, forgot-password, reset-password
+    (bar)/            # KDS para estación barra
+    (cashier)/        # Dashboard caja y cobro
+    (kitchen)/        # KDS para cocina
+    (super-admin)/    # 6 pantallas de administración global
+    (tabs)/           # Landing pública
+    (waiter)/         # Dashboard garzón (mesas + pedidos)
+    [restaurantSlug]/[tableNumber]/  # Menú interactivo cliente (QR)
+    scanner/          # Escáner de códigos QR
+    _layout.tsx       # Layout raíz con AuthContext y ThemeContext
+    index.tsx         # Redirect según rol autenticado
+  components/         # 20 componentes reutilizables (modales, cards, headers)
+  context/
+    AuthContext.tsx   # Sesión, rol, restaurantId, push token
+    ThemeContext.tsx  # Branding dinámico mobile
+  lib/
+    supabase.ts       # Cliente Supabase con ExpoSecureStoreAdapter
+    api.ts            # Descubrimiento dinámico de URLs de API
+    pushNotifications.ts
+    useKdsAudio.ts    # Hook de alertas de audio para KDS
+  constants/
+    MB_Theme.ts       # Paleta institucional (fallback de tema)
+```
 
 ## 8. CONCLUSIÓN
 El sistema Menu Bites v2.5.0 incorpora una arquitectura dual-estación completa y un motor de branding dinámico que garantiza la excelencia visual y operativa. Con la introducción de los **Primitivos del Portal**, el sistema alcanza un nivel de madurez técnica superior, facilitando la escalabilidad y el mantenimiento de la interfaz de cliente bajo estándares de diseño "Pro Max".

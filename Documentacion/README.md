@@ -46,6 +46,7 @@
 
 | Versión | Fecha | Cambios principales |
 |---|---|---|
+| v2.6.0 | 2026-05-17 | App mobile React Native / Expo marcada como completa; sección 7.15 del SAD con arquitectura, roles, autenticación, funcionalidades nativas y estructura; README propio de la app mobile |
 | v2.5.0 | 2026-05-17 | Documentación JSDoc en español en todos los archivos TypeScript del monorepo (~280 archivos); estándar de cabeceras de archivo, JSDoc de funciones/hooks/componentes, comentarios de sección y comentarios inline; paquetes `@menu-bites/auth`, `@menu-bites/ui` y `@menu-bites/store` completamente documentados |
 | v2.4.0 | 2026-05-10 | Bar Dashboard (rol BAR, puerto 3006); arquitectura dual-estación KITCHEN/BAR; campo `target_station` en categorías; `kds_settings` polimórfico; `bar_ready`/`bar_preparing` en órdenes |
 | v2.3.0 | anterior | Refactor UX/UI Pro Max; flujo de pedido automatizado; motor de marca dinámica |

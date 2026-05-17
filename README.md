@@ -15,6 +15,7 @@ Menu Bites es una plataforma SaaS multitenant de vanguardia diseñada para trans
 * **Cashier Dashboard:** Cierre de cuentas, gestión de métodos de pago y facturación rápida.
 * **Local Dashboard:** Control total del restaurante: gestión de menú, inventario, reportes de ventas y configuración de marca.
 * **Admin Dashboard:** Panel global para la gestión de suscripciones, soporte y monitoreo de la plataforma SaaS.
+* **App Mobile (React Native / Expo):** App nativa multi-rol para iOS y Android. Concentra todos los dashboards en una sola app — cliente, garzón, cocina, barra, caja, admin y super-admin — con push notifications, escáner QR integrado y alertas de audio para el KDS.
 
 ### Tecnología Realtime
 
@@ -158,6 +159,7 @@ graph TD
         A --> F[cashier-dashboard]
         A --> G[customer-portal]
         A --> H[bar-dashboard]
+        A --> I[mobile]
 
         P[Packages Shared] --> UI["@menu-bites/ui"]
         P --> AUTH["@menu-bites/auth"]
@@ -169,11 +171,12 @@ graph TD
 
 ### Stack Tecnológico
 
-* **Frontend:** React 19, Next.js 16, TailwindCSS v4, Framer Motion.
+* **Frontend Web:** React 19, Next.js 16, TailwindCSS v4, Framer Motion.
+* **Frontend Mobile:** React Native 0.81, Expo SDK 54, Expo Router v6.
 * **Backend & DB:** Supabase (PostgreSQL, Auth, Realtime, Storage).
 * **ORM:** Prisma.
 * **Monorepo:** Turborepo, npm Workspaces.
-* **Notificaciones:** Web Push API (VAPID).
+* **Notificaciones:** Web Push API (VAPID) + Expo Notifications (iOS/Android).
 
 ---
 
