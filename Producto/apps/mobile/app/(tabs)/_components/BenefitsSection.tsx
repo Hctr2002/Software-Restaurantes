@@ -23,7 +23,7 @@ const BENEFITS = [
   {
     icon: Palette,
     title: 'Marca 100% personalizable',
-    desc: '12 templates de branding que se propagan al portal al instante.',
+    desc: '9 diseños de branding que se propagan al portal al instante.',
   },
   {
     icon: Bell,
