@@ -1,3 +1,8 @@
+/**
+ * ResetPasswordPage — Formulario para definir una nueva contraseña tras recuperación.
+ * Valida que ambas contraseñas coincidan y llama a updateUserPassword de Supabase.
+ * Redirige automáticamente al login tras 3 segundos en caso de éxito.
+ */
 "use client";
 
 import React, { useState } from "react";

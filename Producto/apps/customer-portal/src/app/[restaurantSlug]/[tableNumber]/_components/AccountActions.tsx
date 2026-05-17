@@ -1,12 +1,18 @@
 "use client";
 
+/**
+ * AccountActions — Barra de acciones flotante en el portal del cliente.
+ * Muestra los botones de Cuenta, Cobro, Garzón y Confirmar Orden.
+ * Se oculta si no hay mesa activa o si el checkout está abierto.
+ */
+
 import { ClipboardList, Receipt, Loader2, ChevronRight, Bell } from "lucide-react";
 import { TableRecord } from "@menu-bites/auth";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn, PortalPrimaryButton, PortalText } from "@menu-bites/ui";
 
 /**
- * Propiedades del componente AccountActions.
+ * Props del componente AccountActions.
  */
 interface AccountActionsProps {
   tableData: TableRecord | null;
@@ -22,8 +28,8 @@ interface AccountActionsProps {
 }
 
 /**
- * Componente que muestra las acciones rápidas del cliente (Cuenta, Cobro, Garzón, Checkout).
- * // Función para heredar las acciones de la cuenta y sincronizar botones con el tema dinámico.
+ * Barra de acciones rápidas del cliente: Cuenta, Cobro, Garzón y Checkout.
+ * Los colores y tipografías se heredan del tema dinámico del restaurante via CSS vars.
  */
 export function AccountActions({
   tableData,
@@ -37,7 +43,6 @@ export function AccountActions({
   onOpenCheckout,
   onConfirmBill
 }: AccountActionsProps) {
-  // Función para ocultar acciones si no hay mesa activa o el checkout está abierto
   if (!tableData || isCheckoutOpen) return null;
 
   return (
@@ -50,7 +55,6 @@ export function AccountActions({
           animate={{ y: 0, opacity: 1 }}
           className="flex gap-2 sm:gap-3 pointer-events-auto"
         >
-          {/* // Función para visualizar el resumen de la cuenta del cliente */}
           {tableOrdersCount > 0 && (
             <PortalPrimaryButton 
               variant="ghost"
@@ -59,14 +63,13 @@ export function AccountActions({
             >
               <ClipboardList className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
               <PortalText as="span" className="hidden xs:inline">Cuenta</PortalText>
-              {/* Indicador visual de la cantidad de pedidos realizados con herencia de fuente */}
+              {/* Contador de pedidos activos */}
               <PortalText as="span" className="bg-primary/20 text-primary text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-full">
                 {tableOrdersCount}
               </PortalText>
             </PortalPrimaryButton>
           )}
 
-          {/* // Función para solicitar el cobro de la cuenta al personal */}
           <PortalPrimaryButton 
             variant={billRequested ? "success" : "ghost"}
             onClick={onConfirmBill} 
@@ -81,7 +84,6 @@ export function AccountActions({
             <PortalText as="span">{billRequested ? '✓ Cobro' : 'Cobro'}</PortalText>
           </PortalPrimaryButton>
 
-          {/* // Función para solicitar asistencia de un garzón a la mesa */}
           <PortalPrimaryButton 
             variant="ghost"
             onClick={() => (window as any).handleCallWaiter?.()} 
@@ -106,7 +108,7 @@ export function AccountActions({
                 onClick={onOpenCheckout} 
                 className="w-full py-4 sm:py-5 px-6 sm:px-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl shadow-primary/40 flex justify-between items-center group overflow-hidden relative h-auto"
               >
-                {/* // Función para aplicar el efecto de brillo animado en la acción principal */}
+                {/* Efecto shimmer animado sobre el botón principal */}
                 <motion.div 
                   className="absolute inset-0 bg-gradient-to-r from-primary-foreground/20 to-transparent pointer-events-none"
                   animate={{ x: ['-100%', '100%'] }}
@@ -127,7 +129,7 @@ export function AccountActions({
                   </div>
                 </div>
 
-                {/* Lado derecho: Monto Total acumulado con fuente de acento heredada */}
+                {/* Monto total acumulado del carrito */}
                 <div className="flex items-center gap-3 sm:gap-4 relative z-10">
                   <div className="text-right">
                     <PortalText className="block text-[9px] sm:text-[10px] uppercase font-black tracking-[0.2em] opacity-80 leading-none mb-1">Total</PortalText>

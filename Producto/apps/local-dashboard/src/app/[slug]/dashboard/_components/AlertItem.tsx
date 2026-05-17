@@ -1,3 +1,7 @@
+/**
+ * AlertItem — Tarjeta individual de alerta para el panel de notificaciones.
+ * Muestra tipo, mensaje, remitente y acciones contextuales según el tipo de alerta.
+ */
 "use client";
 
 import React from "react";
@@ -15,9 +19,11 @@ const TYPE_CONFIG: Record<AlertType, { label: string; variant: "danger" | "warni
 
 interface AlertItemProps {
   alert: Alert;
+  /** true mientras se está resolviendo esta alerta específica */
   isActing: boolean;
   onResolve: (id: string, action?: "disable_item", menuItemId?: string | null) => void;
   onNavigate: (path: string) => void;
+  /** Ruta base del dashboard, ej: "/mi-restaurante/dashboard" */
   basePath: string;
 }
 

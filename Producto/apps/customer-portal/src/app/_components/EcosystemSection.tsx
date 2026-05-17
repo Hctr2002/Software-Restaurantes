@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * EcosystemSection — Sección del ecosistema de apps para la landing page.
+ * Presenta los módulos del sistema (Admin, Cocina, Garzón, Caja, Bar, Portal, Mobile).
+ */
+
 import {
   Shield, LayoutDashboard, CookingPot, ConciergeBell,
   Receipt, Smartphone, Wine,

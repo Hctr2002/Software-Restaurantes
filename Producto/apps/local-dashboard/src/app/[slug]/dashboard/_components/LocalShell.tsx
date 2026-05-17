@@ -1,5 +1,10 @@
+/**
+ * LocalShell — Layout principal del dashboard local: sidebar, header, menú móvil y área de contenido.
+ * Sincroniza el tema del restaurante en tiempo real via Supabase Realtime y eventos window.
+ * Envuelve cada página del dashboard; recibe title y subtitle para el header.
+ */
 "use client";
- 
+
 import React from "react";
 import { usePathname, useParams } from "next/navigation";
 import { useAuthStore } from "@menu-bites/store";

@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * Home — Landing page pública del customer-portal (/).
+ * Presenta Menu Bites al visitante con secciones de problemas, ecosistema, flujo operacional,
+ * beneficios, stack tecnológico y equipo.
+ * Incluye un campo de búsqueda de restaurante que redirige a /[slug]/1.
+ */
+
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { QrCode, Utensils, Star, ArrowRight, Store, ChevronDown } from "lucide-react";

@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * AnimatedSection — Envuelve cualquier contenido en un section animado con framer-motion.
+ * La animación se activa una sola vez cuando el elemento entra al viewport (useInView).
+ * También exporta variantes reutilizables: fadeUp, staggerCard, scaleIn.
+ */
+
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 

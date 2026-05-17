@@ -1,3 +1,7 @@
+/**
+ * ForgotPasswordPage — Formulario de recuperación de contraseña.
+ * Envía un correo con enlace de restablecimiento usando resetPasswordForEmail de Supabase.
+ */
 "use client";
 
 import React, { useState } from "react";

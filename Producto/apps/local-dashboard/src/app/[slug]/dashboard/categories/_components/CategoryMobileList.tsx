@@ -1,3 +1,7 @@
+/**
+ * CategoryMobileList — Vista de tarjetas de categorías para pantallas móviles (visible en lg:hidden).
+ * Cada tarjeta muestra nombre, estado y acciones de editar/eliminar.
+ */
 import React from "react";
 import { Badge, Button } from "@menu-bites/ui";
 import { Pencil, Trash2, Loader2 } from "lucide-react";

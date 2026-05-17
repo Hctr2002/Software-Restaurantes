@@ -16,10 +16,10 @@ interface CategoryNavProps {
  */
 export function CategoryNav({ categories, activeCategory, onSelectCategory }: CategoryNavProps) {
   return (
-    <nav className="px-6 overflow-x-auto no-scrollbar flex gap-2 pb-1 bg-transparent border-t border-border">
+    <nav className="px-6 overflow-x-auto no-scrollbar flex gap-2 pb-1 bg-card border-t border-border">
       {/* // Función para mostrar todos los platos de la carta completa */}
       <PortalPrimaryButton 
-        variant="ghost"
+        variant="flat"
         onClick={() => onSelectCategory(null)}
         className="relative whitespace-nowrap px-4 py-4 text-sm font-bold transition-all duration-500 group h-auto"
       >
@@ -59,7 +59,7 @@ export function CategoryNav({ categories, activeCategory, onSelectCategory }: Ca
         return (
           <PortalPrimaryButton 
             key={cat.id} 
-            variant="ghost"
+            variant="flat"
             onClick={() => onSelectCategory(cat.id)} 
             className="relative whitespace-nowrap px-4 py-4 text-sm font-bold transition-all duration-500 group h-auto"
           >

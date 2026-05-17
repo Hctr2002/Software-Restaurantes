@@ -1,3 +1,9 @@
+/**
+ * SectionHeader — Encabezado de sección para la landing page del portal.
+ * Muestra una etiqueta pequeña en verde (label) y un título principal (title).
+ * Acepta un id para permitir navegación por anclas desde el menú.
+ */
+
 interface SectionHeaderProps {
   label: string;
   title: string;

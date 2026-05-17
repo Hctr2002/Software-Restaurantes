@@ -1,3 +1,8 @@
+/**
+ * palettes — Paletas de marca predefinidas para el Carrusel de Inspiración del Laboratorio de Branding.
+ * Cada plantilla incluye colores y tipografías listos para aplicar como tema del restaurante.
+ */
+
 export interface PaletteTemplate {
   id: string;
   name: string;

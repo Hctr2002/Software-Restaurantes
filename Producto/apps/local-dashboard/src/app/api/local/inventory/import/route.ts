@@ -1,3 +1,8 @@
+/**
+ * /api/local/inventory/import — Importación masiva de stock via CSV.
+ * POST: Recibe texto CSV con columnas "id" y "stock_actual", actualiza cada fila en la DB
+ * y retorna conteo de actualizaciones, errores por fila y lista de ítems bajo stock crítico.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createServiceClient, ensureServiceConfig } from "@/lib/localApi";
 import { LOW_STOCK_THRESHOLD } from "@menu-bites/auth";

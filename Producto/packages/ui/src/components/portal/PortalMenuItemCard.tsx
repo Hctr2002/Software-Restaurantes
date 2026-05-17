@@ -67,18 +67,20 @@ export function PortalMenuItemCard({ item, cartQuantity, onAdd, onDecrement }: P
         <div className="space-y-2">
           <div className="flex justify-between items-start gap-4">
             {/* // Función para renderizar el nombre del plato con la fuente de encabezado del tema */}
-            <PortalHeading 
-              as="h4"
-              className="text-lg sm:text-2xl font-black text-foreground tracking-tighter italic uppercase group-hover:text-primary transition-colors duration-500 line-clamp-2"
-            >
-              {item.name}
-            </PortalHeading>
+            <div className="flex-1 min-w-0">
+              <PortalHeading
+                as="h4"
+                className="text-base sm:text-lg font-black text-foreground tracking-tighter italic uppercase group-hover:text-primary transition-colors duration-500 [overflow:clip] [overflow-clip-margin:16px] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+              >
+                {item.name}
+              </PortalHeading>
+            </div>
             <div className="flex flex-col items-end shrink-0">
               {/* // Función para renderizar el precio con la fuente de acento heredada */}
               <PortalText 
                 as="span"
                 font="accent"
-                className="text-primary font-black text-xl sm:text-2xl italic tracking-tighter leading-none"
+                className="text-primary font-black text-base sm:text-xl italic tracking-tighter leading-none"
               >
                 ${item.price.toLocaleString()}
               </PortalText>

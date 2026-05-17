@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * OperationalFlowSection — Sección de flujo operacional para la landing page.
+ * Ilustra el ciclo completo del pedido: portal → garzón → cocina/bar → caja → reportes.
+ */
+
 import {
   Smartphone, ConciergeBell, CookingPot, Wine, Receipt, BarChart3,
 } from "lucide-react";

@@ -19,22 +19,18 @@ import {
 import { Loader2, Store, ShoppingBag, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Módulos extraídos para cumplir con el límite de 400 líneas
-// Función para heredar la navegación de categorías y sincronizar con el scroll.
+// Componentes extraídos para respetar el límite de 400 líneas por archivo
 import { CategoryNav } from "./_components/CategoryNav";
-// Función para heredar el listado de platos y aplicar el filtrado dinámico.
 import { MenuSection } from "./_components/MenuSection";
-// Función para heredar el resumen de compra y gestionar el envío del pedido.
 import { CheckoutModal } from "./_components/CheckoutModal";
-// Función para heredar el feedback visual de éxito tras realizar un pedido.
 import { ConfirmationOverlay } from "./_components/ConfirmationOverlay";
-// Función para heredar los botones de acción rápida de la cuenta y el pago.
 import { AccountActions } from "./_components/AccountActions";
 
 /**
- * Página principal del menú del cliente.
- * Coordina la lógica de navegación, carrito, seguimiento de pedidos y feedback.
- * // Función para heredar el estado global del restaurante y sincronizar la UI con el tema dinámico.
+ * Página principal del menú del cliente: /[restaurantSlug]/[tableNumber]
+ * Orquesta navegación por categorías, carrito, checkout, seguimiento de pedidos en tiempo real,
+ * solicitud de cuenta y valoración del servicio.
+ * El tema visual (colores, tipografías) se hereda de RestaurantThemeProvider en el layout padre.
  */
 export default function MenuPage({
   params: paramsPromise,
@@ -65,7 +61,6 @@ export default function MenuPage({
 
   const [isCuentaOpen, setIsCuentaOpen]     = useState(false);
 
-  // Función para heredar la confirmación de pedido y resetear el estado local tras un éxito.
   const handlePlaceOrder = async () => {
     const success = await portal.placeOrder();
     if (success) setIsCheckoutOpen(false);
@@ -79,7 +74,7 @@ export default function MenuPage({
     }
   }, [currentTrackerStatus, portal.order.lastId]);
 
-  // Función para enviar la calificación del servicio al servidor.
+  /** Envía la valoración (1-5 estrellas) del servicio al servidor y cierra el modal tras 2s. */
   const handleSubmitRating = async () => {
     if (!stars || !ratingOrderId || !restaurant?.id) return;
     setRatingSubmitting(true);
@@ -108,7 +103,7 @@ export default function MenuPage({
     }
   };
 
-  // Función para solicitar la cuenta desde la mesa y notificar al sistema.
+  /** Activa bill_requested en la mesa e inserta una alerta BILL_REQUEST para el staff. */
   const handleRequestBill = async () => {
     if (!portal.table.data || isRequestingBill || billRequested || !restaurant?.id) return;
     setIsRequestingBill(true);
@@ -129,7 +124,7 @@ export default function MenuPage({
     }
   };
 
-  // Función para solicitar asistencia del mozo a la mesa.
+  /** Activa help_requested en la mesa. Expuesto en window para acceso desde AccountActions. */
   const handleCallWaiter = async () => {
     if (!portal.table.data || !restaurant?.id) return;
     try {
@@ -152,7 +147,6 @@ export default function MenuPage({
     return () => { delete (window as any).handleCallWaiter; };
   }, [portal.table.data, restaurant?.id]);
 
-  // Función para heredar el estado de carga y mostrar un spinner temático con la fuente del sistema.
   if (menuLoading || !items) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
@@ -186,7 +180,6 @@ export default function MenuPage({
               className="border border-border"
               actions={
                 <div className="flex items-center gap-2 sm:gap-3">
-                  {/* // Función para heredar el botón de búsqueda con estilo ghost dinámico */}
                   <PortalPrimaryButton 
                     variant="ghost" 
                     className="rounded-2xl w-12 h-12 p-0 flex items-center justify-center bg-muted/30 border-border text-muted-foreground hover:text-foreground transition-all"
@@ -195,7 +188,6 @@ export default function MenuPage({
                   </PortalPrimaryButton>
                   
                   <div className="relative">
-                    {/* // Función para heredar el botón del carrito con el color primario del restaurante */}
                     <PortalPrimaryButton
                       onClick={() => setIsCheckoutOpen(true)}
                       className="w-12 h-12 sm:w-14 sm:h-14 p-0 rounded-2xl shadow-xl shadow-primary/30 group relative overflow-hidden"
@@ -207,7 +199,7 @@ export default function MenuPage({
                     </PortalPrimaryButton>
                     
                     <AnimatePresence>
-                      {/* // Función para mostrar el contador de productos en el carrito con estilo dinámico */}
+                      {/* Badge con conteo de ítems — animado con framer-motion */}
                       {portal.cartCount > 0 && (
                         <motion.span 
                           initial={{ scale: 0, opacity: 0 }}
@@ -215,7 +207,6 @@ export default function MenuPage({
                           exit={{ scale: 0, opacity: 0 }}
                           className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-[3px] border-background shadow-lg z-20"
                         >
-                          {/* // Función para heredar la tipografía del cuerpo en el contador del carrito */}
                           <PortalText as="span" font="body">
                             {portal.cartCount}
                           </PortalText>
@@ -270,7 +261,7 @@ export default function MenuPage({
           />
         )}
 
-        {/* // Función para heredar el tracker de estado de pedido en tiempo real */}
+        {/* Tracker de estado visible mientras el pedido no ha sido entregado/rechazado */}
         {portal.order.lastId && currentTrackerStatus && currentTrackerStatus !== 'DELIVERED' && currentTrackerStatus !== 'COMPLETED' && currentTrackerStatus !== 'REJECTED' && (
           <OrderTracker status={currentTrackerStatus} />
         )}
@@ -283,7 +274,6 @@ export default function MenuPage({
           />
         )}
 
-        {/* // Función para heredar las acciones globales de la cuenta y el carrito */}
         <AccountActions 
           tableData={portal.table.data} 
           tableOrdersCount={tableOrders.length} 

@@ -1,3 +1,7 @@
+/**
+ * MobileMenu — Cajón lateral de navegación animado para pantallas móviles.
+ * Se desliza desde la izquierda con AnimatePresence; incluye overlay oscuro para cerrar al tocar.
+ */
 "use client";
 
 import React from "react";

@@ -1,3 +1,7 @@
+/**
+ * page.tsx (raíz) — Página de login del Panel Local de Menu Bites.
+ * Autentica al usuario y redirige según su rol: ADMIN al dashboard, otros roles a sus apps.
+ */
 "use client";
 
 import React, { useState, useEffect } from "react";

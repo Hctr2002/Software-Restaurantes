@@ -1,3 +1,8 @@
+/**
+ * proxy.ts — Middleware de autenticación y enrutamiento del local-dashboard.
+ * Reemplaza el middleware de Next.js para cubrir también rutas /api/* con refresco de token.
+ * Verifica sesión, rol ADMIN y coherencia del slug en la URL antes de continuar.
+ */
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';

@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * MenuItemCard — Tarjeta de producto para la landing page del portal (no el menú del restaurante).
+ * Muestra imagen, nombre, descripción, precio y controles de cantidad +/−.
+ * Cuando cartQuantity > 0 cambia al modo de edición de cantidad; de lo contrario muestra "Añadir".
+ * Las animaciones de entrada se controlan desde el padre (variants hidden/show).
+ */
+
 import { motion } from "framer-motion";
 import { Minus, Plus } from "lucide-react";
 import { getPublicImageUrl, MenuItem } from "@menu-bites/auth";

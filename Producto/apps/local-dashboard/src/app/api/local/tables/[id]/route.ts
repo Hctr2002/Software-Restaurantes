@@ -1,3 +1,8 @@
+/**
+ * /api/local/tables/[id] — Operaciones sobre una mesa específica.
+ * PUT: Actualiza número, etiqueta y estado; valida con tableSchema.
+ * DELETE: Elimina la mesa. Retorna 409 si tiene órdenes activas (pendientes o en preparación).
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, ensureServiceConfig } from "@/lib/localApi";
 import { tableService } from "@/lib/services/tableService";

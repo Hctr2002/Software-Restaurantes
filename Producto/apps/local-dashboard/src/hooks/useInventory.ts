@@ -1,3 +1,7 @@
+/**
+ * useInventory — Hook de gestión de inventario con soporte de importación/exportación CSV.
+ * Carga insumos desde /api/local/inventory y provee handlers de CRUD, importación y exportación.
+ */
 "use client";
 
 import { useState, useCallback, useRef, useEffect, RefObject } from "react";
@@ -7,6 +11,10 @@ export type ImportStatus = "idle" | "uploading" | "success" | "error";
 
 const EMPTY_FORM = { name: "", stock: "", unit: "unidades" };
 
+/**
+ * Provee estado completo de inventario incluyendo feedback de importación CSV
+ * y referencia al input de archivo para el botón de importación.
+ */
 export function useInventory() {
   const [items, setItems] = useState<Inventory[]>([]);
   const [loading, setLoading] = useState(true);

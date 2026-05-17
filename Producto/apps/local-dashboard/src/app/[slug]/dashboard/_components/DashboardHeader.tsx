@@ -1,3 +1,7 @@
+/**
+ * DashboardHeader — Cabecera superior del dashboard con icono dinámico por ruta, título y panel de alertas.
+ * Incluye el botón de menú móvil y el AlertsPanel para notificaciones en tiempo real.
+ */
 "use client";
 
 import React from "react";

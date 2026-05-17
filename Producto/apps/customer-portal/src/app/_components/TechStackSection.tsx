@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * TechStackSection — Sección del stack tecnológico para la landing page.
+ * Muestra las tecnologías utilizadas en el proyecto (Next.js, Supabase, etc.).
+ */
+
 import { AnimatedSection, staggerCard } from "./AnimatedSection";
 import { SectionHeader } from "./SectionHeader";
 import { motion } from "framer-motion";

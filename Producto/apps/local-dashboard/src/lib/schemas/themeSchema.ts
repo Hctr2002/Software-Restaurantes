@@ -1,3 +1,8 @@
+/**
+ * themeSchema — Esquema de validación Zod para temas visuales del restaurante.
+ * Valida colores en formato hex, tipografías y opciones de activación.
+ * Usado en las rutas API POST/PATCH /api/local/theme.
+ */
 import { z } from "zod";
 
 export const themeSchema = z.object({

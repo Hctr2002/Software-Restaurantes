@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * BenefitsSection — Sección de beneficios para la landing page del portal.
+ * Muestra los beneficios de Menu Bites (velocidad, crecimiento, personalización, alertas).
+ */
+
 import { Zap, TrendingUp, Palette, Bell } from "lucide-react";
 import { AnimatedSection, staggerCard } from "./AnimatedSection";
 import { SectionHeader } from "./SectionHeader";

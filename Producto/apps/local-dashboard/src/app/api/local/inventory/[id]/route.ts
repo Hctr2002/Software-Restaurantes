@@ -1,3 +1,8 @@
+/**
+ * /api/local/inventory/[id] — Operaciones sobre un insumo específico.
+ * PUT: Actualiza nombre, stock y unidad de medida.
+ * DELETE: Elimina el insumo del inventario.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createServiceClient, ensureServiceConfig } from "@/lib/localApi";
 

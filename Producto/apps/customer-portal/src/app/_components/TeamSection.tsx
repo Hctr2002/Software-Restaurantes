@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * TeamSection — Sección del equipo de desarrollo para la landing page.
+ * Presenta a los integrantes del proyecto con nombre, rol e institución.
+ */
+
 import { GraduationCap } from "lucide-react";
 import { AnimatedSection } from "./AnimatedSection";
 import { motion } from "framer-motion";

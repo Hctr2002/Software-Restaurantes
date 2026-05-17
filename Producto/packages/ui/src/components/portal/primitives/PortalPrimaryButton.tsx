@@ -9,7 +9,7 @@ import { cn } from "../../../lib/utils";
  */
 interface PortalPrimaryButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
-  variant?: "primary" | "ghost" | "success";
+  variant?: "primary" | "ghost" | "flat" | "success";
   size?: "sm" | "md" | "lg" | "icon";
   font?: "body" | "title" | "accent"; // Permite elegir qué fuente del tema usar
 }
@@ -28,8 +28,9 @@ export function PortalPrimaryButton({
   // Clases semánticas basadas en las variables CSS inyectadas
   const variantStyles = {
     primary: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25",
-    ghost:   "bg-card/95 text-foreground border border-foreground/10 hover:bg-foreground/5",
-    success: "text-success border border-success/30 hover:bg-success/10",
+    ghost:   "bg-card text-foreground border border-border hover:bg-muted",
+    flat:    "bg-transparent text-foreground border-0 hover:bg-foreground/5",
+    success: "bg-success/15 text-success border border-success/40 hover:bg-success/25",
   };
 
   const sizeStyles = {

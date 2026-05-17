@@ -1,3 +1,8 @@
+/**
+ * /api/local/categories — CRUD de categorías del menú.
+ * GET: Lista todas las categorías del restaurante ordenadas por nombre.
+ * POST: Crea una nueva categoría con nombre, estado activo y estación destino.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createServiceClient, ensureServiceConfig } from "@/lib/localApi";
 

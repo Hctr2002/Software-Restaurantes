@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * OrderTracker — Barra fija de estado del pedido activo.
+ * Muestra los pasos PENDING → VALIDATED → PREPARING → READY con indicador de progreso.
+ * Se posiciona bajo el header (top-[73px]) para no solapar la navegación.
+ */
+
 import React from "react";
 
 const STATUS_STEPS = [
@@ -9,6 +15,7 @@ const STATUS_STEPS = [
   { key: "READY",     label: "Listo",          icon: "🍽️" },
 ] as const;
 
+/** Retorna el índice del estado actual en STATUS_STEPS, o -1 si no se reconoce. */
 function getStepIndex(status: string): number {
   return STATUS_STEPS.findIndex((s) => s.key === status);
 }

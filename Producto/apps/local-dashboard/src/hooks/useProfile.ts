@@ -1,7 +1,15 @@
+/**
+ * useProfile — Hook para actualizar el perfil del usuario ADMIN autenticado.
+ * Persiste nombre y contraseña via PUT /api/local/profile.
+ */
 "use client";
 
 import { useState } from "react";
 
+/**
+ * Provee estado de formulario, mensaje de respuesta y handler de guardado.
+ * Solo envía los campos que fueron modificados (nombre o contraseña).
+ */
 export function useProfile() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");

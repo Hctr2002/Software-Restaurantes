@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * ProblemSection — Sección de problemas que resuelve Menu Bites (landing page).
+ * Presenta los pain points del sector gastronómico: tiempos, errores, datos, costos.
+ */
+
 import { Clock, FileX2, BarChart3, DollarSign } from "lucide-react";
 import { AnimatedSection, staggerCard } from "./AnimatedSection";
 import { SectionHeader } from "./SectionHeader";

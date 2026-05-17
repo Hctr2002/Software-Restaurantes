@@ -1,3 +1,8 @@
+/**
+ * Sidebar — Barra de navegación lateral del dashboard local.
+ * Muestra el logo de marca, los grupos de navegación y el perfil del usuario con cierre de sesión.
+ * Reutilizado tanto en el sidebar de escritorio como en el cajón móvil (MobileMenu).
+ */
 "use client";
 
 import { Store, LayoutDashboard, Users, UtensilsCrossed, Tag, TableProperties, ClipboardList, Package, Palette, BarChart2, LogOut, X } from "lucide-react";

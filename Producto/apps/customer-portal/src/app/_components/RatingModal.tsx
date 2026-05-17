@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * RatingModal — Modal de valoración del servicio tras la entrega del pedido.
+ * Se muestra 1.5s después de que el estado del pedido pasa a DELIVERED.
+ * Flujo: selección de estrellas → comentario opcional → envío o saltar.
+ * Tras el envío exitoso muestra un estado de agradecimiento por 2s y se cierra.
+ */
+
 import { Loader2 } from "lucide-react";
 
 interface Props {

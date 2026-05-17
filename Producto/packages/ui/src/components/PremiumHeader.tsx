@@ -73,25 +73,25 @@ export const PremiumHeader = ({
           <h1 
             className={cn(
               "font-bold tracking-tight leading-tight pr-1 truncate",
-              isCompact ? "text-xl sm:text-2xl" : "text-lg sm:text-2xl lg:text-3xl"
+              isCompact ? "text-base sm:text-xl" : "text-lg sm:text-2xl lg:text-3xl"
             )}
             style={{ fontFamily: 'var(--font-title)' }}
           >
             {title} {accentTitle && <span className="text-primary">{accentTitle}</span>}
           </h1>
           {/* Indicador de Estado */}
-          <div className="flex items-center space-x-2 sm:space-x-3 text-[8px] sm:text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] sm:tracking-[0.3em] mt-0.5">
-            <span className="flex items-center gap-1.5 text-success">
-              <span className="relative flex h-2 w-2">
+          <div className="flex items-center gap-1.5 sm:gap-3 text-[9px] sm:text-[10px] font-black text-foreground/40 uppercase tracking-[0.1em] sm:tracking-[0.3em] mt-0.5 overflow-hidden">
+            <span className="flex items-center gap-1 text-success whitespace-nowrap shrink-0">
+              <span className="relative flex h-2 w-2 shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success/40 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
               </span>
               {statusLabel}
             </span>
             {statusSubLabel && (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-1 whitespace-nowrap shrink-0">
                 <span className="opacity-30">•</span>
-                <span className="truncate max-w-[80px] sm:max-w-none">{statusSubLabel}</span>
+                <span>{statusSubLabel}</span>
               </div>
             )}
           </div>

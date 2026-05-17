@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * CuentaSheet — Hoja deslizable con el resumen de todos los pedidos activos de la mesa.
+ * Muestra cada pedido con su estado, ítems y precios, más el total acumulado en CLP.
+ * Recibe la lista ya filtrada desde useTableOrders (excluye COMPLETED y REJECTED).
+ */
+
 import { ClipboardList, X } from "lucide-react";
 interface OrderItem {
   quantity: number;
@@ -21,6 +27,7 @@ interface Props {
   onClose: () => void;
 }
 
+/** Formatea un número como precio en pesos chilenos (ej. $1.290). */
 function formatCLP(n: number) {
   return `$${n.toLocaleString("es-CL")}`;
 }

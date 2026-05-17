@@ -1,3 +1,9 @@
+/**
+ * Layout raíz del customer-portal.
+ * Inyecta el script bloqueante anti-FOUC en <head> para aplicar el tema cacheado
+ * antes del primer paint. No aplica en rutas /login ni /auth/*.
+ */
+
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 

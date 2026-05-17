@@ -1,3 +1,8 @@
+/**
+ * /api/local/menu — CRUD de ítems del menú validado con Zod.
+ * GET: Lista todos los platos con categoría incluida.
+ * POST: Crea un nuevo plato; valida payload con menuSchema antes de persistir.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, ensureServiceConfig } from "@/lib/localApi";
 import { menuService } from "@/lib/services/menuService";

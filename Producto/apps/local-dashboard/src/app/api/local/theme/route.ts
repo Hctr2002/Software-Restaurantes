@@ -1,3 +1,10 @@
+/**
+ * /api/local/theme — Gestión completa de temas visuales del restaurante.
+ * GET: Lista todos los temas del restaurante.
+ * POST: Crea un nuevo tema validado con themeSchema.
+ * PATCH: Activa un tema (action="activate") o actualiza sus campos (action="update").
+ * DELETE: Elimina uno o varios temas por ID (parámetros themeId o themeIds CSV).
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, ensureServiceConfig } from "@/lib/localApi";
 import { themeService } from "@/lib/services/themeService";

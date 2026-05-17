@@ -1,3 +1,7 @@
+/**
+ * DashboardPage — Página principal (resumen) del panel local.
+ * Muestra KPIs, alertas de órdenes vencidas, monitor de flujo y estado de mesas en tiempo real.
+ */
 "use client";
 
 import React from "react";

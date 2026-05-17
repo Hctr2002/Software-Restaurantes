@@ -1,3 +1,8 @@
+/**
+ * themeService — Capa de acceso a datos para la tabla restaurant_themes.
+ * Gestiona el ciclo de vida completo de los temas: crear, actualizar, activar y eliminar.
+ * Al activar un tema, primero desactiva todos los anteriores del mismo restaurante.
+ */
 import { createServiceClient } from "../localApi";
 import { ThemeInput } from "../schemas/themeSchema";
 
