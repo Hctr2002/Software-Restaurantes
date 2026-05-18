@@ -15,7 +15,7 @@ export function useLocalDashboard() {
   const { user } = useAuthStore();
   const restaurantId = user?.restaurantId;
 
-  // Hooks de tiempo real centralizados
+  // Hooks de tiempo real centralizados desde @menu-bites/auth
   const { orders, loading: ordersLoading } = useRealtimeOrders(restaurantId);
   const { stats, loading: statsLoading } = useRealtimeStats(restaurantId);
   const { tables, loading: tablesLoading } = useTables(restaurantId);

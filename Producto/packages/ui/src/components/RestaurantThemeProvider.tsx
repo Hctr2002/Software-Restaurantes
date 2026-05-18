@@ -9,19 +9,9 @@
  */
 
 import React, { useEffect } from "react";
+import type { RestaurantTheme } from "@menu-bites/auth";
 
-export interface RestaurantTheme {
-  primaryColor: string;
-  secondaryColor: string;
-  backgroundColor: string;
-  accentColor: string;
-  textColor: string;
-  cardBackground: string;
-  fontTitle?: string;
-  fontBody?: string;
-  fontAccent?: string;
-  logoUrl?: string | null;
-}
+export type { RestaurantTheme };
 
 interface Props {
   theme?: RestaurantTheme | null;

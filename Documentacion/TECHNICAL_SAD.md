@@ -823,7 +823,25 @@ LOCALADMIN_API      → puerto 3003 (local-dashboard)
 CUSTOMER_PORTAL_API → puerto 3005 (customer-portal)
 ```
 
-### 7.15.7 Estructura de Carpetas
+### 7.15.7 Landing Page Pública Mobile (v2.6.0)
+
+La ruta `(tabs)/` contiene la landing page pública de la app, mostrada antes del login y a usuarios `CLIENTE`. Fue completamente rediseñada en v2.6.0 como una pantalla modular con secciones de presentación del producto.
+
+**Componente raíz:** `app/(tabs)/index.tsx` → `MenuHomeScreen`
+
+| Componente | Archivo | Contenido |
+|---|---|---|
+| `ProblemSection` | `_components/ProblemSection.tsx` | Problemática que resuelve Menu Bites (retrasos, errores, papel) |
+| `EcosystemSection` | `_components/EcosystemSection.tsx` | Presentación del ecosistema de 8 apps integradas |
+| `OperationalFlowSection` | `_components/OperationalFlowSection.tsx` | Flujo QR → pedido → cocina → entrega → pago |
+| `BenefitsSection` | `_components/BenefitsSection.tsx` | Beneficios cuantificados (tiempo, errores, satisfacción) |
+| `RestaurantsCarousel` | `_components/RestaurantsCarousel.tsx` | Carrusel de restaurantes de demostración con branding |
+| `TeamSection` | `_components/TeamSection.tsx` | Identificación del equipo de desarrollo |
+| `SectionHeader` | `_components/SectionHeader.tsx` | Componente primitivo reutilizable de encabezado de sección |
+
+La pantalla usa animaciones de entrada `FadeInDown` con `react-native-reanimated`, `BlurView` para efectos de glassmorphism, y se integra con `LandingHeader` para la barra superior.
+
+### 7.15.8 Estructura de Carpetas
 
 ```text
 apps/mobile/
@@ -834,12 +852,24 @@ apps/mobile/
     (cashier)/        # Dashboard caja y cobro
     (kitchen)/        # KDS para cocina
     (super-admin)/    # 6 pantallas de administración global
-    (tabs)/           # Landing pública
+    (tabs)/
+      _components/    # Secciones de la landing pública (7 componentes)
+        BenefitsSection.tsx
+        EcosystemSection.tsx
+        OperationalFlowSection.tsx
+        ProblemSection.tsx
+        RestaurantsCarousel.tsx
+        SectionHeader.tsx
+        TeamSection.tsx
+      index.tsx       # MenuHomeScreen — landing page pública
     (waiter)/         # Dashboard garzón (mesas + pedidos)
     [restaurantSlug]/[tableNumber]/  # Menú interactivo cliente (QR)
     scanner/          # Escáner de códigos QR
     _layout.tsx       # Layout raíz con AuthContext y ThemeContext
     index.tsx         # Redirect según rol autenticado
+  assets/images/
+    icon.png          # Ícono oficial Menu Bites
+    adaptive-icon.png # Ícono adaptativo Android
   components/         # 20 componentes reutilizables (modales, cards, headers)
   context/
     AuthContext.tsx   # Sesión, rol, restaurantId, push token
@@ -847,14 +877,109 @@ apps/mobile/
   lib/
     supabase.ts       # Cliente Supabase con ExpoSecureStoreAdapter
     api.ts            # Descubrimiento dinámico de URLs de API
+    dashboard.ts      # KPIs del dashboard (calcula unit_price × quantity)
     pushNotifications.ts
     useKdsAudio.ts    # Hook de alertas de audio para KDS
   constants/
     MB_Theme.ts       # Paleta institucional (fallback de tema)
+    Palettes.ts       # 17 paletas premium con tipografías actualizadas
 ```
 
-## 8. CONCLUSIÓN
-El sistema Menu Bites v2.5.0 incorpora una arquitectura dual-estación completa y un motor de branding dinámico que garantiza la excelencia visual y operativa. Con la introducción de los **Primitivos del Portal**, el sistema alcanza un nivel de madurez técnica superior, facilitando la escalabilidad y el mantenimiento de la interfaz de cliente bajo estándares de diseño "Pro Max".
+## 8. INFRAESTRUCTURA DE TESTING
 
-### 9. APÉNDICE DE SEGURIDAD Y CUMPLIMIENTO
-Próximamente se integrará el módulo de auditoría de logs centralizada en el Data Warehouse para asegurar trazabilidad completa ante incidentes críticos (Wave 10).
+### 8.1 Visión General
+
+El proyecto cuenta con una suite automatizada de **651 pruebas** distribuidas en **12 workspaces**, orquestada mediante Turborepo. La cobertura abarca paquetes compartidos, aplicaciones individuales, la app mobile y funciones Edge de Supabase.
+
+### 8.2 Estructura de Archivos de Test
+
+```
+Producto/
+├── packages/
+│   ├── auth/src/__tests__/         # 9 archivos — utilidades, constantes, hooks por dominio
+│   │   ├── utils.test.ts           # mapOrder, formatCLP, timeAgo, diffMinutes
+│   │   ├── constants.test.ts       # ORDER_STATUS_LABEL, TABLE_STATUS_LABEL
+│   │   ├── index.test.ts           # updateOrderStatus, sendAlert
+│   │   ├── auditLog.test.ts        # AuditLog
+│   │   ├── useMenuHooks.test.ts
+│   │   ├── useTableHooks.test.ts
+│   │   ├── useThemeHooks.test.ts
+│   │   ├── useUserHooks.test.ts
+│   │   └── useAlertHooks.test.ts
+│   ├── ui/src/__tests__/           # 33 archivos — componentes React
+│   │   ├── utils.test.ts           # cn, formatDate, formatPrice, timeAgo
+│   │   ├── Badge.test.tsx          # Todas las variantes del componente Badge
+│   │   ├── KDSColumn.test.tsx
+│   │   ├── LiveFlowMonitor.test.tsx
+│   │   ├── TableMergeBar.test.tsx
+│   │   ├── BillAlertIsland.test.tsx
+│   │   ├── StaleOrdersAlert.test.tsx
+│   │   ├── PreparingOrdersList.test.tsx
+│   │   ├── RatingModal.test.tsx
+│   │   └── ... (25 archivos adicionales)
+│   └── store/src/__tests__/        # 1 archivo — Zustand + cifrado AES
+│       └── store.test.ts           # useAuthStore: setUser, logout, persistencia cifrada
+├── apps/
+│   ├── */src/__tests__/            # 7 archivos — rutas API por aplicación web
+│   └── cashier-dashboard/src/__tests__/
+│       └── proxy.test.ts           # Proxy de autenticación de cashier
+│   └── mobile/__tests__/          # 3 archivos — app React Native
+│       ├── dashboard.test.ts
+│       ├── reportUtils.test.ts
+│       └── utils.test.ts
+└── e2e/                            # 2 specs Playwright
+    ├── admin-login.spec.ts         # Flujo de autenticación del panel admin
+    └── customer-portal.spec.ts     # Portal público sin autenticación
+supabase/
+└── functions/__tests__/            # 1 archivo — Edge Function
+    └── manage-users.test.ts        # Validación de RBAC en gestión de usuarios
+```
+
+### 8.3 Inventario por Workspace
+
+| Workspace | Ruta | Archivos de test |
+|---|---|---|
+| `@menu-bites/auth` | `packages/auth/src/__tests__/` | 9 archivos |
+| `@menu-bites/ui` | `packages/ui/src/__tests__/` | 33 archivos |
+| `@menu-bites/store` | `packages/store/src/__tests__/` | 1 archivo |
+| Apps web (6 apps) | `apps/*/src/__tests__/` | 7 archivos |
+| Proxy cashier | `apps/cashier-dashboard/src/__tests__/` | 1 archivo |
+| Mobile | `apps/mobile/__tests__/` | 3 archivos |
+| Supabase Edge Fn | `supabase/functions/__tests__/` | 1 archivo |
+| E2E Playwright | `Producto/e2e/` | 2 specs |
+| **Total** | | **651 pruebas, 12 workspaces** |
+
+### 8.4 Comandos de Ejecución
+
+```bash
+# Ejecutar todos los workspaces (desde Producto/)
+npm test
+
+# Workspace específico
+npx turbo test --filter="@menu-bites/auth"
+npx turbo test --filter="@menu-bites/store"
+npx turbo test --filter="@menu-bites/ui"
+
+# Modo watch (desarrollo)
+cd packages/auth && npm run test:watch
+cd packages/ui   && npm run test:watch
+
+# Con reporte de cobertura
+cd packages/auth && npm run test:coverage
+
+# Pruebas E2E (requiere apps corriendo)
+npm run test:e2e
+npm run test:e2e:ui   # Modo interactivo para depuración
+```
+
+### 8.5 Cobertura de Seguridad
+
+La Edge Function `manage-users` es el punto central de control de roles (RBAC). El archivo `supabase/functions/__tests__/manage-users.test.ts` valida que toda modificación a las reglas de acceso por rol sea verificada antes del despliegue, actuando como guardia de seguridad en la capa de infraestructura de Supabase.
+
+---
+
+## 9. CONCLUSIÓN
+El sistema Menu Bites v2.6.0 constituye una plataforma SaaS multitenant production-ready con arquitectura de monorepo madura. Las incorporaciones clave de esta versión son: el motor de `DynamicThemeWrapper` centralizado (eliminación de FOUC y wrappers redundantes), la landing page pública de la app mobile con secciones modulares, la corrección del cálculo de KPIs (multiplicación correcta de `unit_price × quantity`), y la unificación cromática institucional del `admin-dashboard`. El sistema cubre los 7 roles operativos en 8 aplicaciones web y 1 app nativa, con sincronización Realtime, Web Push, dual-KDS y branding completamente dinámico por restaurante. La suite de testing (651 pruebas, 12 workspaces) garantiza la calidad en todos los paquetes compartidos y aplicaciones del ecosistema.
+
+### 10. APÉNDICE DE SEGURIDAD Y CUMPLIMIENTO
+Próximamente se integrará el módulo de auditoría de logs centralizada en el Data Warehouse para asegurar trazabilidad completa ante incidentes críticos (Wave 10). La cobertura de la Edge Function `manage-users` mediante `supabase/functions/__tests__/manage-users.test.ts` (sección 8.5) garantiza que toda modificación a las reglas de acceso por rol sea verificada antes de despliegue.

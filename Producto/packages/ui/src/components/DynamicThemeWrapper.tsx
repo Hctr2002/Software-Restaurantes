@@ -54,7 +54,8 @@ export const DynamicThemeWrapper = ({ appKey, children }: DynamicThemeWrapperPro
       } catch (e) {
         console.error(`[ThemeWrapper-${appKey}] Error al guardar en caché:`, e);
       }
-    } else if (liveTheme === null) {
+    } else if (liveTheme === null && user?.restaurantId) {
+      // Limpia el caché solo si el restaurantId era conocido y la BD no devolvió tema
       setTheme(undefined);
       try {
         localStorage.removeItem(cacheKey);
