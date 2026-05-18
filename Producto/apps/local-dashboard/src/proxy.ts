@@ -58,26 +58,21 @@ export async function proxy(req: NextRequest) {
   const roleUpper = String(role || '').toUpperCase();
   const isAdmin = roleUpper === 'ADMIN';
 
-  // Telemetry
-  if (error || !isPublicRoute) {
-    console.log(`[Proxy] Path: ${pathname} | Role: ${roleUpper} | Session: ${sessionExists} | Error: ${error?.message || 'none'}`);
-  }
+  const isDev = process.env.NODE_ENV !== 'production';
 
   // Handle invalid sessions or refresh token errors on protected routes
   if (error && !isPublicRoute) {
-    console.warn(`[Proxy] Auth error on ${pathname}: ${error.message}. Redirecting to central auth.`);
+    if (isDev) console.warn(`[Proxy] Auth error on ${pathname}: ${error.message}. Redirecting to central auth.`);
     return NextResponse.redirect(new URL(authUrl, req.url));
   }
 
   // Sin sesión y ruta protegida → central login
   if (!sessionExists && !isPublicRoute) {
-    console.log(`[Proxy] No session for protected route ${pathname}. Redirecting to central auth.`);
     return NextResponse.redirect(new URL(authUrl, req.url));
   }
 
   // Sesión de otro rol en ruta protegida → central login
   if (sessionExists && !isPublicRoute && !isAdmin) {
-    console.log(`[Proxy] Role ${roleUpper} not authorized for local dashboard. Redirecting to central auth.`);
     return NextResponse.redirect(new URL(authUrl, req.url));
   }
 
@@ -90,13 +85,11 @@ export async function proxy(req: NextRequest) {
       .single();
 
     if (data?.slug) {
-      console.log(`[Proxy] Admin logged in. Redirecting to dashboard: /${data.slug}/dashboard`);
       const url = req.nextUrl.clone();
       url.pathname = `/${data.slug}/dashboard`;
       return NextResponse.redirect(url);
     }
     // Si no tiene restaurante asignado → central login
-    console.log(`[Proxy] Admin has no restaurant assigned. Redirecting to central auth.`);
     return NextResponse.redirect(new URL(authUrl, req.url));
   }
 
@@ -109,8 +102,6 @@ export async function proxy(req: NextRequest) {
       .single();
 
     if (data?.slug && data.slug !== urlSlug) {
-      // Corregir slug en la URL y redirigir
-      console.log(`[Proxy] Correcting slug: ${urlSlug} -> ${data.slug}`);
       const url = req.nextUrl.clone();
       url.pathname = pathname.replace(
         `/${urlSlug}/dashboard`,
