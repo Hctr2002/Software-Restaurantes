@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
   // Fetch delivered orders of today — use unit_price (snapshot at order time)
   const { data: todayOrders } = await db
     .from("orders")
-    .select("id, order_items(id, unit_price, menu_items(name))")
+    .select("id, order_items(id, unit_price, quantity, menu_items(name))")
     .eq("restaurant_id", restaurantId)
     .in("status", ["DELIVERED", "COMPLETED"])
     .gte("createdAt", dayStart(now));
@@ -41,19 +41,21 @@ export async function GET(req: NextRequest) {
   // Fetch delivered orders of this month
   const { data: monthOrders } = await db
     .from("orders")
-    .select("id, order_items(id, unit_price)")
+    .select("id, order_items(id, unit_price, quantity)")
     .eq("restaurant_id", restaurantId)
     .in("status", ["DELIVERED", "COMPLETED"])
     .gte("createdAt", monthStart(now));
 
   // Calculate ingresos del día
   const ingresos_dia = (todayOrders ?? []).reduce((sum: number, order: any) => {
-    return sum + (order.order_items ?? []).reduce((s: number, item: any) => s + Number(item.unit_price ?? 0), 0);
+    return sum + (order.order_items ?? []).reduce((s: number, item: any) =>
+      s + (Number(item.unit_price ?? 0) * Number(item.quantity ?? 1)), 0);
   }, 0);
 
   // Calculate ingresos del mes
   const ingresos_mes = (monthOrders ?? []).reduce((sum: number, order: any) => {
-    return sum + (order.order_items ?? []).reduce((s: number, item: any) => s + Number(item.unit_price ?? 0), 0);
+    return sum + (order.order_items ?? []).reduce((s: number, item: any) =>
+      s + (Number(item.unit_price ?? 0) * Number(item.quantity ?? 1)), 0);
   }, 0);
 
   // Ticket promedio del día

@@ -28,12 +28,20 @@ import { useTheme } from '../../context/ThemeContext';
 import { PALETTE_TEMPLATES, PaletteTemplate } from '../../constants/Palettes';
 
 const TITLE_FONTS = [
-  'Outfit', 'Playfair Display', 'Cormorant Garamond', 'Cinzel', 
-  'Josefin Sans', 'Montserrat', 'Raleway', 'Bebas Neue', 'Abril Fatface', 'Roboto'
+  'Vollkorn', 'Playfair Display', 'Cormorant Garamond', 'Bodoni Moda', 'Cinzel',
+  'Orbitron', 'Syne', 'Outfit', 'Plus Jakarta Sans', 'Montserrat',
+  'Bebas Neue', 'Comfortaa', 'Cormorant Infant', 'Abril Fatface', 'Archivo Black',
 ];
 
 const BODY_FONTS = [
-  'Inter', 'Lato', 'Nunito', 'Poppins', 'DM Sans', 'Barlow', 'Source Sans 3', 'Roboto'
+  'Inter', 'Outfit', 'Montserrat', 'EB Garamond', 'Nunito',
+  'Poppins', 'Raleway', 'Roboto', 'Barlow', 'system-ui',
+];
+
+const ACCENT_FONTS = [
+  'Russo One', 'Oswald', 'Fjalla One', 'Barlow Condensed', 'Cinzel',
+  'Josefin Sans', 'Josefin Slab', 'Space Mono', 'JetBrains Mono',
+  'Noto Serif JP', 'Permanent Marker', 'Caveat',
 ];
 
 export default function BrandingScreen() {
@@ -64,14 +72,15 @@ export default function BrandingScreen() {
         // Default theme if none exists
         setTheme({
           name: 'Default',
-          primary_color: '#FE5F55',
-          secondary_color: '#495057',
-          background_color: '#0B0D17',
-          accent_color: '#FE5F55',
-          text_color: '#FFFFFF',
-          card_background: 'rgba(255,255,255,0.05)',
+          primary_color: '#25B16B',
+          secondary_color: '#06162B',
+          background_color: '#F9F5EF',
+          accent_color: '#FFA729',
+          text_color: '#06162B',
+          card_background: '#FFFFFF',
           font_title: 'Outfit',
           font_body: 'Inter',
+          font_accent: 'Outfit',
           is_active: true
         });
       }
@@ -192,6 +201,9 @@ export default function BrandingScreen() {
       accent_color: preset.accentColor,
       text_color: preset.textColor,
       card_background: preset.cardBackground,
+      font_title: preset.fontTitle,
+      font_body: preset.fontBody,
+      font_accent: preset.fontAccent,
       is_custom: false
     });
   };
@@ -342,16 +354,33 @@ export default function BrandingScreen() {
           <Text style={[styles.label, { marginTop: 16, color: colors.muted }]}>Fuente de Cuerpo</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.fontList}>
             {BODY_FONTS.map((f) => (
-              <TouchableOpacity 
-                key={f} 
+              <TouchableOpacity
+                key={f}
                 style={[
-                  styles.fontChip, 
+                  styles.fontChip,
                   { backgroundColor: colors.glass, borderColor: colors.glassHeavy },
                   theme.font_body === f && { backgroundColor: colors.brandAccent, borderColor: colors.brandAccent }
                 ]}
                 onPress={() => updateTheme('font_body', f)}
               >
                 <Text style={[styles.fontChipText, { color: colors.muted }, theme.font_body === f && styles.fontChipTextActive, { fontFamily: f }]}>{f}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <Text style={[styles.label, { marginTop: 16, color: colors.muted }]}>Fuente de Acento (Navegación & Precios)</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.fontList}>
+            {ACCENT_FONTS.map((f) => (
+              <TouchableOpacity
+                key={f}
+                style={[
+                  styles.fontChip,
+                  { backgroundColor: colors.glass, borderColor: colors.glassHeavy },
+                  theme.font_accent === f && { backgroundColor: colors.brandAccent, borderColor: colors.brandAccent }
+                ]}
+                onPress={() => updateTheme('font_accent', f)}
+              >
+                <Text style={[styles.fontChipText, { color: colors.muted }, theme.font_accent === f && styles.fontChipTextActive, { fontFamily: f }]}>{f}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>

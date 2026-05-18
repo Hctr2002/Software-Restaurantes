@@ -8,7 +8,7 @@ const workspaceRoot = path.resolve(projectRoot, '../..');
 const config = getDefaultConfig(projectRoot);
 
 // 1. Ver todas las carpetas del monorepo (packages y apps)
-config.watchFolders = [workspaceRoot];
+config.watchFolders = [...(config.watchFolders ?? []), workspaceRoot];
 
 // 2. Forzar resolución de dependencias core a la raíz (Deduplicación)
 // Esto evita el error "Invalid hook call" al asegurar que solo exista un React.

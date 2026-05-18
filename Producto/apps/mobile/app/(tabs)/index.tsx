@@ -1,196 +1,92 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { 
-  StyleSheet, 
-  ScrollView, 
-  TouchableOpacity, 
-  Dimensions,
-  StatusBar,
-  ActivityIndicator,
-  View
-} from 'react-native';
+import React from 'react';
+import { StyleSheet, ScrollView, TouchableOpacity, View, StatusBar } from 'react-native';
 import { Text } from '@/components/Themed';
-import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
-import LandingHeader from '../../components/LandingHeader';
-import { supabase } from '../../lib/supabase';
-import { QrCode, Utensils, Zap, Star, Store, MapPin } from 'lucide-react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
+import { useRouter } from 'expo-router';
+import { Star, QrCode, ArrowRight, Utensils } from 'lucide-react-native';
 
-const { width } = Dimensions.get('window');
+import LandingHeader from '../../components/LandingHeader';
+import ProblemSection from './_components/ProblemSection';
+import EcosystemSection from './_components/EcosystemSection';
+import OperationalFlowSection from './_components/OperationalFlowSection';
+import BenefitsSection from './_components/BenefitsSection';
+import TeamSection from './_components/TeamSection';
+import RestaurantsCarousel from './_components/RestaurantsCarousel';
 
 export default function MenuHomeScreen() {
-  const autoScrollOffset = useRef(0);
-  const flatListRef = useRef<any>(null);
-  const isInteracting = useRef(false);
-  const scrollInterval = useRef<any>(null);
-  
+  const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [restaurants, setRestaurants] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadRestaurants() {
-      const { data, error } = await supabase
-        .from('restaurants')
-        .select('id, name, slug')
-        .eq('status', 'ACTIVE')
-        .order('name');
-      
-      if (!error && data) setRestaurants(data);
-      setLoading(false);
-    }
-    loadRestaurants();
-  }, []);
-
-  useEffect(() => {
-    if (loading || restaurants.length === 0) return;
-
-    const startCarousel = () => {
-      if (scrollInterval.current) clearInterval(scrollInterval.current);
-      scrollInterval.current = setInterval(() => {
-        if (flatListRef.current && !isInteracting.current) {
-          autoScrollOffset.current += 0.5;
-          
-          // Reset logic based on card width (260) + gap (12)
-          const totalWidth = restaurants.length * 272;
-          if (autoScrollOffset.current > totalWidth) {
-            autoScrollOffset.current = 0;
-          }
-          
-          flatListRef.current.scrollToOffset({ 
-            offset: autoScrollOffset.current, 
-            animated: false 
-          });
-        }
-      }, 30);
-    };
-
-    startCarousel();
-
-    return () => {
-      if (scrollInterval.current) clearInterval(scrollInterval.current);
-    };
-  }, [loading, restaurants]);
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       <LandingHeader />
-      
-      <ScrollView 
-        showsVerticalScrollIndicator={false} 
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
       >
-        
-        {/* Background Decorative Elements */}
-        <View style={styles.bgDecorContainer}>
+        {/* Background blob */}
+        <View style={styles.bgDecor} pointerEvents="none">
           <View style={styles.bgBlob} />
         </View>
 
-        {/* Hero Section */}
-        <Animated.View entering={FadeInDown.delay(200)} style={styles.heroSection}>
-          <View style={styles.heroBadge}>
+        {/* ═══════════ Hero ═══════════ */}
+        <Animated.View entering={FadeInDown.delay(200)} style={styles.hero}>
+          <View style={styles.badge}>
             <Star size={12} color="#10b981" fill="#10b981" />
-            <Text style={styles.heroBadgeText}>NUEVA EXPERIENCIA GASTRONÓMICA</Text>
+            <Text style={styles.badgeText}>NUEVA EXPERIENCIA GASTRONÓMICA</Text>
           </View>
-          
           <Text style={styles.heroTitle}>
-            Pide sin <Text style={{ color: '#10b981' }}>esperas</Text>, disfruta sin límites.
+            Pide sin <Text style={styles.accent}>esperas</Text>,{'\n'}disfruta sin límites.
           </Text>
-          
           <Text style={styles.heroSubtitle}>
-            Tu menú digital inteligente. Escanea el código QR en tu mesa para comenzar.
+            Plataforma SaaS que digitaliza la operación completa del restaurante — desde el menú QR hasta los reportes de negocio.
           </Text>
         </Animated.View>
 
-        {/* Scan CTA */}
-        <Animated.View entering={FadeInDown.delay(400)} style={styles.scanCtaContainer}>
-          <TouchableOpacity activeOpacity={0.9} style={styles.scanCtaWrapper}>
-            <BlurView intensity={10} tint="dark" style={styles.scanCtaCard}>
-              <View style={styles.scanIconBox}>
+        {/* ═══════════ Scan CTA ═══════════ */}
+        <Animated.View entering={FadeInDown.delay(400)} style={styles.ctaContainer}>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            style={styles.ctaWrapper}
+            onPress={() => router.push('/scanner')}
+          >
+            <BlurView intensity={10} tint="dark" style={styles.ctaCard}>
+              <View style={styles.ctaIcon}>
                 <QrCode size={32} color="#10b981" />
               </View>
-              <View style={styles.scanCtaInfo}>
-                <Text style={styles.scanCtaTitle}>¿Estás en un restaurante?</Text>
-                <Text style={styles.scanCtaSub}>Toca aquí para escanear el código QR</Text>
+              <View style={styles.ctaInfo}>
+                <Text style={styles.ctaTitle}>¿Estás en un restaurante?</Text>
+                <Text style={styles.ctaSub}>Toca aquí para escanear el código QR</Text>
               </View>
+              <ArrowRight size={18} color="rgba(16,185,129,0.6)" />
             </BlurView>
           </TouchableOpacity>
         </Animated.View>
 
-        {/* Restaurants Section */}
-        <View style={styles.sectionHeader}>
-          <View>
-            <Text style={styles.sectionTag}>PARTNERS SELECCIONADOS</Text>
-            <Text style={styles.sectionTitle}>Nuestra Red</Text>
+        {/* ═══════════ Sections ═══════════ */}
+        <ProblemSection />
+        <EcosystemSection />
+        <OperationalFlowSection />
+        <BenefitsSection />
+        <RestaurantsCarousel />
+        <TeamSection />
+
+        {/* ═══════════ Footer ═══════════ */}
+        <View style={styles.footer}>
+          <View style={styles.footerLogo}>
+            <View style={styles.footerBadge}>
+              <Utensils size={14} color="#020617" />
+            </View>
+            <Text style={styles.footerLogoText}>
+              Menu<Text style={styles.accent}>Bites</Text>
+            </Text>
           </View>
+          <Text style={styles.footerCopy}>© 2026 Gastro Analytics 360 · Duoc UC · All Rights Reserved</Text>
         </View>
-
-        <View style={styles.carouselContainer}>
-          {loading ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
-              {[1, 2, 3].map((i) => (
-                <View key={i} style={[styles.restaurantCard, { width: 240, opacity: 0.5, justifyContent: 'center' }]}>
-                  <ActivityIndicator color="#10b981" />
-                </View>
-              ))}
-            </ScrollView>
-          ) : restaurants.length > 0 ? (
-            <Animated.FlatList
-              ref={flatListRef}
-              data={[...restaurants, ...restaurants, ...restaurants]}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              keyExtractor={(item, index) => `${item.id}-${index}`}
-              renderItem={({ item, index }) => (
-                <Animated.View entering={FadeInRight.delay(index * 100)}>
-                  <TouchableOpacity style={styles.restaurantCard} activeOpacity={0.8}>
-                    <View style={styles.restaurantIcon}>
-                      <Store size={22} color="#10b981" />
-                    </View>
-                    <View style={styles.restaurantInfo}>
-                      <Text style={item.name.length > 20 ? styles.restaurantNameSmall : styles.restaurantName} numberOfLines={1}>{item.name}</Text>
-                      <View style={styles.restaurantMeta}>
-                        <MapPin size={12} color="rgba(16, 185, 129, 0.5)" />
-                        <Text style={styles.restaurantMetaText}>DISPONIBLE VÍA QR</Text>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                </Animated.View>
-              )}
-              contentContainerStyle={{ paddingLeft: 24, paddingRight: 24 }}
-              onScroll={(e) => {
-                if (isInteracting.current) {
-                  autoScrollOffset.current = e.nativeEvent.contentOffset.x;
-                }
-              }}
-              onScrollBeginDrag={() => { isInteracting.current = true; }}
-              onScrollEndDrag={() => { isInteracting.current = false; }}
-              onMomentumScrollBegin={() => { isInteracting.current = true; }}
-              onMomentumScrollEnd={() => { isInteracting.current = false; }}
-            />
-          ) : (
-            <Text style={{ color: '#94a3b8', marginLeft: 24, fontStyle: 'italic', fontSize: 13 }}>Pronto nuevos partners...</Text>
-          )}
-        </View>
-
-        {/* Steps Section */}
-        <View style={styles.stepsContainer}>
-          {[
-            { icon: QrCode, title: "Escanea", desc: "Usa la cámara en el QR de tu mesa." },
-            { icon: Utensils, title: "Elige", desc: "Explora el menú con fotos reales." },
-            { icon: Zap, title: "Disfruta", desc: "Tu pedido llega directo a cocina." }
-          ].map((step, idx) => (
-            <Animated.View key={idx} entering={FadeInDown.delay(600 + idx * 100)} style={styles.stepCard}>
-              <View style={styles.stepIconBox}>
-                <step.icon size={24} color="#10b981" />
-              </View>
-              <Text style={styles.stepTitle}>{step.title}</Text>
-              <Text style={styles.stepDesc}>{step.desc}</Text>
-            </Animated.View>
-          ))}
-        </View>
-
       </ScrollView>
     </View>
   );
@@ -204,13 +100,12 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 100,
   },
-  bgDecorContainer: {
+  bgDecor: {
     position: 'absolute',
     top: -100,
     left: -100,
     width: 400,
     height: 400,
-    pointerEvents: 'none',
   },
   bgBlob: {
     width: '100%',
@@ -218,13 +113,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(16, 185, 129, 0.05)',
     borderRadius: 200,
   },
-  heroSection: {
+
+  // Hero
+  hero: {
     paddingHorizontal: 24,
     paddingTop: 40,
     paddingBottom: 32,
     alignItems: 'center',
   },
-  heroBadge: {
+  badge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
@@ -236,7 +133,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(16, 185, 129, 0.2)',
     marginBottom: 24,
   },
-  heroBadgeText: {
+  badgeText: {
     color: '#10b981',
     fontSize: 10,
     fontWeight: '900',
@@ -250,153 +147,94 @@ const styles = StyleSheet.create({
     lineHeight: 42,
     letterSpacing: -1,
   },
+  accent: {
+    color: '#10b981',
+  },
   heroSubtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#94a3b8',
     textAlign: 'center',
     marginTop: 16,
     lineHeight: 24,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
+    fontWeight: '500',
   },
-  scanCtaContainer: {
+
+  // Scan CTA
+  ctaContainer: {
     paddingHorizontal: 24,
     marginBottom: 48,
   },
-  scanCtaWrapper: {
-    borderRadius: 32,
+  ctaWrapper: {
+    borderRadius: 28,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
   },
-  scanCtaCard: {
-    padding: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 20,
-  },
-  scanIconBox: {
-    width: 64,
-    height: 64,
-    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scanCtaInfo: {
-    flex: 1,
-  },
-  scanCtaTitle: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '900',
-    marginBottom: 4,
-  },
-  scanCtaSub: {
-    color: '#94a3b8',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  sectionHeader: {
-    paddingHorizontal: 24,
-    marginBottom: 20,
-  },
-  sectionTag: {
-    color: 'rgba(16, 185, 129, 0.5)',
-    fontSize: 10,
-    fontWeight: '900',
-    letterSpacing: 3,
-    marginBottom: 4,
-  },
-  sectionTitle: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: '900',
-  },
-  carouselContainer: {
-    marginBottom: 48,
-    height: 100,
-  },
-  categoryScroll: {
-    paddingLeft: 24,
-  },
-  restaurantCard: {
-    backgroundColor: 'rgba(15, 23, 42, 0.6)',
-    borderRadius: 24,
+  ctaCard: {
     padding: 20,
-    marginRight: 12,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-    width: 260,
   },
-  restaurantIcon: {
-    width: 52,
-    height: 52,
+  ctaIcon: {
+    width: 60,
+    height: 60,
     backgroundColor: 'rgba(16, 185, 129, 0.1)',
     borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  restaurantInfo: {
+  ctaInfo: {
     flex: 1,
   },
-  restaurantName: {
+  ctaTitle: {
     color: 'white',
     fontSize: 17,
     fontWeight: '900',
-    letterSpacing: -0.5,
+    marginBottom: 4,
   },
-  restaurantNameSmall: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '900',
-    letterSpacing: -0.5,
+  ctaSub: {
+    color: '#94a3b8',
+    fontSize: 13,
+    fontWeight: '600',
   },
-  restaurantMeta: {
+
+  // Footer
+  footer: {
+    marginTop: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.05)',
+    alignItems: 'center',
+    gap: 12,
+  },
+  footerLogo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginTop: 6,
+    gap: 8,
   },
-  restaurantMetaText: {
-    color: '#64748b',
-    fontSize: 10,
-    fontWeight: '900',
-    letterSpacing: 1.5,
-  },
-  stepsContainer: {
-    paddingHorizontal: 24,
-    gap: 16,
-    marginBottom: 40,
-  },
-  stepCard: {
-    backgroundColor: 'rgba(15, 23, 42, 0.4)',
-    borderRadius: 24,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
-  },
-  stepIconBox: {
-    width: 48,
-    height: 48,
-    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-    borderRadius: 16,
+  footerBadge: {
+    width: 24,
+    height: 24,
+    backgroundColor: '#10b981',
+    borderRadius: 7,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
   },
-  stepTitle: {
-    color: 'white',
-    fontSize: 18,
+  footerLogoText: {
+    fontSize: 16,
     fontWeight: '900',
-    marginBottom: 8,
+    color: 'white',
+    letterSpacing: -0.5,
   },
-  stepDesc: {
-    color: '#94a3b8',
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: '500',
+  footerCopy: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.25)',
+    letterSpacing: 0.5,
+    textAlign: 'center',
+    lineHeight: 16,
   },
 });

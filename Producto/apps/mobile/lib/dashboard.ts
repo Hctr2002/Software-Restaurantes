@@ -53,12 +53,12 @@ export async function fetchDashboardStats(restaurantId: string): Promise<Dashboa
     .in('status', ['DELIVERED', 'COMPLETED'])
     .gte('createdAt', monthStart());
 
-  // Count all ACTIVE orders (not delivered/completed)
+  // Count all ACTIVE orders (in-progress, excluding terminal states)
   const { count: activosCount } = await supabase
     .from('orders')
     .select('*', { count: 'exact', head: true })
     .eq('restaurant_id', restaurantId)
-    .not('status', 'in', '("DELIVERED","COMPLETED")');
+    .in('status', ['PENDING', 'VALIDATED', 'PREPARING', 'READY']);
 
   // Filter today's successful orders for revenue
   const todaySuccessful = (allTodayOrders ?? []).filter(o => ['DELIVERED', 'COMPLETED'].includes(o.status));
