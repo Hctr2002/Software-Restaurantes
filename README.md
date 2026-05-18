@@ -220,6 +220,83 @@ graph TD
 
 ---
 
+## Testing
+
+El proyecto cuenta con **91 pruebas unitarias y de componentes** sobre los paquetes compartidos, más pruebas E2E con Playwright.
+
+### Estructura de pruebas
+
+```
+Producto/
+├── packages/
+│   ├── auth/src/__tests__/
+│   │   ├── utils.test.ts      # mapOrder, formatCLP, timeAgo, diffMinutes…
+│   │   ├── index.test.ts      # updateOrderStatus, sendAlert
+│   │   └── constants.test.ts  # ORDER_STATUS_LABEL, TABLE_STATUS_LABEL
+│   ├── store/src/__tests__/
+│   │   └── store.test.ts      # useAuthStore: setUser, logout, cifrado AES
+│   └── ui/src/__tests__/
+│       ├── utils.test.ts      # cn, formatDate, formatPrice, timeAgo
+│       └── Badge.test.tsx     # Componente Badge, todas las variantes
+└── e2e/
+    ├── customer-portal.spec.ts  # Portal público (sin auth)
+    └── admin-login.spec.ts      # Flujo de login
+```
+
+### Ejecutar las pruebas
+
+**Todos los paquetes compartidos (recomendado):**
+```bash
+npm test
+```
+
+**Un paquete específico:**
+```bash
+npx turbo test --filter="@menu-bites/auth"
+npx turbo test --filter="@menu-bites/store"
+npx turbo test --filter="@menu-bites/ui"
+```
+
+**Modo watch (desarrollo):**
+```bash
+cd packages/auth && npm run test:watch
+cd packages/store && npm run test:watch
+cd packages/ui   && npm run test:watch
+```
+
+**Con reporte de cobertura:**
+```bash
+cd packages/auth && npm run test:coverage
+```
+
+### Pruebas E2E con Playwright
+
+> Las apps deben estar corriendo antes de ejecutar los tests E2E.
+
+```bash
+# 1. Levantar el servidor de desarrollo
+npm run dev
+
+# 2. Ejecutar los tests E2E
+npm run test:e2e
+
+# 3. Modo UI interactivo (recomendado para depurar)
+npm run test:e2e:ui
+```
+
+**Variables de entorno opcionales para E2E:**
+
+| Variable | Descripción | Default |
+|----------|-------------|---------|
+| `E2E_BASE_URL` | URL del customer-portal | `http://localhost:3005` |
+| `E2E_ADMIN_URL` | URL del admin-dashboard | `http://localhost:3000` |
+| `E2E_TEST_EMAIL` | Email de usuario de prueba | — |
+| `E2E_TEST_PASSWORD` | Contraseña del usuario de prueba | — |
+
+> Si `E2E_TEST_EMAIL` y `E2E_TEST_PASSWORD` no están definidos, el test de login exitoso se omite automáticamente.
+
+---
+
 ## Seguridad y Privacidad
 
 El sistema implementa **Row Level Security (RLS)** a nivel de base de datos, garantizando que cada restaurante solo pueda acceder a su propia información mediante tokens JWT validados por Supabase Auth.
