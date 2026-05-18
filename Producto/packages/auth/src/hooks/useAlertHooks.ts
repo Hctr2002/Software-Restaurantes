@@ -1,10 +1,17 @@
 "use client";
 
+/**
+ * useAlertHooks — Hooks para gestión de alertas del restaurante.
+ * useRealtimeAlerts: suscribe a alertas PENDING en tiempo real.
+ * useAlertForm: estado y lógica del formulario de envío de nueva alerta.
+ */
+
 import { useCallback, useState } from "react";
 import { supabase, sendAlert } from "../index";
 import type { Alert, AlertType } from "../types";
 import { useRealtimeSync } from "./useRealtimeSync";
 
+/** Retorna las alertas PENDING del restaurante suscritas en tiempo real. */
 export function useRealtimeAlerts(restaurantId: string | undefined) {
   const fetchFn = useCallback(async () => {
     if (!restaurantId) return { data: [], error: null };
@@ -25,6 +32,10 @@ export function useRealtimeAlerts(restaurantId: string | undefined) {
   return { alerts, loading, refetch };
 }
 
+/**
+ * Estado y lógica del formulario para crear una nueva alerta.
+ * Tras un envío exitoso resetea el formulario automáticamente a los 1.5s.
+ */
 export function useAlertForm(restaurantId: string | undefined, userId?: string, userEmail?: string) {
   const [form, setForm] = useState({
     type: "HELP_REQUEST" as AlertType,

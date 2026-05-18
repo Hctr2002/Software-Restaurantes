@@ -4,6 +4,15 @@
 
 ---
 
+## Estado de Implementación
+
+| Estado | Descripción |
+|--------|-------------|
+| Implementado | Existe archivo de test real en el repositorio |
+| Sugerido | Pendiente de implementación |
+
+---
+
 ## 1. PRUEBAS UNITARIAS (Vitest / Jest + React Testing Library)
 
 ### 1.1 Lógica de Precios e Inventario
@@ -33,24 +42,26 @@
 
 ### 1.2 Formateadores y Utilidades
 
-**TC-U-005: Formateo de moneda CLP**
+**[Implementado] TC-U-005: Formateo de moneda CLP**
 - **Función:** `formatPrice(amount: number): string`
 - **Casos:**
   - `3990` → `"$3.990"`
   - `1000000` → `"$1.000.000"`
   - `0` → `"$0"`
   - `1990.5` → `"$1.991"` (redondeo a entero para CLP)
+- Ver implementación en: `packages/auth/src/__tests__/utils.test.ts` (describe `formatCLP`)
 
 **TC-U-006: Formateo de fecha para display**
 - **Función:** `formatDate(iso: string): string`
 - **Entrada:** `"2024-01-15T10:30:00Z"`
 - **Resultado esperado:** `"15 ene 2024, 10:30"` (o formato local configurado)
 
-**TC-U-007: Cálculo de tiempo relativo (`timeAgo`)**
+**[Implementado] TC-U-007: Cálculo de tiempo relativo (`timeAgo`)**
 - **Casos:**
   - `now - 30s` → `"hace 30 segundos"`
   - `now - 5min` → `"hace 5 minutos"`
   - `now - 2h` → `"hace 2 horas"`
+- Ver implementación en: `packages/auth/src/__tests__/utils.test.ts` (describe `timeAgo`)
 
 ### 1.3 Lógica de Máquina de Estados
 
@@ -238,53 +249,15 @@
 
 ### 9.1 Tests de Utilidades Compartidas (`@menu-bites/auth`)
 
-```typescript
-// packages/auth/src/utils.test.ts
+**Estado: Implementado**
 
-describe("formatCLP", () => {
-  it("formatea miles correctamente en es-CL", () => {
-    expect(formatCLP(36000)).toBe("$36.000");
-    expect(formatCLP(1500)).toBe("$1.500");
-    expect(formatCLP(0)).toBe("$0");
-  });
-});
+Los tests de `formatCLP`, `timeAgo`, `diffMinutes`, `mapOrder`, `mapMenuItem`, `mapCategory`, `mapTable`, `orderItemTotal`, `pluralize` y `getPublicImageUrl` ya se encuentran implementados.
 
-describe("timeAgo", () => {
-  it("retorna 'Ahora' para menos de 1 minuto", () => {
-    expect(timeAgo(new Date().toISOString())).toBe("Ahora");
-  });
-  it("retorna minutos para < 60 min", () => {
-    const ago = new Date(Date.now() - 5 * 60000).toISOString();
-    expect(timeAgo(ago)).toBe("5 min");
-  });
-  it("retorna horas para >= 60 min", () => {
-    const ago = new Date(Date.now() - 90 * 60000).toISOString();
-    expect(timeAgo(ago)).toBe("1h");
-  });
-});
+Ver implementación en: `packages/auth/src/__tests__/utils.test.ts`
 
-describe("diffMinutes", () => {
-  it("retorna null si algún argumento es nulo", () => {
-    expect(diffMinutes(null, "2026-01-01T00:00:00Z")).toBeNull();
-    expect(diffMinutes("2026-01-01T00:00:00Z", null)).toBeNull();
-  });
-  it("calcula diferencia positiva en minutos", () => {
-    const a = "2026-01-01T10:00:00Z";
-    const b = "2026-01-01T10:15:00Z";
-    expect(diffMinutes(a, b)).toBe(15);
-  });
-});
+Los tests de `ORDER_STATUS_LABEL`, `TABLE_STATUS_LABEL` y `LOW_STOCK_THRESHOLD` ya se encuentran implementados.
 
-describe("constants", () => {
-  it("LOW_STOCK_THRESHOLD es 5", () => {
-    expect(LOW_STOCK_THRESHOLD).toBe(5);
-  });
-  it("ORDER_STATUS_LABEL contiene todos los estados", () => {
-    const required = ["PENDING", "VALIDATED", "PREPARING", "READY", "DELIVERED", "REJECTED"];
-    required.forEach(s => expect(ORDER_STATUS_LABEL[s]).toBeDefined());
-  });
-});
-```
+Ver implementación en: `packages/auth/src/__tests__/constants.test.ts`
 
 ### 9.2 Tests de API — Customer Portal
 
@@ -390,25 +363,103 @@ Body: { sessionId: "uuid-existente" }
 
 ### 9.6 Tests de Componentes — Customer Portal
 
-**TC-COMP-TRACKER-001: OrderTracker muestra paso correcto**
-```tsx
-render(<OrderTracker status="PREPARING" />)
-expect(screen.getByText("En preparación")).toBeInTheDocument()
-// Solicitado y Confirmado aparecen con opacity-60 (done)
-// Listo aparece con opacity-20 (pending)
-```
+**[Implementado] TC-COMP-TRACKER-001: OrderTracker muestra paso correcto**
 
-**TC-COMP-RATING-001: RatingModal envía correctamente**
-```tsx
-const onSubmit = jest.fn()
-render(<RatingModal stars={4} onSubmit={onSubmit} ... />)
-fireEvent.click(screen.getByText("Enviar"))
-expect(onSubmit).toHaveBeenCalledTimes(1)
-```
+Ver implementación en: `packages/ui/src/__tests__/OrderTracker.test.tsx`
 
-**TC-COMP-MENUITEM-001: MenuItemCard muestra contador si está en carrito**
-```tsx
-render(<MenuItemCard item={mockItem} cartQuantity={2} ... />)
-expect(screen.getByText("2")).toBeInTheDocument()
-// Botones + y - visibles en vez de "Añadir"
-```
+**[Implementado] TC-COMP-RATING-001: RatingModal envía correctamente**
+
+Ver implementación en: `packages/ui/src/__tests__/RatingModal.test.tsx`
+
+**[Implementado] TC-COMP-MENUITEM-001: MenuItemCard muestra contador si está en carrito**
+
+Ver implementación en: `packages/ui/src/__tests__/PortalMenuItemCard.test.tsx`
+
+---
+
+## 10. Cobertura Implementada — Suite Real
+
+Esta sección documenta los dominios con cobertura de tests en la suite real del repositorio que no aparecen listados como casos sugeridos en las secciones anteriores.
+
+### 10.1 Paquete `@menu-bites/auth` — `packages/auth/src/__tests__/`
+
+| Archivo | Dominio cubierto |
+|---------|-----------------|
+| `utils.test.ts` | `mapMenuItem`, `mapCategory`, `mapTable`, `mapOrder`, `formatCLP`, `formatDateTime`, `timeAgo`, `orderItemTotal`, `diffMinutes`, `pluralize`, `getPublicImageUrl` |
+| `constants.test.ts` | `LOW_STOCK_THRESHOLD`, `ORDER_STATUS_LABEL`, `TABLE_STATUS_LABEL` |
+| `index.test.ts` | `updateOrderStatus`, `sendAlert`, `getAppMetadata` |
+| `auditLog.test.ts` | Registro de auditoría (`AuditLog`) |
+| `useMenuHooks.test.ts` | Hook de consulta de menú por restaurante |
+| `useTableHooks.test.ts` | Hook de mesas y estado de sala |
+| `useThemeHooks.test.ts` | Hook de sincronización de temas |
+| `useUserHooks.test.ts` | Hook de gestión de usuarios |
+| `useAlertHooks.test.ts` | Hook de alertas operativas |
+
+### 10.2 Paquete `@menu-bites/ui` — `packages/ui/src/__tests__/`
+
+33 componentes con cobertura de tests:
+
+| Archivo | Componente |
+|---------|-----------|
+| `Badge.test.tsx` | Badge |
+| `Button.test.tsx` | Button |
+| `Input.test.tsx` | Input |
+| `Modal.test.tsx` | Modal |
+| `AlertModal.test.tsx` | AlertModal |
+| `CategoryTabs.test.tsx` | CategoryTabs |
+| `MenuComponents.test.tsx` | MenuComponents |
+| `OrderTicket.test.tsx` | OrderTicket |
+| `TableGrid.test.tsx` | TableGrid |
+| `TableComponent.test.tsx` | TableComponent |
+| `TableCard.test.tsx` | TableCard |
+| `TableMergeBar.test.tsx` | TableMergeBar |
+| `TableOrdersModal.test.tsx` | TableOrdersModal |
+| `KDSColumn.test.tsx` | KDSColumn |
+| `KpiGrid.test.tsx` | KpiGrid |
+| `LiveFlowMonitor.test.tsx` | LiveFlowMonitor |
+| `BillAlertIsland.test.tsx` | BillAlertIsland |
+| `StaleOrdersAlert.test.tsx` | StaleOrdersAlert |
+| `PreparingOrdersList.test.tsx` | PreparingOrdersList |
+| `PendingOrderCard.test.tsx` | PendingOrderCard |
+| `OrderGroupCard.test.tsx` | OrderGroupCard |
+| `ReadyOrdersBanner.test.tsx` | ReadyOrdersBanner |
+| `OrderTracker.test.tsx` | OrderTracker |
+| `RatingModal.test.tsx` | RatingModal |
+| `PortalMenuItemCard.test.tsx` | PortalMenuItemCard |
+| `PaymentSlideOver.test.tsx` | PaymentSlideOver |
+| `CuentaSheet.test.tsx` | CuentaSheet |
+| `DashboardComponents.test.tsx` | DashboardComponents |
+| `DynamicThemeWrapper.test.tsx` | DynamicThemeWrapper |
+| `RestaurantThemeProvider.test.tsx` | RestaurantThemeProvider |
+| `HeaderStat.test.tsx` | HeaderStat |
+| `PremiumHeader.test.tsx` | PremiumHeader |
+| `SkeletonLoader.test.tsx` | SkeletonLoader |
+| `utils.test.ts` | Utilidades de UI (`cn`, `formatPrice`) |
+
+### 10.3 Paquete `@menu-bites/store` — `packages/store/src/__tests__/`
+
+| Archivo | Dominio cubierto |
+|---------|-----------------|
+| `store.test.ts` | `useAuthStore`: `setUser`, `logout`, cifrado AES de persistencia en localStorage |
+
+### 10.4 Aplicaciones — Tests de nivel de app
+
+| Archivo | Aplicación | Dominio cubierto |
+|---------|-----------|-----------------|
+| `apps/cashier-dashboard/src/__tests__/proxy.test.ts` | cashier-dashboard | Proxy de autenticación y reenvío de rutas |
+| `apps/mobile/__tests__/dashboard.test.ts` | mobile | Pantalla de dashboard móvil |
+| `apps/mobile/__tests__/reportUtils.test.ts` | mobile | Utilidades de generación de reportes |
+| `apps/mobile/__tests__/utils.test.ts` | mobile | Utilidades generales de la app móvil |
+
+### 10.5 Supabase Edge Functions
+
+| Archivo | Dominio cubierto |
+|---------|-----------------|
+| `Producto/supabase/functions/__tests__/manage-users.test.ts` | Edge Function de gestión de usuarios (creación, actualización de roles, eliminación) |
+
+### 10.6 Tests E2E (Playwright) — `Producto/e2e/`
+
+| Archivo | Flujo cubierto |
+|---------|---------------|
+| `admin-login.spec.ts` | Flujo completo de autenticación de administrador |
+| `customer-portal.spec.ts` | Flujo de cliente: QR, menú, carrito, pedido |

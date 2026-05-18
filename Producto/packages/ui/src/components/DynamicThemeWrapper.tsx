@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * DynamicThemeWrapper — Wrapper de tema para apps operacionales (bar, waiter, kitchen, cashier).
+ * Combina tres fuentes de tema en orden de prioridad:
+ * 1. Caché localStorage (carga síncrona para anti-FOUC)
+ * 2. Suscripción Realtime vía useThemeSync (actualización en vivo)
+ * 3. Evento 'admin-theme-preview' (previsualización instantánea desde el laboratorio de branding)
+ */
+
 import React, { useEffect, useState } from "react";
 import { useAuthStore } from "@menu-bites/store";
 import { useThemeSync } from "@menu-bites/auth";
@@ -45,6 +53,14 @@ export const DynamicThemeWrapper = ({ appKey, children }: DynamicThemeWrapperPro
         localStorage.setItem(cacheKey, JSON.stringify(liveTheme));
       } catch (e) {
         console.error(`[ThemeWrapper-${appKey}] Error al guardar en caché:`, e);
+      }
+    } else if (liveTheme === null && user?.restaurantId) {
+      // Limpia el caché solo si el restaurantId era conocido y la BD no devolvió tema
+      setTheme(undefined);
+      try {
+        localStorage.removeItem(cacheKey);
+      } catch (e) {
+        console.error(`[ThemeWrapper-${appKey}] Error al limpiar caché:`, e);
       }
     }
   }, [liveTheme, cacheKey, appKey]);

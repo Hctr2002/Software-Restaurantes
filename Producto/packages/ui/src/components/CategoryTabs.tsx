@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * CategoryTabs — Pestañas de navegación por categorías del menú.
+ * Usado en el portal del cliente y en el KDS para filtrar ítems por categoría.
+ */
+
 import React from "react";
 import { cn } from "../lib/utils";
 

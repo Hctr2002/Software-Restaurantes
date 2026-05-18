@@ -36,7 +36,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <DashboardShell title="Panel Principal" subtitle="Resumen ejecutivo del ecosistema">
+    <DashboardShell title="Principal" subtitle="Resumen">
       <AnimatePresence>
         {error && (
           <motion.div 

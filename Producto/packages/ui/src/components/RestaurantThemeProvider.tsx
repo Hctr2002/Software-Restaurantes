@@ -1,19 +1,17 @@
 "use client";
 
-import React, { useEffect } from "react";
+/**
+ * RestaurantThemeProvider — Proveedor de tema dinámico del restaurante.
+ * Convierte los colores hex del restaurante a tokens HSL y los inyecta como
+ * CSS Custom Properties en document.documentElement (isGlobal=true) o en un
+ * contenedor local. También carga fuentes Google Fonts de forma dinámica.
+ * hexToHslValues: convierte #RRGGBB a "H S% L%" para uso directo en Tailwind.
+ */
 
-export interface RestaurantTheme {
-  primaryColor: string;
-  secondaryColor: string;
-  backgroundColor: string;
-  accentColor: string;
-  textColor: string;
-  cardBackground: string;
-  fontTitle?: string;
-  fontBody?: string;
-  fontAccent?: string;
-  logoUrl?: string | null;
-}
+import React, { useEffect } from "react";
+import type { RestaurantTheme } from "@menu-bites/auth";
+
+export type { RestaurantTheme };
 
 interface Props {
   theme?: RestaurantTheme | null;
@@ -27,6 +25,11 @@ const adjustHslLightness = (hslStr: string, delta: number): string => {
   const l = Math.min(97, Math.max(3, parseInt(lRaw) + delta));
   return `${h} ${s} ${l}%`;
 };
+
+// Regex para validar colores hex de 6 dígitos y prevenir CSS injection
+const HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
+
+const safeHex = (color: string): string => (HEX_COLOR_RE.test(color) ? color : "#000000");
 
 // Función para convertir colores hexadecimales a valores HSL puros
 export const hexToHslValues = (hex: string) => {
@@ -134,22 +137,22 @@ export const RestaurantThemeProvider = ({ theme, children, isGlobal = false }: P
     }
 
     try {
-      const cardHsl = hexToHslValues(theme.cardBackground);
+      const cardHsl = hexToHslValues(safeHex(theme.cardBackground));
       const cardL   = parseInt(cardHsl.split(' ')[2]);
       // Muted: superficie sutil derivada del card (±6 puntos de luminosidad)
       const mutedHsl = adjustHslLightness(cardHsl, cardL > 50 ? -6 : 6);
       // Border: aún más sutil que muted (±10 puntos)
       const borderHsl = adjustHslLightness(cardHsl, cardL > 50 ? -10 : 10);
       // Muted-foreground: textColor atenuado (±20 puntos hacia el centro)
-      const textHsl  = hexToHslValues(theme.textColor);
+      const textHsl  = hexToHslValues(safeHex(theme.textColor));
       const textL    = parseInt(textHsl.split(' ')[2]);
       const mutedFgHsl = adjustHslLightness(textHsl, textL > 50 ? -20 : 20);
 
       const colors = {
-        "--primary": hexToHslValues(theme.primaryColor),
-        "--secondary": hexToHslValues(theme.secondaryColor),
-        "--background": hexToHslValues(theme.backgroundColor),
-        "--accent": hexToHslValues(theme.accentColor),
+        "--primary": hexToHslValues(safeHex(theme.primaryColor)),
+        "--secondary": hexToHslValues(safeHex(theme.secondaryColor)),
+        "--background": hexToHslValues(safeHex(theme.backgroundColor)),
+        "--accent": hexToHslValues(safeHex(theme.accentColor)),
         "--card": cardHsl,
         "--foreground": textHsl,
         // --- Tokens Derivados ---

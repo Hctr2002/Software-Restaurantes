@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * TableOrdersModal — Modal de detalle de pedidos activos de una mesa.
+ * Muestra ítems de cocina y bar separados, tiempos de espera y acción de entrega.
+ * Se abre desde TableCard cuando el garzón selecciona una mesa ocupada.
+ */
+
 import React from "react";
 import { X, Receipt, Clock, CheckCircle2, Utensils, Beer, Timer } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";

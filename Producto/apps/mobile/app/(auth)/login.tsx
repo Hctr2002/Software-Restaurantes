@@ -11,10 +11,14 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { Mail, Lock, LogIn, ChefHat, Eye, EyeOff } from 'lucide-react-native';
+import { Mail, Lock, LogIn, Utensils, Eye, EyeOff } from 'lucide-react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
+
+const EMERALD = '#10b981';
+const MUTED = 'rgba(255,255,255,0.4)';
+const GLASS = 'rgba(255,255,255,0.05)';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -30,46 +34,44 @@ export default function LoginScreen() {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       Alert.alert('Error de acceso', 'Credenciales inválidas o problema de servidor');
       setLoading(false);
-    } else {
-      // AuthContext will handle navigation via _layout observer
     }
+    // El AuthContext maneja la navegación al iniciar sesión correctamente
   };
 
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
-      
-      {/* Background Decor */}
-      <View style={styles.bgCircle1} />
-      <View style={styles.bgCircle2} />
+
+      {/* Blobs de fondo — igual que la landing */}
+      <View style={styles.bgBlob1} />
+      <View style={styles.bgBlob2} />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.formContainer}
       >
         <Animated.View entering={FadeInDown.duration(800)} style={styles.header}>
-          <View style={styles.logoContainer}>
-            <ChefHat color={MB_COLORS.brandAccent} size={48} />
+          <View style={styles.logoBadge}>
+            <Utensils color="#020617" size={32} />
           </View>
-          <Text style={styles.title}>Menu Bites</Text>
-          <Text style={styles.subtitle}>Gourmet Experience Manager</Text>
+          <Text style={styles.title}>
+            Menu<Text style={styles.titleAccent}>Bites</Text>
+          </Text>
+          <Text style={styles.subtitle}>Acceso para personal del restaurante</Text>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).duration(800)} style={styles.inputSection}>
           <View style={styles.inputWrapper}>
-            <Mail color={MB_COLORS.muted} size={20} style={styles.inputIcon} />
+            <Mail color={MUTED} size={20} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Email"
-              placeholderTextColor={MB_COLORS.muted}
+              placeholderTextColor={MUTED}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -78,24 +80,22 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.inputWrapper}>
-            <Lock color={MB_COLORS.muted} size={20} style={styles.inputIcon} />
+            <Lock color={MUTED} size={20} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Contraseña"
-              placeholderTextColor={MB_COLORS.muted}
+              placeholderTextColor={MUTED}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setShowPassword(!showPassword)}
               style={styles.eyeIcon}
             >
-              {showPassword ? (
-                <EyeOff color={MB_COLORS.muted} size={20} />
-              ) : (
-                <Eye color={MB_COLORS.muted} size={20} />
-              )}
+              {showPassword
+                ? <EyeOff color={MUTED} size={20} />
+                : <Eye color={MUTED} size={20} />}
             </TouchableOpacity>
           </View>
 
@@ -123,7 +123,7 @@ export default function LoginScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeIn.delay(600)} style={styles.footer}>
-          <Text style={styles.versionText}>v1.1.0 Premium Access</Text>
+          <Text style={styles.versionText}>v1.1.0 · Menu Bites Staff</Text>
         </Animated.View>
       </KeyboardAvoidingView>
     </View>
@@ -135,70 +135,82 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#020617',
   },
-  bgCircle1: {
+
+  // Fondo — mismos blobs que la landing
+  bgBlob1: {
     position: 'absolute',
-    top: -100,
-    right: -100,
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: MB_COLORS.brandAccent,
-    opacity: 0.1,
+    top: -120,
+    right: -120,
+    width: 320,
+    height: 320,
+    borderRadius: 160,
+    backgroundColor: EMERALD,
+    opacity: 0.07,
   },
-  bgCircle2: {
+  bgBlob2: {
     position: 'absolute',
-    bottom: -50,
-    left: -50,
-    width: 250,
-    height: 250,
-    borderRadius: 125,
-    backgroundColor: MB_COLORS.sage,
-    opacity: 0.1,
+    bottom: -80,
+    left: -80,
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    backgroundColor: EMERALD,
+    opacity: 0.05,
   },
+
   formContainer: {
     flex: 1,
     justifyContent: 'center',
     padding: MB_SPACING.xl,
   },
+
+  // Encabezado / logo
   header: {
     alignItems: 'center',
     marginBottom: MB_SPACING.xxl,
   },
-  logoContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: MB_COLORS.glassHeavy,
+  logoBadge: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    backgroundColor: EMERALD,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: MB_SPACING.md,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    shadowColor: EMERALD,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
   },
   title: {
     fontSize: 32,
-    fontWeight: '800',
-    color: MB_COLORS.cream,
-    letterSpacing: 1,
+    fontWeight: '900',
+    color: 'white',
+    letterSpacing: -1,
+  },
+  titleAccent: {
+    color: EMERALD,
   },
   subtitle: {
-    fontSize: 14,
-    color: MB_COLORS.muted,
+    fontSize: 13,
+    color: MUTED,
     marginTop: MB_SPACING.xs,
-    fontStyle: 'italic',
   },
+
+  // Campos de entrada
   inputSection: {
     gap: MB_SPACING.md,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: MB_COLORS.glass,
+    backgroundColor: GLASS,
     borderRadius: MB_RADIUS.md,
     paddingHorizontal: MB_SPACING.md,
     height: 56,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   inputIcon: {
     marginRight: MB_SPACING.sm,
@@ -208,46 +220,55 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: MB_COLORS.cream,
+    color: 'white',
     fontSize: 16,
   },
+
+  // Botón de inicio de sesión
   loginButton: {
     flexDirection: 'row',
-    backgroundColor: MB_COLORS.brandAccent,
+    backgroundColor: EMERALD,
     height: 56,
     borderRadius: MB_RADIUS.md,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: MB_SPACING.md,
-    shadowColor: MB_COLORS.brandAccent,
+    shadowColor: EMERALD,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
   },
   disabledButton: {
     opacity: 0.7,
   },
   loginButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '700',
+    color: '#020617',
+    fontSize: 16,
+    fontWeight: '900',
+    letterSpacing: 0.5,
   },
+
+  // Enlace de contraseña olvidada
   forgotButton: {
     alignItems: 'center',
     paddingVertical: MB_SPACING.sm,
   },
   forgotText: {
-    color: MB_COLORS.muted,
-    fontSize: 14,
-    textDecorationLine: 'underline',
+    color: EMERALD,
+    fontSize: 13,
+    fontWeight: '600',
+    opacity: 0.8,
   },
+
+  // Pie de página
   footer: {
     marginTop: MB_SPACING.xxl,
     alignItems: 'center',
   },
   versionText: {
-    color: MB_COLORS.muted,
-    fontSize: 12,
+    color: 'rgba(255,255,255,0.2)',
+    fontSize: 11,
+    letterSpacing: 0.5,
   },
 });

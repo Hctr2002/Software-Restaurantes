@@ -1,3 +1,9 @@
+/**
+ * button.tsx — Primitivo Button basado en Radix UI Slot y class-variance-authority.
+ * Variantes: default, destructive, outline, secondary, ghost, link.
+ * Tamaños: default, sm, lg, icon.
+ */
+
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";

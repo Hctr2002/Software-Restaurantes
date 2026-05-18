@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * CuentaSheet (portal/ui) — Versión del componente CuentaSheet para @menu-bites/ui.
+ * Hoja deslizable con el resumen de pedidos activos de la mesa formateados en CLP.
+ * Expuesto desde el package para reutilización en múltiples apps.
+ */
+
 import { ClipboardList, X } from "lucide-react";
 import { Order } from "@menu-bites/auth";
 import { PortalHeading, PortalText, PortalCard } from "./primitives";

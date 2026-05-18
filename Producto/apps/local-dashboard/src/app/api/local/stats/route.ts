@@ -30,37 +30,39 @@ export async function GET(req: NextRequest) {
   const now = new Date();
   const db = createServiceClient();
 
-  // Fetch delivered orders of today — use unit_price (snapshot at order time)
+  // Órdenes entregadas del día — usa unit_price (precio al momento del pedido)
   const { data: todayOrders } = await db
     .from("orders")
-    .select("id, order_items(id, unit_price, menu_items(name))")
+    .select("id, order_items(id, unit_price, quantity, menu_items(name))")
     .eq("restaurant_id", restaurantId)
     .in("status", ["DELIVERED", "COMPLETED"])
     .gte("createdAt", dayStart(now));
 
-  // Fetch delivered orders of this month
+  // Órdenes entregadas del mes
   const { data: monthOrders } = await db
     .from("orders")
-    .select("id, order_items(id, unit_price)")
+    .select("id, order_items(id, unit_price, quantity)")
     .eq("restaurant_id", restaurantId)
     .in("status", ["DELIVERED", "COMPLETED"])
     .gte("createdAt", monthStart(now));
 
-  // Calculate ingresos del día
+  // Cálculo de ingresos del día
   const ingresos_dia = (todayOrders ?? []).reduce((sum: number, order: any) => {
-    return sum + (order.order_items ?? []).reduce((s: number, item: any) => s + Number(item.unit_price ?? 0), 0);
+    return sum + (order.order_items ?? []).reduce((s: number, item: any) =>
+      s + (Number(item.unit_price ?? 0) * Number(item.quantity ?? 1)), 0);
   }, 0);
 
-  // Calculate ingresos del mes
+  // Cálculo de ingresos del mes
   const ingresos_mes = (monthOrders ?? []).reduce((sum: number, order: any) => {
-    return sum + (order.order_items ?? []).reduce((s: number, item: any) => s + Number(item.unit_price ?? 0), 0);
+    return sum + (order.order_items ?? []).reduce((s: number, item: any) =>
+      s + (Number(item.unit_price ?? 0) * Number(item.quantity ?? 1)), 0);
   }, 0);
 
-  // Ticket promedio del día
+  // Ticket promedio diario
   const count_dia = todayOrders?.length ?? 0;
   const ticket_promedio = count_dia > 0 ? Math.round(ingresos_dia / count_dia) : 0;
 
-  // Top 3 items más pedidos hoy
+  // Top 3 ítems más pedidos hoy
   const itemCount: Record<string, { name: string; count: number }> = {};
   (todayOrders ?? []).forEach((order: any) => {
     (order.order_items ?? []).forEach((item: any) => {

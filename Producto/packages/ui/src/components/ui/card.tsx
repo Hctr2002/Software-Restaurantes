@@ -1,3 +1,8 @@
+/**
+ * card.tsx — Componente de tarjeta base con sub-componentes (CardHeader, CardContent, CardFooter, etc.).
+ * Usado como contenedor visual primario en todos los dashboards.
+ */
+
 import * as React from "react";
 import { cn } from "../../lib/utils";
 

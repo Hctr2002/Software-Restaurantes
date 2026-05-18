@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * PreparingOrdersList — Lista compacta de pedidos en preparación (PREPARING).
+ * Usada en la columna central del terminal del garzón para seguimiento de pedidos en curso.
+ */
+
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Order } from "../dashboard/dashboardTypes";

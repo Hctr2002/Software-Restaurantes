@@ -164,7 +164,7 @@ export default function UsersPage() {
   );
 
   return (
-    <DashboardShell title="Directorio" subtitle="Control de Identidades y Privilegios">
+    <DashboardShell title="Directorio" subtitle="Usuarios Globales">
       {/* Notificación de Error Estilizada */}
       <AnimatePresence>
         {error && (

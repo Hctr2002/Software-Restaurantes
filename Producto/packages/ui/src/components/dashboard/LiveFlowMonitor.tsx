@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * LiveFlowMonitor — Monitor de flujo de pedidos en tiempo real para el dashboard.
+ * Muestra los pedidos activos con su tiempo transcurrido y estado (PENDING, PREPARING, READY).
+ * Resalta pedidos que superan el umbral de tiempo de alerta.
+ */
+
 import React from "react";
 import { Flame, Timer } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";

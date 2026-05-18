@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * PortalMenuItemCard — Tarjeta de ítem del menú para el portal del cliente.
+ * Hereda tipografías y colores del tema dinámico del restaurante.
+ * Muestra imagen, nombre, descripción, precio y controles de cantidad +/−.
+ * Las animaciones de entrada se controlan por el contenedor padre (variants hidden/show).
+ */
+
 import { motion, AnimatePresence } from "framer-motion";
 import { Minus, Plus } from "lucide-react";
 import { getPublicImageUrl, MenuItem } from "@menu-bites/auth";

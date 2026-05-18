@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * KpiGrid — Grilla de métricas KPI para el dashboard del restaurante.
+ * Muestra ingresos del día, del mes, ticket promedio y total de pedidos.
+ * Anima la entrada de las tarjetas con framer-motion (stagger).
+ */
+
 import React from "react";
 import { motion, Variants } from "framer-motion";
 import { Wallet, TrendingUp, ReceiptText, ClipboardList } from "lucide-react";

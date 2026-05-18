@@ -15,14 +15,14 @@ export function useLocalDashboard() {
   const { user } = useAuthStore();
   const restaurantId = user?.restaurantId;
 
-  // Hooks de tiempo real centralizados
+  // Hooks de tiempo real centralizados desde @menu-bites/auth
   const { orders, loading: ordersLoading } = useRealtimeOrders(restaurantId);
   const { stats, loading: statsLoading } = useRealtimeStats(restaurantId);
   const { tables, loading: tablesLoading } = useTables(restaurantId);
 
   const loading = ordersLoading || statsLoading || tablesLoading;
 
-  const activeOrdersCount = orders.filter(o => ["PENDING", "PREPARING"].includes(o.status)).length;
+  const activeOrdersCount = orders.filter(o => ["PENDING", "VALIDATED", "PREPARING", "READY"].includes(o.status)).length;
 
   return {
     user,

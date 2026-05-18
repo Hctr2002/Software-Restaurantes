@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * TableCard — Tarjeta de mesa para la vista de mesas del terminal del garzón.
+ * Muestra el número, estado, indicadores de pedidos activos y botón de fusión.
+ * Se resalta visualmente según el estado: OCCUPIED (primary), CLEANING (warning), etc.
+ */
+
 import React from "react";
 import { CheckCircle, Hash, Link2 } from "lucide-react";
 import { motion } from "framer-motion";

@@ -1,11 +1,21 @@
 "use client";
 
+/**
+ * useMenuHooks — Hooks de menú y categorías en tiempo real.
+ * useMenu: retorna los ítems activos y categorías activas del restaurante,
+ * ambos suscritos a cambios en tiempo real vía useRealtimeSync.
+ */
+
 import { useCallback } from "react";
 import { supabase } from "../index";
 import type { MenuItem, Category } from "../types";
 import { mapMenuItem, mapCategory } from "../utils";
 import { useRealtimeSync } from "./useRealtimeSync";
 
+/**
+ * Retorna los ítems activos y categorías activas del restaurante suscritos en tiempo real.
+ * Aplica mapMenuItem / mapCategory para convertir snake_case a camelCase.
+ */
 export function useMenu(restaurantId: string | undefined) {
   const fetchMenu = useCallback(async () => {
     if (!restaurantId) return { data: [], error: null };

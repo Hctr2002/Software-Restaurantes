@@ -94,3 +94,5 @@ jspm_packages/
 
 # others
 Entrega 1.pdf
+# Test coverage reports
+coverage/

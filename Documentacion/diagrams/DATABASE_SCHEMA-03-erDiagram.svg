@@ -28,26 +28,30 @@
 <polyline class="er-relationship" data-entity1="INVENTORY" data-entity2="MENU_ITEM_INGREDIENT" data-cardinality1="one" data-cardinality2="zero-many" data-identifying="true" data-label="es insumo de" points="628.454,102.66666666666666 878.692,102.66666666666666" fill="none" stroke="var(--_line)" stroke-width="1" />
 <polyline class="er-relationship" data-entity1="INVENTORY" data-entity2="MENU_ITEM_EXTRA" data-cardinality1="one" data-cardinality2="zero-many" data-identifying="true" data-label="vinculado a" points="628.454,165.33333333333331 638.454,165.33333333333331 638.454,416.9666666666667 878.692,416.9666666666667" fill="none" stroke="var(--_line)" stroke-width="1" />
 <g class="entity" data-id="CATEGORY" data-label="CATEGORY">
-  <rect x="40" y="342" width="179.79999999999998" height="166" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
-  <rect x="40" y="342" width="179.79999999999998" height="34" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
-  <text x="129.89999999999998" y="359" text-anchor="middle" font-size="13" font-weight="700" fill="var(--_text)" dy="4.55">CATEGORY</text>
-  <line x1="40" y1="376" x2="219.79999999999998" y2="376" stroke="var(--_node-stroke)" stroke-width="0.75" />
-  <rect x="46" y="380" width="22.31" height="14" rx="2" ry="2" fill="var(--_key-badge)" />
-  <text x="57.155" y="387" text-anchor="middle" dy="0.35em" font-size="9" font-weight="600" fill="var(--_text-sec)">PK</text>
-  <text x="76.31" y="387" class="mono" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-muted)">uuid</tspan></text>
-  <text x="211.79999999999998" y="387" class="mono" text-anchor="end" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-sec)">id</tspan></text>
-  <text x="48" y="409" class="mono" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-muted)">string</tspan></text>
-  <text x="211.79999999999998" y="409" class="mono" text-anchor="end" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-sec)">name</tspan></text>
-  <rect x="46" y="424" width="22.31" height="14" rx="2" ry="2" fill="var(--_key-badge)" />
-  <text x="57.155" y="431" text-anchor="middle" dy="0.35em" font-size="9" font-weight="600" fill="var(--_text-sec)">FK</text>
-  <text x="76.31" y="431" class="mono" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-muted)">uuid</tspan></text>
-  <text x="211.79999999999998" y="431" class="mono" text-anchor="end" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-sec)">restaurant_id</tspan></text>
-  <text x="48" y="453" class="mono" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-muted)">boolean</tspan></text>
-  <text x="211.79999999999998" y="453" class="mono" text-anchor="end" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-sec)">is_active</tspan></text>
-  <text x="48" y="475" class="mono" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-muted)">datetime</tspan></text>
-  <text x="211.79999999999998" y="475" class="mono" text-anchor="end" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-sec)">createdAt</tspan></text>
-  <text x="48" y="497" class="mono" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-muted)">datetime</tspan></text>
-  <text x="211.79999999999998" y="497" class="mono" text-anchor="end" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-sec)">updatedAt</tspan></text>
+  <rect x="40" y="331" width="179.79999999999998" height="188" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="40" y="331" width="179.79999999999998" height="34" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="129.89999999999998" y="348" text-anchor="middle" font-size="13" font-weight="700" fill="var(--_text)" dy="4.55">CATEGORY</text>
+  <line x1="40" y1="365" x2="219.79999999999998" y2="365" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <rect x="46" y="369" width="22.31" height="14" rx="2" ry="2" fill="var(--_key-badge)" />
+  <text x="57.155" y="376" text-anchor="middle" dy="0.35em" font-size="9" font-weight="600" fill="var(--_text-sec)">PK</text>
+  <text x="76.31" y="376" class="mono" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-muted)">uuid</tspan></text>
+  <text x="211.79999999999998" y="376" class="mono" text-anchor="end" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-sec)">id</tspan></text>
+  <text x="48" y="398" class="mono" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-muted)">string</tspan></text>
+  <text x="211.79999999999998" y="398" class="mono" text-anchor="end" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-sec)">name</tspan></text>
+  <rect x="46" y="413" width="22.31" height="14" rx="2" ry="2" fill="var(--_key-badge)" />
+  <text x="57.155" y="420" text-anchor="middle" dy="0.35em" font-size="9" font-weight="600" fill="var(--_text-sec)">FK</text>
+  <text x="76.31" y="420" class="mono" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-muted)">uuid</tspan></text>
+  <text x="211.79999999999998" y="420" class="mono" text-anchor="end" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-sec)">restaurant_id</tspan></text>
+  <text x="48" y="442" class="mono" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-muted)">boolean</tspan></text>
+  <text x="211.79999999999998" y="442" class="mono" text-anchor="end" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-sec)">is_active</tspan></text>
+  <g><title>KITCHEN o BAR</title>
+  <text x="48" y="464" class="mono" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-muted)">enum</tspan></text>
+  <text x="211.79999999999998" y="464" class="mono" text-anchor="end" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-sec)">target_station</tspan></text>
+  </g>
+  <text x="48" y="486" class="mono" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-muted)">datetime</tspan></text>
+  <text x="211.79999999999998" y="486" class="mono" text-anchor="end" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-sec)">createdAt</tspan></text>
+  <text x="48" y="508" class="mono" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-muted)">datetime</tspan></text>
+  <text x="211.79999999999998" y="508" class="mono" text-anchor="end" dy="0.35em" font-size="11" font-weight="400"><tspan fill="var(--_text-sec)">updatedAt</tspan></text>
 </g>
 <g class="entity" data-id="MENU_ITEM" data-label="MENU_ITEM">
   <rect x="448.65399999999994" y="298" width="179.79999999999998" height="254" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />

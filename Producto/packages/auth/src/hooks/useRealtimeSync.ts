@@ -1,10 +1,28 @@
 "use client";
 
+/**
+ * useRealtimeSync — Hook base de sincronización en tiempo real con Supabase Postgres Changes.
+ * Realiza un fetch inicial y luego suscribe a cambios de la tabla indicada filtrando por
+ * restaurant_id (u otro filtro personalizado). Incluye reconexión automática con backoff
+ * exponencial (hasta MAX_RETRIES intentos) ante errores de canal o timeouts.
+ *
+ * Todos los hooks de datos del sistema se construyen sobre este hook.
+ */
+
 import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "../index";
 
 const MAX_RETRIES = 5;
 
+/**
+ * Suscribe a cambios en tiempo real de una tabla Supabase y sincroniza el estado local.
+ * @param restaurantId - UUID del restaurante para el filtro por defecto. Puede ser undefined en rutas públicas.
+ * @param tableName - Nombre de la tabla Postgres a escuchar.
+ * @param fetchFn - Función que ejecuta el fetch inicial y ante cada cambio recibido.
+ * @param options.channelId - Sufijo para diferenciar canales sobre la misma tabla.
+ * @param options.filter - Filtro Realtime personalizado; si se omite usa restaurant_id.
+ * @param options.transform - Transformación aplicada al resultado crudo del fetch.
+ */
 export function useRealtimeSync<T>(
   restaurantId: string | undefined,
   tableName: string,

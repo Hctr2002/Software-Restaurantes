@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * OrderGroupCard — Tarjeta de pedido agrupado por mesa para el terminal del garzón.
+ * Fusiona sub-órdenes KITCHEN y BAR en una vista unificada.
+ * Expone acciones de validar, rechazar y entregar desde la interfaz del garzón.
+ */
+
 import React from "react";
 import { motion } from "framer-motion";
 import { CheckCircle, ChevronRight, Clock, Hash, Bell } from "lucide-react";
