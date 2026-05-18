@@ -7,7 +7,10 @@
     "dev": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -45,8 +48,10 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.10",
+    "@vitest/coverage-v8": "^2.1.0",
     "react-test-renderer": "19.1.0",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "vitest": "^2.1.0"
   },
   "overrides": {
     "react-native-worklets": "0.5.1",
