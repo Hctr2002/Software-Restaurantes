@@ -227,6 +227,69 @@ erDiagram
     }
 ```
 
+### ERD-4: Dominio de Soporte (KDS, Alertas y Notificaciones)
+
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#7c3aed',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#6d28d9',
+    'lineColor': '#a78bfa',
+    'secondaryColor': '#0f766e',
+    'tertiaryColor': '#f5f3ff',
+    'fontFamily': 'Inter, sans-serif',
+    'fontSize': '13px'
+  }
+}}%%
+erDiagram
+    RESTAURANT ||--|| KDS_SETTINGS : "configura"
+    RESTAURANT ||--o{ ALERT : "recibe"
+    RESTAURANT ||--o{ PUSH_SUBSCRIPTION : "gestiona"
+    RESTAURANT ||--o{ REVIEW : "acumula"
+    USER ||--o{ PUSH_SUBSCRIPTION : "suscribe"
+    ORDER ||--o| REVIEW : "origina"
+
+    KDS_SETTINGS {
+        uuid id PK
+        uuid restaurant_id UK "1:1 con restaurant"
+        jsonb settings "claves KITCHEN y BAR con thresholds, sounds, autoClear"
+        datetime created_at
+        datetime updated_at
+    }
+
+    ALERT {
+        uuid id PK
+        uuid restaurant_id FK
+        uuid user_id FK "nullable"
+        string type "STOCK_SHORTAGE o HELP_REQUEST"
+        string message
+        boolean is_read "false por defecto"
+        datetime created_at
+    }
+
+    PUSH_SUBSCRIPTION {
+        uuid id PK
+        uuid user_id FK "rol GARZON"
+        uuid restaurant_id
+        jsonb subscription "endpoint + keys VAPID del browser"
+        datetime created_at
+        datetime updated_at
+    }
+
+    REVIEW {
+        uuid id PK
+        uuid order_id
+        uuid restaurant_id FK
+        uuid table_id "nullable"
+        uuid session_id "nullable, fusión de mesas"
+        smallint rating "1-5 estrellas"
+        text comment "nullable"
+        datetime created_at
+    }
+```
+
 ---
 
 ## 2. DICCIONARIO DE DATOS
@@ -480,6 +543,22 @@ Ratings post-pago que el cliente deja desde el Customer Portal cuando su orden p
 
 **RLS:** INSERT público (clientes anónimos). SELECT restringido a usuarios autenticados del mismo restaurante.
 
+#### `alerts` (Sistema de Alertas Operativas)
+
+Registro de eventos que requieren atención inmediata del personal: stock bajo o solicitud de asistencia de un cliente.
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | UUID PK | |
+| `restaurant_id` | UUID FK | Tenant propietario |
+| `user_id` | UUID? FK | Usuario que generó la alerta (nullable para alertas automáticas de sistema) |
+| `type` | String | Tipo: `STOCK_SHORTAGE` (inventario crítico) o `HELP_REQUEST` (cliente pide ayuda en mesa) |
+| `message` | String | Descripción legible de la alerta |
+| `is_read` | Boolean | `false` por defecto; `true` cuando el personal la marca como atendida |
+| `created_at` | Timestamptz | Timestamp de creación de la alerta |
+
+**RLS:** INSERT y SELECT restringidos a usuarios autenticados del mismo restaurante. Las alertas de `HELP_REQUEST` son generadas por la sesión anónima del Customer Portal a través de una función RPC con `SECURITY DEFINER`.
+
 ---
 
 ## 3. INTEGRIDAD DE DATOS
@@ -537,27 +616,48 @@ flowchart LR
 
 ---
 
-## 6. MIGRACIONES APLICADAS EN RAMA feature/front_bar
+## 6. HISTORIAL DE MIGRACIONES
 
-### Migración 0009: Separación de Pedidos por Estación
+Las migraciones se almacenan en `Producto/supabase/migrations/` y se aplican con `supabase db push`.
 
-**Archivo:** `supabase/migrations/0009_order_station_split.sql`
-**Fecha:** 2026-05-10
+### Migración 20260515203801: Schema Completo (Remote Schema)
 
-**Propósito:** Eliminar la lógica de pedidos mixtos con flags cruzados y reemplazarla por sub-pedidos independientes por estación.
+**Archivo:** `supabase/migrations/20260515203801_remote_schema.sql`
+**Fecha:** 2026-05-15
 
-**Cambios aplicados:**
-- `ALTER TABLE orders ADD COLUMN station TEXT CHECK (station IN ('KITCHEN', 'BAR'))` — estación propietaria del pedido.
-- `ALTER TABLE orders ADD COLUMN parent_order_id UUID` — referencia al sub-pedido hermano (sin FK para compatibilidad con pgbouncer).
-- `CREATE INDEX idx_orders_station ON orders (station)`
-- `CREATE INDEX idx_orders_parent_order_id ON orders (parent_order_id)`
-- UPDATE de backfill: pedidos con un solo tipo de ítem reciben su `station` automáticamente.
+**Propósito:** Snapshot completo del esquema PostgreSQL generado desde Supabase. Incluye la creación de todos los objetos de base de datos del sistema en su estado actual.
 
-**Patrón de creación (nuevo):**
+**Objetos creados:**
+- Extensiones: `pg_stat_statements`, `pgcrypto`, `uuid-ossp`, `supabase_vault`
+- Enums: `OrderStatus`, `Role`, `StationType`, `SubscriptionStatus`, `TableStatus`
+- Tablas: `restaurants`, `plans`, `users`, `categories`, `menu_items`, `tables`, `orders`, `order_items`, `order_item_extras`, `inventories`, `menu_item_ingredients`, `menu_item_extras`, `restaurant_themes`, `kds_settings`, `alerts`, `push_subscriptions`, `reviews`
+- Índices de rendimiento para `orders.station`, `orders.parent_order_id`, `orders.table_id`, `orders.restaurant_id`
+- Políticas RLS en todas las tablas transaccionales
+- Trigger `tr_order_status_validation` — valida transiciones de estado del pedido
+- Función RPC `get_auth_restaurant_id()` — lee `restaurant_id` del JWT para las políticas RLS
+- Función RPC `get_auth_role()` — lee el rol del usuario desde el JWT
+
+**Separación dual-estación (incluida en este schema):**
 ```
 Cliente pide: [Hamburguesa (KITCHEN) + Jugo (BAR)]
 → INSERT orders (station='KITCHEN') → order_items [Hamburguesa]
 → INSERT orders (station='BAR', parent_order_id=<kitchen_id>) → order_items [Jugo]
 ```
 
-**Compatibilidad hacia atrás:** Pedidos con `station IS NULL` siguen siendo válidos. Los hooks de filtrado incluyen `OR station IS NULL` para no romper datos históricos.
+**Compatibilidad hacia atrás:** Pedidos con `station IS NULL` son válidos. Los hooks incluyen `OR station IS NULL` para datos históricos.
+
+---
+
+### Migración 20260515210000: Push Token en Usuarios
+
+**Archivo:** `supabase/migrations/20260515210000_add_push_token_to_users.sql`
+**Fecha:** 2026-05-15
+
+**Propósito:** Agregar soporte para notificaciones push nativas en la app mobile.
+
+**Cambio aplicado:**
+```sql
+ALTER TABLE users ADD COLUMN push_token TEXT;
+```
+
+Este token es el `ExpoPushToken` del dispositivo del usuario (formato: `ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxxxx]`). Permite enviar notificaciones push a través del servidor de Expo cuando una orden cambia de estado.
