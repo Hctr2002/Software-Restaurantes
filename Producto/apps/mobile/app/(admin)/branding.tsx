@@ -69,7 +69,7 @@ export default function BrandingScreen() {
       if (data) {
         setTheme(data);
       } else {
-        // Default theme if none exists
+        // Tema por defecto cuando el restaurante no tiene uno configurado
         setTheme({
           name: 'Default',
           primary_color: '#25B16B',

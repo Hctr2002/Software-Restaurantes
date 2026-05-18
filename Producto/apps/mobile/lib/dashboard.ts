@@ -38,14 +38,14 @@ function monthStart() {
 
 export async function fetchDashboardStats(restaurantId: string): Promise<DashboardStats> {
 
-  // Fetch ALL orders of today for flow and cycle metrics
+  // Todas las órdenes del día para métricas de flujo y tiempo de ciclo
   const { data: allTodayOrders } = await supabase
     .from('orders')
     .select('id, status, createdAt, ready_at, order_items(unit_price, quantity, menu_items(name))')
     .eq('restaurant_id', restaurantId)
     .gte('createdAt', dayStart());
 
-  // Fetch delivered/completed orders of this month (for revenue)
+  // Órdenes entregadas/completadas del mes (para ingresos)
   const { data: monthOrders } = await supabase
     .from('orders')
     .select('id, order_items(unit_price, quantity)')
@@ -53,14 +53,14 @@ export async function fetchDashboardStats(restaurantId: string): Promise<Dashboa
     .in('status', ['DELIVERED', 'COMPLETED'])
     .gte('createdAt', monthStart());
 
-  // Count all ACTIVE orders (in-progress, excluding terminal states)
+  // Conteo de órdenes activas (en progreso, excluye estados terminales)
   const { count: activosCount } = await supabase
     .from('orders')
     .select('*', { count: 'exact', head: true })
     .eq('restaurant_id', restaurantId)
     .in('status', ['PENDING', 'VALIDATED', 'PREPARING', 'READY']);
 
-  // Filter today's successful orders for revenue
+  // Órdenes exitosas del día para el cálculo de ingresos
   const todaySuccessful = (allTodayOrders ?? []).filter(o => ['DELIVERED', 'COMPLETED'].includes(o.status));
 
   const ingresos_dia = todaySuccessful.reduce((sum, order: any) => {
@@ -74,7 +74,7 @@ export async function fetchDashboardStats(restaurantId: string): Promise<Dashboa
   const count_dia = todaySuccessful.length;
   const ticket_promedio = count_dia > 0 ? Math.round(ingresos_dia / count_dia) : 0;
 
-  // Flow Counts
+  // Conteo por estado de flujo
   const flowCounts = {
     PENDING: (allTodayOrders ?? []).filter(o => o.status === 'PENDING').length,
     VALIDATED: (allTodayOrders ?? []).filter(o => o.status === 'VALIDATED').length,
@@ -82,7 +82,7 @@ export async function fetchDashboardStats(restaurantId: string): Promise<Dashboa
     READY: (allTodayOrders ?? []).filter(o => o.status === 'READY').length,
   };
 
-  // Avg Cycle Time (Today)
+  // Tiempo de ciclo promedio del día
   const deliveredWithTime = (allTodayOrders ?? []).filter(o => (o.status === 'DELIVERED' || o.status === 'READY') && o.ready_at && o.createdAt);
   const avgCycleMin = deliveredWithTime.length > 0
     ? Math.round(deliveredWithTime.reduce((s, o) => {

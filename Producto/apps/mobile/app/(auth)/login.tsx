@@ -40,14 +40,14 @@ export default function LoginScreen() {
       Alert.alert('Error de acceso', 'Credenciales inválidas o problema de servidor');
       setLoading(false);
     }
-    // AuthContext handles navigation on success
+    // El AuthContext maneja la navegación al iniciar sesión correctamente
   };
 
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Background blobs — igual que la landing */}
+      {/* Blobs de fondo — igual que la landing */}
       <View style={styles.bgBlob1} />
       <View style={styles.bgBlob2} />
 
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#020617',
   },
 
-  // Background — mismos blobs que la landing
+  // Fondo — mismos blobs que la landing
   bgBlob1: {
     position: 'absolute',
     top: -120,
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     padding: MB_SPACING.xl,
   },
 
-  // Header / logo
+  // Encabezado / logo
   header: {
     alignItems: 'center',
     marginBottom: MB_SPACING.xxl,
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     marginTop: MB_SPACING.xs,
   },
 
-  // Inputs
+  // Campos de entrada
   inputSection: {
     gap: MB_SPACING.md,
   },
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  // Button
+  // Botón de inicio de sesión
   loginButton: {
     flexDirection: 'row',
     backgroundColor: EMERALD,
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  // Links
+  // Enlace de contraseña olvidada
   forgotButton: {
     alignItems: 'center',
     paddingVertical: MB_SPACING.sm,
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
 
-  // Footer
+  // Pie de página
   footer: {
     marginTop: MB_SPACING.xxl,
     alignItems: 'center',
