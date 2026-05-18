@@ -28,6 +28,11 @@
         "^lint"
       ]
     },
+    "test": {
+      "dependsOn": [],
+      "outputs": ["coverage/**"],
+      "cache": false
+    },
     "dev": {
       "cache": false,
       "persistent": true
