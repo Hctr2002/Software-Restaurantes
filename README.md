@@ -68,7 +68,8 @@ Software-Restaurantes/
 │   ├── SECURITY_POSTURE.md
 │   ├── TEST_PLAN.md
 │   └── diagrams/           # SVGs generados automáticamente desde los .md
-├── Gestion/                # Planificación, integrantes y reportes de avance
+├── Gestion/                # Planificación e integrantes del equipo
+│   └── markdown/           # Reportes de avance e historias técnicas archivadas
 └── Producto/               # Código fuente del sistema (Monorepo Turborepo)
     ├── apps/
     │   ├── admin-dashboard/
@@ -553,6 +554,9 @@ Toda la documentación técnica está en la carpeta `Documentacion/`:
 | [USER_MANUAL.md](Documentacion/USER_MANUAL.md) | Manual de usuario para cada aplicación del ecosistema |
 | [SECURITY_POSTURE.md](Documentacion/SECURITY_POSTURE.md) | Modelo de defensa en profundidad y controles de seguridad |
 | [TEST_PLAN.md](Documentacion/TEST_PLAN.md) | Plan de pruebas: estrategia, criterios de aceptación y flujos E2E |
+| [SUGGESTED_TESTS.md](Documentacion/SUGGESTED_TESTS.md) | Casos de prueba detallados por ID y módulo |
+| [MANUAL_DEPLOY_VERCEL.md](Documentacion/MANUAL_DEPLOY_VERCEL.md) | Instrucciones paso a paso para deployment en Vercel |
+| [onboarding_manager.md](Documentacion/onboarding_manager.md) | Guía de configuración inicial para gerentes de restaurante |
 | [diagrams/index.html](Documentacion/diagrams/index.html) | Galería visual de todos los diagramas del proyecto |
 
 ---
