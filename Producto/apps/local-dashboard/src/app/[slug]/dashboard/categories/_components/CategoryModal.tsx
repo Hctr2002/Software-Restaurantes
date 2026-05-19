@@ -1,3 +1,7 @@
+/**
+ * CategoryModal — Modal de creación y edición de categorías.
+ * Permite configurar nombre, estación de preparación (KITCHEN o BAR) y estado activo.
+ */
 import React from "react";
 import { Modal, Button, Input } from "@menu-bites/ui";
 import { Loader2 } from "lucide-react";
@@ -32,7 +36,7 @@ export function CategoryModal({
           <Button
             variant="ghost"
             onClick={onClose}
-            className="text-foreground/50 hover:bg-white/5 hover:text-foreground rounded-xl font-bold uppercase tracking-widest text-[10px]"
+            className="text-foreground/50 hover:bg-foreground/5 hover:text-foreground rounded-xl font-bold uppercase tracking-widest text-[10px]"
           >
             Cancelar
           </Button>
@@ -57,7 +61,7 @@ export function CategoryModal({
           </label>
           <Input
             placeholder="Ej. Entradas, Bebidas, Postres"
-            className="bg-white/5 border-white/10 h-12 rounded-2xl focus-visible:ring-primary text-foreground font-medium uppercase italic"
+            className="bg-foreground/5 border-foreground/10 h-12 rounded-2xl focus-visible:ring-primary text-foreground font-medium uppercase italic"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
@@ -74,10 +78,8 @@ export function CategoryModal({
                 onClick={() => setForm({ ...form, target_station: station })}
                 className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${
                   form.target_station === station
-                    ? station === "BAR"
-                      ? "bg-purple-500/20 border-purple-500/60 text-purple-300"
-                      : "bg-primary/20 border-primary/60 text-primary"
-                    : "bg-white/5 border-white/10 text-foreground/40 hover:border-white/20"
+                    ? "bg-primary/20 border-primary/60 text-primary"
+                    : "bg-foreground/5 border-foreground/10 text-foreground/40 hover:border-foreground/20"
                 }`}
               >
                 {station === "KITCHEN" ? "Cocina" : "Barra"}
@@ -85,13 +87,13 @@ export function CategoryModal({
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5">
+        <div className="flex items-center gap-3 p-4 rounded-2xl bg-foreground/5 border border-foreground/5">
           <input
             type="checkbox"
             id="cat_active"
             checked={form.is_active}
             onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-            className="w-5 h-5 rounded-lg accent-primary border-white/10 bg-white/5 cursor-pointer"
+            className="w-5 h-5 rounded-lg accent-primary border-foreground/10 bg-foreground/5 cursor-pointer"
           />
           <label
             htmlFor="cat_active"

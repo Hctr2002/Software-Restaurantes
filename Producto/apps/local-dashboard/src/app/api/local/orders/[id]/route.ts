@@ -1,3 +1,7 @@
+/**
+ * /api/local/orders/[id] — Actualización de estado de una orden específica.
+ * PUT: Cambia el status a uno de los valores válidos del enum OrderStatus.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createServiceClient, ensureServiceConfig } from "@/lib/localApi";
 

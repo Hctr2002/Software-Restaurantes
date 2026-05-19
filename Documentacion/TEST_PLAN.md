@@ -27,8 +27,8 @@ graph TD
     classDef unit fill:#f59e0b,stroke:#d97706,color:#fff;
     classDef manual fill:#94a3b8,stroke:#64748b,color:#fff;
 
-    E2E["Tier 4: E2E — Playwright / Cypress\n(Flujos criticos de usuario)"]:::e2e
-    INT["Tier 3: Integracion — Supabase CLI\n(API + RLS + Realtime)"]:::int
+    E2E["Tier 4: E2E — Playwright\n(Flujos criticos de usuario)"]:::e2e
+    INT["Tier 3: Integracion — Vitest / Jest\n(Hooks Realtime, temas, RBAC)"]:::int
     UNIT["Tier 2: Unitarias — Vitest / Jest\n(Logica de negocio y utilitarios)"]:::unit
     MANUAL["Tier 1: Manual y Visual\n(UX, responsive, branding)"]:::manual
 
@@ -40,9 +40,25 @@ graph TD
 | Nivel | Enfoque | Herramienta | Responsable |
 |---|---|---|---|
 | **Unitarias** | Funciones puras, formateadores, cálculos | Vitest / Jest + RTL | Desarrollador |
-| **Integración** | Comunicación con Supabase, RLS, Realtime | Supabase CLI Test | Desarrollador / QA |
-| **E2E Funcional** | Flujos críticos de usuario completos | Playwright / Cypress | QA Engineer |
+| **Integración** | Hooks Realtime, temas dinámicos, RBAC | Vitest / Jest | Desarrollador / QA |
+| **E2E Funcional** | Flujos críticos de usuario completos | Playwright | QA Engineer |
 | **Manual / Visual** | Estética, UX, responsive, accesibilidad | Browser Testing | QA / Diseñador |
+
+### 1.1 Comandos de Ejecución
+
+```bash
+# Ejecutar todos los tests del monorepo (12 workspaces via Turborepo)
+cd Producto && npm test
+
+# Ejecutar tests de un workspace específico
+npx turbo test --filter="@menu-bites/auth"
+npx turbo test --filter="@menu-bites/ui"
+npx turbo test --filter="@menu-bites/store"
+
+# Pruebas E2E con Playwright (requiere apps corriendo)
+npm run test:e2e
+npm run test:e2e:ui
+```
 
 ---
 
@@ -50,7 +66,7 @@ graph TD
 
 ### Criterio de PASS (Release autorizado)
 
-- [ ] 100% de pruebas unitarias pasando (`npm run test`).
+- [ ] 100% de pruebas unitarias pasando (`cd Producto && npm test`).
 - [ ] 0 fallos en pruebas de integración de RLS (tenant leakage = 0).
 - [ ] Todos los flujos E2E críticos (Sección 3) pasan en Chromium y WebKit.
 - [ ] Sin errores de consola en rutas críticas.
@@ -123,30 +139,43 @@ sequenceDiagram
 3. Abrir el Customer Portal en otra pestaña.
 4. **Verificar** que el color cambió sin recargar la página.
 
+Los specs E2E se encuentran en `Producto/e2e/`:
+
+- `admin-login.spec.ts` — flujo de autenticación del administrador
+- `customer-portal.spec.ts` — portal público de cliente (sin autenticación requerida)
+
 ---
 
-## 4. PRUEBAS DE INTEGRACIÓN (Supabase RLS)
+## 4. PRUEBAS DE INTEGRACIÓN (Hooks y Servicios)
 
-Estas pruebas deben ejecutarse contra una instancia de Supabase de staging con datos de fixture.
-
-### 4.1 Aislamiento de Datos
+Las pruebas de integración están implementadas como suites Vitest/Jest en `packages/auth/src/__tests__/` y cubren la lógica de negocio que depende de la comunicación con Supabase.
 
 ```bash
-# Usando Supabase CLI para pruebas de RLS
-supabase test db --file tests/rls/tenant-isolation.sql
+npx turbo test --filter="@menu-bites/auth"
 ```
 
-Casos a cubrir:
-- Usuario de Restaurante A no puede SELECT en `orders` de Restaurante B.
-- Usuario `anon` puede SELECT en `menu_items` con `is_active=true`.
-- Usuario `anon` NO puede INSERT en `orders` sin pasar por la API.
-- `service_role` puede SELECT sin filtros (para procesos administrativos).
+### 4.1 Aislamiento de Datos (RLS)
+
+Casos cubiertos por los tests existentes:
+
+- Usuario de Restaurante A no puede leer datos de órdenes de Restaurante B (validado via hooks con cliente autenticado).
+- Usuario `anon` puede leer `menu_items` con `is_active=true` (validado en tests de portal público).
+- `service_role` tiene acceso irrestricto para procesos administrativos.
+- El hook `useRealtimeSync` setea correctamente el token de auth antes de suscribirse al canal Realtime.
 
 ### 4.2 Sincronización Realtime
 
-- Al hacer INSERT en `orders`, todos los subscribers reciben el evento en < 500ms.
-- Al hacer UPDATE de `table.help_requested`, el Waiter Terminal actualiza el mapa de mesas.
-- Al desconectar el canal y reconectar, el estado se reconcilia correctamente.
+Los hooks de Realtime (`useRealtimeOrders`, `useRealtimeStats`, `useRealtimeSync`) son probados en `packages/auth/src/__tests__/`. Casos cubiertos:
+
+- Al hacer INSERT en `orders`, el callback del subscriber es invocado correctamente.
+- Al hacer UPDATE de `table.help_requested`, el estado local del hook se actualiza sin refresco de página.
+- Al desconectar el canal y reconectar, el estado se reconcilia correctamente vía re-suscripción.
+
+### 4.3 Temas, Alertas y RBAC
+
+- Los tests de temas verifican que `useThemeSync` aplica las variables CSS correctas según el tema activo del restaurante.
+- Los tests de alertas verifican el comportamiento cuando una orden supera el umbral de tiempo configurado.
+- Los tests de RBAC verifican que los roles `GARZON`, `COCINA`, `CAJERO` y `BAR` acceden únicamente a las rutas autorizadas.
 
 ---
 
@@ -268,4 +297,32 @@ Casos a cubrir:
 | U-03 | `timeAgo(hace 90 min)` | Retorna "1h" |
 | U-04 | `LOW_STOCK_THRESHOLD` | Valor = 5 en todas las apps que lo importan |
 | U-05 | `ORDER_STATUS_LABEL["VALIDATED"]` | Retorna "Confirmado" |
-- **Volumen de datos:** Restaurante con 500 pedidos históricos. Verificar que la vista de reportes carga en < 2s con paginación.
+
+---
+
+## 9. INVENTARIO DE ARCHIVOS DE PRUEBA
+
+La suite total comprende **651 pruebas distribuidas en 12 workspaces**.
+
+| Workspace | Ruta | Archivos de test |
+|---|---|---|
+| `@menu-bites/auth` | `packages/auth/src/__tests__/` | 9 archivos |
+| `@menu-bites/ui` | `packages/ui/src/__tests__/` | 33 archivos |
+| `@menu-bites/store` | `packages/store/src/__tests__/` | 1 archivo |
+| apps (6 web apps) | `apps/*/src/__tests__/` | 7 archivos |
+| cashier proxy | `apps/cashier-dashboard/src/__tests__/` | 1 archivo |
+| mobile | `apps/mobile/__tests__/` | 3 archivos |
+| Supabase Edge Fn | `supabase/functions/__tests__/` | 1 archivo |
+| E2E | `Producto/e2e/` | 2 specs |
+| **Total** | | **651 pruebas, 12 workspaces** |
+
+Dominios cubiertos por workspace:
+
+- **`@menu-bites/auth` (9 archivos):** Hooks de Realtime, sincronización de temas, alertas de escalación, RBAC, utilidades (`formatCLP`, `timeAgo`, `diffMinutes`), constantes de estado.
+- **`@menu-bites/ui` (33 archivos):** Pruebas unitarias y de renderizado de cada componente compartido.
+- **`@menu-bites/store` (1 archivo):** Store Zustand con persistencia AES-encriptada en localStorage.
+- **Apps web (7 archivos):** Rutas protegidas y lógica específica de cada aplicación.
+- **Cashier proxy (1 archivo):** Proxy de autenticación de `cashier-dashboard` (`src/proxy.ts`).
+- **Mobile (3 archivos):** Componentes React Native de la app móvil.
+- **Supabase Edge Fn (1 archivo):** Edge Function `manage-users` — gestión de usuarios y roles via `service_role`.
+- **E2E (2 specs):** `admin-login.spec.ts` y `customer-portal.spec.ts` con Playwright.

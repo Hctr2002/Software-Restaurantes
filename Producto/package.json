@@ -6,6 +6,10 @@
     "dev:all": "dotenv -e .env -- turbo dev",
     "dev:mobile": "dotenv -e .env -- turbo dev --filter=menu-bites",
     "build": "dotenv -e .env -- turbo build",
+    "test": "turbo test",
+    "test:packages": "turbo test --filter=@menu-bites/*",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "lerna:version": "lerna version",
@@ -20,11 +24,12 @@
   "packageManager": "npm@10.2.4",
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "supabase/functions"
   ],
   "dependencies": {
     "@prisma/client": "^5.15.0",
-    "@supabase/supabase-js": "^2.103.0",
+    "@supabase/supabase-js": "^2.105.4",
     "@types/pg": "^8.20.0",
     "cross-spawn": "^7.0.6",
     "dotenv": "^17.4.1",

@@ -1,3 +1,8 @@
+/**
+ * constants.ts — Constantes operativas y etiquetas de estado compartidas entre todas las apps.
+ * Centraliza umbrales de stock crítico, tiempos de alerta y labels de estado en español.
+ */
+
 // Umbrales operativos compartidos entre todas las apps
 export const LOW_STOCK_THRESHOLD      = 5;   // inventory/page.tsx
 export const CRITICAL_STOCK_THRESHOLD = 5;   // kitchen-kds API

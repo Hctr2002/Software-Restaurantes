@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * useTableHooks — Hooks de mesas en tiempo real.
+ * useTable: suscribe a una mesa específica por ID.
+ * useTables: lista de todas las mesas del restaurante.
+ * useTableOrders: pedidos activos de una mesa (filtra por session_id si está disponible).
+ */
+
 import { useCallback } from "react";
 import { supabase } from "../index";
 import type { TableRecord, Order } from "../types";
@@ -50,27 +57,39 @@ export function useTables(restaurantId: string | undefined) {
   return { tables, loading, refetch };
 }
 
-export function useTableOrders(tableId: string | undefined) {
+/**
+ * Pedidos activos de una mesa (excluye REJECTED y COMPLETED).
+ * Si sessionId está disponible filtra por sesión para soportar múltiples turnos en la misma mesa.
+ */
+export function useTableOrders(tableId: string | undefined, sessionId?: string | null) {
   const fetchFn = useCallback(async () => {
     if (!tableId) return { data: [], error: null };
-    return supabase
+    
+    let query = supabase
       .from("orders")
       .select(`
         *,
         items:order_items(*, menu_item:menu_items(name))
-      `)
-      .eq("table_id", tableId)
+      `);
+      
+    if (sessionId) {
+      query = query.eq("session_id", sessionId);
+    } else {
+      query = query.eq("table_id", tableId);
+    }
+    
+    return query
       .not("status", "in", '("REJECTED","COMPLETED")')
       .order("createdAt", { ascending: false });
-  }, [tableId]);
+  }, [tableId, sessionId]);
 
   const { data: orders, loading, refetch } = useRealtimeSync<Order[]>(
     undefined,
     "orders",
     fetchFn,
-    {
-      channelId: `table-orders-${tableId ?? "none"}`,
-      filter: tableId ? `table_id=eq.${tableId}` : undefined,
+    { 
+      channelId: `table-orders-${sessionId || tableId}`,
+      filter: sessionId ? `session_id=eq.${sessionId}` : `table_id=eq.${tableId}`,
       transform: (data: any) => Array.isArray(data) ? data.map(mapOrder) : []
     }
   );

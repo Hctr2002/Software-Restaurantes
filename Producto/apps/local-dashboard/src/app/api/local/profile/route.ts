@@ -1,3 +1,8 @@
+/**
+ * /api/local/profile — Actualización del perfil del usuario ADMIN autenticado.
+ * PUT: Actualiza nombre (display_name) y/o contraseña del usuario de sesión actual.
+ * Usa el cliente de sesión para operar sobre el usuario autenticado, no el service role.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createSessionClient, ensureServiceConfig } from "@/lib/localApi";
 

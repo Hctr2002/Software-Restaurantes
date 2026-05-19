@@ -1,3 +1,7 @@
+/**
+ * CategoryTable — Vista de tabla de categorías para pantallas de escritorio (hidden en móvil).
+ * Muestra nombre, estación destino, estado y acciones por fila.
+ */
 import React from "react";
 import { Table, TableRow, TableCell, Badge, Button } from "@menu-bites/ui";
 import { Pencil, Trash2, Loader2 } from "lucide-react";

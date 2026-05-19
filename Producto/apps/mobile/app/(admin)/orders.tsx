@@ -11,13 +11,13 @@ import {
   ScrollView,
   Alert
 } from 'react-native';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 import { formatCurrency, timeAgo } from '../../lib/dashboard';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { ShoppingBag, ChevronRight, Filter } from 'lucide-react-native';
+import { ShoppingBag, ChevronRight } from 'lucide-react-native';
 import OrderDetailModal, { OrderStatus } from '../../components/OrderDetailModal';
 
 const STATUS_FILTER = [
@@ -31,7 +31,7 @@ const STATUS_FILTER = [
 
 export default function AdminOrdersScreen() {
   const { restaurantId } = useAuth();
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   // Pagination State
   const [orders, setOrders] = React.useState<any[]>([]);
   const [filteredOrders, setFilteredOrders] = React.useState<any[]>([]);
@@ -239,7 +239,7 @@ export default function AdminOrdersScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.navy }]}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={isLight ? 'dark-content' : 'light-content'} />
       <View style={styles.header}>
         <View>
           <Text style={[styles.headerTitle, { color: colors.text }]}>Gestión de Pedidos</Text>
@@ -317,7 +317,6 @@ export default function AdminOrdersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MB_COLORS.navy,
   },
   header: {
     flexDirection: 'row',
@@ -329,20 +328,17 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 26,
-    color: 'white',
     fontWeight: '900',
     letterSpacing: -0.5,
   },
   headerSubtitle: {
     fontSize: 12,
-    color: MB_COLORS.muted,
     fontWeight: '600',
     marginTop: 2,
   },
   filterContainer: {
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
   },
   filterScroll: {
     paddingHorizontal: MB_SPACING.lg,
@@ -352,34 +348,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
   },
-  filterChipActive: {
-    backgroundColor: MB_COLORS.brandAccent,
-    borderColor: MB_COLORS.brandAccent,
-  },
+  filterChipActive: {},
   filterText: {
-    color: MB_COLORS.muted,
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.5,
   },
-  filterTextActive: {
-    color: 'white',
-  },
+  filterTextActive: {},
   listContent: {
     padding: MB_SPACING.lg,
     paddingBottom: 100,
   },
   orderCard: {
-    backgroundColor: MB_COLORS.glass,
     borderRadius: MB_RADIUS.lg,
     padding: MB_SPACING.md,
     marginBottom: MB_SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.03)',
   },
   orderHeader: {
     flexDirection: 'row',
@@ -388,14 +374,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   tableText: {
-    color: 'white',
     fontSize: 18,
     fontWeight: '900',
     fontStyle: 'italic',
     textTransform: 'uppercase',
   },
   timeText: {
-    color: MB_COLORS.muted,
     fontSize: 12,
     fontWeight: '600',
     marginTop: 2,
@@ -416,17 +400,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.05)',
   },
   totalLabel: {
     flex: 1,
-    color: MB_COLORS.muted,
     fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',
   },
   totalAmount: {
-    color: 'white',
     fontSize: 16,
     fontWeight: '900',
     marginRight: 8,
@@ -438,14 +419,12 @@ const styles = StyleSheet.create({
     padding: 40,
   },
   loadingText: {
-    color: MB_COLORS.muted,
     marginTop: 12,
     fontSize: 12,
     fontWeight: '800',
     textTransform: 'uppercase',
   },
   emptyText: {
-    color: MB_COLORS.muted,
     fontSize: 14,
     fontStyle: 'italic',
   },

@@ -1,3 +1,7 @@
+/**
+ * AuthCallback — Procesa el retorno de autenticación OAuth o magic link de Supabase.
+ * Lee tokens del hash de la URL, establece la sesión y redirige al destino indicado.
+ */
 "use client";
 
 import { useEffect } from "react";

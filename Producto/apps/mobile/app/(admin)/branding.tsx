@@ -12,36 +12,41 @@ import {
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
-import { 
-  Palette, 
-  Type, 
-  Image as ImageIcon, 
-  Save, 
+import {
+  Palette,
+  Type,
+  Image as ImageIcon,
+  Save,
   RefreshCcw,
-  Check,
-  ChevronRight,
   Upload
 } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../constants/MB_Theme';
+import { MB_SPACING } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { PALETTE_TEMPLATES, PaletteTemplate } from '../../constants/Palettes';
 
 const TITLE_FONTS = [
-  'Outfit', 'Playfair Display', 'Cormorant Garamond', 'Cinzel', 
-  'Josefin Sans', 'Montserrat', 'Raleway', 'Bebas Neue', 'Abril Fatface', 'Roboto'
+  'Vollkorn', 'Playfair Display', 'Cormorant Garamond', 'Bodoni Moda', 'Cinzel',
+  'Orbitron', 'Syne', 'Outfit', 'Plus Jakarta Sans', 'Montserrat',
+  'Bebas Neue', 'Comfortaa', 'Cormorant Infant', 'Abril Fatface', 'Archivo Black',
 ];
 
 const BODY_FONTS = [
-  'Inter', 'Lato', 'Nunito', 'Poppins', 'DM Sans', 'Barlow', 'Source Sans 3', 'Roboto'
+  'Inter', 'Outfit', 'Montserrat', 'EB Garamond', 'Nunito',
+  'Poppins', 'Raleway', 'Roboto', 'Barlow', 'system-ui',
+];
+
+const ACCENT_FONTS = [
+  'Russo One', 'Oswald', 'Fjalla One', 'Barlow Condensed', 'Cinzel',
+  'Josefin Sans', 'Josefin Slab', 'Space Mono', 'JetBrains Mono',
+  'Noto Serif JP', 'Permanent Marker', 'Caveat',
 ];
 
 export default function BrandingScreen() {
   const { restaurantId } = useAuth();
-  const { colors } = useTheme();
+  const { colors, refreshTheme } = useTheme();
   
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
@@ -64,17 +69,18 @@ export default function BrandingScreen() {
       if (data) {
         setTheme(data);
       } else {
-        // Default theme if none exists
+        // Tema por defecto cuando el restaurante no tiene uno configurado
         setTheme({
           name: 'Default',
-          primary_color: '#FE5F55',
-          secondary_color: '#495057',
-          background_color: '#0B0D17',
-          accent_color: '#FE5F55',
-          text_color: '#FFFFFF',
-          card_background: 'rgba(255,255,255,0.05)',
+          primary_color: '#25B16B',
+          secondary_color: '#06162B',
+          background_color: '#F9F5EF',
+          accent_color: '#FFA729',
+          text_color: '#06162B',
+          card_background: '#FFFFFF',
           font_title: 'Outfit',
           font_body: 'Inter',
+          font_accent: 'Outfit',
           is_active: true
         });
       }
@@ -173,6 +179,7 @@ export default function BrandingScreen() {
       Alert.alert('Éxito', 'Identidad visual actualizada correctamente');
       setNewLogoUri(null);
       fetchTheme();
+      refreshTheme();
     } catch (err: any) {
       Alert.alert('Error', err.message || 'No se pudo guardar la configuración');
     } finally {
@@ -194,12 +201,15 @@ export default function BrandingScreen() {
       accent_color: preset.accentColor,
       text_color: preset.textColor,
       card_background: preset.cardBackground,
+      font_title: preset.fontTitle,
+      font_body: preset.fontBody,
+      font_accent: preset.fontAccent,
       is_custom: false
     });
   };
 
   const LivePreview = () => (
-    <View style={[styles.previewContainer, { backgroundColor: theme.background_color }]}>
+    <View style={[styles.previewContainer, { backgroundColor: theme.background_color, borderColor: colors.glassHeavy }]}>
       <Text style={[styles.previewLabel, { color: theme.text_color, opacity: 0.5 }]}>VISTA PREVIA EN VIVO</Text>
       
       <View style={styles.previewContent}>
@@ -216,7 +226,7 @@ export default function BrandingScreen() {
 
         {/* Product Card Mini Preview */}
         <View style={[styles.previewCard, { backgroundColor: theme.card_background }]}>
-          <View style={styles.previewImagePlaceholder}>
+          <View style={[styles.previewImagePlaceholder, { backgroundColor: theme.card_background }]}>
             <ImageIcon size={20} color={theme.text_color + '20'} />
             <View style={[styles.previewBadge, { backgroundColor: theme.primary_color }]}>
               <Text style={styles.previewBadgeText}>POPULAR</Text>
@@ -344,16 +354,33 @@ export default function BrandingScreen() {
           <Text style={[styles.label, { marginTop: 16, color: colors.muted }]}>Fuente de Cuerpo</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.fontList}>
             {BODY_FONTS.map((f) => (
-              <TouchableOpacity 
-                key={f} 
+              <TouchableOpacity
+                key={f}
                 style={[
-                  styles.fontChip, 
+                  styles.fontChip,
                   { backgroundColor: colors.glass, borderColor: colors.glassHeavy },
                   theme.font_body === f && { backgroundColor: colors.brandAccent, borderColor: colors.brandAccent }
                 ]}
                 onPress={() => updateTheme('font_body', f)}
               >
                 <Text style={[styles.fontChipText, { color: colors.muted }, theme.font_body === f && styles.fontChipTextActive, { fontFamily: f }]}>{f}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <Text style={[styles.label, { marginTop: 16, color: colors.muted }]}>Fuente de Acento (Navegación & Precios)</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.fontList}>
+            {ACCENT_FONTS.map((f) => (
+              <TouchableOpacity
+                key={f}
+                style={[
+                  styles.fontChip,
+                  { backgroundColor: colors.glass, borderColor: colors.glassHeavy },
+                  theme.font_accent === f && { backgroundColor: colors.brandAccent, borderColor: colors.brandAccent }
+                ]}
+                onPress={() => updateTheme('font_accent', f)}
+              >
+                <Text style={[styles.fontChipText, { color: colors.muted }, theme.font_accent === f && styles.fontChipTextActive, { fontFamily: f }]}>{f}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -405,7 +432,6 @@ export default function BrandingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A1128',
   },
   header: {
     paddingHorizontal: MB_SPACING.lg,
@@ -414,13 +440,11 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    color: 'white',
     fontWeight: '900',
     letterSpacing: -0.5,
   },
   headerSubtitle: {
     fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.4)',
     fontWeight: '600',
     marginTop: 2,
   },
@@ -438,7 +462,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    color: 'rgba(255, 255, 255, 0.4)',
     fontSize: 10,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -446,7 +469,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitleText: {
-    color: 'white',
     fontSize: 14,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -470,7 +492,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
   },
   presetCircle: {
     width: 24,
@@ -484,7 +505,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   presetName: {
-    color: 'rgba(255, 255, 255, 0.4)',
     fontSize: 10,
     fontWeight: '700',
     marginTop: 6,
@@ -494,7 +514,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   label: {
-    color: 'rgba(255, 255, 255, 0.4)',
     fontSize: 10,
     fontWeight: '800',
     marginBottom: 8,
@@ -502,7 +521,6 @@ const styles = StyleSheet.create({
   colorInputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 48,
@@ -513,11 +531,9 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
   },
   input: {
     flex: 1,
-    color: 'white',
     fontSize: 14,
     fontWeight: '700',
   },
@@ -528,16 +544,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
   },
   fontChipActive: {
     backgroundColor: '#FF3B30',
     borderColor: '#FF3B30',
   },
   fontChipText: {
-    color: 'rgba(255, 255, 255, 0.4)',
     fontSize: 14,
     fontWeight: '700',
   },
@@ -547,11 +560,9 @@ const styles = StyleSheet.create({
   logoUpload: {
     width: '100%',
     height: 160,
-    backgroundColor: 'rgba(255,255,255,0.03)',
     borderRadius: 24,
     borderStyle: 'dashed',
     borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
@@ -566,7 +577,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   logoPlaceholderText: {
-    color: 'rgba(255, 255, 255, 0.4)',
     fontSize: 12,
     fontWeight: '800',
   },
@@ -586,7 +596,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
-    backgroundColor: '#FF3B30',
     marginHorizontal: MB_SPACING.lg,
     height: 56,
     borderRadius: 16,
@@ -601,10 +610,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0A1128',
   },
   loadingText: {
-    color: 'rgba(255, 255, 255, 0.4)',
     marginTop: 12,
     fontSize: 12,
     fontWeight: '800',
@@ -614,7 +621,6 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
     overflow: 'hidden',
   },
   previewLabel: {
@@ -659,7 +665,6 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.05)',
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -1,3 +1,7 @@
+/**
+ * useMenu — Hook de gestión CRUD para ítems del menú, incluyendo subida de imágenes a Supabase Storage.
+ * Carga ítems y categorías desde /api/local/menu y /api/local/categories respectivamente.
+ */
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -6,6 +10,10 @@ import { MenuItem, Category } from "@/app/[slug]/dashboard/_components/localShar
 
 const EMPTY_FORM = { name: "", description: "", price: "", is_active: true, categoryId: "" };
 
+/**
+ * Provee CRUD completo para platos del menú.
+ * La función saveItem sube la imagen al bucket "menu-images" antes de persistir en DB.
+ */
 export function useMenu() {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);

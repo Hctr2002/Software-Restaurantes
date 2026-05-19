@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  Text, 
-  FlatList, 
-  TouchableOpacity, 
-  ActivityIndicator, 
+import {
+  StyleSheet,
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
   StatusBar,
   RefreshControl,
-  Alert
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -19,12 +18,13 @@ import OrderDetailModal, { OrderStatus } from '../../components/OrderDetailModal
 import StockAlertModal from './_components/StockAlertModal';
 import KdsSettingsModal, { KdsSettings, DEFAULT_KDS_SETTINGS } from './_components/KdsSettingsModal';
 import Animated, { FadeInRight } from 'react-native-reanimated';
+import { useKdsAudio } from '../../lib/useKdsAudio';
 
 type KitchenTab = 'Nuevos' | 'Cocinando' | 'Listos';
 
 export default function KitchenDashboard() {
   const { restaurantId, signOut } = useAuth();
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   
   const [activeTab, setActiveTab] = useState<KitchenTab>('Nuevos');
   const [orders, setOrders] = useState<any[]>([]);
@@ -42,6 +42,10 @@ export default function KitchenDashboard() {
   // KDS Settings
   const [settings, setSettings] = useState<KdsSettings>(DEFAULT_KDS_SETTINGS);
   const [tick, setTick] = useState(0);
+
+  // Audio alerts
+  const { playNewOrder, playUrgent } = useKdsAudio(true);
+  const knownOrderIdsRef = useRef<Set<string>>(new Set());
 
   const fetchOrders = useCallback(async () => {
     if (!restaurantId) return;
@@ -119,6 +123,27 @@ export default function KitchenDashboard() {
       clearInterval(interval);
     };
   }, [restaurantId, fetchOrders, fetchSettings]);
+
+  // Sound: play when new VALIDATED orders appear
+  useEffect(() => {
+    const known = knownOrderIdsRef.current;
+    const incoming = orders.filter(o => o.status === 'VALIDATED');
+    const hasNew = incoming.some(o => !known.has(o.id));
+    if (hasNew) playNewOrder();
+    knownOrderIdsRef.current = new Set(orders.map(o => o.id));
+  }, [orders, playNewOrder]);
+
+  // Sound: play urgent alert on tick if any order exceeds critical threshold
+  useEffect(() => {
+    if (tick === 0) return;
+    const criticalMs = (settings.thresholds?.red ?? 30) * 60 * 1000;
+    const hasCritical = orders.some(o => {
+      if (o.status === 'READY') return false;
+      const age = Date.now() - new Date(o.createdAt).getTime();
+      return age > criticalMs;
+    });
+    if (hasCritical) playUrgent();
+  }, [tick, orders, settings.thresholds, playUrgent]);
 
   const handleUpdateStatus = async (orderId: string, nextStatus: OrderStatus) => {
     setUpdating(true);
@@ -231,7 +256,7 @@ export default function KitchenDashboard() {
               styles.badge, 
               { backgroundColor: activeTab === tab ? colors.brandAccent : colors.glassHeavy }
             ]}>
-              <Text style={styles.badgeText}>{getTabCount(tab)}</Text>
+              <Text style={[styles.badgeText, { color: activeTab === tab ? 'white' : colors.text }]}>{getTabCount(tab)}</Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -241,7 +266,7 @@ export default function KitchenDashboard() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.navy }]}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={isLight ? 'dark-content' : 'light-content'} />
       {renderHeader()}
       {renderTabs()}
 

@@ -1,3 +1,7 @@
+/**
+ * /api/local/alerts/[id] — Resuelve una alerta específica.
+ * PUT: Marca la alerta como RESOLVED. Si action="disable_item", también desactiva el ítem de menú asociado.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createServiceClient, ensureServiceConfig } from "@/lib/localApi";
 

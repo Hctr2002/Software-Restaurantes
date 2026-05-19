@@ -23,7 +23,7 @@ interface CashierAlertModalProps {
 }
 
 export default function CashierAlertModal({ visible, isSending, onClose, onSend }: CashierAlertModalProps) {
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   const [tableNum, setTableNum] = useState('');
   const [message, setMessage] = useState('');
 
@@ -41,7 +41,7 @@ export default function CashierAlertModal({ visible, isSending, onClose, onSend 
       animationType="none" 
       onRequestClose={onClose}
     >
-      <BlurView intensity={20} tint="dark" style={styles.overlay}>
+      <BlurView intensity={20} tint={isLight ? 'light' : 'dark'} style={styles.overlay}>
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
           style={styles.centered}

@@ -1,3 +1,7 @@
+/**
+ * UserMobileList — Tarjetas de usuarios para vista móvil.
+ * Confirma la eliminación con window.confirm antes de ejecutar la acción.
+ */
 "use client";
 
 import React from "react";
@@ -27,7 +31,7 @@ export function UserMobileList({ users, onEdit, onDelete, deleteId }: UserMobile
   return (
     <div className="grid grid-cols-1 gap-4 lg:hidden">
       {users.length === 0 && (
-        <div className="py-12 text-center glass rounded-[2.5rem] border-white/5 text-foreground/40 font-bold uppercase tracking-widest text-[10px]">
+        <div className="py-12 text-center glass rounded-[2.5rem] border-foreground/5 text-foreground/40 font-bold uppercase tracking-widest text-[10px]">
           No hay usuarios registrados.
         </div>
       )}
@@ -36,7 +40,7 @@ export function UserMobileList({ users, onEdit, onDelete, deleteId }: UserMobile
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           key={user.id}
-          className="glass p-6 rounded-[2rem] border-white/5 space-y-4 relative overflow-hidden"
+          className="glass p-6 rounded-[2rem] border-foreground/5 space-y-4 relative overflow-hidden"
         >
           <div className="flex justify-between items-start">
             <div className="overflow-hidden">
@@ -53,16 +57,16 @@ export function UserMobileList({ users, onEdit, onDelete, deleteId }: UserMobile
             <span className="text-foreground/60">{formatDate(user.createdAt)}</span>
           </div>
 
-          <div className="pt-4 border-t border-white/5 flex gap-2">
+          <div className="pt-4 border-t border-foreground/5 flex gap-2">
             <Button 
-              className="flex-1 bg-white/5 hover:bg-primary/10 hover:text-primary border-white/5 rounded-xl h-10 text-[10px] font-black uppercase tracking-widest transition-all"
+              className="flex-1 bg-foreground/5 hover:bg-primary/10 hover:text-primary border-foreground/5 rounded-xl h-10 text-[10px] font-black uppercase tracking-widest transition-all"
               onClick={() => onEdit(user)}
             >
               <Pencil className="w-3.5 h-3.5 mr-2" /> Editar
             </Button>
             <Button 
               variant="ghost"
-              className="aspect-square p-0 bg-white/5 hover:bg-destructive/10 hover:text-destructive border-white/5 rounded-xl h-10 w-10 transition-all"
+              className="aspect-square p-0 bg-foreground/5 hover:bg-destructive/10 hover:text-destructive border-foreground/5 rounded-xl h-10 w-10 transition-all"
               onClick={() => {
                 if (window.confirm("¿Eliminar usuario de forma permanente?")) {
                   onDelete(user.id);

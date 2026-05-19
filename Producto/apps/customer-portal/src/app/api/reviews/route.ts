@@ -1,3 +1,9 @@
+/**
+ * API Route: POST /api/reviews
+ * Guarda la valoración del cliente para un pedido (1-5 estrellas).
+ * Requiere: order_id, restaurant_id, rating (1-5). Opcional: table_id, comment.
+ */
+
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 

@@ -1,6 +1,14 @@
+/**
+ * useTables — Hook de gestión CRUD para mesas del restaurante.
+ * Carga las mesas desde /api/local/tables y expone handlers de crear, editar y eliminar.
+ */
 import { useCallback, useEffect, useState } from "react";
 import { TableRecord } from "@menu-bites/ui";
 
+/**
+ * Provee la grilla de mesas, formulario de edición y operaciones de persistencia.
+ * La eliminación puede fallar con error 409 si la mesa tiene órdenes activas.
+ */
 export function useTables() {
   const [tables, setTables] = useState<TableRecord[]>([]);
   const [loading, setLoading] = useState(true);

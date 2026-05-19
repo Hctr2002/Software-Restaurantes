@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { ChevronRight, Mail, Shield } from 'lucide-react-native';
-import { MB_COLORS, MB_RADIUS, MB_SPACING } from '../constants/MB_Theme';
+import { ChevronRight } from 'lucide-react-native';
+import { MB_RADIUS, MB_SPACING } from '../constants/MB_Theme';
 import { useTheme } from '../context/ThemeContext';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -24,7 +24,8 @@ const getRoleBadgeColor = (role: string) => {
     case 'GARZON': return '#729B79';
     case 'COCINA': return '#E09F3E';
     case 'CAJERO': return '#335C67';
-    default: return MB_COLORS.muted;
+    case 'BAR': return '#7B5EA7';
+    default: return '#6B7280';
   }
 };
 
@@ -65,7 +66,7 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: MB_COLORS.glass,
+    backgroundColor: 'rgba(255,255,255,0.05)',
     borderRadius: MB_RADIUS.xl,
     padding: MB_SPACING.md,
     marginBottom: 12,
@@ -76,7 +77,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: MB_COLORS.glassHeavy,
+    backgroundColor: 'rgba(255,255,255,0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   date: {
-    color: MB_COLORS.muted,
+    color: 'rgba(255,255,255,0.4)',
     fontSize: 9,
     fontWeight: '600',
   },

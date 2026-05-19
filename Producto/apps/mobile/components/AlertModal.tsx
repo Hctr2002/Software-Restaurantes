@@ -13,7 +13,6 @@ import {
   ScrollView
 } from 'react-native';
 import { AlertTriangle, X, CheckCircle2 } from 'lucide-react-native';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../constants/MB_Theme';
 import { useTheme } from '../context/ThemeContext';
 import Animated, { FadeIn, FadeOut, SlideInDown } from 'react-native-reanimated';
 

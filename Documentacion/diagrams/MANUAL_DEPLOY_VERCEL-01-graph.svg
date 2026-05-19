@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 995.2629999999999 181.8" width="995.2629999999999" height="181.8" style="--bg:#1a1b26;--fg:#a9b1d6;--line:#3d59a1;--accent:#7aa2f7;--muted:#565f89;background:var(--bg)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 919.6809999999999 181.8" width="919.6809999999999" height="181.8" style="--bg:#1a1b26;--fg:#a9b1d6;--line:#3d59a1;--accent:#7aa2f7;--muted:#565f89;background:var(--bg)">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
   text { font-family: 'Inter', system-ui, sans-serif; }
@@ -26,34 +26,34 @@
     <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
   </marker>
 </defs>
-<polyline class="edge" data-from="Commit" data-to="Build" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="183.46699999999998,90.9 231.46699999999998,90.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
-<polyline class="edge" data-from="Build" data-to="A" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="366.783,90.9 393.37649999999996,90.9 393.37649999999996,58.45 419.96999999999997,58.45" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
-<polyline class="edge" data-from="Build" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="366.783,90.9 393.37649999999996,90.9 393.37649999999996,123.35000000000001 419.96999999999997,123.35000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
-<polyline class="edge" data-from="A" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="583.444,58.45 604.8505,58.45 604.8505,90.9 626.257,90.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
-<polyline class="edge" data-from="B" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="573.0699999999999,123.35000000000001 604.8505,123.35000000000001 604.8505,90.9 626.257,90.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
-<polyline class="edge" data-from="C" data-to="Prod" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="740.8249999999999,90.9 788.8249999999999,90.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
-<g class="node" data-id="Commit" data-label="💻 Push to GitHub" data-shape="rectangle">
-  <rect x="40" y="72.45" width="143.46699999999998" height="36.900000000000006" rx="0" ry="0" fill="#6366f1" stroke="#4f46e5" stroke-width="0.75" />
-  <text x="111.73349999999999" y="90.9" text-anchor="middle" font-size="13" font-weight="500" fill="#fff" dy="4.55">💻 Push to GitHub</text>
+<polyline class="edge" data-from="Commit" data-to="Build" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="166.424,90.9 214.424,90.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Build" data-to="A" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="325.28700000000003,90.9 351.8805,90.9 351.8805,58.45 378.474,58.45" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="Build" data-to="B" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="325.28700000000003,90.9 351.8805,90.9 351.8805,123.35000000000001 378.474,123.35000000000001" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="A" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="524.905,58.45 546.3115,58.45 546.3115,90.9 567.718,90.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="B" data-to="C" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="514.531,123.35000000000001 546.3115,123.35000000000001 546.3115,90.9 567.718,90.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="C" data-to="Prod" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="682.286,90.9 730.286,90.9" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="node" data-id="Commit" data-label="Push to GitHub" data-shape="rectangle">
+  <rect x="40" y="72.45" width="126.424" height="36.900000000000006" rx="0" ry="0" fill="#6366f1" stroke="#4f46e5" stroke-width="0.75" />
+  <text x="103.212" y="90.9" text-anchor="middle" font-size="13" font-weight="500" fill="#fff" dy="4.55">Push to GitHub</text>
 </g>
-<g class="node" data-id="Build" data-label="⚙️ Turbo Build" data-shape="rectangle">
-  <rect x="231.46699999999998" y="72.45" width="135.316" height="36.900000000000006" rx="0" ry="0" fill="#6366f1" stroke="#4f46e5" stroke-width="0.75" />
-  <text x="299.125" y="90.9" text-anchor="middle" font-size="13" font-weight="500" fill="#fff" dy="4.55">⚙️ Turbo Build</text>
+<g class="node" data-id="Build" data-label="Turbo Build" data-shape="rectangle">
+  <rect x="214.424" y="72.45" width="110.863" height="36.900000000000006" rx="0" ry="0" fill="#6366f1" stroke="#4f46e5" stroke-width="0.75" />
+  <text x="269.8555" y="90.9" text-anchor="middle" font-size="13" font-weight="500" fill="#fff" dy="4.55">Turbo Build</text>
 </g>
-<g class="node" data-id="A" data-label="📱 Admin Dashboard" data-shape="rectangle">
-  <rect x="419.96999999999997" y="40" width="163.474" height="36.900000000000006" rx="0" ry="0" fill="#f8fafc" stroke="#cbd5e1" stroke-width="0.75" />
-  <text x="501.707" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="#1e293b" dy="4.55">📱 Admin Dashboard</text>
+<g class="node" data-id="A" data-label="Admin Dashboard" data-shape="rectangle">
+  <rect x="378.474" y="40" width="146.43099999999998" height="36.900000000000006" rx="0" ry="0" fill="#f8fafc" stroke="#cbd5e1" stroke-width="0.75" />
+  <text x="451.68949999999995" y="58.45" text-anchor="middle" font-size="13" font-weight="500" fill="#1e293b" dy="4.55">Admin Dashboard</text>
 </g>
-<g class="node" data-id="B" data-label="🌐 Customer Portal" data-shape="rectangle">
-  <rect x="419.96999999999997" y="104.9" width="153.10000000000002" height="36.900000000000006" rx="0" ry="0" fill="#f8fafc" stroke="#cbd5e1" stroke-width="0.75" />
-  <text x="496.52" y="123.35000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="#1e293b" dy="4.55">🌐 Customer Portal</text>
+<g class="node" data-id="B" data-label="Customer Portal" data-shape="rectangle">
+  <rect x="378.474" y="104.9" width="136.05700000000002" height="36.900000000000006" rx="0" ry="0" fill="#f8fafc" stroke="#cbd5e1" stroke-width="0.75" />
+  <text x="446.5025" y="123.35000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="#1e293b" dy="4.55">Customer Portal</text>
 </g>
 <g class="node" data-id="C" data-label="Rest of Apps" data-shape="rectangle">
-  <rect x="626.257" y="72.45" width="114.568" height="36.900000000000006" rx="0" ry="0" fill="#f8fafc" stroke="#cbd5e1" stroke-width="0.75" />
-  <text x="683.5409999999999" y="90.9" text-anchor="middle" font-size="13" font-weight="500" fill="#1e293b" dy="4.55">Rest of Apps</text>
+  <rect x="567.718" y="72.45" width="114.568" height="36.900000000000006" rx="0" ry="0" fill="#f8fafc" stroke="#cbd5e1" stroke-width="0.75" />
+  <text x="625.002" y="90.9" text-anchor="middle" font-size="13" font-weight="500" fill="#1e293b" dy="4.55">Rest of Apps</text>
 </g>
-<g class="node" data-id="Prod" data-label="🚀 Vercel Production" data-shape="rectangle">
-  <rect x="788.8249999999999" y="72.45" width="166.438" height="36.900000000000006" rx="0" ry="0" fill="#6366f1" stroke="#4f46e5" stroke-width="0.75" />
-  <text x="872.0439999999999" y="90.9" text-anchor="middle" font-size="13" font-weight="500" fill="#fff" dy="4.55">🚀 Vercel Production</text>
+<g class="node" data-id="Prod" data-label="Vercel Production" data-shape="rectangle">
+  <rect x="730.286" y="72.45" width="149.39499999999998" height="36.900000000000006" rx="0" ry="0" fill="#6366f1" stroke="#4f46e5" stroke-width="0.75" />
+  <text x="804.9834999999999" y="90.9" text-anchor="middle" font-size="13" font-weight="500" fill="#fff" dy="4.55">Vercel Production</text>
 </g>
 </svg>

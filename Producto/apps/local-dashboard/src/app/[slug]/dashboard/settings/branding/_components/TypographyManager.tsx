@@ -1,9 +1,13 @@
+/**
+ * TypographyManager — Pestaña de selección de tipografías del tema (título, cuerpo, acento).
+ * Muestra cada fuente en su propio estilo dentro del selector para previsualización directa.
+ */
 "use client";
 
 import React from "react";
 import { motion } from "framer-motion";
 import { Card } from "@menu-bites/ui";
-import { TITLE_FONTS, BODY_FONTS } from "./constants";
+import { TITLE_FONTS, BODY_FONTS, ACCENT_FONTS } from "./constants";
 
 interface TypographyManagerProps {
   currentTheme: any;
@@ -15,7 +19,7 @@ interface TypographyManagerProps {
  * 
  * Gestiona la selección de fuentes para títulos, cuerpo y acentos.
  */
-export default function TypographyManager({ currentTheme, setCurrentTheme }: TypographyManagerProps) {
+export function TypographyManager({ currentTheme, setCurrentTheme }: TypographyManagerProps) {
   const updateFont = (key: string, font: string) => {
     setCurrentTheme({ ...currentTheme, [key]: font });
   };
@@ -27,7 +31,7 @@ export default function TypographyManager({ currentTheme, setCurrentTheme }: Typ
       exit={{ opacity: 0, x: 20 }}
       className="space-y-8"
     >
-      <Card className="p-8 bg-white/5 border-white/5 rounded-[2.5rem] shadow-2xl space-y-10">
+      <Card className="p-8 bg-foreground/5 border-foreground/5 rounded-[2.5rem] shadow-2xl space-y-10">
         <div>
           <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1">Jerarquía Tipográfica</h3>
           <p className="text-xs text-foreground/40 font-medium">Define la voz visual de tu restaurante</p>
@@ -49,7 +53,7 @@ export default function TypographyManager({ currentTheme, setCurrentTheme }: Typ
           <FontSelector 
             label="Navegación & Precios" 
             value={currentTheme.fontAccent} 
-            options={TITLE_FONTS} 
+            options={ACCENT_FONTS} 
             onChange={(f) => updateFont('fontAccent', f)} 
           />
         </div>
@@ -80,7 +84,7 @@ function FontSelector({
       <select
         value={value || "Outfit"}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-white/5 border border-white/10 rounded-[1.5rem] h-14 px-6 text-sm text-foreground font-bold outline-none focus:ring-2 focus:ring-primary appearance-none cursor-pointer hover:bg-white/10 transition-all"
+        className="w-full bg-foreground/5 border border-foreground/10 rounded-[1.5rem] h-14 px-6 text-sm text-foreground font-bold outline-none focus:ring-2 focus:ring-primary appearance-none cursor-pointer hover:bg-foreground/10 transition-all"
         style={{ fontFamily: `"${value || 'Outfit'}", sans-serif` }}
       >
         {options.map(f => (

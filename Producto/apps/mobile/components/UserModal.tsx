@@ -13,7 +13,6 @@ import {
   Keyboard
 } from 'react-native';
 import { X, Mail, Lock, Shield, Trash2, Eye, EyeOff } from 'lucide-react-native';
-import { MB_COLORS, MB_RADIUS, MB_SPACING } from '../constants/MB_Theme';
 import { useTheme } from '../context/ThemeContext';
 import { UserProfile } from './UserCard';
 

@@ -18,7 +18,7 @@ export default function AdminKpiCard({ icon, label, value, detail, delay = 0 }: 
   return (
     <Animated.View 
       entering={FadeInDown.delay(delay)}
-      style={[styles.card, { backgroundColor: colors.glass }]}
+      style={[styles.card, { backgroundColor: colors.glass, borderColor: colors.glassHeavy }]}
     >
       <View style={styles.header}>
         <View style={[styles.iconContainer, { backgroundColor: colors.brandAccent + '1A' }]}>
@@ -27,7 +27,7 @@ export default function AdminKpiCard({ icon, label, value, detail, delay = 0 }: 
         <Text style={[styles.label, { color: colors.muted }]}>{label}</Text>
       </View>
       
-      <Text style={styles.value}>{value}</Text>
+      <Text style={[styles.value, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>{value}</Text>
       <Text style={[styles.detail, { color: colors.muted }]}>{detail}</Text>
       
       <View style={[styles.glow, { backgroundColor: colors.brandAccent }]} />
@@ -62,7 +62,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   value: {
-    color: 'white',
     fontSize: 28,
     fontWeight: '900',
     letterSpacing: -0.5,

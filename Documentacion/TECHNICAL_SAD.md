@@ -1,5 +1,5 @@
 # Documento de Arquitectura de Software (SAD) — Menu Bites
-**Versión:** 2.4.0 | **Alcance:** Arquitectura técnica, patrones de diseño e infraestructura del sistema de gestión de restaurantes Menu Bites.
+**Versión:** 2.6.0 | **Alcance:** Arquitectura técnica, patrones de diseño e infraestructura del sistema de gestión de restaurantes Menu Bites.
 
 ---
 
@@ -33,15 +33,15 @@ El proyecto utiliza una arquitectura de monorepo gestionada con **Turborepo** y 
 | `cashier-dashboard` | 3004 | CAJERO | Panel de caja para cierre de cuentas y cobro |
 | `customer-portal` | 3005 | CLIENTE | Portal web del cliente final, accedido vía código QR de mesa |
 | `bar-dashboard` | 3006 | BAR | KDS dedicado para la estación de barra (bebidas y cócteles) |
-| `mobile` | — | GARZON / CLIENTE | Aplicación móvil (en desarrollo) |
+| `mobile` | — | TODOS LOS ROLES | App nativa React Native / Expo. Soporta los 7 roles del sistema: SUPER_ADMIN, ADMIN, GARZON, COCINA, CAJERO, BAR, CLIENTE. Dashboard completo por rol, menú QR interactivo, KDS con audio, push notifications, branding dinámico. |
 
 #### Paquetes Compartidos (`packages/`):
 
 | Paquete | Descripción |
 |---|---|
-| `@menu-bites/ui` | Biblioteca de componentes React compartidos (`Button`, `Modal`, `Table`, `Badge`, `OrderTicket`, `Card`, `cn`, etc.) |
-| `@menu-bites/auth` | Cliente Supabase instanciado y helpers de sesión (`getSession`, `signOut`, `supabase`) |
-| `@menu-bites/store` | Estado global compartido (Zustand o similar) para datos cross-app |
+| `@menu-bites/ui` | Biblioteca de componentes React compartidos: primitivos (`Button`, `Card`, `Badge`, `Input`), componentes del dashboard (`KpiGrid`, `LiveFlowMonitor`, `KDSColumn`, `OrderGroupCard`, `PaymentSlideOver`, `TableStatusBoard`), componentes del terminal (`PendingOrderCard`, `TableCard`, `TableMergeBar`), componentes del portal (`PortalMenuItemCard`, `PortalPrimaryButton`, `PortalHeading`, `PortalText`, `PortalCard`), `RestaurantThemeProvider` y `DynamicThemeWrapper`. |
+| `@menu-bites/auth` | Cliente Supabase (`createBrowserClient`), helpers de sesión (`getSession`, `signOut`, `updateOrderStatus`, `sendAlert`, `getRestaurantTheme`), todos los hooks Realtime (`useRealtimeSync`, `useRealtimeOrders`, `useKitchenOrders`, `useBarOrders`, `useTables`, `useMenu`, `useRealtimeAlerts`, `useCashierOrders`, `useThemeSync`, `useRealtimeWaiterOrders`, `useCustomerPortal`, `useCustomerOrderTracker`) y todos los tipos del modelo de datos. |
+| `@menu-bites/store` | Store Zustand `useAuthStore` con persistencia AES-encriptada en localStorage. La clave de cifrado se deriva de `hostname + userAgent` para prevenir extracción directa del token. |
 
 #### Diagrama de Estructura del Monorepo
 
@@ -632,5 +632,354 @@ rm -rf apps/local-dashboard/.next && turbo dev --filter=local-dashboard
 
 ---
 
-## 8. CONCLUSIÓN
-El sistema Menu Bites v2.4.0 incorpora una arquitectura dual-estación completa que permite la operación simultánea e independiente de Cocina y Barra sobre el mismo flujo de pedidos. La adición de `bar-dashboard` completa el ecosistema de aplicaciones operativas, con siete apps productivas que cubren todos los roles del sistema: SUPER_ADMIN, ADMIN, GARZON, COCINA, CAJERO, BAR y CLIENTE.
+### 7.14 Auditoría de Tokens Residuales y Primitivos del Portal (v2.5.0)
+
+En la versión 2.5.0 se consolidó la arquitectura temática del sistema, permitiendo una personalización profunda y dinámica de la identidad visual de cada restaurante, garantizando al mismo tiempo la coherencia técnica y estética (FCTO 5/5).
+
+#### 7.14.1 Motor de Tematización Dinámica (Branding Engine)
+
+El sistema utiliza un motor de inyección de CSS Variables en tiempo de ejecución. El componente `RestaurantThemeProvider` en `@menu-bites/ui` consume la configuración de la tabla `restaurant_themes` y la inyecta en el `:root` del documento.
+
+**Arquitectura de Fuentes Estabilizada:**
+- **Variables de Stack:** Se utilizan variables de stack completas (`--font-title-stack`, `--font-body-stack`, `--font-accent-stack`) que incluyen fallbacks nativos (`system-ui`, `sans-serif`), evitando parpadeos de fuente (FOUT) y garantizando herencia reactiva.
+- **Alias de Compatibilidad:** Se inyectan alias como `--font-outfit` y `--font-inter` vinculados dinámicamente a las fuentes elegidas, asegurando que componentes heredados o de terceros sigan respondiendo al tema global.
+- **Herencia en Body:** El `globals.css` fuerza la herencia de `--font-body-stack` en todo el documento, eliminando la necesidad de aplicar clases de fuente manualmente en la mayoría de los contenedores.
+
+**Variables Semánticas Inyectadas:**
+- **Colores:** `--primary`, `--primary-foreground`, `--background`, `--card`, `--card-foreground`, `--success`, `--destructive`.
+- **Tipografía:** `--font-title` (Encabezados), `--font-body` (Cuerpo), `--font-accent` (Acentos/Botones).
+- **Efectos:** `--radius` (Bordes), `--glass-opacity` (Nivel de desenfoque).
+
+#### 7.14.2 Primitivos de UI del Portal (`Portal Primitives`)
+
+Para garantizar que todos los componentes del portal de clientes hereden correctamente el tema dinámico y eviten estilos "hardcodeados", se crearon primitivos semánticos en `packages/ui/src/components/portal/primitives/`:
+
+| Componente | Función |
+|---|---|
+| `PortalHeading` | Encabezados (h1-h6) que heredan automáticamente `--font-title`. |
+| `PortalText` | Bloques de texto que heredan `--font-body`. Soporta variante `muted`. |
+| `PortalPrimaryButton` | Botones de acción principal que heredan `--font-accent` y colores primarios. |
+| `PortalCard` | Contenedores con efectos de glassmorphism y bordes dinámicos. |
+
+**Beneficios:**
+1. **Mantenibilidad:** Los cambios en el sistema de diseño se realizan en un solo lugar.
+2. **Consistencia:** Se garantiza que la tipografía de un botón coincida con el acento del restaurante.
+3. **Clean Code:** Se reemplazaron etiquetas HTML nativas con estilos manuales por componentes semánticos con nombres descriptivos.
+
+#### 7.14.3 Estándar de Documentación de Código (Clean Code)
+
+A partir de la v2.5.0 se implementó un sistema de comentarios JSDoc en español en todos los archivos TypeScript del monorepo (~280 archivos entre `apps/` y `packages/`). El objetivo es permitir que cualquier desarrollador comprenda el propósito de cada módulo, función y componente sin necesidad de navegar por toda la jerarquía.
+
+**Tipos de comentarios aplicados:**
+
+**1. Cabecera de archivo** — todo archivo `.ts` / `.tsx` comienza con un bloque que describe su responsabilidad, contexto y relaciones:
+```typescript
+/**
+ * useRealtimeSync — Hook base de sincronización en tiempo real con Supabase Postgres Changes.
+ * Realiza un fetch inicial y luego suscribe a cambios de la tabla indicada filtrando por
+ * restaurant_id. Incluye reconexión automática con backoff exponencial (hasta MAX_RETRIES).
+ * Todos los hooks de datos del sistema se construyen sobre este hook.
+ */
+```
+
+**2. JSDoc de función / hook / componente exportado** — describe el comportamiento, side effects y parámetros no obvios:
+```typescript
+/**
+ * Agrupa sub-órdenes (KITCHEN y BAR) por mesa en un único objeto Order fusionado.
+ * El status resultante es el de mayor prioridad: READY > PREPARING > VALIDATED > PENDING.
+ * @param restaurantId - UUID del restaurante obtenido del JWT.
+ */
+export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
+```
+
+**3. Comentarios de sección** — en archivos con múltiples responsabilidades:
+```typescript
+// ─────────────────────────────────────────
+// QUERIES DE LECTURA
+// ─────────────────────────────────────────
+```
+
+**4. Comentarios inline** — solo para lógica no obvia (decisiones de seguridad, workarounds, invariantes del sistema):
+```typescript
+// El token de anon puede ser null en rutas públicas — es intencional para tablas
+// con RLS SELECT abierto. El hook silencia este error.
+```
+
+**5. Documentación de props** — en interfaces de componentes React:
+```typescript
+interface Props {
+  /** Slug del restaurante; se usa para resolver el tenant en RLS */
+  restaurantSlug: string
+}
+```
+
+**Cobertura alcanzada (v2.5.0):**
+
+| Scope | Archivos comentados |
+|---|---|
+| `apps/customer-portal` | 27 archivos |
+| `apps/local-dashboard` | ~98 archivos |
+| `apps/waiter-terminal` | Completado |
+| `apps/kitchen-kds` | Completado |
+| `apps/cashier-dashboard` | Completado |
+| `apps/bar-dashboard` | Completado |
+| `apps/admin-dashboard` | Completado |
+| `packages/auth` | 14 archivos |
+| `packages/ui` | 47 archivos |
+| `packages/store` | 1 archivo |
+
+**Reglas de integridad:**
+- Todo `/**` debe cerrarse con `*/` antes de la declaración que documenta.
+- Los comentarios inline no se insertan dentro de objetos literales, arrays ni template strings.
+- Los divisores `// ─── ` van entre declaraciones, nunca dentro de una función abierta.
+- Los comentarios no describen el QUÉ (ya lo hace el nombre) sino el POR QUÉ y el CONTEXTO.
+
+---
+
+---
+
+## 7.15 App Mobile (React Native / Expo)
+
+### 7.15.1 Visión General
+
+La app `mobile` es una aplicación React Native construida con Expo SDK 54 y Expo Router v6 (file-based routing). Es una réplica funcional nativa de todo el ecosistema web, con soporte para los 7 roles del sistema y características exclusivas del dispositivo móvil (cámara, push notifications, audio, haptics).
+
+| Propiedad | Valor |
+|---|---|
+| Framework | React Native 0.81.5 + Expo SDK 54 |
+| Router | Expo Router v6 (file-based) |
+| Lenguaje | TypeScript 5.9.2 |
+| Estado | Context API (AuthContext, ThemeContext) |
+| Backend | Supabase (Auth + Realtime + Storage) |
+| Persistencia | Expo SecureStore (tokens JWT) |
+
+### 7.15.2 Roles y Módulos Implementados
+
+| Rol | Ruta | Pantallas | Funcionalidades clave |
+| --- | --- | --- | --- |
+| `CLIENTE` | `[restaurantSlug]/[tableNumber]/` | Menú QR | Menú por categoría, carrito, checkout, llamar garzón, pedir cuenta, rating de orden |
+| `GARZON` | `(waiter)/` | Dashboard mesas + pedidos | Grid de mesas con estado live, fusión de mesas (merge mode), isla de órdenes listas |
+| `COCINA` | `(kitchen)/` | KDS 3 tabs | VALIDATED → PREPARING → READY, alertas de audio, auto-clear, umbrales configurables |
+| `BAR` | `(bar)/` | KDS barra | Idéntico a Cocina filtrado por `station: 'BAR'` |
+| `CAJERO` | `(cashier)/` | Tabs pendientes/historial | Agrupa por mesa/sesión, modal de pago, actualiza estado a COMPLETED, libera mesa |
+| `ADMIN` | `(admin)/` | 11 pantallas | Dashboard KPI, órdenes, mesas, menú, inventario, categorías, usuarios, notificaciones, reportes, branding, configuración |
+| `SUPER_ADMIN` | `(super-admin)/` | 6 pantallas | Dashboard global, organizaciones, usuarios, planes de suscripción |
+
+### 7.15.3 Arquitectura de Autenticación Mobile
+
+La autenticación mobile difiere de la web en el mecanismo de persistencia de sesión:
+
+```text
+lib/supabase.ts
+  ↓ createClient con ExpoSecureStoreAdapter
+  ↓ Tokens JWT almacenados en expo-secure-store (encriptado nativo)
+
+context/AuthContext.tsx
+  ↓ getSession() al montar
+  ↓ onAuthStateChange() para cambios
+  ↓ Extrae role + restaurantId desde session.user.app_metadata
+  ↓ Registra push token al login → users.push_token
+  ↓ Deep linking menubites://reset-password para recuperación
+```
+
+El rol determina la ruta de navegación automática al iniciar sesión:
+
+| Rol | Ruta destino |
+|---|---|
+| `CLIENTE` | `/(tabs)` |
+| `GARZON` | `/(waiter)` |
+| `COCINA` | `/(kitchen)` |
+| `BAR` | `/(bar)` |
+| `CAJERO` | `/(cashier)` |
+| `ADMIN` | `/(admin)` |
+| `SUPER_ADMIN` | `/(super-admin)` |
+
+### 7.15.4 Tema Dinámico Mobile
+
+El sistema de branding dinámico funciona a través de `ThemeContext.tsx`, que lee la tabla `restaurant_themes` y expone los colores como un objeto de tema React Native. Usa el tema institucional `MB_Theme.ts` (navy/emerald) como fallback.
+
+A diferencia de la web, el tema mobile NO usa CSS Variables — aplica los colores directamente como `StyleSheet` props de React Native.
+
+### 7.15.5 Funcionalidades Nativas Exclusivas
+
+| Feature | Librería | Uso |
+| --- | --- | --- |
+| Push Notifications | `expo-notifications` | Alertas de órdenes para staff, actualizaciones de estado para cliente |
+| Escáner QR | `expo-camera` | `scanner/index.tsx` → navega a `[restaurantSlug]/[tableNumber]/` |
+| Alertas de audio | `expo-av` | KDS: sonido al recibir orden, sonido urgente al superar umbral crítico |
+| Haptics | `expo-haptics` | Feedback táctil en acciones críticas |
+| Impresión | `expo-print` | Impresión de recibos desde la caja |
+| Selección de imágenes | `expo-image-picker` | Upload de imágenes de menú en el módulo Admin |
+
+### 7.15.6 Descubrimiento de APIs
+
+La app mobile consume las mismas APIs REST que las apps web a través de `lib/api.ts`:
+
+```typescript
+// En desarrollo: auto-detecta IP local (10.0.2.2 Android / localhost iOS)
+// En producción: lee EXPO_PUBLIC_*_URL del .env
+SUPERADMIN_API      → puerto 3000 (admin-dashboard)
+LOCALADMIN_API      → puerto 3003 (local-dashboard)
+CUSTOMER_PORTAL_API → puerto 3005 (customer-portal)
+```
+
+### 7.15.7 Landing Page Pública Mobile (v2.6.0)
+
+La ruta `(tabs)/` contiene la landing page pública de la app, mostrada antes del login y a usuarios `CLIENTE`. Fue completamente rediseñada en v2.6.0 como una pantalla modular con secciones de presentación del producto.
+
+**Componente raíz:** `app/(tabs)/index.tsx` → `MenuHomeScreen`
+
+| Componente | Archivo | Contenido |
+|---|---|---|
+| `ProblemSection` | `_components/ProblemSection.tsx` | Problemática que resuelve Menu Bites (retrasos, errores, papel) |
+| `EcosystemSection` | `_components/EcosystemSection.tsx` | Presentación del ecosistema de 8 apps integradas |
+| `OperationalFlowSection` | `_components/OperationalFlowSection.tsx` | Flujo QR → pedido → cocina → entrega → pago |
+| `BenefitsSection` | `_components/BenefitsSection.tsx` | Beneficios cuantificados (tiempo, errores, satisfacción) |
+| `RestaurantsCarousel` | `_components/RestaurantsCarousel.tsx` | Carrusel de restaurantes de demostración con branding |
+| `TeamSection` | `_components/TeamSection.tsx` | Identificación del equipo de desarrollo |
+| `SectionHeader` | `_components/SectionHeader.tsx` | Componente primitivo reutilizable de encabezado de sección |
+
+La pantalla usa animaciones de entrada `FadeInDown` con `react-native-reanimated`, `BlurView` para efectos de glassmorphism, y se integra con `LandingHeader` para la barra superior.
+
+### 7.15.8 Estructura de Carpetas
+
+```text
+apps/mobile/
+  app/
+    (admin)/          # 11 pantallas de gestión del restaurante
+    (auth)/           # login, forgot-password, reset-password
+    (bar)/            # KDS para estación barra
+    (cashier)/        # Dashboard caja y cobro
+    (kitchen)/        # KDS para cocina
+    (super-admin)/    # 6 pantallas de administración global
+    (tabs)/
+      _components/    # Secciones de la landing pública (7 componentes)
+        BenefitsSection.tsx
+        EcosystemSection.tsx
+        OperationalFlowSection.tsx
+        ProblemSection.tsx
+        RestaurantsCarousel.tsx
+        SectionHeader.tsx
+        TeamSection.tsx
+      index.tsx       # MenuHomeScreen — landing page pública
+    (waiter)/         # Dashboard garzón (mesas + pedidos)
+    [restaurantSlug]/[tableNumber]/  # Menú interactivo cliente (QR)
+    scanner/          # Escáner de códigos QR
+    _layout.tsx       # Layout raíz con AuthContext y ThemeContext
+    index.tsx         # Redirect según rol autenticado
+  assets/images/
+    icon.png          # Ícono oficial Menu Bites
+    adaptive-icon.png # Ícono adaptativo Android
+  components/         # 20 componentes reutilizables (modales, cards, headers)
+  context/
+    AuthContext.tsx   # Sesión, rol, restaurantId, push token
+    ThemeContext.tsx  # Branding dinámico mobile
+  lib/
+    supabase.ts       # Cliente Supabase con ExpoSecureStoreAdapter
+    api.ts            # Descubrimiento dinámico de URLs de API
+    dashboard.ts      # KPIs del dashboard (calcula unit_price × quantity)
+    pushNotifications.ts
+    useKdsAudio.ts    # Hook de alertas de audio para KDS
+  constants/
+    MB_Theme.ts       # Paleta institucional (fallback de tema)
+    Palettes.ts       # 17 paletas premium con tipografías actualizadas
+```
+
+## 8. INFRAESTRUCTURA DE TESTING
+
+### 8.1 Visión General
+
+El proyecto cuenta con una suite automatizada de **651 pruebas** distribuidas en **12 workspaces**, orquestada mediante Turborepo. La cobertura abarca paquetes compartidos, aplicaciones individuales, la app mobile y funciones Edge de Supabase.
+
+### 8.2 Estructura de Archivos de Test
+
+```
+Producto/
+├── packages/
+│   ├── auth/src/__tests__/         # 9 archivos — utilidades, constantes, hooks por dominio
+│   │   ├── utils.test.ts           # mapOrder, formatCLP, timeAgo, diffMinutes
+│   │   ├── constants.test.ts       # ORDER_STATUS_LABEL, TABLE_STATUS_LABEL
+│   │   ├── index.test.ts           # updateOrderStatus, sendAlert
+│   │   ├── auditLog.test.ts        # AuditLog
+│   │   ├── useMenuHooks.test.ts
+│   │   ├── useTableHooks.test.ts
+│   │   ├── useThemeHooks.test.ts
+│   │   ├── useUserHooks.test.ts
+│   │   └── useAlertHooks.test.ts
+│   ├── ui/src/__tests__/           # 33 archivos — componentes React
+│   │   ├── utils.test.ts           # cn, formatDate, formatPrice, timeAgo
+│   │   ├── Badge.test.tsx          # Todas las variantes del componente Badge
+│   │   ├── KDSColumn.test.tsx
+│   │   ├── LiveFlowMonitor.test.tsx
+│   │   ├── TableMergeBar.test.tsx
+│   │   ├── BillAlertIsland.test.tsx
+│   │   ├── StaleOrdersAlert.test.tsx
+│   │   ├── PreparingOrdersList.test.tsx
+│   │   ├── RatingModal.test.tsx
+│   │   └── ... (25 archivos adicionales)
+│   └── store/src/__tests__/        # 1 archivo — Zustand + cifrado AES
+│       └── store.test.ts           # useAuthStore: setUser, logout, persistencia cifrada
+├── apps/
+│   ├── */src/__tests__/            # 7 archivos — rutas API por aplicación web
+│   └── cashier-dashboard/src/__tests__/
+│       └── proxy.test.ts           # Proxy de autenticación de cashier
+│   └── mobile/__tests__/          # 3 archivos — app React Native
+│       ├── dashboard.test.ts
+│       ├── reportUtils.test.ts
+│       └── utils.test.ts
+└── e2e/                            # 2 specs Playwright
+    ├── admin-login.spec.ts         # Flujo de autenticación del panel admin
+    └── customer-portal.spec.ts     # Portal público sin autenticación
+supabase/
+└── functions/__tests__/            # 1 archivo — Edge Function
+    └── manage-users.test.ts        # Validación de RBAC en gestión de usuarios
+```
+
+### 8.3 Inventario por Workspace
+
+| Workspace | Ruta | Archivos de test |
+|---|---|---|
+| `@menu-bites/auth` | `packages/auth/src/__tests__/` | 9 archivos |
+| `@menu-bites/ui` | `packages/ui/src/__tests__/` | 33 archivos |
+| `@menu-bites/store` | `packages/store/src/__tests__/` | 1 archivo |
+| Apps web (6 apps) | `apps/*/src/__tests__/` | 7 archivos |
+| Proxy cashier | `apps/cashier-dashboard/src/__tests__/` | 1 archivo |
+| Mobile | `apps/mobile/__tests__/` | 3 archivos |
+| Supabase Edge Fn | `supabase/functions/__tests__/` | 1 archivo |
+| E2E Playwright | `Producto/e2e/` | 2 specs |
+| **Total** | | **651 pruebas, 12 workspaces** |
+
+### 8.4 Comandos de Ejecución
+
+```bash
+# Ejecutar todos los workspaces (desde Producto/)
+npm test
+
+# Workspace específico
+npx turbo test --filter="@menu-bites/auth"
+npx turbo test --filter="@menu-bites/store"
+npx turbo test --filter="@menu-bites/ui"
+
+# Modo watch (desarrollo)
+cd packages/auth && npm run test:watch
+cd packages/ui   && npm run test:watch
+
+# Con reporte de cobertura
+cd packages/auth && npm run test:coverage
+
+# Pruebas E2E (requiere apps corriendo)
+npm run test:e2e
+npm run test:e2e:ui   # Modo interactivo para depuración
+```
+
+### 8.5 Cobertura de Seguridad
+
+La Edge Function `manage-users` es el punto central de control de roles (RBAC). El archivo `supabase/functions/__tests__/manage-users.test.ts` valida que toda modificación a las reglas de acceso por rol sea verificada antes del despliegue, actuando como guardia de seguridad en la capa de infraestructura de Supabase.
+
+---
+
+## 9. CONCLUSIÓN
+El sistema Menu Bites v2.6.0 constituye una plataforma SaaS multitenant production-ready con arquitectura de monorepo madura. Las incorporaciones clave de esta versión son: el motor de `DynamicThemeWrapper` centralizado (eliminación de FOUC y wrappers redundantes), la landing page pública de la app mobile con secciones modulares, la corrección del cálculo de KPIs (multiplicación correcta de `unit_price × quantity`), y la unificación cromática institucional del `admin-dashboard`. El sistema cubre los 7 roles operativos en 8 aplicaciones web y 1 app nativa, con sincronización Realtime, Web Push, dual-KDS y branding completamente dinámico por restaurante. La suite de testing (651 pruebas, 12 workspaces) garantiza la calidad en todos los paquetes compartidos y aplicaciones del ecosistema.
+
+### 10. APÉNDICE DE SEGURIDAD Y CUMPLIMIENTO
+Próximamente se integrará el módulo de auditoría de logs centralizada en el Data Warehouse para asegurar trazabilidad completa ante incidentes críticos (Wave 10). La cobertura de la Edge Function `manage-users` mediante `supabase/functions/__tests__/manage-users.test.ts` (sección 8.5) garantiza que toda modificación a las reglas de acceso por rol sea verificada antes de despliegue.

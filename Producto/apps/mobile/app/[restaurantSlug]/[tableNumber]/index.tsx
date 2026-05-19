@@ -13,6 +13,7 @@ import { CartFooter } from './_components/CartFooter';
 import { CheckoutModal } from './_components/CheckoutModal';
 import { ActiveOrdersModal } from './_components/ActiveOrdersModal';
 import { SuccessOverlay } from './_components/SuccessOverlay';
+import { RatingModal } from './_components/RatingModal';
 
 interface CartItem {
   id: string;
@@ -47,6 +48,11 @@ export default function RestaurantMenuScreen() {
   const [isPlacing, setIsPlacing] = useState(false);
   const [callingWaiter, setCallingWaiter] = useState(false);
   const [requestingBill, setRequestingBill] = useState(false);
+
+  // Rating state
+  const [showRating, setShowRating] = useState(false);
+  const [ratingOrderId, setRatingOrderId] = useState<string | null>(null);
+  const prevOrderStatusesRef = useRef<Record<string, string>>({});
 
   // Sync Logic (Polling)
   const syncTableData = useCallback(async (tableId: string) => {
@@ -115,6 +121,43 @@ export default function RestaurantMenuScreen() {
     return () => clearInterval(intervalId);
   }, [table?.id, syncTableData]);
 
+  // Realtime theme updates
+  useEffect(() => {
+    if (!restaurant?.id) return;
+    const channel = supabase
+      .channel(`customer-theme-${restaurant.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'restaurant_themes', filter: `restaurant_id=eq.${restaurant.id}` },
+        async () => {
+          const { data } = await supabase
+            .from('restaurant_themes')
+            .select('*')
+            .eq('restaurant_id', restaurant.id)
+            .eq('is_active', true)
+            .single();
+          if (data) setTheme(data);
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [restaurant?.id]);
+
+  // Detect when any order transitions to DELIVERED and trigger rating
+  useEffect(() => {
+    const prev = prevOrderStatusesRef.current;
+    for (const order of activeOrders) {
+      if (order.status === 'DELIVERED' && prev[order.id] && prev[order.id] !== 'DELIVERED') {
+        setRatingOrderId(order.id);
+        setShowRating(true);
+        break;
+      }
+    }
+    const next: Record<string, string> = {};
+    for (const order of activeOrders) next[order.id] = order.status;
+    prevOrderStatusesRef.current = next;
+  }, [activeOrders]);
+
   // Handlers
   const handleCallWaiter = async () => {
     if (!table || !restaurant || callingWaiter || table.help_requested) return;
@@ -176,6 +219,27 @@ export default function RestaurantMenuScreen() {
     }
   };
 
+  const handleSubmitRating = async (rating: number, comment: string) => {
+    if (!ratingOrderId || !restaurant || !table) return;
+    try {
+      const portalUrl = getApiUrl(3005);
+      await fetch(`${portalUrl}/api/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_id: ratingOrderId,
+          restaurant_id: restaurant.id,
+          table_id: table.id,
+          session_id: table.current_session_id,
+          rating,
+          comment: comment || null,
+        }),
+      });
+    } catch (err) {
+      console.error('[Rating] submit error:', err);
+    }
+  };
+
   // Cart Logic
   const addToCart = (item: any) => {
     setCart(prev => {
@@ -198,8 +262,17 @@ export default function RestaurantMenuScreen() {
 
   const primaryColor = theme?.primary_color || '#10b981';
   const bgColor = theme?.background_color || '#020617';
-  const textColor = theme?.text_color || 'white';
+  const textColor = theme?.text_color || '#ffffff';
   const accentColor = theme?.accent_color || primaryColor;
+
+  const isLightBg = (() => {
+    const hex = bgColor.replace('#', '');
+    if (hex.length !== 6) return false;
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.5;
+  })();
 
   const getStatusText = (s: string) => {
     const map: any = { PENDING: 'Esperando Garzón', VALIDATED: 'En Cocina', PREPARING: 'Preparando', READY: '¡Listo!', DELIVERED: 'Entregado' };
@@ -220,7 +293,7 @@ export default function RestaurantMenuScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={isLightBg ? 'dark-content' : 'light-content'} />
       <Stack.Screen options={{ headerShown: false }} />
 
       <MenuHeader 
@@ -293,9 +366,18 @@ export default function RestaurantMenuScreen() {
         getStatusColor={getStatusColor}
       />
 
-      <SuccessOverlay 
+      <SuccessOverlay
         visible={orderSuccess}
         onClose={() => setOrderSuccess(false)}
+        primaryColor={primaryColor}
+        bgColor={bgColor}
+        textColor={textColor}
+      />
+
+      <RatingModal
+        visible={showRating}
+        onClose={() => { setShowRating(false); setRatingOrderId(null); }}
+        onSubmit={handleSubmitRating}
         primaryColor={primaryColor}
         bgColor={bgColor}
         textColor={textColor}

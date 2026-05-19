@@ -1,9 +1,18 @@
+/**
+ * route.ts (api/inventory) — Endpoints para exportar e importar inventario como CSV.
+ * GET devuelve el inventario del restaurante autenticado en formato CSV descargable.
+ * POST recibe un CSV con stocks actualizados y aplica los cambios vía service role.
+ */
 import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { CRITICAL_STOCK_THRESHOLD as CRITICAL_THRESHOLD } from '@menu-bites/auth';
 
+/**
+ * Crea un cliente de Supabase con service role para operaciones privilegiadas
+ * que requieren omitir las políticas RLS (lectura/escritura de inventario masiva).
+ */
 function serviceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,6 +21,10 @@ function serviceClient() {
   );
 }
 
+/**
+ * Extrae el restaurant_id del JWT de la sesión activa en la cookie sb-kds-session.
+ * Retorna null si no hay sesión válida (cliente anon o cookie expirada).
+ */
 async function getRestaurantId(): Promise<string | null> {
   const cookieStore = await cookies();
   const supabase = createServerClient(

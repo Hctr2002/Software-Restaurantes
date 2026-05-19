@@ -1,3 +1,7 @@
+/**
+ * ProfileForm — Formulario de configuración de perfil del usuario ADMIN.
+ * Permite actualizar nombre a mostrar y contraseña; dejar campos vacíos los omite del payload.
+ */
 "use client";
 
 import React from "react";

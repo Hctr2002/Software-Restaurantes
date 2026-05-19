@@ -44,7 +44,8 @@ export async function proxy(req: NextRequest) {
   const isPublicRoute =
     pathname === '/' ||
     pathname.startsWith('/forgot-password') ||
-    pathname.startsWith('/reset-password');
+    pathname.startsWith('/reset-password') ||
+    pathname.startsWith('/auth/callback'); // callback is effectively public for the proxy
 
   const appRole  = user?.app_metadata?.role;
   const userRole = user?.user_metadata?.role;
@@ -56,11 +57,20 @@ export async function proxy(req: NextRequest) {
   const hasRestaurant = restaurantId && String(restaurantId).trim() !== "" && String(restaurantId) !== "null" && String(restaurantId) !== "undefined";
   const isSuperAdmin = roleUpper === 'SUPER_ADMIN' || (roleUpper === 'ADMIN' && !hasRestaurant);
 
-  console.log(`[Proxy] Path: ${pathname} | Role: ${roleUpper} | IsSuperAdmin: ${isSuperAdmin} | Session: ${session} | Error: ${error?.message || 'none'}`);
+  // Telemetry
+  if (error || !isPublicRoute) {
+    console.log(`[Proxy] Path: ${pathname} | Role: ${roleUpper} | Session: ${session} | Error: ${error?.message || 'none'}`);
+  }
+
+  // Handle invalid sessions or refresh token errors on protected routes
+  if (error && !isPublicRoute) {
+    console.warn(`[Proxy] Auth error on ${pathname}: ${error.message}. Redirecting to login.`);
+    const url = req.nextUrl.clone();
+    url.pathname = '/';
+    return NextResponse.redirect(url);
+  }
 
   // The login page (/) is always accessible.
-  // If session exists and user is at /, we can let them through or redirect to dashboard.
-  // For now, follow existing logic.
   if (pathname === '/') return response;
 
   // No session for a protected route -> redirect to login (/).
@@ -74,8 +84,10 @@ export async function proxy(req: NextRequest) {
   // Session exists but user is not a SuperAdmin -> redirect to their specific dashboard.
   if (session && !isPublicRoute && !isSuperAdmin) {
     const target = ROLE_URLS[roleUpper ?? ''];
-    console.log(`[Proxy] Not SuperAdmin. Role: ${roleUpper}. Redirecting to operative dashboard: ${target}`);
-    if (target) return NextResponse.redirect(new URL(target));
+    if (target) {
+      console.log(`[Proxy] Not SuperAdmin. Role: ${roleUpper}. Redirecting to operative dashboard: ${target}`);
+      return NextResponse.redirect(new URL(target));
+    }
     
     // Fallback if no target is defined for the role.
     console.log(`[Proxy] No target defined for role ${roleUpper}. Redirecting to login.`);

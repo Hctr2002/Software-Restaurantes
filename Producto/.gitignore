@@ -84,6 +84,7 @@ jspm_packages/
 # Build Artifacts
 **/.next/
 **/.turbo/
+**/next-env.d.ts
 **/out/
 **/dist/
 **/.expo/
@@ -93,3 +94,5 @@ jspm_packages/
 
 # others
 Entrega 1.pdf
+# Test coverage reports
+coverage/

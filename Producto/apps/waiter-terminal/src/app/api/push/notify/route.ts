@@ -1,3 +1,8 @@
+/**
+ * route.ts (api/push/notify) — Envía notificaciones Web Push a todos los garzones de un restaurante.
+ * Invocado por useWebPush cuando aparecen nuevos pedidos en estado READY.
+ * Limpia automáticamente suscripciones expiradas (HTTP 410/404).
+ */
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import webpush from 'web-push';
@@ -10,6 +15,10 @@ if (VAPID_PUBLIC && VAPID_PRIVATE) {
   webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC, VAPID_PRIVATE);
 }
 
+/**
+ * Crea un cliente Supabase con service role para operaciones privilegiadas
+ * que no deben estar restringidas por RLS (ej: leer todas las suscripciones push).
+ */
 function serviceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

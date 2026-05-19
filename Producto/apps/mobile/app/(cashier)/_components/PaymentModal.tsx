@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  Modal, 
-  TextInput, 
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  TextInput,
   ActivityIndicator,
   ScrollView,
   KeyboardAvoidingView,
-  Platform
+  Platform,
 } from 'react-native';
-import { X, CreditCard, ChevronRight, CheckCircle2, Receipt } from 'lucide-react-native';
+import { X, ChevronRight, Receipt, Share2 } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../../constants/MB_Theme';
 import { useTheme } from '../../../context/ThemeContext';
 import { formatCurrency } from '../../../lib/dashboard';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { shareReceipt } from '../../../lib/receipt';
+import { TIP_RATE, TIP_COLOR } from '../../../constants/MB_Theme';
 
 interface PaymentModalProps {
   visible: boolean;
@@ -27,17 +28,41 @@ interface PaymentModalProps {
 }
 
 export default function PaymentModal({ visible, group, isProcessing, onClose, onConfirm }: PaymentModalProps) {
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   const [reference, setReference] = useState('');
+  const [isSharing, setIsSharing] = useState(false);
 
   if (!group) return null;
 
   const allItems = group.orders.flatMap((o: any) => o.order_items ?? []);
   const tableLabel = group.sessionId ? "Mesas fusionadas" : `Mesa ${group.tableNumber ?? "S/N"}`;
+  const subtotal = group.total;
+  const tipAmount = group.tipIncluded ? Math.round(subtotal * TIP_RATE) : 0;
+  const totalToPay = subtotal + tipAmount;
 
   const handleConfirm = async () => {
     await onConfirm(reference);
     setReference('');
+  };
+
+  const handleShare = async () => {
+    setIsSharing(true);
+    try {
+      await shareReceipt({
+        tableLabel,
+        items: allItems.map((i: any) => ({
+          name: i.menu_items?.name ?? 'Ítem',
+          quantity: i.quantity,
+          unitPrice: Number(i.unit_price),
+        })),
+        tipIncluded: group.tipIncluded,
+        reference: reference || undefined,
+      });
+    } catch {
+      // Sharing cancelled or unavailable — no feedback needed
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   return (
@@ -47,7 +72,7 @@ export default function PaymentModal({ visible, group, isProcessing, onClose, on
       animationType="none"
       onRequestClose={onClose}
     >
-      <BlurView intensity={20} tint="dark" style={styles.overlay}>
+      <BlurView intensity={20} tint={isLight ? 'light' : 'dark'} style={styles.overlay}>
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.centered}
@@ -73,7 +98,13 @@ export default function PaymentModal({ visible, group, isProcessing, onClose, on
             <ScrollView showsVerticalScrollIndicator={false} style={styles.body}>
               <View style={styles.summaryCard}>
                 <Text style={[styles.summaryLabel, { color: colors.muted }]}>TOTAL A COBRAR</Text>
-                <Text style={[styles.summaryValue, { color: colors.text }]}>{formatCurrency(group.total)}</Text>
+                <Text style={[styles.summaryValue, { color: colors.text }]}>{formatCurrency(totalToPay)}</Text>
+                {group.tipIncluded && (
+                  <View style={[styles.tipRow, { backgroundColor: TIP_COLOR + '15', borderColor: TIP_COLOR + '30' }]}>
+                    <Text style={[styles.tipLabel, { color: TIP_COLOR }]}>Propina 10%</Text>
+                    <Text style={[styles.tipValue, { color: TIP_COLOR }]}>+{formatCurrency(tipAmount)}</Text>
+                  </View>
+                )}
               </View>
 
               <Text style={[styles.sectionTitle, { color: colors.muted }]}>DESGLOSE DE PRODUCTOS</Text>
@@ -100,7 +131,20 @@ export default function PaymentModal({ visible, group, isProcessing, onClose, on
             </ScrollView>
 
             <View style={styles.footer}>
-              <TouchableOpacity 
+              <TouchableOpacity
+                style={[styles.shareBtn, { borderColor: colors.glassHeavy }]}
+                onPress={handleShare}
+                disabled={isSharing}
+              >
+                {isSharing
+                  ? <ActivityIndicator color={colors.muted} size="small" />
+                  : <Share2 size={18} color={colors.muted} />}
+                <Text style={[styles.shareBtnText, { color: colors.muted }]}>
+                  {isSharing ? 'Generando...' : 'Compartir recibo'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
                 style={[styles.confirmBtn, { backgroundColor: '#10b981' }]}
                 onPress={handleConfirm}
                 disabled={isProcessing}
@@ -251,5 +295,31 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '900',
     letterSpacing: 1,
-  }
+  },
+  shareBtn: {
+    height: 44,
+    borderRadius: 14,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+    borderWidth: 1,
+  },
+  shareBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  tipRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  tipLabel: { fontSize: 11, fontWeight: '900', letterSpacing: 0.5 },
+  tipValue: { fontSize: 14, fontWeight: '900' },
 });

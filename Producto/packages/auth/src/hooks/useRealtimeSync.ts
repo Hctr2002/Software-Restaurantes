@@ -1,10 +1,28 @@
 "use client";
 
+/**
+ * useRealtimeSync — Hook base de sincronización en tiempo real con Supabase Postgres Changes.
+ * Realiza un fetch inicial y luego suscribe a cambios de la tabla indicada filtrando por
+ * restaurant_id (u otro filtro personalizado). Incluye reconexión automática con backoff
+ * exponencial (hasta MAX_RETRIES intentos) ante errores de canal o timeouts.
+ *
+ * Todos los hooks de datos del sistema se construyen sobre este hook.
+ */
+
 import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "../index";
 
 const MAX_RETRIES = 5;
 
+/**
+ * Suscribe a cambios en tiempo real de una tabla Supabase y sincroniza el estado local.
+ * @param restaurantId - UUID del restaurante para el filtro por defecto. Puede ser undefined en rutas públicas.
+ * @param tableName - Nombre de la tabla Postgres a escuchar.
+ * @param fetchFn - Función que ejecuta el fetch inicial y ante cada cambio recibido.
+ * @param options.channelId - Sufijo para diferenciar canales sobre la misma tabla.
+ * @param options.filter - Filtro Realtime personalizado; si se omite usa restaurant_id.
+ * @param options.transform - Transformación aplicada al resultado crudo del fetch.
+ */
 export function useRealtimeSync<T>(
   restaurantId: string | undefined,
   tableName: string,
@@ -66,9 +84,12 @@ export function useRealtimeSync<T>(
     // If this effect runs before onAuthStateChange fires, the Realtime WebSocket
     // connects without a token and RLS silently blocks all events.
     // Fix: explicitly set the auth token before subscribing.
-    supabase.auth.getSession().then(({ data: sessionData }) => {
+    supabase.auth.getSession()
+      .then(({ data: sessionData }) => sessionData.session?.access_token ?? null)
+      .catch(() => null) // expected for anonymous users in public apps (no refresh token)
+      .then((token) => {
       if (intentionallyClosed) return; // effect was cleaned up while awaiting
-      supabase.realtime.setAuth(sessionData.session?.access_token ?? null);
+      supabase.realtime.setAuth(token);
 
       const channel = supabase.channel(name)
         .on("postgres_changes", { event: "*", schema: "public", table: tableName, filter: f },

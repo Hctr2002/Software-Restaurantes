@@ -1,3 +1,7 @@
+/**
+ * TableOccupationTable — Tabla de ingresos y pedidos agrupados por número de mesa.
+ * Ordenada de mayor a menor ingreso para identificar las zonas más productivas.
+ */
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, Table, TableRow, TableCell } from "@menu-bites/ui";
@@ -11,7 +15,7 @@ interface TableOccupationTableProps {
 
 export default function TableOccupationTable({ reports }: TableOccupationTableProps) {
   return (
-    <Card className="glass rounded-[2.5rem] border-white/5 overflow-hidden">
+    <Card className="glass rounded-[2.5rem] border-foreground/5 overflow-hidden">
       <CardHeader className="p-8 pb-4">
          <div className="flex items-center gap-3 mb-2">
           <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">

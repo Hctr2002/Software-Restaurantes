@@ -1,6 +1,14 @@
+/**
+ * useCategories — Hook de gestión CRUD para categorías del menú.
+ * Carga las categorías desde /api/local/categories y expone handlers para crear, editar y eliminar.
+ */
 import { useCallback, useEffect, useState } from "react";
 import { Category } from "@/app/[slug]/dashboard/_components/localShared";
 
+/**
+ * Provee estado de lista, formulario, modal y acciones CRUD para categorías.
+ * No tiene suscripción Realtime; se actualiza manualmente tras cada mutación.
+ */
 export function useCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);

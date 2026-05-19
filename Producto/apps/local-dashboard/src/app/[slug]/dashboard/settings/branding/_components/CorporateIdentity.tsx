@@ -16,7 +16,7 @@ interface CorporateIdentityProps {
  * 
  * Gestiona el logo y muestra información del slug del local.
  */
-export default function CorporateIdentity({ currentTheme, setCurrentTheme, slug }: CorporateIdentityProps) {
+export function CorporateIdentity({ currentTheme, setCurrentTheme, slug }: CorporateIdentityProps) {
   return (
     <motion.div 
       initial={{ opacity: 0, x: -20 }} 
@@ -24,7 +24,7 @@ export default function CorporateIdentity({ currentTheme, setCurrentTheme, slug 
       exit={{ opacity: 0, x: 20 }}
       className="space-y-8"
     >
-      <Card className="p-8 bg-white/5 border-white/5 rounded-[2.5rem] shadow-2xl space-y-10">
+      <Card className="p-8 bg-foreground/5 border-foreground/5 rounded-[2.5rem] shadow-2xl space-y-10">
         <div>
           <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1">Identidad Corporativa</h3>
           <p className="text-xs text-foreground/40 font-medium">Configuración base de tu local</p>
@@ -37,11 +37,11 @@ export default function CorporateIdentity({ currentTheme, setCurrentTheme, slug 
               value={currentTheme.logoUrl || ""} 
               onChange={(e) => setCurrentTheme({...currentTheme, logoUrl: e.target.value})}
               placeholder="https://tu-sitio.com/logo.png"
-              className="bg-white/5 border-white/10 rounded-2xl h-14 px-6 text-sm font-bold"
+              className="bg-foreground/5 border-foreground/10 rounded-2xl h-14 px-6 text-sm font-bold"
             />
           </div>
           
-          <div className="p-8 rounded-[2.5rem] border border-white/10 bg-white/5 flex items-center justify-between group">
+          <div className="p-8 rounded-[2.5rem] border border-foreground/10 bg-foreground/5 flex items-center justify-between group">
             <div>
               <p className="text-[10px] font-black text-foreground/30 uppercase tracking-[0.2em] mb-1">Slug de Acceso</p>
               <code className="text-xl font-black text-primary tracking-tighter italic">/{slug}</code>

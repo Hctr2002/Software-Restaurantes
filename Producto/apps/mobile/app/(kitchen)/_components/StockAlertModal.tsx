@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { AlertTriangle, X, Send } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
-import { MB_COLORS, MB_SPACING, MB_RADIUS } from '../../../constants/MB_Theme';
 import { useTheme } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';
 import { supabase } from '../../../lib/supabase';
@@ -24,7 +23,7 @@ interface StockAlertModalProps {
 }
 
 export default function StockAlertModal({ visible, onClose }: StockAlertModalProps) {
-  const { colors } = useTheme();
+  const { colors, isLight } = useTheme();
   const { restaurantId, user } = useAuth();
   
   const [alertItem, setAlertItem] = useState('');
@@ -70,7 +69,7 @@ export default function StockAlertModal({ visible, onClose }: StockAlertModalPro
       animationType="none"
       onRequestClose={onClose}
     >
-      <BlurView intensity={20} tint="dark" style={styles.overlay}>
+      <BlurView intensity={20} tint={isLight ? 'light' : 'dark'} style={styles.overlay}>
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.centered}

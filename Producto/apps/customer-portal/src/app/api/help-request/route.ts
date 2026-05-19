@@ -1,3 +1,10 @@
+/**
+ * API Route: POST /api/help-request
+ * Registra la solicitud de asistencia de una mesa:
+ * activa el flag help_requested = true en la tabla 'tables'.
+ * Requiere: table_id, restaurant_id en el cuerpo.
+ */
+
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 

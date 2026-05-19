@@ -1,3 +1,7 @@
+/**
+ * InventoryTable — Tabla de insumos para vista de escritorio (hidden en móvil).
+ * Colorea el stock y el badge de estado según LOW_STOCK_THRESHOLD.
+ */
 "use client";
 
 import { Table, TableRow, TableCell, Badge, Button } from "@menu-bites/ui";

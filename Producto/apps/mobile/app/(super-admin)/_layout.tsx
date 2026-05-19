@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { LayoutDashboard, Settings, Store, Users, CreditCard } from 'lucide-react-native';
+import { LayoutDashboard, Settings, Store, Users } from 'lucide-react-native';
 import { MB_COLORS } from '../../constants/MB_Theme';
 
 export default function SuperAdminLayout() {
@@ -40,12 +40,10 @@ export default function SuperAdminLayout() {
           tabBarIcon: ({ color }) => <Users size={24} color={color} />,
         }}
       />
+
       <Tabs.Screen
         name="plans"
-        options={{
-          title: 'Planes',
-          tabBarIcon: ({ color }) => <CreditCard size={24} color={color} />,
-        }}
+        options={{ href: null }}
       />
       <Tabs.Screen
         name="profile"

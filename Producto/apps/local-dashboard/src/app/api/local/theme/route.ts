@@ -1,3 +1,10 @@
+/**
+ * /api/local/theme — Gestión completa de temas visuales del restaurante.
+ * GET: Lista todos los temas del restaurante.
+ * POST: Crea un nuevo tema validado con themeSchema.
+ * PATCH: Activa un tema (action="activate") o actualiza sus campos (action="update").
+ * DELETE: Elimina uno o varios temas por ID (parámetros themeId o themeIds CSV).
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, ensureServiceConfig } from "@/lib/localApi";
 import { themeService } from "@/lib/services/themeService";
@@ -59,6 +66,12 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ data });
   }
 
+  if (action === "update" && themeId) {
+    const { data, error } = await themeService.update(restaurantId, themeId, body);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ data });
+  }
+
   return NextResponse.json({ error: "Acción no válida" }, { status: 400 });
 }
 
@@ -72,8 +85,17 @@ export async function DELETE(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
   const themeId = searchParams.get("themeId");
+  const themeIds = searchParams.get("themeIds");
 
-  if (!themeId) return NextResponse.json({ error: "Falta themeId" }, { status: 400 });
+  if (themeIds) {
+    const ids = themeIds.split(",").map((id) => id.trim()).filter(Boolean);
+    if (ids.length === 0) return NextResponse.json({ error: "Falta themeIds" }, { status: 400 });
+    const { error } = await themeService.deleteMany(restaurantId, ids);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true, deleted: ids.length });
+  }
+
+  if (!themeId) return NextResponse.json({ error: "Falta themeId o themeIds" }, { status: 400 });
 
   const { error } = await themeService.delete(restaurantId, themeId);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

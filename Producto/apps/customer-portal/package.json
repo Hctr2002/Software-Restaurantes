@@ -6,12 +6,16 @@
     "dev": "next dev -p 3005",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.105.1",
     "@menu-bites/auth": "*",
     "@menu-bites/ui": "*",
+    "@supabase/supabase-js": "^2.105.1",
+    "framer-motion": "^11.18.2",
     "next": "16.2.4",
     "react": "19.1.0",
     "react-dom": "19.1.0"
@@ -21,9 +25,11 @@
     "@types/node": "^20.19.39",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@vitest/coverage-v8": "^2.1.9",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^2.1.9"
   }
 }

@@ -1,20 +1,41 @@
 @import "tailwindcss";
 
 @theme {
-  --color-navy: hsl(214 95% 13%);
-  --color-navy-dark: hsl(214 90% 9%);
-  --color-navy-light: hsl(214 80% 22%);
-  --color-sage: hsl(145 20% 55%);
-  --color-sage-light: hsl(145 15% 75%);
-  --color-sage-dark: hsl(145 25% 40%);
-  --color-sand: hsl(60 14% 97%);
-  --color-accent: hsl(35 90% 55%);
-  
   --radius-xl: 1.5rem;
   --radius-2xl: 2rem;
-  
-  --font-outfit: "Outfit", sans-serif;
+  --radius-3xl: 2.5rem;
 
+  /* Fuentes — mapeadas a CSS vars de :root para reactividad runtime */
+  /* Se usan nombres internos para evitar circularidad en la definición de utilidades de Tailwind */
+  --font-title: var(--font-title-stack);
+  --font-body: var(--font-body-stack);
+  --font-accent: var(--font-accent-stack);
+  --font-outfit: var(--font-title-stack);
+  --font-inter: var(--font-body-stack);
+
+  /* ─── Escala Tipográfica Modular (Major Third 1.25x) ─── */
+  --text-hero: 5rem;          /* 80px — h1 hero */
+  --text-display: 2.986rem;   /* ~47.8px — display sections */
+  --text-title: 2.389rem;     /* ~38.2px — h2 sección */
+  --text-heading: 1.563rem;   /* ~25px — h3 cards */
+  --text-body-lg: 1.25rem;    /* 20px — body grande */
+  --text-body: 1rem;          /* 16px — body base */
+  --text-sm: 0.8rem;          /* 12.8px — captions */
+  --text-xs: 0.64rem;         /* 10.24px — labels/badges */
+
+  /* ─── Semantic Color Tokens ─── */
+  --color-surface-0: #020617;
+  --color-surface-1: #0f172a;
+  --color-surface-2: #1e293b;
+  --color-accent-primary: #10b981;
+  --color-accent-glow: rgba(16,185,129,0.15);
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  --color-border-subtle: rgba(255,255,255,0.08);
+  --color-border-accent: rgba(16,185,129,0.25);
+
+  /* ─── Original Semantic Colors ─── */
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-card: hsl(var(--card));
@@ -22,40 +43,85 @@
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
   --color-secondary: hsl(var(--secondary));
+  --color-accent: hsl(var(--accent));
+  --color-destructive: hsl(var(--destructive));
+  --color-border: hsl(var(--border));
+  --color-success: hsl(var(--success));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
 }
 
 :root {
+  /* ── Color tokens HSL (manipulables por RestaurantThemeProvider) ── */
   --background: 214 90% 9%;
   --foreground: 60 14% 97%;
   --card: 214 95% 13%;
   --card-foreground: 60 14% 97%;
   --primary: 145 20% 55%;
   --primary-foreground: 214 90% 9%;
+  --accent: 35 90% 55%;
+  --border: 214 80% 22%;
+  --destructive: 0 84% 60%;
+  --muted: 214 40% 18%;
+  --muted-foreground: 214 15% 65%;
+  --success: 160 84% 39%;
+  --success-foreground: 0 0% 100%;
+
+  /* ── Font stacks base con fallbacks robustos ── */
+  --font-title-stack:  "Outfit", system-ui, sans-serif;
+  --font-body-stack:   "Inter", system-ui, sans-serif;
+  --font-accent-stack: "Outfit", system-ui, sans-serif;
+
+  /* Aliases para herencia directa en componentes */
+  --font-title: var(--font-title-stack);
+  --font-body: var(--font-body-stack);
+  --font-accent: var(--font-accent-stack);
 }
 
 @layer base {
   * {
-    @apply border-navy-light/20;
+    @apply border-foreground/10;
   }
   body {
-    @apply bg-navy-dark text-sand font-outfit antialiased;
+    /* // Función para heredar la tipografía base y asegurar que todos los elementos usen font-body por defecto. */
+    @apply bg-background text-foreground font-body antialiased;
+    font-family: var(--font-body-stack);
     background-image: 
-      radial-gradient(circle at 0% 0%, rgba(178, 194, 178, 0.05) 0%, transparent 50%),
-      radial-gradient(circle at 100% 100%, rgba(10, 25, 47, 0.1) 0%, transparent 50%);
+      radial-gradient(circle at 0% 0%, hsla(var(--primary), 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, hsla(var(--background), 0.1) 0%, transparent 50%);
     min-height: 100vh;
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply bg-navy/40 backdrop-blur-xl border border-sand/10 shadow-2xl;
+    @apply bg-card border border-foreground/10 shadow-2xl;
   }
   
   .glass-card {
-    @apply bg-navy-light/30 backdrop-blur-md border border-sand/5 hover:border-sage/30 transition-all duration-500;
+    @apply bg-card border border-foreground/5 hover:border-primary/30 transition-all duration-500;
   }
 
   .premium-gradient {
-    @apply bg-gradient-to-br from-sage/20 via-transparent to-navy/40;
+    @apply bg-gradient-to-br from-primary/20 via-transparent to-foreground/5;
+  }
+
+  /* ─── Animaciones utilitarias ─── */
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.1; transform: scale(1); }
+    50% { opacity: 0.2; transform: scale(1.05); }
+  }
+
+  .glow-pulse {
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .float-animation {
+    animation: float 4s ease-in-out infinite;
   }
 }

@@ -1,3 +1,11 @@
+/**
+ * API Route: /api/orders
+ * Maneja la creación y consulta de pedidos desde el portal del cliente.
+ * Usa la Service Role Key para bypasear RLS — el cliente anónimo no puede insertar directamente.
+ * Los pedidos se dividen automáticamente en sub-órdenes por estación (KITCHEN / BAR)
+ * según el target_station de la categoría de cada ítem.
+ */
+
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
@@ -15,6 +23,11 @@ interface CreateOrderPayload {
   items: OrderItemPayload[];
 }
 
+/**
+ * GET /api/orders?table_id=<uuid>
+ * Retorna todos los pedidos activos de una mesa (excluye REJECTED y COMPLETED).
+ * Incluye los ítems y nombres de productos en la respuesta.
+ */
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const tableId = searchParams.get('table_id');
@@ -51,6 +64,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
+/** Crea un cliente Supabase con permisos de administrador (Service Role) sin persistir sesión. */
 function serviceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -59,6 +73,10 @@ function serviceClient() {
   );
 }
 
+/**
+ * Inserta una orden en la BD con un UUID generado localmente.
+ * Retorna el id generado y el mensaje de error si ocurre uno.
+ */
 async function insertOrder(
   db: ReturnType<typeof serviceClient>,
   params: {
@@ -83,6 +101,10 @@ async function insertOrder(
   return { id, error: error?.message ?? null };
 }
 
+/**
+ * Inserta los ítems de una orden en batch.
+ * Retorna el mensaje de error o null si la inserción fue exitosa.
+ */
 async function insertItems(
   db: ReturnType<typeof serviceClient>,
   orderId: string,
@@ -101,6 +123,12 @@ async function insertItems(
   return error?.message ?? null;
 }
 
+/**
+ * POST /api/orders
+ * Recibe el carrito del cliente, valida que los ítems pertenezcan al restaurante,
+ * y crea sub-pedidos separados por estación (KITCHEN y/o BAR).
+ * Marca la mesa como OCCUPIED al finalizar.
+ */
 export async function POST(req: NextRequest) {
   const db = serviceClient();
   try {

@@ -198,16 +198,19 @@ El sistema genera análisis exportables a Excel (`.xls` SpreadsheetML):
 Los tiempos se muestran como barras horizontales con código de color: verde (< 10 min), amarillo (10–20 min), rojo (> 20 min). Solo aparece para órdenes que tienen `validated_at` y `ready_at` registrados.
 
 > **Nota:** Los timestamps se escriben automáticamente al transicionar el estado de la orden.
+
+### 2.7 Laboratorio de Branding (v2.0)
+
+A partir de la versión 2.5.0, el Local Dashboard incorpora el **Laboratorio de Branding**, una interfaz avanzada para la gestión de la identidad visual del restaurante:
+
+- **Previsualización en Tiempo Real:** Permite ver cómo se aplicará el tema en el portal de clientes sin salir del dashboard.
+- **Selector de Paleta de Colores:** Configuración de colores primarios, fondos y acentos mediante selectores HSL.
+- **Suite de Tipografía Dinámica:** Selección de fuentes para títulos y cuerpo desde una curaduría optimizada para legibilidad y estética premium.
+- **Gestión de Assets:** Carga de logos y banners con soporte para transparencia y optimización automática.
+- **Inyección CSS Variables:** El sistema traduce la configuración visual en variables CSS que se inyectan dinámicamente en el portal.
+
 | Eficiencia de Mesas | Tiempo promedio de ocupación y rotación |
 | Reporte Consolidado | Resumen de cierre de caja para contabilidad |
-
-### 2.7 Laboratorio de Marca (Branding Lab)
-
-- **Templates Predefinidos:** 12 paletas de colores profesionales listas para usar.
-- **Editor Granular:** Control de 6 variables CSS: `primary`, `secondary`, `background`, `accent`, `text`, `card`.
-- **Tipografías:** Selección de Google Fonts para `font_title` y `font_body`.
-- **Preview en Tiempo Real:** Vista previa del Customer Portal con el tema antes de guardar.
-- **Propagación Instantánea:** Al activar un tema, el Customer Portal y las terminales lo reflejan sin necesidad de recargar.
 
 ---
 
@@ -519,7 +522,30 @@ Vista de resumen al final del turno del cajero:
 
 ## 6. PORTAL DEL CLIENTE (Customer Portal)
 
-Aplicación web pública accedida vía código QR de la mesa. No requiere creación de cuenta. Accede por `/{slug}?qr={token}`.
+Acceso directo del comensal a través de QR. v2.5.0 incorpora el estándar de diseño **Pro Max** con conectividad temática total.
+
+### 6.1 Interfaz Premium Pro Max
+
+- **Diseño Adaptativo:** Optimizado para dispositivos móviles con interacciones táctiles fluidas (Framer Motion).
+- **Conectividad de Marca:** La interfaz adopta automáticamente los colores y fuentes definidos por el restaurante en el Laboratorio de Branding.
+- **Estética de Laboratorio (Lab Style):** El portal utiliza un estilo visual premium con tipografías en **negrita**, *itálicas* y textos en MAYÚSCULAS para encabezados y acentos, proyectando una imagen moderna y profesional.
+- **Reactividad Total:** Los cambios realizados en el dashboard administrativo se reflejan instantáneamente en el portal del cliente, permitiendo ajustes estacionales o promocionales en segundos.
+- **Glassmorphism Dinámico:** Uso de transparencias y desenfoques (backdrop-filter) que se ajustan según la opacidad configurada en el tema.
+
+### 6.2 Primitivos de Navegación
+
+- **PremiumHeader:** Encabezado con el nombre del restaurante y estado del servicio.
+- **CategoryNav:** Navegación por categorías con indicadores de scroll y resaltado dinámico de la sección activa.
+- **OrderTracker:** Barra de seguimiento en tiempo real que informa al cliente sobre el estado de su pedido (Solicitado -> Preparando -> Listo).
+
+### 6.3 Flujo de Pedido sin Fricción
+
+1. **Selección de Productos:** Tarjetas de producto (`PortalMenuItemCard`) con fotos, precios y descripción.
+2. **Carrito Flotante:** Acceso rápido al resumen del pedido desde cualquier sección.
+3. **Checkout Express:** Confirmación de pedido vinculada automáticamente a la mesa del QR.
+4. **Solicitud de Ayuda y Cuenta:** Botones dedicados para llamar al garzón o pedir la boleta, integrados con el sistema de alertas en tiempo real.
+
+Acceso vía Código QR: aplicación web pública accedida vía código QR de la mesa. No requiere creación de cuenta. Accede por `/{slug}?qr={token}`.
 
 ### 6.1 Acceso vía Código QR
 

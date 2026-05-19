@@ -1,3 +1,10 @@
+/**
+ * proxy — Middleware de autenticación para cashier-dashboard.
+ * Intercepta cada request entrante, valida la sesión Supabase y
+ * verifica que el rol del usuario sea CAJERO; redirige al portal
+ * de auth si la sesión es inválida o el rol no corresponde.
+ * Las rutas /auth/callback y /receipt/* son públicas (bypass).
+ */
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
@@ -5,7 +12,13 @@ import type { NextRequest } from 'next/server';
 export async function proxy(req: NextRequest) {
   let response = NextResponse.next({ request: { headers: req.headers } });
 
-  if (req.nextUrl.pathname.startsWith('/auth/callback')) return response;
+  // Public routes: auth callback and receipt/voucher pages (server-rendered with service role)
+  if (
+    req.nextUrl.pathname.startsWith('/auth/callback') ||
+    req.nextUrl.pathname.startsWith('/receipt/')
+  ) {
+    return response;
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

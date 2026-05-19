@@ -1,3 +1,8 @@
+/**
+ * SkeletonLoader — Componente de carga esqueleto para estados de carga.
+ * Renderiza un rectángulo pulsante que simula el contenido en carga.
+ */
+
 import React from "react";
 import { cn } from "../lib/utils";
 

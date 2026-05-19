@@ -1,3 +1,8 @@
+/**
+ * tableService — Capa de acceso a datos para la tabla tables.
+ * Al crear una mesa genera automáticamente el QR con la URL del portal de clientes.
+ * Al eliminar, verifica que no existan órdenes activas para proteger la integridad.
+ */
 import { createServiceClient } from "../localApi";
 import { TableInput } from "../schemas/tableSchema";
 

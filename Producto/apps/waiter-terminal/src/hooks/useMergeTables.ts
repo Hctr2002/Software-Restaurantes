@@ -27,7 +27,31 @@ export function useMergeTables() {
     const json = await res.json();
     setMerging(false);
     if (res.ok) {
-      setMergeResult(`Mesas fusionadas — ${json.ordersUpdated} pedido(s) unificados.`);
+      if (json.alreadyMerged) {
+        setMergeResult("Estas mesas ya se encuentran fusionadas.");
+      } else {
+        const msg = json.ordersUpdated > 0 
+          ? `Mesas fusionadas — ${json.ordersUpdated} pedido(s) unificados.`
+          : `Mesas fusionadas.`;
+        setMergeResult(msg);
+      }
+      setMergeMode(false);
+      setSelectedForMerge(new Set());
+      setTimeout(() => setMergeResult(null), 4000);
+    }
+  };
+
+  const handleUnlinkTables = async (sessionId: string) => {
+    if (!sessionId) return;
+    setMerging(true);
+    const res = await fetch("/api/sessions", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId }),
+    });
+    setMerging(false);
+    if (res.ok) {
+      setMergeResult(`Mesas desvinculadas.`);
       setMergeMode(false);
       setSelectedForMerge(new Set());
       setTimeout(() => setMergeResult(null), 4000);
@@ -39,5 +63,5 @@ export function useMergeTables() {
     setSelectedForMerge(new Set());
   };
 
-  return { mergeMode, selectedForMerge, merging, mergeResult, toggleMergeSelect, handleMergeTables, toggleMode };
+  return { mergeMode, selectedForMerge, merging, mergeResult, toggleMergeSelect, handleMergeTables, toggleMode, handleUnlinkTables };
 }

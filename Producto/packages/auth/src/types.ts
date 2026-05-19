@@ -1,3 +1,9 @@
+/**
+ * types.ts — Tipos y enums compartidos por todas las apps del monorepo.
+ * Espejo del modelo Prisma: Role, OrderStatus, TableStatus y entidades principales.
+ * Importar desde '@menu-bites/auth' — no desde esta ruta directamente.
+ */
+
 import { SupabaseClient } from '@supabase/supabase-js';
 
 export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'GARZON' | 'COCINA' | 'CAJERO' | 'CLIENTE' | 'BAR';
@@ -51,6 +57,8 @@ export type TableRecord = {
   restaurantId: string;
   billRequested: boolean;
   helpRequested: boolean;
+  current_session_id?: string | null;
+  tip_included?: boolean;
 };
 
 export type OrderItem = {
@@ -89,6 +97,7 @@ export type Order = {
   barPreparing: boolean;
   createdAt: string;
   updatedAt: string;
+  tableNumber?: number | null;
   validatedAt?: string | null;
   preparingAt?: string | null;
   readyAt?: string | null;
@@ -142,3 +151,16 @@ export type LocalUserRecord = {
   createdAt: string;
   name?: string | null;
 };
+
+export interface RestaurantTheme {
+  primaryColor: string;
+  secondaryColor: string;
+  backgroundColor: string;
+  accentColor: string;
+  textColor: string;
+  cardBackground: string;
+  fontTitle?: string;
+  fontBody?: string;
+  fontAccent?: string;
+  logoUrl?: string | null;
+}

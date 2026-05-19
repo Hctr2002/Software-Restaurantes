@@ -2,31 +2,36 @@
 
 import { use, useState, useEffect } from "react";
 import { 
-  useTableOrders, 
-  useCustomerOrderTracker, 
-  useThemeSync, 
+  useTableOrders,
+  useCustomerOrderTracker,
   useMenu,
-  useCustomerPortal 
+  useCustomerPortal,
 } from '@menu-bites/auth';
 import { useTenant } from '@/context/TenantContext';
-import { 
-  OrderTracker, 
-  RatingModal, 
+import {
+  OrderTracker,
+  RatingModal,
   CuentaSheet,
-  PremiumHeader, 
-  Button,
-  RestaurantThemeProvider
+  PremiumHeader,
+  PortalPrimaryButton,
+  PortalText,
 } from '@menu-bites/ui';
 import { Loader2, Store, ShoppingBag, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Módulos extraídos para cumplir con el límite de 400 líneas
+// Componentes extraídos para respetar el límite de 400 líneas por archivo
 import { CategoryNav } from "./_components/CategoryNav";
 import { MenuSection } from "./_components/MenuSection";
 import { CheckoutModal } from "./_components/CheckoutModal";
 import { ConfirmationOverlay } from "./_components/ConfirmationOverlay";
 import { AccountActions } from "./_components/AccountActions";
 
+/**
+ * Página principal del menú del cliente: /[restaurantSlug]/[tableNumber]
+ * Orquesta navegación por categorías, carrito, checkout, seguimiento de pedidos en tiempo real,
+ * solicitud de cuenta y valoración del servicio.
+ * El tema visual (colores, tipografías) se hereda de RestaurantThemeProvider en el layout padre.
+ */
 export default function MenuPage({
   params: paramsPromise,
 }: {
@@ -39,14 +44,13 @@ export default function MenuPage({
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const portal = useCustomerPortal(restaurant?.id, params.tableNumber);
-  const theme = useThemeSync(restaurant?.id);
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isRequestingBill, setIsRequestingBill] = useState(false);
   const [billRequested, setBillRequested]       = useState(false);
 
   const { status: currentTrackerStatus } = useCustomerOrderTracker(portal.order.lastId);
-  const { orders: tableOrders } = useTableOrders(portal.table.data?.id);
+  const { orders: tableOrders } = useTableOrders(portal.table.data?.id, portal.table.data?.current_session_id);
 
   const [showRating, setShowRating]       = useState(false);
   const [ratingOrderId, setRatingOrderId] = useState<string | null>(null);
@@ -70,6 +74,7 @@ export default function MenuPage({
     }
   }, [currentTrackerStatus, portal.order.lastId]);
 
+  /** Envía la valoración (1-5 estrellas) del servicio al servidor y cierra el modal tras 2s. */
   const handleSubmitRating = async () => {
     if (!stars || !ratingOrderId || !restaurant?.id) return;
     setRatingSubmitting(true);
@@ -98,6 +103,7 @@ export default function MenuPage({
     }
   };
 
+  /** Activa bill_requested en la mesa e inserta una alerta BILL_REQUEST para el staff. */
   const handleRequestBill = async () => {
     if (!portal.table.data || isRequestingBill || billRequested || !restaurant?.id) return;
     setIsRequestingBill(true);
@@ -118,6 +124,7 @@ export default function MenuPage({
     }
   };
 
+  /** Activa help_requested en la mesa. Expuesto en window para acceso desde AccountActions. */
   const handleCallWaiter = async () => {
     if (!portal.table.data || !restaurant?.id) return;
     try {
@@ -142,15 +149,16 @@ export default function MenuPage({
 
   if (menuLoading || !items) {
     return (
-      <div className="min-h-screen bg-navy-dark flex flex-col items-center justify-center p-6">
-        <Loader2 className="w-12 h-12 text-sage animate-spin mb-4" aria-hidden="true" />
-        <p className="text-sand/60 font-medium">Cargando menú de {restaurant?.name}…</p>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" aria-hidden="true" />
+        <PortalText className="text-foreground/60 font-medium">
+          Cargando menú de {restaurant?.name}…
+        </PortalText>
       </div>
     );
   }
 
   return (
-    <RestaurantThemeProvider theme={theme ?? undefined} isGlobal>
       <div className="min-h-screen wow-gradient text-foreground pb-32">
         <ConfirmationOverlay 
           show={portal.order.success} 
@@ -160,7 +168,7 @@ export default function MenuPage({
         />
 
         {/* Bloque de Navegación Unificado Pro Max */}
-        <div className="sticky top-0 z-50 bg-background shadow-2xl border-b border-white/5">
+        <div className="sticky top-0 z-50 bg-background shadow-2xl border-b border-border">
           <div className="p-4 lg:p-6 pb-2">
             <PremiumHeader
               title={restaurant?.name || ''}
@@ -169,39 +177,39 @@ export default function MenuPage({
               statusLabel="En Servicio"
               statusSubLabel={portal.table.data ? `Mesa ${portal.table.data.number}` : "Escanea tu mesa"}
               isSolid
-            className="border border-white/10"
+              className="border border-border"
               actions={
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    className="rounded-2xl w-12 h-12 bg-white/5 border-white/10 text-muted-foreground hover:text-foreground transition-all"
+                  <PortalPrimaryButton 
+                    variant="ghost" 
+                    className="rounded-2xl w-12 h-12 p-0 flex items-center justify-center bg-muted/30 border-border text-muted-foreground hover:text-foreground transition-all"
                   >
                     <Search className="w-5 h-5" />
-                  </Button>
+                  </PortalPrimaryButton>
                   
                   <div className="relative">
-                    <motion.button 
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setIsCheckoutOpen(true)} 
-                      className="w-12 h-12 sm:w-14 sm:h-14 bg-primary rounded-2xl flex items-center justify-center shadow-xl shadow-primary/30 group relative overflow-hidden"
+                    <PortalPrimaryButton
+                      onClick={() => setIsCheckoutOpen(true)}
+                      className="w-12 h-12 sm:w-14 sm:h-14 p-0 rounded-2xl shadow-xl shadow-primary/30 group relative overflow-hidden"
                     >
                       <motion.div 
-                        className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute inset-0 bg-gradient-to-tr from-primary-foreground/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
                       />
                       <ShoppingBag className="w-6 h-6 text-primary-foreground relative z-10" />
-                    </motion.button>
+                    </PortalPrimaryButton>
                     
                     <AnimatePresence>
+                      {/* Badge con conteo de ítems — animado con framer-motion */}
                       {portal.cartCount > 0 && (
                         <motion.span 
                           initial={{ scale: 0, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
                           exit={{ scale: 0, opacity: 0 }}
-                          className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-[3px] border-background shadow-lg z-20"
+                          className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-[3px] border-background shadow-lg z-20"
                         >
-                          {portal.cartCount}
+                          <PortalText as="span" font="body">
+                            {portal.cartCount}
+                          </PortalText>
                         </motion.span>
                       )}
                     </AnimatePresence>
@@ -253,13 +261,14 @@ export default function MenuPage({
           />
         )}
 
+        {/* Tracker de estado visible mientras el pedido no ha sido entregado/rechazado */}
         {portal.order.lastId && currentTrackerStatus && currentTrackerStatus !== 'DELIVERED' && currentTrackerStatus !== 'COMPLETED' && currentTrackerStatus !== 'REJECTED' && (
           <OrderTracker status={currentTrackerStatus} />
         )}
 
         {isCuentaOpen && portal.table.data && (
           <CuentaSheet 
-            tableNumber={portal.table.data.number} 
+            tableLabel={String(portal.table.data.number)} 
             orders={tableOrders} 
             onClose={() => setIsCuentaOpen(false)} 
           />
@@ -278,6 +287,5 @@ export default function MenuPage({
           onConfirmBill={handleRequestBill} 
         />
       </div>
-    </RestaurantThemeProvider>
   );
 }

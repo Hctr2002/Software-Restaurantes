@@ -1,3 +1,7 @@
+/**
+ * ForgotPasswordPage — Formulario de recuperación de contraseña.
+ * Envía un correo con enlace de restablecimiento usando resetPasswordForEmail de Supabase.
+ */
 "use client";
 
 import React, { useState } from "react";
@@ -29,7 +33,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-slate-950">
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-background">
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 scale-105"
         style={{ backgroundImage: "url('/login_background.png')" }}
@@ -37,21 +41,21 @@ export default function ForgotPasswordPage() {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-background" />
 
       <main className="relative z-10 w-full max-w-md">
-        <Card className="border-white/5 backdrop-blur-2xl">
+        <Card className="border-border bg-card">
           <CardHeader className="text-center space-y-2">
-            <CardTitle className="text-2xl tracking-tighter">
+            <CardTitle className="text-2xl tracking-tighter text-foreground">
               Recuperar <span className="text-primary">Acceso</span>
             </CardTitle>
-            <CardDescription>Ingresa tu correo para recibir un enlace de recuperación</CardDescription>
+            <CardDescription className="text-foreground/60">Ingresa tu correo para recibir un enlace de recuperación</CardDescription>
           </CardHeader>
 
           <CardContent>
             {message ? (
               <div className="text-center space-y-6 py-4">
-                <div className="mx-auto w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center border border-emerald-500/20">
-                  <Send className="w-8 h-8 text-emerald-500" />
+                <div className="mx-auto w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center border border-primary/20">
+                  <Send className="w-8 h-8 text-primary" />
                 </div>
-                <p className="text-sm font-medium text-emerald-200">{message}</p>
+                <p className="text-sm font-medium text-foreground">{message}</p>
                 <Button asChild variant="outline" className="w-full">
                   <Link href="/">Volver al Login</Link>
                 </Button>
@@ -59,12 +63,12 @@ export default function ForgotPasswordPage() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/50 z-10" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/20 z-10" />
                   <Input
                     type="email"
                     placeholder="tu@correo.com"
                     required
-                    className="pl-10"
+                    className="pl-10 bg-foreground/5 border-foreground/10"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
@@ -91,7 +95,7 @@ export default function ForgotPasswordPage() {
             <CardFooter className="flex flex-col pt-0">
               <Link
                 href="/"
-                className="flex items-center text-[10px] text-muted-foreground hover:text-white transition-colors uppercase tracking-widest font-black"
+                className="flex items-center text-[10px] text-foreground/40 hover:text-primary transition-colors uppercase tracking-widest font-black"
               >
                 <ArrowLeft className="w-3 h-3 mr-2" />
                 Volver al inicio

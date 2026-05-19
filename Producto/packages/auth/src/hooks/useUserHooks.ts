@@ -1,5 +1,17 @@
 "use client";
 
+/**
+ * useUserHooks — Hooks de alto nivel para las apps con interacción de usuarios.
+ *
+ * useRealtimeWaiterOrders: estado completo para el terminal del garzón.
+ *   Agrupa sub-órdenes por mesa (groupOrdersByTable), expone acciones de validar,
+ *   rechazar, entregar, guardar notas y limpiar mesa.
+ *
+ * useCustomerPortal: estado del portal del cliente (mesa, carrito, colocación de pedido).
+ *
+ * useCustomerOrderTracker: suscribe al estado de un pedido específico para el tracker en vivo.
+ */
+
 import { useCallback, useState, useEffect, useMemo } from "react";
 import { supabase, updateOrderStatus } from "../index";
 import type { Order, TableRecord } from "../types";
@@ -8,19 +20,25 @@ import { useRealtimeSync } from "./useRealtimeSync";
 import { useTables } from "./useTableHooks";
 import { useRealtimeOrders } from "./useOrderHooks";
 
+/**
+ * Agrupa sub-órdenes (KITCHEN y BAR) por mesa en un único objeto Order fusionado.
+ * El status resultante es el de mayor prioridad entre los sub-órdenes: READY > PREPARING > VALIDATED > PENDING.
+ * Almacena barSubOrderId / kitchenSubOrderId para que las acciones puedan operar sobre cada sub-orden.
+ */
 function groupOrdersByTable(orders: Order[]): Order[] {
   const map = new Map<string, Order>();
   for (const order of orders) {
     const key = order.tableId ?? order.id;
     const existing = map.get(key);
     if (!existing) {
-      const merged = { ...order, orderItems: [...(order.orderItems ?? [])] } as any;
-      merged.order_items = [...(order.orderItems ?? [])];
+      const items = [...(order.orderItems ?? (order as any).order_items ?? [])];
+      const merged = { ...order, orderItems: items } as any;
+      merged.order_items = items;
       if (order.station === 'BAR') merged.barSubOrderId = order.id;
       else merged.kitchenSubOrderId = order.id;
       map.set(key, merged);
     } else {
-      const newItems = order.orderItems ?? [];
+      const newItems = [...(order.orderItems ?? (order as any).order_items ?? [])];
       existing.orderItems = [...(existing.orderItems ?? []), ...newItems];
       (existing as any).order_items = existing.orderItems;
       const priority: Record<string, number> = { READY: 4, PREPARING: 3, VALIDATED: 2, PENDING: 1 };
@@ -135,7 +153,16 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
   };
 
   const handleTableClean = async (tableId: string) => {
-    await supabase.from("tables").update({ status: "FREE" }).eq("id", tableId);
+    try {
+      const { error } = await supabase.from("tables").update({ status: "FREE", current_session_id: null }).eq("id", tableId);
+      if (error) {
+        console.error("Error cleaning table:", error);
+        alert(`Error al limpiar mesa: ${error.message}`);
+      }
+    } catch (err: any) {
+      console.error("Critical error cleaning table:", err);
+      alert(`Error crítico al limpiar mesa: ${err.message || 'Revisa la consola'}`);
+    }
   };
 
   const handleHelpComplete = async (tableId: string) => {
@@ -177,6 +204,10 @@ export function useRealtimeWaiterOrders(restaurantId: string | undefined) {
   };
 }
 
+/**
+ * Estado completo del portal del cliente: mesa (validación, realtime), carrito y colocación de pedido.
+ * @param tableNumber - Número de mesa leído de la URL; se valida automáticamente al montar.
+ */
 export function useCustomerPortal(restaurantId: string | undefined, tableNumber?: string) {
   const [table, setTable] = useState({
     input: tableNumber ?? "",
@@ -305,6 +336,10 @@ export function useCustomerPortal(restaurantId: string | undefined, tableNumber?
   };
 }
 
+/**
+ * Suscribe al estado de un pedido específico para el tracker en tiempo real del portal.
+ * Retorna null hasta que el pedido exista o el orderId sea proporcionado.
+ */
 export function useCustomerOrderTracker(orderId: string | null) {
   const fetchFn = useCallback(async () => {
     if (!orderId) return { data: null, error: null };

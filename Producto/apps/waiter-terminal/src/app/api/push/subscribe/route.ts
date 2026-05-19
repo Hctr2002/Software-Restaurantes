@@ -1,8 +1,17 @@
+/**
+ * route.ts (api/push/subscribe) — Registra o elimina la suscripción VAPID del navegador del garzón.
+ * POST guarda el objeto PushSubscription en la tabla push_subscriptions.
+ * DELETE lo borra al cerrar sesión o desactivar notificaciones.
+ */
 import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
+/**
+ * Crea un cliente Supabase con service role para escritura privilegiada
+ * en push_subscriptions sin restricciones RLS.
+ */
 function serviceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,6 +20,10 @@ function serviceClient() {
   );
 }
 
+/**
+ * Lee la sesión activa del garzón desde la cookie sb-waiter-session
+ * y devuelve su userId y restaurantId para asociar la suscripción.
+ */
 async function getSessionInfo(): Promise<{ userId: string; restaurantId: string } | null> {
   const cookieStore = await cookies();
   const supabase = createServerClient(
