@@ -466,25 +466,55 @@ sequenceDiagram
 
 ## Testing
 
-El proyecto cuenta con **651 pruebas** distribuidas en 12 workspaces, más pruebas E2E con Playwright.
+El proyecto cuenta con **843 pruebas unitarias/integración** (Vitest) distribuidas en 12 workspaces, **23 pruebas de base de datos** (pgTAP: RLS y triggers) y pruebas E2E con Playwright. Guía completa en [Producto/README-testing.md](Producto/README-testing.md).
+
+| Workspace | Pruebas | Foco |
+|---|---|---|
+| `@menu-bites/ui` | 358 | Componentes React (Radix + Tailwind) |
+| `@menu-bites/auth` | 148 | Hooks de dominio (pedidos/estaciones, caja, realtime), utils |
+| `local-dashboard` | 121 | Rutas API `/api/local/*`, reportes, branding, servicios |
+| `mobile` | 79 | Utilidades puras (reportes, recibos, API, dashboard) |
+| `admin-dashboard` | 33 | Rutas API admin (restaurantes, usuarios, planes, perfil) |
+| `customer-portal` | 25 | Rutas API públicas + creación de pedido (split KITCHEN/BAR) |
+| `waiter-terminal` | 18 | Sesiones, suscripción y envío de Web Push |
+| `kitchen-kds` / `bar-dashboard` | 14 c/u | Settings e importación de inventario (CSV) |
+| `cashier-dashboard` | 12 | Proxy de sesión |
+| `@menu-bites/store` | 11 | Estado Zustand cifrado (AES) |
+| `supabase/functions` | 10 | Edge function `manage-users` |
+| **pgTAP (`supabase/tests/`)** | **23** | Trigger de transiciones de pedidos + aislamiento RLS multi-tenant |
 
 ### Estructura de pruebas
+
+Las pruebas viven en `__tests__/` dentro de cada package/app (Vitest), en `supabase/tests/` (pgTAP) y en `e2e/` (Playwright).
 
 ```
 Producto/
 ├── packages/
-│   ├── auth/src/__tests__/
-│   │   ├── utils.test.ts      # mapOrder, formatCLP, timeAgo, diffMinutes…
-│   │   ├── index.test.ts      # updateOrderStatus, sendAlert
-│   │   └── constants.test.ts  # ORDER_STATUS_LABEL, TABLE_STATUS_LABEL
-│   ├── store/src/__tests__/
-│   │   └── store.test.ts      # useAuthStore: setUser, logout, cifrado AES
-│   └── ui/src/__tests__/
-│       ├── utils.test.ts      # cn, formatDate, formatPrice, timeAgo
-│       └── Badge.test.tsx     # Componente Badge, todas las variantes
-└── e2e/
-    ├── customer-portal.spec.ts  # Portal público (sin auth)
-    └── admin-login.spec.ts      # Flujo de login
+│   ├── auth/src/__tests__/         # hooks de dominio + utils
+│   │   ├── useOrderHooks.test.ts   # filtrado por estación, órdenes legacy
+│   │   ├── useCashierHooks.test.ts # cierre de pedidos / caja
+│   │   ├── useRealtimeSync.test.ts # suscripción Realtime y reintentos
+│   │   └── … (utils, constants, useTable/Menu/User/Alert/ThemeHooks)
+│   ├── store/src/__tests__/        # useAuthStore (cifrado AES)
+│   └── ui/src/__tests__/           # 34 archivos de componentes
+├── apps/
+│   ├── local-dashboard/src/__tests__/
+│   │   ├── api-routes.test.ts          # menu, tables, theme, profile, stats
+│   │   ├── api-routes-extended.test.ts # [id], orders, users, categories, alerts, inventory/import
+│   │   ├── reportUtils.test.ts         # cálculo y exportación de reportes
+│   │   ├── brandingUtils.test.ts       # hex→HSL, Google Fonts
+│   │   └── services.test.ts            # menu/table/theme services
+│   ├── admin-dashboard/src/__tests__/  # rutas admin (+ [id] y profile)
+│   ├── customer-portal/src/__tests__/  # rutas públicas + creación de pedido
+│   ├── waiter-terminal/src/__tests__/  # sesiones + Web Push (subscribe/notify)
+│   ├── kitchen-kds · bar-dashboard · cashier-dashboard/src/__tests__/
+│   └── mobile/__tests__/               # utils, reportUtils, dashboard, receipt, api
+├── supabase/tests/                     # pgTAP (Postgres)
+│   ├── order_transition_test.sql       # máquina de estados del pedido
+│   └── rls_tenant_isolation_test.sql   # aislamiento multi-tenant (RLS)
+└── e2e/                                # Playwright
+    ├── customer-portal.spec.ts         # Portal público (sin auth)
+    └── admin-login.spec.ts             # Flujo de login
 ```
 
 ### Ejecutar las pruebas
@@ -512,6 +542,26 @@ cd packages/ui   && npm run test:watch
 ```bash
 cd packages/auth && npm run test:coverage
 ```
+
+### Pruebas de base de datos (pgTAP)
+
+Validan las políticas **RLS** y los **triggers** SQL contra una base Postgres local.
+Requieren **Docker** y el stack de Supabase levantado.
+
+```bash
+# 1. Arrancar el stack local (aplica las migraciones)
+supabase start
+
+# 2. Ejecutar las pruebas pgTAP
+npm run test:db          # = supabase test db
+
+# 3. Al terminar, liberar recursos
+supabase stop
+```
+
+Cubren la máquina de estados del pedido (`validate_order_transition()` — transiciones
+válidas/inválidas, estados terminales, estado `PARCIAL`) y el aislamiento multi-tenant en
+`orders` (un restaurante solo ve y modifica sus propios pedidos).
 
 ### Pruebas E2E con Playwright
 

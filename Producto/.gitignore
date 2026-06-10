@@ -44,6 +44,7 @@ scratch/
 memoria.md
 color_proposals.html
 preview.html
+.temp/
 
 # macOS
 .DS_Store
