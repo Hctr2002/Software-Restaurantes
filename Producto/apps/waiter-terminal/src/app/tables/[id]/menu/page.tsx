@@ -145,7 +145,7 @@ export default function TableMenuPage() {
   };
 
   return (
-    <>
+    <RestaurantThemeProvider theme={theme}>
       {loading ? (
         <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
           <div className="w-16 h-16 border-4 border-muted/30 border-t-primary rounded-full animate-spin shadow-2xl shadow-primary/20" />
@@ -323,6 +323,6 @@ export default function TableMenuPage() {
         )}
       </div>
       )}
-    </>
+    </RestaurantThemeProvider>
   );
 }
