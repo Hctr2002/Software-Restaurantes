@@ -16,13 +16,14 @@ function consolidateItems(items: any[]): { name: string; quantity: number; unitP
   const map = new Map<string, { name: string; quantity: number; unitPrice: number }>();
   for (const item of items) {
     const name = item.menu_items?.name ?? "Item";
-    const unitPrice = Number(item.unit_price);
+    const unitPrice = Number(item.unit_price) || 0;
+    const quantity = Number(item.quantity) || 0;
     const key = `${name}__${unitPrice}`;
     const existing = map.get(key);
     if (existing) {
-      existing.quantity += item.quantity;
+      existing.quantity += quantity;
     } else {
-      map.set(key, { name, quantity: item.quantity, unitPrice });
+      map.set(key, { name, quantity, unitPrice });
     }
   }
   return Array.from(map.values());
@@ -65,8 +66,10 @@ export default async function ReceiptSessionPage({
   if (actualRestaurantId !== restaurantId) return notFound();
 
   // Group by table_id to show per-table breakdown
+  const billableOrders = orders.filter((o: any) => o.status !== "REJECTED");
+
   const tableMap = new Map<string, { tableNumber: number; label: string | null; items: any[] }>();
-  for (const order of orders) {
+  for (const order of billableOrders) {
     const key = order.table_id ?? "sin-mesa";
     if (!tableMap.has(key)) {
       tableMap.set(key, {
@@ -80,11 +83,11 @@ export default async function ReceiptSessionPage({
 
   const tableGroups = Array.from(tableMap.values()).sort((a, b) => a.tableNumber - b.tableNumber);
   const tableNums   = tableGroups.map((g) => `#${g.tableNumber}`).join(" + ");
-  const allItems    = orders.flatMap((o: any) => o.order_items ?? []);
-  const subtotal    = allItems.reduce((s: number, i: any) => s + Number(i.unit_price) * i.quantity, 0);
+  const allItems    = billableOrders.flatMap((o: any) => o.order_items ?? []);
+  const subtotal    = allItems.reduce((s: number, i: any) => s + (Number(i.unit_price) || 0) * (Number(i.quantity) || 0), 0);
   const tipAmount   = isTipIncluded ? subtotal * 0.1 : 0;
   const paymentRef  = ref || null;
-  const issuedAt    = orders.at(-1)?.createdAt ?? new Date().toISOString();
+  const issuedAt    = billableOrders.at(-1)?.createdAt ?? orders.at(-1)?.createdAt ?? new Date().toISOString();
 
   return (
     <>
