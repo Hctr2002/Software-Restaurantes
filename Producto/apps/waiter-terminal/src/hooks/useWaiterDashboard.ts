@@ -27,7 +27,7 @@ export function useWaiterDashboard() {
     cleaningTables
   } = orders;
 
-  useWebPush(user?.restaurantId, orders.readyOrders);
+  const notificationSound = useWebPush(user?.restaurantId, orders.readyOrders);
   const merge = useMergeTables();
   const alertForm = useAlertForm(user?.restaurantId, user?.id, user?.email);
   const theme = useThemeSync(user?.restaurantId);
@@ -74,6 +74,7 @@ export function useWaiterDashboard() {
     selectedTableId,
     setSelectedTableId,
     selectedTable,
-    handleSignOut
+    handleSignOut,
+    notificationSound
   };
 }

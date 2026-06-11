@@ -18,6 +18,7 @@ import {
   groupOrders,
   PaymentSlideOver,
   BillAlertIsland,
+  useNotificationSound,
   type TableGroup
 } from "@menu-bites/ui";
 import { CheckCircle, History, Clock } from "lucide-react";
@@ -83,6 +84,9 @@ export default function CashierPage() {
     history: groups.history.reduce((s, g) => s + g.total, 0)
   }), [groups]);
 
+  const billRequestedCount = groups.pending.filter((g) => g.billRequested).length;
+  const { audioBlocked, enableAudio } = useNotificationSound({ count: billRequestedCount });
+
   const filtered = useMemo(() => {
     const current = activeTab === "pending" ? groups.pending : groups.history;
     return current.filter((g) =>
@@ -142,6 +146,14 @@ export default function CashierPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
+        {audioBlocked && (
+          <button
+            onClick={enableAudio}
+            className="w-full text-center text-[10px] font-black uppercase tracking-widest py-2 bg-amber-500/10 text-amber-500 border-b border-amber-500/20 hover:bg-amber-500/20 transition-colors"
+          >
+            Activar sonido de alertas
+          </button>
+        )}
         <div className="p-4 sm:p-6 pt-6 sm:pt-8 pb-0">
           <CashierHeader
             userEmail={user?.email}
