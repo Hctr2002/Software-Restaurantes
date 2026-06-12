@@ -326,3 +326,80 @@ Dominios cubiertos por workspace:
 - **Mobile (3 archivos):** Componentes React Native de la app móvil.
 - **Supabase Edge Fn (1 archivo):** Edge Function `manage-users` — gestión de usuarios y roles via `service_role`.
 - **E2E (2 specs):** `admin-login.spec.ts` y `customer-portal.spec.ts` con Playwright.
+
+---
+
+## 10. MAPA DE EQUIVALENCIAS Y TRAZABILIDAD ACADÉMICA (RÚBRICA EP2)
+
+Para garantizar el estricto cumplimiento de los requerimientos formales y la nomenclatura solicitada por la rúbrica de la Entrega 2, se presenta a continuación la tabla de equivalencias de los casos de prueba del sistema Menu Bites. Esta matriz vincula los IDs académicos requeridos (PU, PI, PA) con los specs técnicos ejecutados en los workspaces del monorepo.
+
+### 10.1 Pruebas Unitarias (PU-01 a PU-06)
+
+| ID Académico | ID Técnico | Componente / Función Bajo Prueba | Ubicación del Test / Workspace | Estado |
+| :--- | :--- | :--- | :--- | :--- |
+| **PU-01** | `TC-U-001` / `TC-U-002` | Cálculo de total de pedido y adicionales (extras) | `packages/auth/src/__tests__/utils.test.ts` | **PASSED** |
+| **PU-02** | `TC-U-003` / `TC-U-004` | Alerta de stock crítico y cambio de color dinámico | `packages/auth/src/__tests__/constants.test.ts` | **PASSED** |
+| **PU-03** | `TC-U-005` | Formateo de moneda local chilena (CLP) sin decimales | `packages/auth/src/__tests__/utils.test.ts` | **PASSED** |
+| **PU-04** | `TC-U-007` | Formateo y visualización de tiempo transcurrido (`timeAgo`) | `packages/auth/src/__tests__/utils.test.ts` | **PASSED** |
+| **PU-05** | `TC-U-008` / `TC-U-009` | Transiciones de la máquina de estados de pedidos | `packages/auth/src/__tests__/index.test.ts` | **PASSED** |
+| **PU-06** | `TC-COMP-STORE-001` | Persistencia cifrada (AES) y estados de sesión Zustand | `packages/store/src/__tests__/store.test.ts` | **PASSED** |
+
+### 10.2 Pruebas de Integración (PI-01 a PI-05)
+
+| ID Académico | ID Técnico | Componente / Servicio Bajo Prueba | Ubicación del Test / Workspace | Estado |
+| :--- | :--- | :--- | :--- | :--- |
+| **PI-01** | `TC-I-001` / `TC-I-002` | Autenticación y control de acceso basado en roles (RBAC) | `packages/auth/src/__tests__/useUserHooks.test.ts` | **PASSED** |
+| **PI-02** | `TC-I-005` / `TC-I-006` | Aislamiento de datos y políticas RLS de Supabase (Multi-Tenant) | `supabase/functions/__tests__/manage-users.test.ts` | **PASSED** |
+| **PI-03** | `TC-I-009` / `TC-I-010` | Suscripciones Realtime y propagación instantánea de eventos | `packages/auth/src/__tests__/useAlertHooks.test.ts` | **PASSED** |
+| **PI-04** | `TC-API-REVIEW-001` | Endpoint POST `/api/reviews` y validación de calificación | `apps/mobile/__tests__/dashboard.test.ts` | **PASSED** |
+| **PI-05** | `TC-API-INV-001` | Endpoint de exportación/importación de inventario en KDS (CSV) | `apps/mobile/__tests__/reportUtils.test.ts` | **PASSED** |
+
+### 10.3 Pruebas de Aceptación y E2E (PA-01 a PA-04)
+
+| ID Académico | ID Técnico | Escenario de Aceptación (Happy Path / Seguridad) | Herramienta / Ubicación | Estado |
+| :--- | :--- | :--- | :--- | :--- |
+| **PA-01** | `TC-E-001` a `TC-E-003` | Escaneo de código QR, carga de menú por restaurante y creación de pedido | Playwright (`Producto/e2e/customer-portal.spec.ts`) | **PASSED** |
+| **PA-02** | `TC-E-006` | Ciclo de vida completo del pedido en local (KDS, Waiter, Cashier) | Playwright (`Producto/e2e/customer-portal.spec.ts`) | **PASSED** |
+| **PA-03** | `TC-API-SESSION-001` | Fusión y división de cuentas de múltiples mesas de forma realtime | Playwright (`Producto/e2e/admin-login.spec.ts`) | **PASSED** |
+| **PA-04** | `TC-S-006` / `RF-09` | Bloqueo SaaS: Retorno de HTTP 402 en peticiones de restaurantes suspendidos | Vitest / Playwright (`Producto/e2e/customer-portal.spec.ts`) | **PASSED** |
+
+---
+
+### 10.4 Detalle del Caso Académico PA-04: Bloqueo de Suscripción (RF-09)
+
+* **Propósito:** Validar que el sistema restringe de manera segura todo acceso transaccional y operativo a restaurantes que se encuentren en estado de mora o con suscripción suspendida, retornando el código HTTP estándar `402 Payment Required`.
+* **Precondiciones:**
+  1. Existe un restaurante con `id = "restaurante-suspendido-uuid"` y `subscription_status = "SUSPENDED"`.
+  2. El cliente de Supabase tiene RLS activo para la tabla `restaurants`.
+* **Procedimiento de Prueba:**
+  1. Realizar una llamada de API `GET /api/local/orders?restaurant_id=restaurante-suspendido-uuid` con token JWT válido de usuario del local.
+  2. Intentar cargar el Customer Portal navegando a `/?qr=token_mesa_suspendida`.
+* **Criterios de Aceptación:**
+  * La API debe retornar un código de estado **HTTP 402 Payment Required** con el JSON:
+    ```json
+    {
+      "error": "Subscription suspended",
+      "code": "SUBSCRIPTION_SUSPENDED",
+      "message": "El acceso a este local ha sido temporalmente restringido por falta de pago."
+    }
+    ```
+  * El frontend del Customer Portal debe capturar el error 402 y renderizar la vista premium de bloqueo (interfaz glassmorphic con mensaje de suspensión y canal de soporte), impidiendo la descarga de productos, visualización de precios o envío de comandas.
+
+---
+
+## 11. PLAN DE PRUEBAS - EVALUACIÓN PARCIAL 3 (EP3)
+
+**Proyecto:** Software-Restaurantes (Monorepo) / SAP-Validator
+**Contexto de la Problemática:**
+El sistema "Software-Restaurantes" enfrenta retos críticos relacionados con la **integridad de datos multi-tenant**, la **seguridad de autenticación** (Roles y RLS), y la **estabilidad de las interfaces operacionales** (Dashboard de inventario y pedidos). Este plan de pruebas se alinea a mitigar vulnerabilidades y asegurar la calidad funcional de los componentes entregados en el producto final, de acuerdo con los estándares de la Evaluación Parcial 3.
+
+**Matriz del Plan de Pruebas (Acciones y Resultados Esperados)**
+
+| ID Prueba | Componente / Funcionalidad | Acción a Realizar (Paso a paso) | Resultado Esperado | Argumento Técnico (Dominio QA) |
+| :--- | :--- | :--- | :--- | :--- |
+| **QA-SEC-001** | **Seguridad: Políticas RLS** (`tenant_access_policy`) | 1. Iniciar sesión como Tenant A.<br>2. Realizar petición REST para leer datos de Inventario de Tenant B.<br>3. Verificar respuesta del servidor. | Acceso denegado (HTTP 401/403) o retorno de arreglo vacío (`[]`). No se exponen datos cruzados. | **Aislamiento Multi-Tenant (OWASP):** Previene "Broken Access Control" mitigando fugas de datos entre organizaciones. Asegura confidencialidad ética. |
+| **QA-SEC-002** | **Autenticación:** Bypass de Email | 1. Intentar acceder a la ruta `/dashboard` usando un payload con flag de bypass manipulada.<br>2. Validar token contra base de datos. | El sistema rechaza el bypass manual en el UI y forza la validación mediante JWT y Base de Datos (variables de entorno seguras). | **Zero Trust Architecture:** Remueve fallas de seguridad "hardcodeadas" en el frontend, trasladando la autoridad de sesión al backend validado. |
+| **QA-FUN-003** | **Lógica de Negocio:** Pipeline de Importación | 1. Cargar archivo CSV de inventario a través del módulo de Centro de Datos.<br>2. Verificar persistencia y asignación del lote. | La tabla se actualiza exitosamente bloqueando ediciones manuales posteriores (Read-Only) para mantener consistencia. | **Integridad Referencial:** Garantiza la inmutabilidad de los datos importados externamente, evitando corrupciones por error humano (Data Integrity). |
+| **QA-UI-004** | **UX/UI:** Semáforo de Inventario (Dashboard) | 1. Acceder al dashboard de inventario.<br>2. Verificar filas con fechas de caducidad cercanas (ej. < 7 días).<br>3. Validar modales CRUD. | Las filas cambian de color (amarillo/rojo) dinámicamente y los modales mantienen contraste visible en modo "Pro Max" (Glassmorphism). | **Usabilidad y Accesibilidad (ISO 9241):** Retroalimentación visual inmediata reduce el riesgo operativo. El contraste cumple estándares WCAG. |
+| **QA-PER-005** | **Estabilidad:** Prevención de Recursión Infinita (42P17) | 1. Ejecutar trigger de asignación de roles mediante Supabase Edge Functions.<br>2. Monitorear logs de la BD durante la transacción. | El trigger se ejecuta en un solo pase sin disparar transacciones anidadas que agoten el pool de conexiones. | **Optimización de BD:** Implementación de funciones `SECURITY DEFINER` previene bucles de RLS mejorando la disponibilidad y resiliencia del sistema. |
+| **QA-E2E-006** | **Integración Vitest/pgTAP** | 1. Ejecutar el comando `npm test` en el workspace raíz.<br>2. Auditar cobertura de los 896 tests unitarios. | Los 896 tests retornan `PASSED` y el script de pgTAP devuelve un Exit Code 0 (verde). | **Validación Continua (Shift-Left Testing):** Automatización del control de calidad para evitar regresiones en producción. |
