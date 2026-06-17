@@ -4,9 +4,9 @@ import { useEffect, useRef } from "react";
 import type { Order } from "@menu-bites/auth";
 import { useNotificationSound } from "@menu-bites/ui";
 
-export function useWebPush(restaurantId: string | undefined, readyOrders: Order[]) {
+export function useWebPush(restaurantId: string | undefined, readyOrders: Order[], pendingOrders: Order[] = []) {
   const prevCount = useRef(0);
-  const { audioBlocked, enableAudio } = useNotificationSound({ count: readyOrders.length });
+  const { audioBlocked, enableAudio } = useNotificationSound({ count: readyOrders.length + pendingOrders.length });
 
   useEffect(() => {
     if (!restaurantId || typeof window === "undefined") return;
