@@ -17,15 +17,17 @@ function serviceClient() {
 function consolidateItems(orders: any[]): { name: string; quantity: number; unitPrice: number }[] {
   const map = new Map<string, { name: string; quantity: number; unitPrice: number }>();
   for (const order of orders) {
+    if (order.status === "REJECTED") continue;
     for (const item of order.order_items ?? []) {
       const name = item.menu_items?.name ?? "Item";
-      const unitPrice = Number(item.unit_price);
+      const unitPrice = Number(item.unit_price) || 0;
+      const quantity = Number(item.quantity) || 0;
       const key = `${name}__${unitPrice}`;
       const existing = map.get(key);
       if (existing) {
-        existing.quantity += item.quantity;
+        existing.quantity += quantity;
       } else {
-        map.set(key, { name, quantity: item.quantity, unitPrice });
+        map.set(key, { name, quantity, unitPrice });
       }
     }
   }
@@ -86,9 +88,7 @@ export default async function ReceiptTablePage({
     query = query.eq("table_id", tableId);
   }
 
-  const { data: orders, error } = await query.order("createdAt", { ascending: true });
-
-  console.log("RECEIPT TABLE:", { tableId, restaurantId, count: orders?.length, error });
+  const { data: orders } = await query.order("createdAt", { ascending: true });
 
   const safeOrders      = orders ?? [];
   const consolidatedItems = consolidateItems(safeOrders);

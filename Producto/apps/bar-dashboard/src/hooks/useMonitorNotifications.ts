@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useNotificationSound } from "@menu-bites/ui";
 import { getTicketUrgency } from "../lib/kdsSettings";
 
-const NEW_TICKET_SFX = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
 const CRITICAL_SFX = "https://assets.mixkit.co/active_storage/sfx/2997/2997-preview.mp3";
 
 function playSound(url: string) {
@@ -28,16 +28,10 @@ interface UseMonitorNotificationsProps {
  * de los monitores de barra y cocina.
  */
 export function useMonitorNotifications({ ordersCount, orders, settings, tick }: UseMonitorNotificationsProps) {
-  const prevCount = useRef(0);
   const criticalAlerted = useRef<Set<string>>(new Set());
 
   // Notificación de nuevo pedido
-  useEffect(() => {
-    if (ordersCount > prevCount.current && settings.sounds.newTicket) {
-      playSound(NEW_TICKET_SFX);
-    }
-    prevCount.current = ordersCount;
-  }, [ordersCount, settings.sounds.newTicket]);
+  useNotificationSound({ count: ordersCount, enabled: settings.sounds.newTicket });
 
   // Alerta de pedido crítico
   useEffect(() => {
