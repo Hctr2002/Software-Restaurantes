@@ -31,6 +31,8 @@ jspm_packages/
 .env.development.local
 .env.test.local
 .env.production.local
+.envtest
+.envprod
 **/supabase/.env
 
 # Build Artifacts

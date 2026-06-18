@@ -1,0 +1,2890 @@
+add motion-utils 12.36.0
+add motion-dom 12.38.0
+add framer-motion 12.38.0
+add undici-types 6.21.0
+add cookie 0.7.2
+add @types/node 20.19.39
+add @supabase/ssr 0.5.2
+add buffer 6.0.3
+add undici-types 6.21.0
+add @types/node 20.19.39
+add undici-types 6.21.0
+add cookie 0.7.2
+add @types/node 20.19.39
+add @supabase/ssr 0.5.2
+add undici-types 6.21.0
+add tailwindcss 4.2.4
+add @types/react-dom 19.2.3
+add @types/react 19.2.14
+add @types/node 20.19.39
+add undici-types 6.21.0
+add @types/node 20.19.39
+add undici-types 6.21.0
+add cookie 0.7.2
+add @types/node 20.19.40
+add @supabase/ssr 0.5.2
+add undici-types 6.21.0
+add @types/node 20.19.39
+add @turbo/windows-arm64 2.9.17
+add @turbo/windows-64 2.9.17
+add @turbo/linux-arm64 2.9.17
+add @turbo/linux-64 2.9.17
+add @turbo/darwin-arm64 2.9.17
+add @turbo/darwin-64 2.9.17
+add shell-quote 1.8.4
+add tmp 0.2.6
+add follow-redirects 1.16.0
+add @nx/nx-win32-x64-msvc 22.7.5
+add @nx/nx-win32-arm64-msvc 22.7.5
+add @nx/nx-linux-x64-musl 22.7.5
+add @nx/nx-linux-x64-gnu 22.7.5
+add @nx/nx-linux-arm64-musl 22.7.5
+add @nx/nx-linux-arm64-gnu 22.7.5
+add @nx/nx-linux-arm-gnueabihf 22.7.5
+add @nx/nx-freebsd-x64 22.7.5
+add @nx/nx-darwin-x64 22.7.5
+add @nx/nx-darwin-arm64 22.7.5
+add yaml 2.9.0
+add nx 22.7.5
+add minimatch 10.2.5
+add brace-expansion 5.0.6
+add balanced-match 4.0.3
+add wrap-ansi 7.0.0
+add strip-bom 3.0.0
+add semver 7.7.4
+add hasown 2.0.2
+add dotenv-expand 12.0.3
+add dotenv 16.4.7
+add chalk 4.1.2
+add @jest/diff-sequences 30.0.1
+add ws 8.21.0
+add turbo 2.9.17
+add menu-bites 1.0.0
+add local-dashboard 0.1.0
+add frontend 0.1.0
+add customer-portal 0.1.0
+add @menu-bites/waiter-terminal 0.1.0
+add @menu-bites/ui 0.0.0
+add @menu-bites/supabase-functions 0.1.0
+add @menu-bites/store 0.0.0
+add @menu-bites/kitchen-kds 0.1.0
+add @menu-bites/cashier-dashboard 0.1.0
+add @menu-bites/bar-dashboard 0.1.0
+add @menu-bites/auth 0.0.0
+add zustand 4.5.7
+add zod-validation-error 4.0.2
+add zod 4.4.3
+add yoctocolors-cjs 2.1.3
+add yocto-queue 0.1.0
+add yargs-parser 21.1.1
+add yargs 17.7.2
+add yallist 5.0.0
+add y18n 5.0.8
+add xtend 4.0.2
+add xmlchars 2.2.0
+add xmlbuilder 15.1.1
+add xml2js 0.6.0
+add xmlbuilder 11.0.1
+add xml-name-validator 5.0.0
+add xcode 3.0.1
+add write-file-atomic 5.0.1
+add signal-exit 4.1.0
+add wrappy 1.0.2
+add wrap-ansi-cjs 7.0.0
+add wrap-ansi 6.2.0
+add wordwrap 1.0.0
+add word-wrap 1.2.5
+add wonka 6.3.6
+add wide-align 1.1.5
+add why-is-node-running 2.3.0
+add which-typed-array 1.1.20
+add which-collection 1.0.2
+add which-builtin-type 1.2.1
+add isarray 2.0.5
+add which-boxed-primitive 1.1.1
+add which 2.0.2
+add whatwg-url-without-unicode 8.0.0-3
+add webidl-conversions 5.0.0
+add whatwg-url 5.0.0
+add whatwg-mimetype 4.0.0
+add whatwg-fetch 3.6.20
+add whatwg-encoding 3.1.1
+add iconv-lite 0.6.3
+add webidl-conversions 3.0.1
+add web-push 3.6.7
+add wcwidth 1.0.1
+add warn-once 0.1.1
+add walker 1.0.8
+add walk-up-path 4.0.0
+add w3c-xmlserializer 5.0.0
+add vlq 1.0.1
+add vitest 2.1.9
+add vite-node 2.1.9
+add vite 5.4.21
+add esbuild 0.21.5
+add @esbuild/win32-x64 0.21.5
+add @esbuild/win32-ia32 0.21.5
+add @esbuild/win32-arm64 0.21.5
+add @esbuild/sunos-x64 0.21.5
+add @esbuild/openbsd-x64 0.21.5
+add @esbuild/netbsd-x64 0.21.5
+add @esbuild/linux-x64 0.21.5
+add @esbuild/linux-s390x 0.21.5
+add @esbuild/linux-riscv64 0.21.5
+add @esbuild/linux-ppc64 0.21.5
+add @esbuild/linux-mips64el 0.21.5
+add @esbuild/linux-loong64 0.21.5
+add @esbuild/linux-ia32 0.21.5
+add @esbuild/linux-arm64 0.21.5
+add @esbuild/linux-arm 0.21.5
+add @esbuild/freebsd-x64 0.21.5
+add @esbuild/freebsd-arm64 0.21.5
+add @esbuild/darwin-x64 0.21.5
+add @esbuild/darwin-arm64 0.21.5
+add @esbuild/android-x64 0.21.5
+add @esbuild/android-arm64 0.21.5
+add @esbuild/android-arm 0.21.5
+add @esbuild/aix-ppc64 0.21.5
+add vaul 1.1.2
+add vary 1.1.2
+add validate-npm-package-name 6.0.2
+add validate-npm-package-license 3.0.4
+add uuid 7.0.3
+add utils-merge 1.0.1
+add util-deprecate 1.0.2
+add util 0.12.5
+add use-sync-external-store 1.6.0
+add use-sidecar 1.1.3
+add use-latest-callback 0.2.6
+add use-callback-ref 1.3.3
+add uri-js 4.4.1
+add update-browserslist-db 1.2.3
+add upath 2.0.1
+add unrs-resolver 1.11.1
+add unpipe 1.0.0
+add universalify 2.0.1
+add universal-user-agent 6.0.1
+add unicode-property-aliases-ecmascript 2.2.0
+add unicode-match-property-value-ecmascript 2.2.1
+add unicode-match-property-ecmascript 2.0.0
+add unicode-canonical-property-names-ecmascript 2.0.1
+add undici-types 7.19.2
+add undici 6.25.0
+add unbox-primitive 1.1.0
+add uglify-js 3.19.3
+add ua-parser-js 1.0.41
+add typescript-eslint 8.59.2
+add typescript 5.9.3
+add typedarray 0.0.6
+add typed-array-length 1.0.7
+add typed-array-byte-offset 1.0.4
+add typed-array-byte-length 1.0.3
+add typed-array-buffer 1.0.3
+add type-fest 0.6.0
+add type-detect 4.0.8
+add type-check 0.4.0
+add tuf-js 4.1.0
+add tsx 4.21.0
+add tslib 2.8.1
+add tsconfig-paths 4.2.0
+add strip-bom 3.0.0
+add ts-interface-checker 0.1.13
+add ts-api-utils 2.5.0
+add trim-newlines 3.0.1
+add treeverse 3.0.0
+add tree-kill 1.2.2
+add tr46 0.0.3
+add tough-cookie 5.1.2
+add toidentifier 1.0.1
+add to-regex-range 5.0.1
+add tmpl 1.0.5
+add tldts-core 6.1.86
+add tldts 6.1.86
+add tinyspy 3.0.2
+add tinyrainbow 1.2.0
+add tinypool 1.1.1
+add tinyglobby 0.2.12
+add tinyexec 0.3.2
+add tinybench 2.9.0
+add through2 2.0.5
+add string_decoder 1.1.1
+add safe-buffer 5.1.2
+add readable-stream 2.3.8
+add through 2.3.8
+add throat 5.0.0
+add thenify-all 1.6.0
+add thenify 3.3.1
+add text-extensions 1.9.0
+add test-exclude 6.0.0
+add glob 7.2.3
+add terser 5.46.2
+add commander 2.20.3
+add terminal-link 2.1.1
+add tar-stream 2.2.0
+add tar 7.5.11
+add tapable 2.3.3
+add tailwindcss-animate 1.0.7
+add tailwindcss 3.4.19
+add postcss-selector-parser 6.1.2
+add jiti 1.21.7
+add fast-glob 3.3.3
+add glob-parent 5.1.2
+add tailwind-merge 2.6.1
+add symbol-tree 3.2.4
+add supports-preserve-symlinks-flag 1.0.0
+add supports-hyperlinks 2.3.0
+add supports-color 7.2.0
+add sucrase 3.35.1
+add lines-and-columns 1.2.4
+add commander 4.1.1
+add styleq 0.1.3
+add styled-jsx 5.1.6
+add structured-headers 0.4.1
+add strip-json-comments 3.1.1
+add strip-indent 3.0.0
+add strip-final-newline 2.0.0
+add strip-bom 4.0.0
+add strip-ansi-cjs 6.0.1
+add strip-ansi 6.0.1
+add string.prototype.trimstart 1.0.8
+add string.prototype.trimend 1.0.9
+add string.prototype.trim 1.2.10
+add string.prototype.repeat 1.0.0
+add string.prototype.matchall 4.0.12
+add string.prototype.includes 2.0.1
+add string-width-cjs 4.2.3
+add string-width 4.2.3
+add string_decoder 1.3.0
+add strict-uri-encode 2.0.0
+add stream-buffers 2.2.0
+add stop-iteration-iterator 1.1.0
+add std-env 3.10.0
+add statuses 1.5.0
+add stacktrace-parser 0.1.11
+add type-fest 0.7.1
+add stackframe 1.3.4
+add stackback 0.0.2
+add stack-utils 2.0.6
+add escape-string-regexp 2.0.0
+add stable-hash 0.0.5
+add ssri 12.0.0
+add sprintf-js 1.0.3
+add split2 3.2.2
+add split-on-first 1.1.0
+add split 1.0.1
+add spdx-license-ids 3.0.23
+add spdx-expression-parse 3.0.1
+add spdx-exceptions 2.5.0
+add spdx-correct 3.2.0
+add source-map-support 0.5.21
+add source-map-js 1.2.1
+add source-map 0.6.1
+add socks-proxy-agent 8.0.5
+add socks 2.8.8
+add smol-toml 1.6.1
+add smart-buffer 4.2.0
+add slugify 1.6.9
+add slash 3.0.0
+add sisteransi 1.0.5
+add simple-swizzle 0.2.4
+add is-arrayish 0.3.4
+add simple-plist 1.3.1
+add bplist-parser 0.3.1
+add sigstore 4.1.0
+add signal-exit 3.0.7
+add siginfo 2.0.0
+add side-channel-weakmap 1.0.2
+add side-channel-map 1.0.1
+add side-channel-list 1.0.1
+add side-channel 1.1.0
+add shebang-regex 3.0.0
+add shebang-command 2.0.0
+add sharp 0.34.5
+add semver 7.7.4
+add shallowequal 1.1.0
+add sf-symbols-typescript 2.2.0
+add setprototypeof 1.2.0
+add setimmediate 1.0.5
+add set-proto 1.0.0
+add set-function-name 2.0.2
+add set-function-length 1.2.2
+add set-cookie-parser 2.7.2
+add server-only 0.0.1
+add serve-static 1.16.3
+add encodeurl 2.0.0
+add serialize-error 2.1.0
+add send 0.19.2
+add statuses 2.0.2
+add on-finished 2.4.1
+add encodeurl 2.0.0
+add debug 2.6.9
+add ms 2.0.0
+add semver 7.7.2
+add scheduler 0.26.0
+add saxes 6.0.0
+add sax 1.6.0
+add safer-buffer 2.1.2
+add safe-regex-test 1.1.0
+add safe-push-apply 1.0.0
+add isarray 2.0.5
+add safe-buffer 5.2.1
+add safe-array-concat 1.1.4
+add isarray 2.0.5
+add rxjs 7.8.2
+add run-parallel 1.2.0
+add run-async 4.0.6
+add rrweb-cssom 0.7.1
+add rollup 4.60.4
+add rimraf 3.0.2
+add glob 7.2.3
+add reusify 1.1.0
+add retry 0.12.0
+add restore-cursor 3.1.0
+add resolve.exports 2.0.3
+add resolve-workspace-root 2.0.1
+add resolve-pkg-maps 1.0.0
+add resolve-from 4.0.0
+add resolve-cwd 3.0.0
+add resolve-from 5.0.0
+add resolve 1.22.12
+add requireg 0.2.2
+add resolve 1.7.1
+add require-from-string 2.0.2
+add require-directory 2.1.1
+add regjsparser 0.13.1
+add regjsgen 0.8.0
+add regexpu-core 6.4.0
+add regexp.prototype.flags 1.5.4
+add regenerator-runtime 0.13.11
+add regenerate-unicode-properties 10.2.2
+add regenerate 1.4.2
+add reflect.getprototypeof 1.0.10
+add redent 3.0.0
+add readdirp 3.6.0
+add picomatch 2.3.2
+add readable-stream 3.6.2
+add read-pkg-up 3.0.0
+add path-exists 3.0.0
+add p-try 1.0.0
+add p-locate 2.0.0
+add p-limit 1.3.0
+add locate-path 2.0.0
+add find-up 2.1.0
+add read-pkg 3.0.0
+add strip-bom 3.0.0
+add semver 5.7.2
+add pify 3.0.0
+add parse-json 4.0.0
+add normalize-package-data 2.5.0
+add load-json-file 4.0.0
+add hosted-git-info 2.8.9
+add read-cmd-shim 4.0.0
+add read-cache 1.0.0
+add read 4.1.0
+add react-test-renderer 19.1.0
+add react-is 19.2.5
+add react-style-singleton 2.2.3
+add react-remove-scroll-bar 2.3.8
+add react-remove-scroll 2.7.2
+add react-refresh 0.14.2
+add react-native-worklets 0.5.1
+add react-native-web 0.21.2
+add memoize-one 6.0.0
+add @react-native/normalize-colors 0.74.89
+add react-native-svg 15.12.1
+add react-native-screens 4.16.0
+add react-native-safe-area-context 5.6.2
+add react-native-reanimated 4.1.1
+add react-native-is-edge-to-edge 1.3.1
+add react-native 0.81.5
+add ws 6.2.3
+add pretty-format 29.7.0
+add glob 7.2.3
+add commander 12.1.0
+add ansi-styles 5.2.0
+add @sinclair/typebox 0.27.10
+add @jest/schemas 29.6.3
+add react-is 18.3.1
+add react-freeze 1.0.4
+add react-fast-compare 3.2.2
+add react-dom 19.1.0
+add react-devtools-core 6.1.5
+add ws 7.5.10
+add react 19.1.0
+add rc 1.2.8
+add strip-json-comments 2.0.1
+add range-parser 1.2.1
+add quick-lru 4.0.1
+add queue-microtask 1.2.3
+add queue 6.0.2
+add query-string 7.1.3
+add qrcode.react 4.2.0
+add qrcode-terminal 0.11.0
+add punycode 2.3.1
+add proxy-from-env 2.1.0
+add protocols 2.0.2
+add prop-types 15.8.1
+add react-is 16.13.1
+add promzard 2.0.0
+add prompts 2.4.2
+add promise-retry 2.0.1
+add promise-call-limit 3.0.2
+add promise-all-reject-late 1.0.1
+add promise 8.3.0
+add progress 2.0.3
+add proggy 3.0.0
+add process-nextick-args 2.0.1
+add proc-log 5.0.0
+add prisma 5.22.0
+add pretty-format 30.3.0
+add ansi-styles 5.2.0
+add pretty-bytes 5.6.0
+add prettier 3.8.3
+add prelude-ls 1.2.1
+add postgres-interval 1.2.0
+add postgres-date 1.0.7
+add postgres-bytea 1.0.1
+add postgres-array 2.0.0
+add postcss-value-parser 4.2.0
+add postcss-selector-parser 7.1.1
+add postcss-nested 6.2.0
+add postcss-selector-parser 6.1.2
+add postcss-load-config 6.0.1
+add postcss-js 4.1.0
+add postcss-import 15.1.0
+add postcss 8.5.10
+add possible-typed-array-names 1.1.0
+add pngjs 3.4.0
+add plist 3.1.1
+add @xmldom/xmldom 0.9.10
+add pkg-dir 4.2.0
+add pirates 4.0.7
+add pify 2.3.0
+add picomatch 4.0.4
+add picocolors 1.1.1
+add pgpass 1.0.5
+add split2 4.2.0
+add pg-types 2.2.0
+add pg-protocol 1.13.0
+add pg-pool 3.13.0
+add pg-int8 1.0.1
+add pg-connection-string 2.12.0
+add pg-cloudflare 1.3.0
+add pg 8.20.0
+add pathval 2.0.1
+add pathe 1.1.2
+add path-type 3.0.0
+add pify 3.0.0
+add path-scurry 2.0.2
+add path-parse 1.0.7
+add path-key 3.1.1
+add path-is-absolute 1.0.1
+add path-exists 4.0.0
+add parseurl 1.3.3
+add parse5 7.3.0
+add entities 6.0.1
+add parse-url 8.1.0
+add parse-png 2.1.0
+add parse-path 7.1.0
+add parse-json 5.2.0
+add lines-and-columns 1.2.4
+add json-parse-even-better-errors 2.3.1
+add parse-conflict-json 4.0.0
+add json-parse-even-better-errors 4.0.0
+add parent-module 1.0.1
+add pacote 21.0.1
+add which 5.0.0
+add npm-pick-manifest 10.0.0
+add npm-package-arg 12.0.2
+add lru-cache 10.4.3
+add isexe 3.1.5
+add ini 5.0.0
+add hosted-git-info 8.1.0
+add @npmcli/promise-spawn 8.0.3
+add @npmcli/git 6.0.3
+add package-json-from-dist 1.0.1
+add p-waterfall 2.1.1
+add p-try 2.2.0
+add p-timeout 3.2.0
+add p-reduce 2.1.0
+add p-queue 6.6.2
+add p-pipe 3.1.0
+add p-map-series 2.1.0
+add p-map 4.0.0
+add p-locate 4.1.0
+add p-limit 2.3.0
+add p-finally 1.0.0
+add own-keys 1.0.1
+add ora 5.3.0
+add optionator 0.9.4
+add open 8.4.2
+add onetime 5.1.2
+add once 1.4.0
+add on-headers 1.1.0
+add on-finished 2.3.0
+add object.values 1.2.1
+add object.groupby 1.0.3
+add object.fromentries 2.0.8
+add object.entries 1.1.9
+add object.assign 4.1.7
+add object-keys 1.1.1
+add object-is 1.1.6
+add object-inspect 1.13.4
+add object-hash 3.0.0
+add object-assign 4.1.1
+add ob1 0.83.3
+add nwsapi 2.2.23
+add nullthrows 1.1.1
+add nth-check 2.1.1
+add npm-run-path 4.0.1
+add npm-registry-fetch 19.1.0
+add npm-pick-manifest 11.0.3
+add npm-normalize-package-bin 5.0.0
+add npm-install-checks 8.0.0
+add npm-packlist 10.0.3
+add proc-log 6.1.0
+add npm-package-arg 13.0.1
+add npm-normalize-package-bin 4.0.0
+add npm-install-checks 7.1.2
+add npm-bundled 4.0.0
+add normalize-path 3.0.0
+add normalize-package-data 3.0.3
+add yallist 4.0.0
+add lru-cache 6.0.0
+add hosted-git-info 4.1.0
+add nopt 8.1.0
+add node-releases 2.0.38
+add node-int64 0.4.0
+add node-gyp 12.3.0
+add which 6.0.1
+add proc-log 6.1.0
+add nopt 9.0.0
+add isexe 4.0.0
+add abbrev 4.0.0
+add node-forge 1.4.0
+add node-fetch 2.7.0
+add node-exports-info 1.6.0
+add semver 6.3.1
+add next 16.2.4
+add nested-error-stacks 2.0.1
+add neo-async 2.6.2
+add negotiator 1.0.0
+add natural-compare 1.4.0
+add napi-postinstall 0.3.4
+add nanoid 3.3.12
+add mz 2.7.0
+add mute-stream 2.0.0
+add ms 2.1.3
+add motion-utils 11.18.1
+add motion-dom 11.18.1
+add modify-values 1.0.1
+add mkdirp 1.0.4
+add minizlib 3.1.0
+add minipass-sized 1.0.3
+add yallist 4.0.0
+add minipass 3.3.6
+add minipass-pipeline 1.2.4
+add yallist 4.0.0
+add minipass 3.3.6
+add minipass-flush 1.0.7
+add yallist 4.0.0
+add minipass 3.3.6
+add minipass-fetch 4.0.1
+add minipass-collect 2.0.1
+add minipass 7.1.3
+add minimist-options 4.1.0
+add minimist 1.2.8
+add minimatch 3.1.4
+add minimalistic-assert 1.0.1
+add min-indent 1.0.1
+add mimic-fn 2.1.0
+add mime-types 2.1.35
+add mime-db 1.52.0
+add mime 1.6.0
+add micromatch 4.0.8
+add picomatch 2.3.2
+add metro-transform-worker 0.83.3
+add metro-transform-plugins 0.83.3
+add metro-symbolicate 0.83.3
+add source-map 0.5.7
+add metro-source-map 0.83.3
+add source-map 0.5.7
+add metro-runtime 0.83.3
+add metro-resolver 0.83.3
+add metro-minify-terser 0.83.3
+add metro-file-map 0.83.3
+add metro-core 0.83.3
+add metro-config 0.83.3
+add metro-cache-key 0.83.3
+add metro-cache 0.83.3
+add metro-babel-transformer 0.83.3
+add hermes-parser 0.32.0
+add hermes-estree 0.32.0
+add metro 0.83.3
+add ws 7.5.10
+add source-map 0.5.7
+add hermes-parser 0.32.0
+add hermes-estree 0.32.0
+add ci-info 2.0.0
+add merge2 1.4.1
+add merge-stream 2.0.0
+add meow 8.1.2
+add yargs-parser 20.2.9
+add type-fest 0.18.1
+add semver 5.7.2
+add read-pkg-up 7.0.1
+add type-fest 0.8.1
+add read-pkg 5.2.0
+add type-fest 0.6.0
+add normalize-package-data 2.5.0
+add hosted-git-info 2.8.9
+add memoize-one 5.2.1
+add mdn-data 2.0.14
+add math-intrinsics 1.1.0
+add marky 1.3.0
+add map-obj 4.3.0
+add makeerror 1.0.12
+add make-fetch-happen 15.0.2
+add make-dir 4.0.0
+add magicast 0.3.5
+add magic-string 0.30.21
+add lz-string 1.5.0
+add lucide-react-native 1.14.0
+add lucide-react 1.14.0
+add lru-cache 11.3.6
+add loupe 3.2.1
+add loose-envify 1.4.0
+add log-symbols 4.1.0
+add lodash.throttle 4.1.1
+add lodash.merge 4.6.2
+add lodash.ismatch 4.4.0
+add lodash.debounce 4.0.8
+add locate-path 5.0.0
+add load-json-file 6.2.0
+add lines-and-columns 2.0.3
+add lilconfig 3.1.3
+add lightningcss-win32-x64-msvc 1.32.0
+add lightningcss-win32-arm64-msvc 1.32.0
+add lightningcss-linux-x64-musl 1.32.0
+add lightningcss-linux-x64-gnu 1.32.0
+add lightningcss-linux-arm64-musl 1.32.0
+add lightningcss-linux-arm64-gnu 1.32.0
+add lightningcss-linux-arm-gnueabihf 1.32.0
+add lightningcss-freebsd-x64 1.32.0
+add lightningcss-darwin-x64 1.32.0
+add lightningcss-darwin-arm64 1.32.0
+add lightningcss-android-arm64 1.32.0
+add lightningcss 1.32.0
+add lighthouse-logger 1.4.2
+add ms 2.0.0
+add debug 2.6.9
+add libnpmpublish 11.1.2
+add libnpmaccess 10.0.3
+add levn 0.4.1
+add leven 3.1.0
+add lerna 9.0.7
+add language-tags 1.0.9
+add language-subtag-registry 0.3.23
+add lan-network 0.2.1
+add kleur 3.0.3
+add kind-of 6.0.3
+add keyv 4.5.4
+add jws 4.0.1
+add jwa 2.0.1
+add just-diff-apply 5.5.0
+add just-diff 6.0.2
+add jsx-ast-utils 3.3.5
+add JSONStream 1.3.5
+add jsonparse 1.3.1
+add jsonfile 6.2.1
+add jsonc-parser 3.2.0
+add json5 2.2.3
+add json-stringify-safe 5.0.1
+add json-stringify-nice 1.1.4
+add json-stable-stringify-without-jsonify 1.0.1
+add json-schema-traverse 0.4.1
+add json-parse-even-better-errors 5.0.0
+add json-parse-better-errors 1.0.2
+add json-buffer 3.0.1
+add jsesc 3.1.0
+add jsdom 25.0.1
+add whatwg-url 14.2.0
+add webidl-conversions 7.0.0
+add tr46 5.1.1
+add jsc-safe-url 0.2.4
+add js-yaml 4.1.1
+add js-tokens 4.0.0
+add jose 4.15.9
+add jiti 2.7.0
+add jimp-compact 0.16.1
+add jest-worker 29.7.0
+add supports-color 8.1.1
+add jest-validate 29.7.0
+add pretty-format 29.7.0
+add camelcase 6.3.0
+add ansi-styles 5.2.0
+add @sinclair/typebox 0.27.10
+add @jest/schemas 29.6.3
+add jest-util 29.7.0
+add picomatch 2.3.2
+add ci-info 3.9.0
+add jest-regex-util 29.6.3
+add jest-mock 29.7.0
+add jest-message-util 29.7.0
+add pretty-format 29.7.0
+add ansi-styles 5.2.0
+add @sinclair/typebox 0.27.10
+add @jest/schemas 29.6.3
+add jest-haste-map 29.7.0
+add jest-get-type 29.6.3
+add jest-environment-node 29.7.0
+add jest-diff 30.3.0
+add chalk 4.1.2
+add jackspeak 4.2.3
+add iterator.prototype 1.1.5
+add istanbul-reports 3.2.0
+add istanbul-lib-source-maps 5.0.6
+add istanbul-lib-report 3.0.1
+add istanbul-lib-instrument 5.2.1
+add semver 6.3.1
+add istanbul-lib-coverage 3.2.2
+add isexe 2.0.0
+add isarray 1.0.0
+add is-wsl 2.2.0
+add is-weakset 2.0.4
+add is-weakref 1.1.1
+add is-weakmap 2.0.2
+add is-unicode-supported 0.1.0
+add is-typed-array 1.1.15
+add is-text-path 1.0.1
+add is-symbol 1.1.1
+add is-string 1.1.1
+add is-stream 2.0.1
+add is-ssh 1.4.1
+add is-shared-array-buffer 1.0.4
+add is-set 2.0.3
+add is-regex 1.2.1
+add is-potential-custom-element-name 1.0.1
+add is-plain-obj 1.1.0
+add is-obj 2.0.0
+add is-number-object 1.1.1
+add is-number 7.0.0
+add is-negative-zero 2.0.3
+add is-nan 1.3.2
+add is-map 2.0.3
+add is-interactive 1.0.0
+add is-glob 4.0.3
+add is-generator-function 1.1.2
+add is-fullwidth-code-point 3.0.0
+add is-finalizationregistry 1.1.1
+add is-extglob 2.1.1
+add is-docker 2.2.1
+add is-date-object 1.1.0
+add is-data-view 1.0.2
+add is-core-module 2.16.2
+add is-ci 3.0.1
+add ci-info 3.9.0
+add is-callable 1.2.7
+add is-bun-module 2.0.0
+add is-boolean-object 1.2.2
+add is-binary-path 2.1.0
+add is-bigint 1.1.0
+add is-async-function 2.1.1
+add is-arrayish 0.2.1
+add is-array-buffer 3.0.5
+add is-arguments 1.2.0
+add ip-address 10.2.0
+add invariant 2.2.4
+add internal-slot 1.1.0
+add inquirer 12.9.6
+add inline-style-prefixer 7.0.1
+add init-package-json 8.2.2
+add ini 1.3.8
+add inherits 2.0.4
+add inflight 1.0.6
+add indent-string 4.0.0
+add imurmurhash 0.1.4
+add import-local 3.1.0
+add import-fresh 3.3.1
+add image-size 1.2.1
+add ignore-walk 8.0.0
+add brace-expansion 5.0.6
+add minimatch 10.2.5
+add balanced-match 4.0.4
+add ignore 7.0.5
+add ieee754 1.2.1
+add iconv-lite 0.7.2
+add iceberg-js 0.8.1
+add hyphenate-style-name 1.1.0
+add human-signals 2.1.0
+add https-proxy-agent 7.0.6
+add http-proxy-agent 7.0.2
+add http-errors 2.0.1
+add statuses 2.0.2
+add http-cache-semantics 4.2.0
+add http_ece 1.2.0
+add html-escaper 2.0.2
+add html-encoding-sniffer 4.0.0
+add hosted-git-info 9.0.3
+add hermes-parser 0.25.1
+add hermes-estree 0.25.1
+add hasown 2.0.3
+add has-unicode 2.0.1
+add has-tostringtag 1.0.2
+add has-symbols 1.1.0
+add has-proto 1.2.0
+add has-property-descriptors 1.0.2
+add has-flag 4.0.0
+add has-bigints 1.1.0
+add hard-rejection 2.1.0
+add handlebars 4.7.9
+add graceful-fs 4.2.11
+add gopd 1.2.0
+add globalthis 1.0.4
+add globals 14.0.0
+add glob-parent 6.0.2
+add glob 13.0.6
+add brace-expansion 5.0.6
+add minimatch 10.2.5
+add balanced-match 4.0.4
+add gitconfiglocal 1.0.0
+add git-url-parse 14.0.0
+add git-up 7.0.0
+add git-semver-tags 5.0.1
+add git-remote-origin-url 2.0.0
+add git-raw-commits 3.0.0
+add getenv 2.0.0
+add get-tsconfig 4.14.0
+add get-symbol-description 1.1.0
+add get-stream 6.0.0
+add get-proto 1.0.1
+add get-pkg-repo 4.2.1
+add yargs-parser 20.2.9
+add yargs 16.2.0
+add yallist 4.0.0
+add wrap-ansi 7.0.0
+add lru-cache 6.0.0
+add hosted-git-info 4.1.0
+add cliui 7.0.4
+add get-package-type 0.1.0
+add get-nonce 1.0.1
+add get-intrinsic 1.3.0
+add get-caller-file 2.0.5
+add gensync 1.0.0-beta.2
+add generator-function 2.0.1
+add functions-have-names 1.2.3
+add function.prototype.name 1.1.8
+add function-bind 1.1.2
+add fsevents 2.3.3
+add fs.realpath 1.0.0
+add fs-minipass 3.0.3
+add fs-extra 11.3.4
+add fs-constants 1.0.0
+add fresh 0.5.2
+add freeport-async 2.0.0
+add framer-motion 11.18.2
+add fraction.js 5.3.4
+add form-data 4.0.5
+add foreground-child 3.3.1
+add signal-exit 4.1.0
+add for-each 0.3.5
+add fontfaceobserver 2.3.0
+add flow-enums-runtime 0.0.6
+add flatted 3.4.2
+add flat-cache 4.0.1
+add flat 5.0.2
+add find-up 4.1.0
+add finalhandler 1.1.2
+add ms 2.0.0
+add debug 2.6.9
+add filter-obj 1.1.0
+add fill-range 7.1.1
+add file-entry-cache 8.0.0
+add figures 3.2.0
+add fdir 6.5.0
+add fbjs-css-vars 1.0.2
+add fbjs 3.0.5
+add promise 7.3.1
+add fb-watchman 2.0.2
+add fastq 1.20.1
+add fast-levenshtein 2.0.6
+add fast-json-stable-stringify 2.1.0
+add fast-glob 3.3.1
+add glob-parent 5.1.2
+add fast-deep-equal 3.1.3
+add exponential-backoff 3.1.3
+add expo-web-browser 15.0.11
+add expo-status-bar 3.0.9
+add expo-splash-screen 31.0.13
+add expo-sharing 14.0.8
+add expo-server 1.0.6
+add expo-secure-store 15.0.8
+add expo-router 6.0.23
+add semver 7.6.3
+add escape-string-regexp 4.0.0
+add @radix-ui/react-slot 1.2.0
+add expo-print 15.0.8
+add expo-notifications 0.32.17
+add expo-modules-core 3.0.30
+add expo-modules-autolinking 3.0.25
+add resolve-from 5.0.0
+add expo-linking 8.0.12
+add expo-keep-awake 15.0.8
+add expo-image-picker 17.0.11
+add expo-image-loader 6.0.0
+add expo-haptics 15.0.8
+add expo-font 14.0.11
+add expo-file-system 19.0.22
+add expo-device 8.0.10
+add ua-parser-js 0.7.41
+add expo-constants 18.0.13
+add expo-camera 17.0.10
+add expo-blur 15.0.8
+add expo-av 16.0.8
+add expo-asset 12.0.13
+add expo-application 7.0.8
+add expo 54.0.34
+add pretty-format 29.7.0
+add ansi-styles 5.2.0
+add @sinclair/typebox 0.27.10
+add @jest/schemas 29.6.3
+add expect-type 1.3.0
+add execa 5.0.0
+add eventemitter3 4.0.7
+add event-target-shim 5.0.1
+add etag 1.8.1
+add esutils 2.0.3
+add estree-walker 3.0.3
+add estraverse 5.3.0
+add esrecurse 4.3.0
+add esquery 1.7.0
+add esprima 4.0.1
+add espree 10.4.0
+add eslint-visitor-keys 4.2.1
+add eslint-scope 8.4.0
+add eslint-plugin-react-hooks 7.1.1
+add eslint-plugin-react 7.37.5
+add semver 6.3.1
+add resolve 2.0.0-next.6
+add eslint-plugin-jsx-a11y 6.10.2
+add emoji-regex 9.2.2
+add eslint-plugin-import 2.32.0
+add tsconfig-paths 3.15.0
+add strip-bom 3.0.0
+add semver 6.3.1
+add json5 1.0.2
+add debug 3.2.7
+add eslint-module-utils 2.12.1
+add debug 3.2.7
+add eslint-import-resolver-typescript 3.10.1
+add tinyglobby 0.2.16
+add eslint-import-resolver-node 0.3.10
+add resolve 2.0.0-next.6
+add debug 3.2.7
+add eslint-config-next 16.2.4
+add globals 16.4.0
+add eslint 9.39.4
+add p-locate 5.0.0
+add p-limit 3.1.0
+add minimatch 3.1.5
+add locate-path 6.0.0
+add ignore 5.3.2
+add find-up 5.0.0
+add escape-string-regexp 4.0.0
+add escape-string-regexp 1.0.5
+add escape-html 1.0.3
+add escalade 3.2.0
+add esbuild 0.27.7
+add es-to-primitive 1.3.0
+add es-shim-unscopables 1.1.0
+add es-set-tostringtag 2.1.0
+add es-object-atoms 1.1.1
+add es-module-lexer 1.7.0
+add es-iterator-helpers 1.3.2
+add es-errors 1.3.0
+add es-define-property 1.0.1
+add es-abstract 1.24.2
+add error-stack-parser 2.1.4
+add error-ex 1.3.4
+add err-code 2.0.3
+add envinfo 7.13.0
+add env-paths 2.2.1
+add env-editor 0.4.2
+add entities 4.5.0
+add enquirer 2.3.6
+add enhanced-resolve 5.21.0
+add end-of-stream 1.4.5
+add encoding 0.1.13
+add iconv-lite 0.6.3
+add encodeurl 1.0.2
+add emoji-regex 8.0.0
+add electron-to-chromium 1.5.350
+add ejs 5.0.1
+add ee-first 1.1.1
+add ecdsa-sig-formatter 1.0.11
+add eastasianwidth 0.2.0
+add dunder-proto 1.0.1
+add dotenv-expand 10.0.0
+add dotenv-cli 8.0.0
+add dotenv 16.6.1
+add dotenv 17.4.2
+add dot-prop 5.3.0
+add domutils 3.2.2
+add domhandler 5.0.3
+add domelementtype 2.3.0
+add dom-serializer 2.0.0
+add dom-accessibility-api 0.5.16
+add doctrine 2.1.0
+add dlv 1.1.3
+add didyoumean 1.2.2
+add detect-node-es 1.1.0
+add detect-libc 2.1.2
+add destroy 1.2.0
+add dequal 2.0.3
+add deprecation 2.3.1
+add depd 2.0.0
+add delayed-stream 1.0.0
+add define-properties 1.2.1
+add define-lazy-prop 2.0.0
+add define-data-property 1.1.4
+add defaults 1.0.4
+add deepmerge 4.3.1
+add deep-is 0.1.4
+add deep-extend 0.6.0
+add deep-eql 5.0.2
+add dedent 1.5.3
+add decode-uri-component 0.2.2
+add decimal.js 10.6.0
+add decamelize-keys 1.1.1
+add map-obj 1.0.1
+add decamelize 1.2.0
+add debug 4.4.3
+add dateformat 3.0.3
+add data-view-byte-offset 1.0.1
+add data-view-byte-length 1.0.2
+add data-view-buffer 1.0.2
+add data-urls 5.0.0
+add whatwg-url 14.2.0
+add webidl-conversions 7.0.0
+add tr46 5.1.1
+add dargs 7.0.0
+add damerau-levenshtein 1.0.8
+add csstype 3.2.3
+add cssstyle 4.6.0
+add rrweb-cssom 0.8.0
+add cssesc 3.0.0
+add css.escape 1.5.1
+add css-what 6.2.2
+add css-tree 1.1.3
+add css-select 5.2.2
+add css-in-js-utils 3.1.0
+add crypto-js 4.2.0
+add cross-spawn 7.0.6
+add cross-fetch 3.2.0
+add cosmiconfig 9.0.0
+add core-util-is 1.0.3
+add core-js-compat 3.49.0
+add cookie 1.1.1
+add convert-source-map 2.0.0
+add conventional-recommended-bump 7.0.1
+add conventional-commits-parser 4.0.0
+add conventional-commits-filter 3.0.0
+add conventional-changelog-writer 6.0.1
+add conventional-changelog-preset-loader 3.0.0
+add conventional-changelog-core 5.0.1
+add conventional-changelog-angular 7.0.0
+add console-control-strings 1.1.0
+add connect 3.7.0
+add ms 2.0.0
+add debug 2.6.9
+add concat-stream 2.0.0
+add concat-map 0.0.1
+add compression 1.8.1
+add negotiator 0.6.4
+add ms 2.0.0
+add debug 2.6.9
+add compressible 2.0.18
+add compare-func 2.0.0
+add common-ancestor-path 1.0.1
+add commander 7.2.0
+add combined-stream 1.0.8
+add columnify 1.6.0
+add color-support 1.1.3
+add color-string 1.9.1
+add color-name 1.1.4
+add color-convert 2.0.1
+add color 4.2.3
+add cmd-shim 6.0.3
+add clsx 2.1.1
+add clone 1.0.4
+add cliui 8.0.1
+add wrap-ansi 7.0.0
+add client-only 0.0.1
+add cli-width 4.1.0
+add cli-spinners 2.6.1
+add cli-cursor 3.1.0
+add clean-stack 2.2.0
+add class-variance-authority 0.7.1
+add ci-info 4.3.1
+add chromium-edge-launcher 0.2.0
+add escape-string-regexp 4.0.0
+add chrome-launcher 0.15.2
+add escape-string-regexp 4.0.0
+add chownr 3.0.0
+add chokidar 3.6.0
+add glob-parent 5.1.2
+add check-error 2.1.3
+add chardet 2.1.1
+add chalk 4.1.0
+add chai 5.3.3
+add caniuse-lite 1.0.30001791
+add camelcase-keys 6.2.2
+add camelcase-css 2.0.1
+add camelcase 5.3.1
+add callsites 3.1.0
+add call-bound 1.0.4
+add call-bind-apply-helpers 1.0.2
+add call-bind 1.0.9
+add cacache 20.0.4
+add ssri 13.0.1
+add p-map 7.0.4
+add @npmcli/fs 5.0.0
+add cac 6.7.14
+add bytes 3.1.2
+add byte-size 8.1.1
+add buffer-from 1.1.2
+add buffer-equal-constant-time 1.0.1
+add buffer 5.7.1
+add bser 2.1.1
+add browserslist 4.28.2
+add braces 3.0.3
+add brace-expansion 1.1.14
+add bplist-parser 0.3.2
+add bplist-creator 0.1.0
+add boolbase 1.0.0
+add bn.js 4.12.3
+add bl 4.1.0
+add binary-extensions 2.3.0
+add bin-links 5.0.0
+add write-file-atomic 6.0.0
+add signal-exit 4.1.0
+add read-cmd-shim 5.0.0
+add cmd-shim 7.0.0
+add big-integer 1.6.52
+add better-opn 3.0.2
+add before-after-hook 2.2.3
+add baseline-browser-mapping 2.10.27
+add base64-js 1.5.1
+add balanced-match 1.0.2
+add badgin 1.2.3
+add babel-preset-jest 29.6.3
+add babel-preset-expo 54.0.10
+add resolve-from 5.0.0
+add babel-preset-current-node-syntax 1.2.0
+add babel-plugin-transform-flow-enums 0.0.2
+add babel-plugin-syntax-hermes-parser 0.29.1
+add hermes-parser 0.29.1
+add hermes-estree 0.29.1
+add babel-plugin-react-native-web 0.21.2
+add babel-plugin-react-compiler 1.0.0
+add babel-plugin-polyfill-regenerator 0.6.8
+add babel-plugin-polyfill-corejs3 0.13.0
+add babel-plugin-polyfill-corejs2 0.4.17
+add semver 6.3.1
+add babel-plugin-jest-hoist 29.6.3
+add babel-plugin-istanbul 6.1.1
+add babel-jest 29.7.0
+add axobject-query 4.1.0
+add axios 1.16.0
+add axe-core 4.11.4
+add available-typed-arrays 1.0.7
+add autoprefixer 10.5.0
+add asynckit 0.4.0
+add async-limiter 1.0.1
+add async-function 1.0.0
+add ast-types-flow 0.0.8
+add assertion-error 2.0.1
+add assert 2.1.0
+add asn1.js 5.4.1
+add asap 2.0.6
+add arrify 1.0.1
+add arraybuffer.prototype.slice 1.0.4
+add array.prototype.tosorted 1.1.4
+add array.prototype.flatmap 1.3.3
+add array.prototype.flat 1.3.3
+add array.prototype.findlastindex 1.2.6
+add array.prototype.findlast 1.2.5
+add array-includes 3.1.9
+add array-ify 1.0.0
+add array-buffer-byte-length 1.0.2
+add aria-query 5.3.2
+add aria-hidden 1.2.6
+add argparse 2.0.1
+add arg 5.0.2
+add aproba 2.0.0
+add anymatch 3.1.3
+add picomatch 2.3.2
+add any-promise 1.3.0
+add ansi-styles 4.3.0
+add ansi-regex 5.0.1
+add ansi-escapes 4.3.2
+add type-fest 0.21.3
+add ansi-colors 4.1.3
+add anser 1.4.10
+add ajv 6.15.0
+add aggregate-error 3.1.0
+add agent-base 7.1.4
+add add-stream 1.0.0
+add acorn-jsx 5.3.2
+add acorn 8.16.0
+add accepts 1.3.8
+add negotiator 0.6.3
+add abort-controller 3.0.0
+add abbrev 3.0.1
+add @zkochan/js-yaml 0.0.7
+add @yarnpkg/lockfile 1.1.0
+add @xmldom/xmldom 0.8.13
+add @vitest/utils 2.1.9
+add @vitest/spy 2.1.9
+add @vitest/snapshot 2.1.9
+add @vitest/runner 2.1.9
+add @vitest/pretty-format 2.1.9
+add @vitest/mocker 2.1.9
+add @vitest/expect 2.1.9
+add @vitest/coverage-v8 2.1.9
+add wrap-ansi 8.1.0
+add test-exclude 7.0.2
+add strip-ansi 7.2.0
+add string-width 5.1.2
+add path-scurry 1.11.1
+add minimatch 10.2.5
+add lru-cache 10.4.3
+add jackspeak 3.4.3
+add glob 10.5.0
+add minimatch 9.0.9
+add brace-expansion 2.1.0
+add balanced-match 1.0.2
+add emoji-regex 9.2.2
+add brace-expansion 5.0.6
+add balanced-match 4.0.4
+add ansi-styles 6.2.3
+add ansi-regex 6.2.2
+add @isaacs/cliui 8.0.2
+add @vitejs/plugin-react 4.7.0
+add react-refresh 0.17.0
+add @urql/exchange-retry 1.3.2
+add @urql/core 5.2.0
+add @unrs/resolver-binding-win32-x64-msvc 1.11.1
+add @unrs/resolver-binding-win32-ia32-msvc 1.11.1
+add @unrs/resolver-binding-win32-arm64-msvc 1.11.1
+add @unrs/resolver-binding-wasm32-wasi 1.11.1
+add @tybys/wasm-util 0.10.2
+add @napi-rs/wasm-runtime 0.2.12
+add @unrs/resolver-binding-linux-x64-musl 1.11.1
+add @unrs/resolver-binding-linux-x64-gnu 1.11.1
+add @unrs/resolver-binding-linux-s390x-gnu 1.11.1
+add @unrs/resolver-binding-linux-riscv64-musl 1.11.1
+add @unrs/resolver-binding-linux-riscv64-gnu 1.11.1
+add @unrs/resolver-binding-linux-ppc64-gnu 1.11.1
+add @unrs/resolver-binding-linux-arm64-musl 1.11.1
+add @unrs/resolver-binding-linux-arm64-gnu 1.11.1
+add @unrs/resolver-binding-linux-arm-musleabihf 1.11.1
+add @unrs/resolver-binding-linux-arm-gnueabihf 1.11.1
+add @unrs/resolver-binding-freebsd-x64 1.11.1
+add @unrs/resolver-binding-darwin-x64 1.11.1
+add @unrs/resolver-binding-darwin-arm64 1.11.1
+add @unrs/resolver-binding-android-arm64 1.11.1
+add @unrs/resolver-binding-android-arm-eabi 1.11.1
+add @ungap/structured-clone 1.3.0
+add @typescript-eslint/visitor-keys 8.59.2
+add eslint-visitor-keys 5.0.1
+add @typescript-eslint/utils 8.59.2
+add @typescript-eslint/typescript-estree 8.59.2
+add brace-expansion 5.0.6
+add tinyglobby 0.2.16
+add semver 7.7.4
+add minimatch 10.2.5
+add balanced-match 4.0.4
+add @typescript-eslint/types 8.59.2
+add @typescript-eslint/type-utils 8.59.2
+add @typescript-eslint/tsconfig-utils 8.59.2
+add @typescript-eslint/scope-manager 8.59.2
+add @typescript-eslint/project-service 8.59.2
+add @typescript-eslint/parser 8.59.2
+add @typescript-eslint/eslint-plugin 8.59.2
+add @types/yargs-parser 21.0.3
+add @types/yargs 17.0.35
+add @types/web-push 3.6.4
+add @types/stack-utils 2.0.3
+add @types/react-dom 19.1.11
+add @types/react 19.1.17
+add @types/pg 8.20.0
+add @types/normalize-package-data 2.4.4
+add @types/node 25.6.0
+add @types/minimist 1.2.5
+add @types/json5 0.0.29
+add @types/json-schema 7.0.15
+add @types/istanbul-reports 3.0.4
+add @types/istanbul-lib-report 3.0.3
+add @types/istanbul-lib-coverage 2.0.6
+add @types/graceful-fs 4.1.9
+add @types/estree 1.0.8
+add @types/crypto-js 4.2.2
+add @types/cookie 0.6.0
+add @types/babel__traverse 7.28.0
+add @types/babel__template 7.4.4
+add @types/babel__generator 7.27.0
+add @types/babel__core 7.20.5
+add @types/aria-query 5.0.4
+add @tybys/wasm-util 0.9.0
+add @tufjs/models 4.1.0
+add brace-expansion 5.0.6
+add minimatch 10.2.5
+add balanced-match 4.0.4
+add @tufjs/canonical-json 2.0.0
+add @testing-library/user-event 14.6.1
+add @testing-library/react 16.3.2
+add @testing-library/jest-dom 6.9.1
+add dom-accessibility-api 0.6.3
+add @testing-library/dom 10.4.1
+add react-is 17.0.2
+add pretty-format 27.5.1
+add aria-query 5.3.0
+add ansi-styles 5.2.0
+add @tailwindcss/postcss 4.2.4
+add tailwindcss 4.2.4
+add @tailwindcss/oxide-win32-x64-msvc 4.2.4
+add @tailwindcss/oxide-win32-arm64-msvc 4.2.4
+add @tailwindcss/oxide-wasm32-wasi 4.2.4
+add @tailwindcss/oxide-linux-x64-musl 4.2.4
+add @tailwindcss/oxide-linux-x64-gnu 4.2.4
+add @tailwindcss/oxide-linux-arm64-musl 4.2.4
+add @tailwindcss/oxide-linux-arm64-gnu 4.2.4
+add @tailwindcss/oxide-linux-arm-gnueabihf 4.2.4
+add @tailwindcss/oxide-freebsd-x64 4.2.4
+add @tailwindcss/oxide-darwin-x64 4.2.4
+add @tailwindcss/oxide-darwin-arm64 4.2.4
+add @tailwindcss/oxide-android-arm64 4.2.4
+add @tailwindcss/oxide 4.2.4
+add @tailwindcss/node 4.2.4
+add tailwindcss 4.2.4
+add @swc/helpers 0.5.15
+add @supabase/supabase-js 2.105.4
+add @supabase/storage-js 2.105.4
+add @supabase/ssr 0.10.2
+add @supabase/realtime-js 2.105.4
+add @supabase/postgrest-js 2.105.4
+add @supabase/phoenix 0.4.2
+add @supabase/functions-js 2.105.4
+add @supabase/auth-js 2.105.4
+add @supabase/auth-helpers-shared 0.7.0
+add @supabase/auth-helpers-nextjs 0.10.0
+add @sinonjs/fake-timers 10.3.0
+add @sinonjs/commons 3.0.1
+add @sinclair/typebox 0.34.49
+add @sigstore/verify 3.1.0
+add @sigstore/tuf 4.0.2
+add @sigstore/sign 4.1.1
+add ssri 13.0.1
+add proc-log 6.1.0
+add minipass-sized 2.0.0
+add minipass-fetch 5.0.2
+add make-fetch-happen 15.0.5
+add @npmcli/redact 4.0.0
+add @sigstore/protobuf-specs 0.5.1
+add @sigstore/core 3.2.0
+add @sigstore/bundle 4.0.0
+add @rtsao/scc 1.1.0
+add @rollup/rollup-win32-x64-msvc 4.60.4
+add @rollup/rollup-win32-x64-gnu 4.60.4
+add @rollup/rollup-win32-ia32-msvc 4.60.4
+add @rollup/rollup-win32-arm64-msvc 4.60.4
+add @rollup/rollup-openharmony-arm64 4.60.4
+add @rollup/rollup-openbsd-x64 4.60.4
+add @rollup/rollup-linux-x64-musl 4.60.4
+add @rollup/rollup-linux-x64-gnu 4.60.4
+add @rollup/rollup-linux-s390x-gnu 4.60.4
+add @rollup/rollup-linux-riscv64-musl 4.60.4
+add @rollup/rollup-linux-riscv64-gnu 4.60.4
+add @rollup/rollup-linux-ppc64-musl 4.60.4
+add @rollup/rollup-linux-ppc64-gnu 4.60.4
+add @rollup/rollup-linux-loong64-musl 4.60.4
+add @rollup/rollup-linux-loong64-gnu 4.60.4
+add @rollup/rollup-linux-arm64-musl 4.60.4
+add @rollup/rollup-linux-arm64-gnu 4.60.4
+add @rollup/rollup-linux-arm-musleabihf 4.60.4
+add @rollup/rollup-linux-arm-gnueabihf 4.60.4
+add @rollup/rollup-freebsd-x64 4.60.4
+add @rollup/rollup-freebsd-arm64 4.60.4
+add @rollup/rollup-darwin-x64 4.60.4
+add @rollup/rollup-darwin-arm64 4.60.4
+add @rollup/rollup-android-arm64 4.60.4
+add @rollup/rollup-android-arm-eabi 4.60.4
+add @rolldown/pluginutils 1.0.0-beta.27
+add @react-navigation/routers 7.5.3
+add @react-navigation/native-stack 7.14.12
+add @react-navigation/native 7.2.2
+add escape-string-regexp 4.0.0
+add @react-navigation/elements 2.9.15
+add @react-navigation/core 7.17.2
+add react-is 19.2.5
+add escape-string-regexp 4.0.0
+add @react-navigation/bottom-tabs 7.15.11
+add @react-native/virtualized-lists 0.81.5
+add @react-native/normalize-colors 0.81.5
+add @react-native/js-polyfills 0.81.5
+add @react-native/gradle-plugin 0.81.5
+add @react-native/dev-middleware 0.81.5
+add ws 6.2.3
+add open 7.4.2
+add @react-native/debugger-frontend 0.81.5
+add @react-native/community-cli-plugin 0.81.5
+add @react-native/codegen 0.81.5
+add hermes-parser 0.29.1
+add hermes-estree 0.29.1
+add glob 7.2.3
+add @react-native/babel-preset 0.81.5
+add @react-native/babel-plugin-codegen 0.81.5
+add @react-native/assets-registry 0.81.5
+add @radix-ui/react-use-layout-effect 1.1.1
+add @radix-ui/react-use-escape-keydown 1.1.1
+add @radix-ui/react-use-effect-event 0.0.2
+add @radix-ui/react-use-controllable-state 1.2.2
+add @radix-ui/react-use-callback-ref 1.1.1
+add @radix-ui/react-tabs 1.1.13
+add @radix-ui/react-slot 1.2.4
+add @radix-ui/react-roving-focus 1.1.11
+add @radix-ui/react-primitive 2.1.3
+add @radix-ui/react-slot 1.2.3
+add @radix-ui/react-presence 1.1.5
+add @radix-ui/react-portal 1.1.9
+add @radix-ui/react-id 1.1.1
+add @radix-ui/react-focus-scope 1.1.7
+add @radix-ui/react-focus-guards 1.1.3
+add @radix-ui/react-dismissable-layer 1.1.11
+add @radix-ui/react-direction 1.1.1
+add @radix-ui/react-dialog 1.1.15
+add @radix-ui/react-slot 1.2.3
+add @radix-ui/react-context 1.1.2
+add @radix-ui/react-compose-refs 1.1.2
+add @radix-ui/react-collection 1.1.7
+add @radix-ui/react-slot 1.2.3
+add @radix-ui/primitive 1.1.3
+add @prisma/get-platform 5.22.0
+add @prisma/fetch-engine 5.22.0
+add @prisma/engines-version 5.22.0-44.605197351a3c8bdd595af2d2a9bc3025bca48ea2
+add @prisma/engines 5.22.0
+add @prisma/debug 5.22.0
+add @prisma/client 5.22.0
+add @pkgjs/parseargs 0.11.0
+add @octokit/types 13.10.0
+add @octokit/rest 20.1.2
+add @octokit/request-error 5.1.1
+add @octokit/request 8.4.1
+add @octokit/plugin-rest-endpoint-methods 13.3.2-cjs.1
+add @octokit/plugin-request-log 4.0.1
+add @octokit/plugin-paginate-rest 11.4.4-cjs.2
+add @octokit/plugin-enterprise-rest 6.0.1
+add @octokit/openapi-types 24.2.0
+add @octokit/graphql 7.1.1
+add @octokit/endpoint 9.0.6
+add @octokit/core 5.2.2
+add @octokit/auth-token 4.0.0
+add @nx/devkit 22.7.1
+add brace-expansion 5.0.6
+add minimatch 10.2.4
+add balanced-match 4.0.4
+add @npmcli/run-script 10.0.3
+add which 6.0.1
+add proc-log 6.1.0
+add isexe 4.0.0
+add @npmcli/node-gyp 5.0.0
+add @npmcli/redact 3.2.2
+add @npmcli/query 4.0.1
+add @npmcli/promise-spawn 9.0.1
+add which 6.0.1
+add isexe 4.0.0
+add @npmcli/package-json 7.0.2
+add brace-expansion 5.0.6
+add proc-log 6.1.0
+add minimatch 10.2.5
+add glob 11.1.0
+add balanced-match 4.0.4
+add @npmcli/node-gyp 4.0.0
+add @npmcli/name-from-folder 3.0.0
+add @npmcli/metavuln-calculator 9.0.3
+add proc-log 6.1.0
+add @npmcli/map-workspaces 5.0.3
+add brace-expansion 5.0.6
+add minimatch 10.2.5
+add balanced-match 4.0.4
+add @npmcli/name-from-folder 4.0.0
+add @npmcli/installed-package-contents 3.0.0
+add @npmcli/git 7.0.2
+add which 6.0.1
+add proc-log 6.1.0
+add isexe 4.0.0
+add ini 6.0.0
+add @npmcli/fs 4.0.0
+add @npmcli/arborist 9.1.6
+add brace-expansion 5.0.6
+add pacote 21.5.0
+add ssri 13.0.1
+add proc-log 6.1.0
+add @npmcli/installed-package-contents 4.0.0
+add npm-normalize-package-bin 5.0.0
+add npm-bundled 5.0.0
+add minimatch 10.2.5
+add balanced-match 4.0.4
+add @npmcli/agent 4.0.0
+add @nolyfill/is-core-module 1.0.39
+add @nodelib/fs.walk 1.2.8
+add @nodelib/fs.stat 2.0.5
+add @nodelib/fs.scandir 2.1.5
+add @next/swc-win32-x64-msvc 16.2.4
+add @next/swc-win32-arm64-msvc 16.2.4
+add @next/swc-linux-x64-musl 16.2.4
+add @next/swc-linux-x64-gnu 16.2.4
+add @next/swc-linux-arm64-musl 16.2.4
+add @next/swc-linux-arm64-gnu 16.2.4
+add @next/swc-darwin-x64 16.2.4
+add @next/swc-darwin-arm64 16.2.4
+add @next/eslint-plugin-next 16.2.4
+add @next/env 16.2.4
+add @napi-rs/wasm-runtime 0.2.4
+add @jridgewell/trace-mapping 0.3.31
+add @jridgewell/sourcemap-codec 1.5.5
+add @jridgewell/source-map 0.3.11
+add @jridgewell/resolve-uri 3.1.2
+add @jridgewell/remapping 2.3.5
+add @jridgewell/gen-mapping 0.3.13
+add @jest/types 29.6.3
+add @sinclair/typebox 0.27.10
+add @jest/schemas 29.6.3
+add @jest/transform 29.7.0
+add write-file-atomic 4.0.2
+add @jest/schemas 30.0.5
+add @jest/get-type 30.1.0
+add @jest/fake-timers 29.7.0
+add @jest/environment 29.7.0
+add @jest/diff-sequences 30.3.0
+add @jest/create-cache-key-function 29.7.0
+add @istanbuljs/schema 0.1.6
+add @istanbuljs/load-nyc-config 1.1.0
+add resolve-from 5.0.0
+add js-yaml 3.14.2
+add argparse 1.0.10
+add @isaacs/ttlcache 1.4.1
+add @isaacs/string-locale-compare 1.1.0
+add @isaacs/fs-minipass 4.0.1
+add @isaacs/cliui 9.0.0
+add @inquirer/type 3.0.10
+add @inquirer/select 4.4.2
+add @inquirer/search 3.2.2
+add @inquirer/rawlist 4.1.11
+add @inquirer/prompts 7.10.1
+add @inquirer/password 4.0.23
+add @inquirer/number 3.0.23
+add @inquirer/input 4.3.1
+add @inquirer/figures 1.0.15
+add @inquirer/external-editor 1.0.3
+add @inquirer/expand 4.0.23
+add @inquirer/editor 4.2.23
+add @inquirer/core 10.3.2
+add signal-exit 4.1.0
+add @inquirer/confirm 5.1.21
+add @inquirer/checkbox 4.3.2
+add @inquirer/ansi 1.0.2
+add @img/sharp-win32-x64 0.34.5
+add @img/sharp-win32-ia32 0.34.5
+add @img/sharp-win32-arm64 0.34.5
+add @img/sharp-wasm32 0.34.5
+add @emnapi/runtime 1.10.0
+add @img/sharp-linuxmusl-x64 0.34.5
+add @img/sharp-linuxmusl-arm64 0.34.5
+add @img/sharp-linux-x64 0.34.5
+add @img/sharp-linux-s390x 0.34.5
+add @img/sharp-linux-riscv64 0.34.5
+add @img/sharp-linux-ppc64 0.34.5
+add @img/sharp-linux-arm64 0.34.5
+add @img/sharp-linux-arm 0.34.5
+add @img/sharp-libvips-linuxmusl-x64 1.2.4
+add @img/sharp-libvips-linuxmusl-arm64 1.2.4
+add @img/sharp-libvips-linux-x64 1.2.4
+add @img/sharp-libvips-linux-s390x 1.2.4
+add @img/sharp-libvips-linux-riscv64 1.2.4
+add @img/sharp-libvips-linux-ppc64 1.2.4
+add @img/sharp-libvips-linux-arm64 1.2.4
+add @img/sharp-libvips-linux-arm 1.2.4
+add @img/sharp-libvips-darwin-x64 1.2.4
+add @img/sharp-libvips-darwin-arm64 1.2.4
+add @img/sharp-darwin-x64 0.34.5
+add @img/sharp-darwin-arm64 0.34.5
+add @img/colour 1.1.0
+add @ide/backoff 1.0.0
+add @hutson/parse-repository-url 3.0.2
+add @humanwhocodes/retry 0.4.3
+add @humanwhocodes/module-importer 1.0.1
+add @humanfs/types 0.15.0
+add @humanfs/node 0.16.8
+add @humanfs/core 0.19.2
+add @gar/promise-retry 1.0.3
+add @expo/xcpretty 4.4.3
+add @expo/ws-tunnel 1.0.6
+add @expo/vector-icons 15.1.1
+add @expo/sudo-prompt 9.3.2
+add @expo/spawn-async 1.7.2
+add @expo/sdk-runtime-versions 1.0.0
+add @expo/schema-utils 0.1.8
+add @expo/require-utils 55.0.5
+add @expo/prebuild-config 54.0.8
+add resolve-from 5.0.0
+add @expo/plist 0.4.8
+add @expo/package-manager 1.10.5
+add validate-npm-package-name 5.0.1
+add supports-color 5.5.0
+add strip-ansi 5.2.0
+add restore-cursor 2.0.0
+add proc-log 4.2.0
+add ora 3.4.0
+add chalk 2.4.2
+add onetime 2.0.1
+add npm-package-arg 11.0.3
+add mimic-fn 1.2.0
+add lru-cache 10.4.3
+add log-symbols 2.2.0
+add chalk 2.4.2
+add hosted-git-info 7.0.2
+add has-flag 3.0.0
+add color-name 1.1.3
+add color-convert 1.9.3
+add cli-cursor 2.1.0
+add ansi-styles 3.2.1
+add ansi-regex 4.1.1
+add @expo/osascript 2.4.3
+add @expo/metro-runtime 6.1.2
+add pretty-format 29.7.0
+add ansi-styles 5.2.0
+add @sinclair/typebox 0.27.10
+add @jest/schemas 29.6.3
+add @expo/metro-config 54.0.15
+add resolve-from 5.0.0
+add hermes-parser 0.29.1
+add hermes-estree 0.29.1
+add dotenv-expand 11.0.7
+add dotenv 16.4.7
+add @expo/metro 54.2.0
+add @expo/json-file 10.0.14
+add @expo/image-utils 0.8.14
+add @expo/fingerprint 0.15.5
+add brace-expansion 5.0.6
+add resolve-from 5.0.0
+add p-limit 3.1.0
+add minimatch 10.2.5
+add ignore 5.3.2
+add chalk 4.1.2
+add balanced-match 4.0.4
+add @expo/env 2.0.11
+add dotenv-expand 11.0.7
+add dotenv 16.4.7
+add @expo/devtools 0.1.8
+add chalk 4.1.2
+add @expo/devcert 1.2.1
+add debug 3.2.7
+add @expo/config-types 54.0.10
+add @expo/config-plugins 54.0.4
+add resolve-from 5.0.0
+add chalk 4.1.2
+add @expo/config 12.0.13
+add resolve-from 5.0.0
+add @babel/code-frame 7.10.4
+add @expo/code-signing-certificates 0.0.6
+add @expo/cli 54.0.24
+add wrap-ansi 7.0.0
+add validate-npm-package-name 5.0.1
+add supports-color 5.5.0
+add restore-cursor 2.0.0
+add resolve-from 5.0.0
+add proc-log 4.2.0
+add pretty-format 29.7.0
+add ansi-styles 5.2.0
+add ora 3.4.0
+add strip-ansi 5.2.0
+add chalk 2.4.2
+add ansi-styles 3.2.1
+add onetime 2.0.1
+add npm-package-arg 11.0.3
+add minimatch 9.0.9
+add mimic-fn 1.2.0
+add lru-cache 10.4.3
+add log-symbols 2.2.0
+add chalk 2.4.2
+add ansi-styles 3.2.1
+add hosted-git-info 7.0.2
+add has-flag 3.0.0
+add color-name 1.1.3
+add color-convert 1.9.3
+add cli-cursor 2.1.0
+add ci-info 3.9.0
+add brace-expansion 2.1.0
+add ansi-regex 4.1.1
+add @sinclair/typebox 0.27.10
+add @jest/schemas 29.6.3
+add @eslint/plugin-kit 0.4.1
+add @eslint/object-schema 2.1.7
+add @eslint/js 9.39.4
+add @eslint/eslintrc 3.3.5
+add minimatch 3.1.5
+add ignore 5.3.2
+add @eslint/core 0.17.0
+add @eslint/config-helpers 0.4.2
+add @eslint/config-array 0.21.2
+add minimatch 3.1.5
+add @eslint-community/regexpp 4.12.2
+add @eslint-community/eslint-utils 4.9.1
+add eslint-visitor-keys 3.4.3
+add @esbuild/win32-x64 0.27.7
+add @esbuild/win32-ia32 0.27.7
+add @esbuild/win32-arm64 0.27.7
+add @esbuild/sunos-x64 0.27.7
+add @esbuild/openharmony-arm64 0.27.7
+add @esbuild/openbsd-x64 0.27.7
+add @esbuild/openbsd-arm64 0.27.7
+add @esbuild/netbsd-x64 0.27.7
+add @esbuild/netbsd-arm64 0.27.7
+add @esbuild/linux-x64 0.27.7
+add @esbuild/linux-s390x 0.27.7
+add @esbuild/linux-riscv64 0.27.7
+add @esbuild/linux-ppc64 0.27.7
+add @esbuild/linux-mips64el 0.27.7
+add @esbuild/linux-loong64 0.27.7
+add @esbuild/linux-ia32 0.27.7
+add @esbuild/linux-arm64 0.27.7
+add @esbuild/linux-arm 0.27.7
+add @esbuild/freebsd-x64 0.27.7
+add @esbuild/freebsd-arm64 0.27.7
+add @esbuild/darwin-x64 0.27.7
+add @esbuild/darwin-arm64 0.27.7
+add @esbuild/android-x64 0.27.7
+add @esbuild/android-arm64 0.27.7
+add @esbuild/android-arm 0.27.7
+add @esbuild/aix-ppc64 0.27.7
+add @emnapi/wasi-threads 1.0.4
+add @emnapi/runtime 1.4.5
+add @emnapi/core 1.4.5
+add @csstools/css-tokenizer 3.0.4
+add @csstools/css-parser-algorithms 3.0.5
+add @csstools/css-color-parser 3.1.0
+add @csstools/css-calc 2.1.4
+add @csstools/color-helpers 5.1.0
+add @bcoe/v8-coverage 0.2.3
+add @babel/types 7.29.0
+add @babel/traverse--for-generate-function-map 7.29.0
+add @babel/traverse 7.29.0
+add @babel/template 7.28.6
+add @babel/runtime 7.29.2
+add @babel/preset-typescript 7.28.5
+add @babel/preset-react 7.28.5
+add @babel/plugin-transform-unicode-regex 7.27.1
+add @babel/plugin-transform-typescript 7.28.6
+add @babel/plugin-transform-template-literals 7.27.1
+add @babel/plugin-transform-sticky-regex 7.27.1
+add @babel/plugin-transform-spread 7.28.6
+add @babel/plugin-transform-shorthand-properties 7.27.1
+add @babel/plugin-transform-runtime 7.29.0
+add semver 6.3.1
+add @babel/plugin-transform-regenerator 7.29.0
+add @babel/plugin-transform-react-pure-annotations 7.27.1
+add @babel/plugin-transform-react-jsx-source 7.27.1
+add @babel/plugin-transform-react-jsx-self 7.27.1
+add @babel/plugin-transform-react-jsx-development 7.27.1
+add @babel/plugin-transform-react-jsx 7.28.6
+add @babel/plugin-transform-react-display-name 7.28.0
+add @babel/plugin-transform-private-property-in-object 7.28.6
+add @babel/plugin-transform-private-methods 7.28.6
+add @babel/plugin-transform-parameters 7.27.7
+add @babel/plugin-transform-optional-chaining 7.28.6
+add @babel/plugin-transform-optional-catch-binding 7.28.6
+add @babel/plugin-transform-object-rest-spread 7.28.6
+add @babel/plugin-transform-numeric-separator 7.28.6
+add @babel/plugin-transform-nullish-coalescing-operator 7.28.6
+add @babel/plugin-transform-named-capturing-groups-regex 7.29.0
+add @babel/plugin-transform-modules-commonjs 7.28.6
+add @babel/plugin-transform-logical-assignment-operators 7.28.6
+add @babel/plugin-transform-literals 7.27.1
+add @babel/plugin-transform-function-name 7.27.1
+add @babel/plugin-transform-for-of 7.27.1
+add @babel/plugin-transform-flow-strip-types 7.27.1
+add @babel/plugin-transform-export-namespace-from 7.27.1
+add @babel/plugin-transform-destructuring 7.28.5
+add @babel/plugin-transform-computed-properties 7.28.6
+add @babel/plugin-transform-classes 7.28.6
+add @babel/plugin-transform-class-static-block 7.28.6
+add @babel/plugin-transform-class-properties 7.28.6
+add @babel/plugin-transform-block-scoping 7.28.6
+add @babel/plugin-transform-async-to-generator 7.28.6
+add @babel/plugin-transform-async-generator-functions 7.29.0
+add @babel/plugin-transform-arrow-functions 7.27.1
+add @babel/plugin-syntax-typescript 7.28.6
+add @babel/plugin-syntax-top-level-await 7.14.5
+add @babel/plugin-syntax-private-property-in-object 7.14.5
+add @babel/plugin-syntax-optional-chaining 7.8.3
+add @babel/plugin-syntax-optional-catch-binding 7.8.3
+add @babel/plugin-syntax-object-rest-spread 7.8.3
+add @babel/plugin-syntax-numeric-separator 7.10.4
+add @babel/plugin-syntax-nullish-coalescing-operator 7.8.3
+add @babel/plugin-syntax-logical-assignment-operators 7.10.4
+add @babel/plugin-syntax-jsx 7.28.6
+add @babel/plugin-syntax-json-strings 7.8.3
+add @babel/plugin-syntax-import-meta 7.10.4
+add @babel/plugin-syntax-import-attributes 7.28.6
+add @babel/plugin-syntax-flow 7.28.6
+add @babel/plugin-syntax-export-default-from 7.28.6
+add @babel/plugin-syntax-dynamic-import 7.8.3
+add @babel/plugin-syntax-decorators 7.28.6
+add @babel/plugin-syntax-class-static-block 7.14.5
+add @babel/plugin-syntax-class-properties 7.12.13
+add @babel/plugin-syntax-bigint 7.8.3
+add @babel/plugin-syntax-async-generators 7.8.4
+add @babel/plugin-proposal-export-default-from 7.27.1
+add @babel/plugin-proposal-decorators 7.29.0
+add @babel/parser 7.29.3
+add @babel/highlight 7.25.9
+add supports-color 5.5.0
+add has-flag 3.0.0
+add color-name 1.1.3
+add color-convert 1.9.3
+add chalk 2.4.2
+add ansi-styles 3.2.1
+add @babel/helpers 7.29.2
+add @babel/helper-wrap-function 7.28.6
+add @babel/helper-validator-option 7.27.1
+add @babel/helper-validator-identifier 7.28.5
+add @babel/helper-string-parser 7.27.1
+add @babel/helper-skip-transparent-expression-wrappers 7.27.1
+add @babel/helper-replace-supers 7.28.6
+add @babel/helper-remap-async-to-generator 7.27.1
+add @babel/helper-plugin-utils 7.28.6
+add @babel/helper-optimise-call-expression 7.27.1
+add @babel/helper-module-transforms 7.28.6
+add @babel/helper-module-imports 7.28.6
+add @babel/helper-member-expression-to-functions 7.28.5
+add @babel/helper-globals 7.28.0
+add @babel/helper-define-polyfill-provider 0.6.8
+add @babel/helper-create-regexp-features-plugin 7.28.5
+add semver 6.3.1
+add @babel/helper-create-class-features-plugin 7.29.3
+add semver 6.3.1
+add @babel/helper-compilation-targets 7.28.6
+add yallist 3.1.1
+add semver 6.3.1
+add lru-cache 5.1.1
+add @babel/helper-annotate-as-pure 7.27.3
+add @babel/generator 7.29.1
+add @babel/core 7.29.0
+add semver 6.3.1
+add @babel/compat-data 7.29.3
+add @babel/code-frame 7.29.0
+add @asamuzakjp/css-color 3.2.0
+add lru-cache 10.4.3
+add @ampproject/remapping 2.3.0
+add @alloc/quick-lru 5.2.0
+add @adobe/css-tools 4.4.4
+add @0no-co/graphql.web 1.2.0
+{
+  "added": 1893,
+  "removed": 0,
+  "changed": 0,
+  "audited": 1906,
+  "funding": 300,
+  "audit": {
+    "auditReportVersion": 2,
+    "vulnerabilities": {
+      "@expo/cli": {
+        "name": "@expo/cli",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "@expo/config",
+          "@expo/config-plugins",
+          "@expo/metro-config",
+          "@expo/prebuild-config"
+        ],
+        "effects": [
+          "expo"
+        ],
+        "range": "<=0.0.0-canary-20231123-1b19f96-4 || >=0.0.1-canary-20231125-d600e44",
+        "nodes": [
+          "node_modules/@expo/cli"
+        ],
+        "fixAvailable": {
+          "name": "expo",
+          "version": "46.0.21",
+          "isSemVerMajor": true
+        }
+      },
+      "@expo/config": {
+        "name": "@expo/config",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "@expo/config-plugins"
+        ],
+        "effects": [
+          "@expo/metro-config",
+          "expo",
+          "expo-constants"
+        ],
+        "range": "<=0.0.1-canary-20240418-8d74597 || >=3.3.23-alpha.0",
+        "nodes": [
+          "node_modules/@expo/config"
+        ],
+        "fixAvailable": {
+          "name": "expo",
+          "version": "46.0.21",
+          "isSemVerMajor": true
+        }
+      },
+      "@expo/config-plugins": {
+        "name": "@expo/config-plugins",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "xcode"
+        ],
+        "effects": [
+          "@expo/cli",
+          "@expo/config",
+          "@expo/prebuild-config",
+          "expo"
+        ],
+        "range": "*",
+        "nodes": [
+          "node_modules/@expo/config-plugins"
+        ],
+        "fixAvailable": {
+          "name": "expo",
+          "version": "46.0.21",
+          "isSemVerMajor": true
+        }
+      },
+      "@expo/metro-config": {
+        "name": "@expo/metro-config",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "@expo/config"
+        ],
+        "effects": [
+          "expo"
+        ],
+        "range": "<=0.0.1-canary-20240418-8d74597 || >=0.1.49-alpha.0",
+        "nodes": [
+          "node_modules/@expo/metro-config"
+        ],
+        "fixAvailable": {
+          "name": "expo",
+          "version": "46.0.21",
+          "isSemVerMajor": true
+        }
+      },
+      "@expo/prebuild-config": {
+        "name": "@expo/prebuild-config",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "@expo/config",
+          "@expo/config-plugins"
+        ],
+        "effects": [
+          "expo-splash-screen"
+        ],
+        "range": "*",
+        "nodes": [
+          "node_modules/@expo/prebuild-config"
+        ],
+        "fixAvailable": {
+          "name": "expo-splash-screen",
+          "version": "56.0.10",
+          "isSemVerMajor": true
+        }
+      },
+      "@vitest/coverage-v8": {
+        "name": "@vitest/coverage-v8",
+        "severity": "critical",
+        "isDirect": true,
+        "via": [
+          "vitest"
+        ],
+        "effects": [],
+        "range": "<=3.2.5",
+        "nodes": [
+          "node_modules/@vitest/coverage-v8"
+        ],
+        "fixAvailable": {
+          "name": "@vitest/coverage-v8",
+          "version": "4.1.8",
+          "isSemVerMajor": true
+        }
+      },
+      "@vitest/mocker": {
+        "name": "@vitest/mocker",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "vite"
+        ],
+        "effects": [
+          "vitest"
+        ],
+        "range": "<=3.0.0-beta.4",
+        "nodes": [
+          "node_modules/@vitest/mocker"
+        ],
+        "fixAvailable": {
+          "name": "vitest",
+          "version": "4.1.8",
+          "isSemVerMajor": true
+        }
+      },
+      "brace-expansion": {
+        "name": "brace-expansion",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1115543,
+            "name": "brace-expansion",
+            "dependency": "brace-expansion",
+            "title": "brace-expansion: Zero-step sequence causes process hang and memory exhaustion",
+            "url": "https://github.com/advisories/GHSA-f886-m6hf-6m8v",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-400"
+            ],
+            "cvss": {
+              "score": 6.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H"
+            },
+            "range": ">=4.0.0 <5.0.5"
+          },
+          {
+            "source": 1120311,
+            "name": "brace-expansion",
+            "dependency": "brace-expansion",
+            "title": "brace-expansion: Large numeric range defeats documented `max` DoS protection",
+            "url": "https://github.com/advisories/GHSA-jxxr-4gwj-5jf2",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-400"
+            ],
+            "cvss": {
+              "score": 6.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H"
+            },
+            "range": ">=5.0.0 <5.0.6"
+          }
+        ],
+        "effects": [
+          "nx"
+        ],
+        "range": "4.0.0 - 5.0.5",
+        "nodes": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "fixAvailable": true
+      },
+      "esbuild": {
+        "name": "esbuild",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1102341,
+            "name": "esbuild",
+            "dependency": "esbuild",
+            "title": "esbuild enables any website to send any requests to the development server and read the response",
+            "url": "https://github.com/advisories/GHSA-67mh-4wv8-2f99",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-346"
+            ],
+            "cvss": {
+              "score": 5.3,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N"
+            },
+            "range": "<=0.24.2"
+          }
+        ],
+        "effects": [
+          "vite"
+        ],
+        "range": "<=0.24.2",
+        "nodes": [
+          "node_modules/vite/node_modules/esbuild"
+        ],
+        "fixAvailable": {
+          "name": "vitest",
+          "version": "4.1.8",
+          "isSemVerMajor": true
+        }
+      },
+      "expo": {
+        "name": "expo",
+        "severity": "moderate",
+        "isDirect": true,
+        "via": [
+          "@expo/cli",
+          "@expo/config",
+          "@expo/config-plugins",
+          "@expo/metro-config",
+          "expo-asset",
+          "expo-constants"
+        ],
+        "effects": [],
+        "range": "40.0.0-alpha.0 - 40.0.0-beta.5 || >=41.0.0-alpha.0",
+        "nodes": [
+          "node_modules/expo"
+        ],
+        "fixAvailable": {
+          "name": "expo",
+          "version": "46.0.21",
+          "isSemVerMajor": true
+        }
+      },
+      "expo-asset": {
+        "name": "expo-asset",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "expo-constants"
+        ],
+        "effects": [
+          "expo"
+        ],
+        "range": "<=0.0.1-canary-20240418-8d74597 || 8.6.1 - 55.0.0-canary-20260223-05214f1 || 55.0.3-canary-20260128-67ce8d5 || 55.0.8-canary-20260424-7bedc9d - 55.0.8-canary-20260429-a5e59cf || 55.0.11-canary-20260327-0789fbc - 55.0.11-canary-20260402-9da566b || 56.0.0-canary-20260212-4f61309 - 56.0.0-canary-20260506-964f25d",
+        "nodes": [
+          "node_modules/expo-asset"
+        ],
+        "fixAvailable": {
+          "name": "expo",
+          "version": "46.0.21",
+          "isSemVerMajor": true
+        }
+      },
+      "expo-constants": {
+        "name": "expo-constants",
+        "severity": "moderate",
+        "isDirect": true,
+        "via": [
+          "@expo/config"
+        ],
+        "effects": [
+          "expo",
+          "expo-asset",
+          "expo-linking",
+          "expo-notifications",
+          "expo-router"
+        ],
+        "range": "<=0.0.1-canary-20240418-8d74597 || 10.1.2 - 55.0.14 || 56.0.0-canary-20260212-4f61309 - 56.0.0-canary-20260506-964f25d",
+        "nodes": [
+          "node_modules/expo-constants"
+        ],
+        "fixAvailable": {
+          "name": "expo-constants",
+          "version": "56.0.17",
+          "isSemVerMajor": true
+        }
+      },
+      "expo-linking": {
+        "name": "expo-linking",
+        "severity": "moderate",
+        "isDirect": true,
+        "via": [
+          "expo-constants"
+        ],
+        "effects": [],
+        "range": "<=0.0.1-canary-20240418-8d74597 || 2.2.2 - 55.0.0-canary-20260223-05214f1 || 55.0.4-canary-20260128-67ce8d5 || 55.0.8-canary-20260424-7bedc9d - 55.0.8-canary-20260429-a5e59cf || 55.0.10-canary-20260327-0789fbc - 55.0.10-canary-20260402-9da566b || 56.0.0-canary-20260212-4f61309 - 56.0.0-canary-20260506-964f25d",
+        "nodes": [
+          "node_modules/expo-linking"
+        ],
+        "fixAvailable": {
+          "name": "expo-linking",
+          "version": "56.0.13",
+          "isSemVerMajor": true
+        }
+      },
+      "expo-notifications": {
+        "name": "expo-notifications",
+        "severity": "moderate",
+        "isDirect": true,
+        "via": [
+          "expo-constants"
+        ],
+        "effects": [],
+        "range": "<=0.0.1-canary-20240418-8d74597 || 0.11.4 - 55.0.0-canary-20260223-05214f1 || 55.0.5-canary-20260128-67ce8d5 || 55.0.11-canary-20260424-7bedc9d - 55.0.11-canary-20260429-a5e59cf || 55.0.15-canary-20260327-0789fbc - 55.0.15-canary-20260402-9da566b || 56.0.0-canary-20260212-4f61309 - 56.0.0-canary-20260506-964f25d",
+        "nodes": [
+          "node_modules/expo-notifications"
+        ],
+        "fixAvailable": {
+          "name": "expo-notifications",
+          "version": "56.0.16",
+          "isSemVerMajor": true
+        }
+      },
+      "expo-router": {
+        "name": "expo-router",
+        "severity": "moderate",
+        "isDirect": true,
+        "via": [
+          "expo-constants",
+          "expo-linking"
+        ],
+        "effects": [],
+        "range": "<=0.0.33 || 4.0.13-canary-20241211-61c49bd || 4.0.18-canary-20250124-42fe332 - 4.0.18-canary-20250306-d9d3e02 || 4.0.20-canary-20250320-7a205d3 || 4.0.21 - 5.0.2-preview.6 || 5.2.0-canary-20250611-f0afe80 - 55.0.0-canary-20260223-05214f1 || 55.0.3-canary-20260424-7bedc9d - 55.0.3-canary-20260429-a5e59cf || 55.0.9-canary-20260327-0789fbc - 55.0.9-canary-20260402-9da566b || 56.0.0-canary-20260212-4f61309 - 56.0.0-canary-20260506-964f25d",
+        "nodes": [
+          "node_modules/expo-router"
+        ],
+        "fixAvailable": {
+          "name": "expo-router",
+          "version": "56.2.9",
+          "isSemVerMajor": true
+        }
+      },
+      "expo-splash-screen": {
+        "name": "expo-splash-screen",
+        "severity": "moderate",
+        "isDirect": true,
+        "via": [
+          "@expo/prebuild-config"
+        ],
+        "effects": [],
+        "range": "<=0.0.1-canary-20240418-8d74597 || 0.11.0 - 56.0.0-canary-20260506-964f25d",
+        "nodes": [
+          "node_modules/expo-splash-screen"
+        ],
+        "fixAvailable": {
+          "name": "expo-splash-screen",
+          "version": "56.0.10",
+          "isSemVerMajor": true
+        }
+      },
+      "follow-redirects": {
+        "name": "follow-redirects",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1116560,
+            "name": "follow-redirects",
+            "dependency": "follow-redirects",
+            "title": "follow-redirects leaks Custom Authentication Headers to Cross-Domain Redirect Targets",
+            "url": "https://github.com/advisories/GHSA-r4q5-vmmm-2653",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-200"
+            ],
+            "cvss": {
+              "score": 0,
+              "vectorString": null
+            },
+            "range": "<=1.15.11"
+          }
+        ],
+        "effects": [
+          "nx"
+        ],
+        "range": "<=1.15.11",
+        "nodes": [
+          ""
+        ],
+        "fixAvailable": true
+      },
+      "next": {
+        "name": "next",
+        "severity": "high",
+        "isDirect": true,
+        "via": [
+          {
+            "source": 1117930,
+            "name": "next",
+            "dependency": "next",
+            "title": "Next.js Vulnerable to Denial of Service with Server Components",
+            "url": "https://github.com/advisories/GHSA-8h8q-6873-q5fj",
+            "severity": "high",
+            "cwe": [
+              "CWE-770"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": ">=16.0.0 <16.2.5"
+          },
+          {
+            "source": 1118938,
+            "name": "next",
+            "dependency": "next",
+            "title": "Next.js has a Middleware / Proxy bypass in App Router applications via segment-prefetch routes - Incomplete Fix Follow-Up",
+            "url": "https://github.com/advisories/GHSA-26hh-7cqf-hhc6",
+            "severity": "high",
+            "cwe": [
+              "CWE-288"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
+            },
+            "range": ">=16.0.0 <16.2.6"
+          },
+          {
+            "source": 1118941,
+            "name": "next",
+            "dependency": "next",
+            "title": "Next.js's Middleware / Proxy redirects can be cache-poisoned",
+            "url": "https://github.com/advisories/GHSA-3g8h-86w9-wvmq",
+            "severity": "low",
+            "cwe": [
+              "CWE-349"
+            ],
+            "cvss": {
+              "score": 3.7,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L"
+            },
+            "range": ">=16.0.0 <16.2.5"
+          },
+          {
+            "source": 1118943,
+            "name": "next",
+            "dependency": "next",
+            "title": "Next.js vulnerable to cross-site scripting in App Router applications using CSP nonces",
+            "url": "https://github.com/advisories/GHSA-ffhc-5mcf-pf4q",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-79"
+            ],
+            "cvss": {
+              "score": 4.7,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:L/I:L/A:N"
+            },
+            "range": ">=16.0.0 <16.2.5"
+          },
+          {
+            "source": 1118945,
+            "name": "next",
+            "dependency": "next",
+            "title": "Next.js vulnerable to cache poisoning via collisions in React Server Component cache-busting",
+            "url": "https://github.com/advisories/GHSA-vfv6-92ff-j949",
+            "severity": "low",
+            "cwe": [
+              "CWE-328"
+            ],
+            "cvss": {
+              "score": 3.7,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N"
+            },
+            "range": ">=16.0.0 <16.2.5"
+          },
+          {
+            "source": 1118947,
+            "name": "next",
+            "dependency": "next",
+            "title": "Next.js has cross-site scripting in beforeInteractive scripts with untrusted input",
+            "url": "https://github.com/advisories/GHSA-gx5p-jg67-6x7h",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-79"
+            ],
+            "cvss": {
+              "score": 6.1,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N"
+            },
+            "range": ">=16.0.0 <16.2.5"
+          },
+          {
+            "source": 1118949,
+            "name": "next",
+            "dependency": "next",
+            "title": "Next.js vulnerable to Denial of Service via connection exhaustion in applications using Cache Components",
+            "url": "https://github.com/advisories/GHSA-mg66-mrh9-m8jx",
+            "severity": "high",
+            "cwe": [
+              "CWE-770"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": ">=16.0.0 <16.2.5"
+          },
+          {
+            "source": 1118951,
+            "name": "next",
+            "dependency": "next",
+            "title": "Next.js has a Denial of Service in the Image Optimization API",
+            "url": "https://github.com/advisories/GHSA-h64f-5h5j-jqjh",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-770"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": ">=16.0.0 <16.2.5"
+          },
+          {
+            "source": 1118953,
+            "name": "next",
+            "dependency": "next",
+            "title": "Next.js vulnerable to server-side request forgery in applications using WebSocket upgrades",
+            "url": "https://github.com/advisories/GHSA-c4j6-fc7j-m34r",
+            "severity": "high",
+            "cwe": [
+              "CWE-918"
+            ],
+            "cvss": {
+              "score": 8.6,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:N"
+            },
+            "range": ">=16.0.0 <16.2.5"
+          },
+          {
+            "source": 1118955,
+            "name": "next",
+            "dependency": "next",
+            "title": "Next.js has a Middleware / Proxy bypass through dynamic route parameter injection",
+            "url": "https://github.com/advisories/GHSA-492v-c6pp-mqqv",
+            "severity": "high",
+            "cwe": [
+              "CWE-288"
+            ],
+            "cvss": {
+              "score": 8.1,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N"
+            },
+            "range": ">=16.0.0 <16.2.5"
+          },
+          {
+            "source": 1118957,
+            "name": "next",
+            "dependency": "next",
+            "title": "Next.js vulnerable to cache poisoning in React Server Component responses",
+            "url": "https://github.com/advisories/GHSA-wfc6-r584-vfw7",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-436"
+            ],
+            "cvss": {
+              "score": 5.4,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:N/I:L/A:L"
+            },
+            "range": ">=16.0.0 <16.2.5"
+          },
+          {
+            "source": 1118959,
+            "name": "next",
+            "dependency": "next",
+            "title": "Next.js has a Middleware / Proxy bypass in App Router applications via segment-prefetch routes",
+            "url": "https://github.com/advisories/GHSA-267c-6grr-h53f",
+            "severity": "high",
+            "cwe": [
+              "CWE-288"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
+            },
+            "range": ">=16.0.0 <16.2.5"
+          },
+          {
+            "source": 1118961,
+            "name": "next",
+            "dependency": "next",
+            "title": "Next.js has a Middleware / Proxy bypass in Pages Router applications using i18n",
+            "url": "https://github.com/advisories/GHSA-36qx-fr4f-26g5",
+            "severity": "high",
+            "cwe": [
+              "CWE-863"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
+            },
+            "range": ">=16.0.0 <16.2.5"
+          }
+        ],
+        "effects": [],
+        "range": "16.0.0 - 16.2.5",
+        "nodes": [
+          "node_modules/next"
+        ],
+        "fixAvailable": true
+      },
+      "nx": {
+        "name": "nx",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "brace-expansion",
+          "follow-redirects",
+          "tmp",
+          "yaml"
+        ],
+        "effects": [],
+        "range": "10.0.7-beta.2 - 10.0.7-beta.5 || 22.7.0-beta.0 - 22.7.4 || >=23.0.0-beta.0",
+        "nodes": [
+          ""
+        ],
+        "fixAvailable": true
+      },
+      "shell-quote": {
+        "name": "shell-quote",
+        "severity": "critical",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1120422,
+            "name": "shell-quote",
+            "dependency": "shell-quote",
+            "title": "shell-quote quote() does not escape newlines in object .op values",
+            "url": "https://github.com/advisories/GHSA-w7jw-789q-3m8p",
+            "severity": "critical",
+            "cwe": [
+              "CWE-77",
+              "CWE-78"
+            ],
+            "cvss": {
+              "score": 8.1,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
+            },
+            "range": ">=1.1.0 <=1.8.3"
+          }
+        ],
+        "effects": [],
+        "range": "1.1.0 - 1.8.3",
+        "nodes": [
+          ""
+        ],
+        "fixAvailable": true
+      },
+      "tmp": {
+        "name": "tmp",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1119610,
+            "name": "tmp",
+            "dependency": "tmp",
+            "title": "tmp has Path Traversal via unsanitized prefix/postfix that enables directory escape",
+            "url": "https://github.com/advisories/GHSA-ph9p-34f9-6g65",
+            "severity": "high",
+            "cwe": [
+              "CWE-22"
+            ],
+            "cvss": {
+              "score": 0,
+              "vectorString": null
+            },
+            "range": "<0.2.6"
+          }
+        ],
+        "effects": [
+          "nx"
+        ],
+        "range": "<0.2.6",
+        "nodes": [
+          ""
+        ],
+        "fixAvailable": true
+      },
+      "turbo": {
+        "name": "turbo",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1119386,
+            "name": "turbo",
+            "dependency": "turbo",
+            "title": "Trubo: Login callback CSRF/session fixation",
+            "url": "https://github.com/advisories/GHSA-hcf7-66rw-9f5r",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-352"
+            ],
+            "cvss": {
+              "score": 0,
+              "vectorString": null
+            },
+            "range": "<=2.9.13"
+          },
+          {
+            "source": 1119389,
+            "name": "turbo",
+            "dependency": "turbo",
+            "title": "Turbo: Unexpected local code execution during Yarn Berry detection",
+            "url": "https://github.com/advisories/GHSA-3qcw-2rhx-2726",
+            "severity": "low",
+            "cwe": [
+              "CWE-426"
+            ],
+            "cvss": {
+              "score": 9.8,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+            },
+            "range": ">=1.1.0 <2.9.14"
+          }
+        ],
+        "effects": [],
+        "range": "<=2.9.13-canary.1",
+        "nodes": [
+          ""
+        ],
+        "fixAvailable": {
+          "name": "turbo",
+          "version": "2.9.17"
+        }
+      },
+      "uuid": {
+        "name": "uuid",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1119441,
+            "name": "uuid",
+            "dependency": "uuid",
+            "title": "uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided",
+            "url": "https://github.com/advisories/GHSA-w5hq-g745-h8pq",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-787",
+              "CWE-1285"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+            },
+            "range": "<11.1.1"
+          }
+        ],
+        "effects": [
+          "xcode"
+        ],
+        "range": "<11.1.1",
+        "nodes": [
+          "node_modules/uuid"
+        ],
+        "fixAvailable": {
+          "name": "expo",
+          "version": "46.0.21",
+          "isSemVerMajor": true
+        }
+      },
+      "vite": {
+        "name": "vite",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1116229,
+            "name": "vite",
+            "dependency": "vite",
+            "title": "Vite Vulnerable to Path Traversal in Optimized Deps `.map` Handling",
+            "url": "https://github.com/advisories/GHSA-4w7w-66w2-5vf9",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-22",
+              "CWE-200"
+            ],
+            "cvss": {
+              "score": 0,
+              "vectorString": null
+            },
+            "range": "<=6.4.1"
+          },
+          "esbuild"
+        ],
+        "effects": [
+          "@vitest/mocker",
+          "vite-node",
+          "vitest"
+        ],
+        "range": "<=6.4.1",
+        "nodes": [
+          "node_modules/vite"
+        ],
+        "fixAvailable": {
+          "name": "vitest",
+          "version": "4.1.8",
+          "isSemVerMajor": true
+        }
+      },
+      "vite-node": {
+        "name": "vite-node",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "vite"
+        ],
+        "effects": [
+          "vitest"
+        ],
+        "range": "<=2.2.0-beta.2",
+        "nodes": [
+          "node_modules/vite-node"
+        ],
+        "fixAvailable": {
+          "name": "vitest",
+          "version": "4.1.8",
+          "isSemVerMajor": true
+        }
+      },
+      "vitest": {
+        "name": "vitest",
+        "severity": "critical",
+        "isDirect": true,
+        "via": [
+          "@vitest/mocker",
+          {
+            "source": 1120126,
+            "name": "vitest",
+            "dependency": "vitest",
+            "title": "When Vitest UI server is listening, arbitrary file can be read and executed",
+            "url": "https://github.com/advisories/GHSA-5xrq-8626-4rwp",
+            "severity": "critical",
+            "cwe": [
+              "CWE-862"
+            ],
+            "cvss": {
+              "score": 9.8,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+            },
+            "range": "<3.2.6"
+          },
+          "vite",
+          "vite-node"
+        ],
+        "effects": [
+          "@vitest/coverage-v8"
+        ],
+        "range": "<=3.2.5",
+        "nodes": [
+          "node_modules/vitest"
+        ],
+        "fixAvailable": {
+          "name": "vitest",
+          "version": "4.1.8",
+          "isSemVerMajor": true
+        }
+      },
+      "ws": {
+        "name": "ws",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1119108,
+            "name": "ws",
+            "dependency": "ws",
+            "title": "ws: Uninitialized memory disclosure",
+            "url": "https://github.com/advisories/GHSA-58qx-3vcg-4xpx",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-908"
+            ],
+            "cvss": {
+              "score": 4.4,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:N/A:N"
+            },
+            "range": ">=8.0.0 <8.20.1"
+          }
+        ],
+        "effects": [],
+        "range": "8.0.0 - 8.20.0",
+        "nodes": [
+          ""
+        ],
+        "fixAvailable": true
+      },
+      "xcode": {
+        "name": "xcode",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "uuid"
+        ],
+        "effects": [
+          "@expo/config-plugins"
+        ],
+        "range": ">=0.9.2",
+        "nodes": [
+          "node_modules/xcode"
+        ],
+        "fixAvailable": {
+          "name": "expo",
+          "version": "46.0.21",
+          "isSemVerMajor": true
+        }
+      },
+      "yaml": {
+        "name": "yaml",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1115556,
+            "name": "yaml",
+            "dependency": "yaml",
+            "title": "yaml is vulnerable to Stack Overflow via deeply nested YAML collections",
+            "url": "https://github.com/advisories/GHSA-48c2-rrv3-qjmp",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-674"
+            ],
+            "cvss": {
+              "score": 4.3,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:L"
+            },
+            "range": ">=2.0.0 <2.8.3"
+          }
+        ],
+        "effects": [],
+        "range": "2.0.0 - 2.8.2",
+        "nodes": [
+          ""
+        ],
+        "fixAvailable": true
+      }
+    },
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 23,
+        "high": 3,
+        "critical": 3,
+        "total": 29
+      },
+      "dependencies": {
+        "prod": 954,
+        "dev": 875,
+        "optional": 176,
+        "peer": 9,
+        "peerOptional": 0,
+        "total": 1905
+      }
+    }
+  }
+}

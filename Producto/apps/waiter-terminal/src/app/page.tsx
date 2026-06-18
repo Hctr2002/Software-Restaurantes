@@ -54,7 +54,8 @@ export default function WaiterDashboard() {
     selectedTableId,
     setSelectedTableId,
     selectedTable,
-    handleSignOut
+    handleSignOut,
+    notificationSound
   } = useWaiterDashboard();
 
   if (waiterLoading) {
@@ -79,7 +80,15 @@ export default function WaiterDashboard() {
   return (
     <RestaurantThemeProvider theme={theme}>
       <div className="min-h-screen bg-background text-foreground pb-32 font-sans flex flex-col relative overflow-x-hidden">
-        
+        {notificationSound.audioBlocked && (
+          <button
+            onClick={notificationSound.enableAudio}
+            className="w-full text-center text-[10px] font-black uppercase tracking-widest py-2 bg-amber-500/10 text-amber-500 border-b border-amber-500/20 hover:bg-amber-500/20 transition-colors"
+          >
+            Activar sonido de alertas
+          </button>
+        )}
+
         <div className="p-4 lg:p-6 pb-0">
           <PremiumHeader
             title="Terminal"
