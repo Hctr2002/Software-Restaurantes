@@ -82,6 +82,7 @@ async function insertOrder(
   params: {
     restaurant_id: string;
     table_id: string | null;
+    session_id: string | null;
     station: 'KITCHEN' | 'BAR';
     total_amount: number;
     parent_order_id?: string;
@@ -92,6 +93,7 @@ async function insertOrder(
     id,
     restaurant_id: params.restaurant_id,
     table_id: params.table_id || null,
+    session_id: params.session_id ?? null,
     status: 'PENDING',
     total_amount: params.total_amount,
     station: params.station,
@@ -204,6 +206,19 @@ export async function POST(req: NextRequest) {
     const kitchenTotal = kitchenItems.reduce((s, i) => s + i.unit_price * i.quantity, 0);
     const barTotal     = barItems.reduce((s, i) => s + i.unit_price * i.quantity, 0);
 
+    // Heredar el session_id de la mesa para agrupar el cobro en mesas fusionadas.
+    // Sin esto, una orden creada después de fusionar quedaría con session_id null
+    // y la caja la mostraría como una cuenta separada del grupo.
+    let session_id: string | null = null;
+    if (table_id) {
+      const { data: tableRow } = await db
+        .from('tables')
+        .select('current_session_id')
+        .eq('id', table_id)
+        .single();
+      session_id = tableRow?.current_session_id ?? null;
+    }
+
     const orderIds: string[] = [];
 
     // Crear sub-pedido KITCHEN
@@ -211,6 +226,7 @@ export async function POST(req: NextRequest) {
       const { id: kitchenOrderId, error: koError } = await insertOrder(db, {
         restaurant_id,
         table_id,
+        session_id,
         station: 'KITCHEN',
         total_amount: kitchenItems.length === items.length ? total_amount : kitchenTotal,
       });
@@ -229,6 +245,7 @@ export async function POST(req: NextRequest) {
       const { id: barOrderId, error: boError } = await insertOrder(db, {
         restaurant_id,
         table_id,
+        session_id,
         station: 'BAR',
         total_amount: barItems.length === items.length ? total_amount : barTotal,
         parent_order_id: orderIds[0],
