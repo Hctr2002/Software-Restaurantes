@@ -1,13 +1,12 @@
 "use client";
 
 import { use, useState, useEffect } from "react";
-import { 
-  useTableOrders,
-  useCustomerOrderTracker,
+import {
   useMenu,
   useCustomerPortal,
 } from '@menu-bites/auth';
 import { useTenant } from '@/context/TenantContext';
+import { usePortalTableOrders } from '@/hooks/usePortalTableOrders';
 import {
   OrderTracker,
   RatingModal,
@@ -53,8 +52,11 @@ export default function MenuPage({
   const [isCallingWaiter, setIsCallingWaiter]   = useState(false);
   const [waiterCalled, setWaiterCalled]         = useState(false);
 
-  const { status: currentTrackerStatus } = useCustomerOrderTracker(portal.order.lastId);
-  const { orders: tableOrders } = useTableOrders(portal.table.data?.id, portal.table.data?.current_session_id);
+  const { orders: tableOrders, refetch: refetchTableOrders } = usePortalTableOrders(portal.table.data?.id);
+
+  // El cliente es anónimo y no puede leer `orders` por RLS; el estado del tracker
+  // se deriva de los pedidos de la mesa (leídos vía API service-role).
+  const currentTrackerStatus = tableOrders.find((o) => o.id === portal.order.lastId)?.status ?? null;
 
   // Total acumulado de la mesa — para mostrar el monto de la propina en el modal.
   const tableTotal = tableOrders.reduce(
@@ -73,7 +75,10 @@ export default function MenuPage({
 
   const handlePlaceOrder = async () => {
     const success = await portal.placeOrder();
-    if (success) setIsCheckoutOpen(false);
+    if (success) {
+      setIsCheckoutOpen(false);
+      refetchTableOrders();
+    }
   };
 
   useEffect(() => {
