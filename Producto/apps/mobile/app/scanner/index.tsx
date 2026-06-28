@@ -4,6 +4,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { X, Zap, ZapOff } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
+import { parseQrTableUrl } from '../../lib/qr';
 
 const { width, height } = Dimensions.get('window');
 
@@ -38,35 +39,13 @@ export default function ScannerScreen() {
     if (scanned) return;
     setScanned(true);
 
-    try {
-      // Logic to parse the URL
-      // Example: https://portal.menubites.com/la-parilla/5
-      let slug = '';
-      let table = '';
-
-      if (data.includes('http')) {
-        const url = new URL(data);
-        const pathParts = url.pathname.split('/').filter(p => p !== '');
-        if (pathParts.length >= 2) {
-          slug = pathParts[0];
-          table = pathParts[1];
-        }
-      } else {
-        const parts = data.split('/');
-        if (parts.length >= 2) {
-          slug = parts[0];
-          table = parts[1];
-        }
-      }
-
-      if (slug && table) {
-        router.replace(`/${slug}/${table}` as any);
-      } else {
-        Alert.alert('Error', 'Código QR no reconocido');
-        setScanned(false);
-      }
-    } catch (e) {
-      Alert.alert('Error', 'No se pudo leer el código QR');
+    // Extrae { slug, table } soportando QR con/sin esquema (https://host/slug/mesa,
+    // host/slug/mesa) o ruta directa (slug/mesa). Ver lib/qr.ts.
+    const parsed = parseQrTableUrl(data);
+    if (parsed) {
+      router.replace(`/${parsed.slug}/${parsed.table}` as any);
+    } else {
+      Alert.alert('Error', 'Código QR no reconocido');
       setScanned(false);
     }
   };
