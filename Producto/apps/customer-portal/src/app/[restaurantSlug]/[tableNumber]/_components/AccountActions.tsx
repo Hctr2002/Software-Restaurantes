@@ -21,10 +21,13 @@ interface AccountActionsProps {
   cartTotal: number;
   billRequested: boolean;
   isRequestingBill: boolean;
+  waiterCalled: boolean;
+  isCallingWaiter: boolean;
   isCheckoutOpen: boolean;
   onOpenCuenta: () => void;
   onOpenCheckout: () => void;
   onConfirmBill: () => void;
+  onCallWaiter: () => void;
 }
 
 /**
@@ -38,10 +41,13 @@ export function AccountActions({
   cartTotal,
   billRequested,
   isRequestingBill,
+  waiterCalled,
+  isCallingWaiter,
   isCheckoutOpen,
   onOpenCuenta,
   onOpenCheckout,
-  onConfirmBill
+  onConfirmBill,
+  onCallWaiter
 }: AccountActionsProps) {
   if (!tableData || isCheckoutOpen) return null;
 
@@ -84,13 +90,18 @@ export function AccountActions({
             <PortalText as="span">{billRequested ? '✓ Cobro' : 'Cobro'}</PortalText>
           </PortalPrimaryButton>
 
-          <PortalPrimaryButton 
-            variant="ghost"
-            onClick={() => (window as any).handleCallWaiter?.()} 
-            className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl shadow-xl font-bold text-[10px] sm:text-xs uppercase tracking-wider text-primary border-primary/20 hover:bg-primary/10 transition-all"
+          <PortalPrimaryButton
+            variant={waiterCalled ? "success" : "ghost"}
+            onClick={onCallWaiter}
+            disabled={isCallingWaiter || waiterCalled}
+            className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl shadow-xl font-bold text-[10px] sm:text-xs uppercase tracking-wider transition-all"
           >
-            <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-pulse" />
-            <PortalText as="span">Garzón</PortalText>
+            {isCallingWaiter ? (
+              <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
+            ) : (
+              <Bell className={cn("w-3.5 h-3.5 sm:w-4 sm:h-4", waiterCalled ? "text-success" : "text-primary animate-pulse")} />
+            )}
+            <PortalText as="span">{waiterCalled ? '✓ Llamado' : 'Garzón'}</PortalText>
           </PortalPrimaryButton>
         </motion.div>
 
