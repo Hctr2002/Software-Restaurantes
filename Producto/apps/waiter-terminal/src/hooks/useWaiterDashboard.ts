@@ -27,7 +27,7 @@ export function useWaiterDashboard() {
     cleaningTables
   } = orders;
 
-  const notificationSound = useWebPush(user?.restaurantId, orders.readyOrders, orders.pendingOrders, billRequestedTableIds.size);
+  const notificationSound = useWebPush(user?.restaurantId, orders.readyOrders, orders.pendingOrders, billRequestedTableIds.size, orders.helpRequestedTableIds?.size ?? 0);
   const merge = useMergeTables();
   const alertForm = useAlertForm(user?.restaurantId, user?.id, user?.email);
   const theme = useThemeSync(user?.restaurantId);

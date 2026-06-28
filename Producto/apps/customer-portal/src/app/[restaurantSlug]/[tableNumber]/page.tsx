@@ -48,6 +48,8 @@ export default function MenuPage({
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isRequestingBill, setIsRequestingBill] = useState(false);
   const [billRequested, setBillRequested]       = useState(false);
+  const [isCallingWaiter, setIsCallingWaiter]   = useState(false);
+  const [waiterCalled, setWaiterCalled]         = useState(false);
 
   const { status: currentTrackerStatus } = useCustomerOrderTracker(portal.order.lastId);
   const { orders: tableOrders } = useTableOrders(portal.table.data?.id, portal.table.data?.current_session_id);
@@ -124,28 +126,31 @@ export default function MenuPage({
     }
   };
 
-  /** Activa help_requested en la mesa. Expuesto en window para acceso desde AccountActions. */
+  /** Activa help_requested en la mesa y marca el botón como "llamado" mientras el garzón acude. */
   const handleCallWaiter = async () => {
-    if (!portal.table.data || !restaurant?.id) return;
+    if (!portal.table.data || isCallingWaiter || waiterCalled || !restaurant?.id) return;
+    setIsCallingWaiter(true);
     try {
-      await fetch('/api/help-request', {
+      const res = await fetch('/api/help-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           table_id: portal.table.data.id,
           restaurant_id: restaurant.id,
           table_number: portal.table.data.number
         }),
       });
+      if (res.ok) {
+        setWaiterCalled(true);
+        // Permite volver a llamar pasados unos segundos
+        setTimeout(() => setWaiterCalled(false), 30000);
+      }
     } catch (err) {
       console.error('Error calling waiter:', err);
+    } finally {
+      setIsCallingWaiter(false);
     }
   };
-
-  useEffect(() => {
-    (window as any).handleCallWaiter = handleCallWaiter;
-    return () => { delete (window as any).handleCallWaiter; };
-  }, [portal.table.data, restaurant?.id]);
 
   if (menuLoading || !items) {
     return (
@@ -279,12 +284,15 @@ export default function MenuPage({
           tableOrdersCount={tableOrders.length} 
           cartCount={portal.cartCount} 
           cartTotal={portal.cartTotal} 
-          billRequested={billRequested} 
-          isRequestingBill={isRequestingBill} 
-          isCheckoutOpen={isCheckoutOpen} 
-          onOpenCuenta={() => setIsCuentaOpen(true)} 
-          onOpenCheckout={() => setIsCheckoutOpen(true)} 
-          onConfirmBill={handleRequestBill} 
+          billRequested={billRequested}
+          isRequestingBill={isRequestingBill}
+          waiterCalled={waiterCalled}
+          isCallingWaiter={isCallingWaiter}
+          isCheckoutOpen={isCheckoutOpen}
+          onOpenCuenta={() => setIsCuentaOpen(true)}
+          onOpenCheckout={() => setIsCheckoutOpen(true)}
+          onConfirmBill={handleRequestBill}
+          onCallWaiter={handleCallWaiter}
         />
       </div>
   );
