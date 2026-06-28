@@ -85,6 +85,23 @@ describe('POST /api/bill-request', () => {
     const res = await POST(makeReq({ table_id: 't-1', restaurant_id: 'r-1', table_number: 3 }))
     expect(res.status).toBe(500)
   })
+
+  it('guarda el monto de propina y deriva tip_included=true', async () => {
+    const tables = makeChain()
+    setupClient({ tables })
+    const { POST } = await import('../app/api/bill-request/route')
+    const res = await POST(makeReq({ table_id: 't-1', restaurant_id: 'r-1', table_number: 3, tip_amount: 2500 }))
+    expect(res.status).toBe(200)
+    expect(tables.update).toHaveBeenCalledWith(expect.objectContaining({ bill_requested: true, tip_included: true, tip_amount: 2500 }))
+  })
+
+  it('tip_amount=0 → sin propina (tip_included=false)', async () => {
+    const tables = makeChain()
+    setupClient({ tables })
+    const { POST } = await import('../app/api/bill-request/route')
+    await POST(makeReq({ table_id: 't-1', restaurant_id: 'r-1', table_number: 3, tip_amount: 0 }))
+    expect(tables.update).toHaveBeenCalledWith(expect.objectContaining({ tip_included: false, tip_amount: 0 }))
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -25,6 +25,7 @@ import { MenuSection } from "./_components/MenuSection";
 import { CheckoutModal } from "./_components/CheckoutModal";
 import { ConfirmationOverlay } from "./_components/ConfirmationOverlay";
 import { AccountActions } from "./_components/AccountActions";
+import { TipModal } from "./_components/TipModal";
 
 /**
  * Página principal del menú del cliente: /[restaurantSlug]/[tableNumber]
@@ -48,11 +49,18 @@ export default function MenuPage({
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isRequestingBill, setIsRequestingBill] = useState(false);
   const [billRequested, setBillRequested]       = useState(false);
+  const [showTipModal, setShowTipModal]         = useState(false);
   const [isCallingWaiter, setIsCallingWaiter]   = useState(false);
   const [waiterCalled, setWaiterCalled]         = useState(false);
 
   const { status: currentTrackerStatus } = useCustomerOrderTracker(portal.order.lastId);
   const { orders: tableOrders } = useTableOrders(portal.table.data?.id, portal.table.data?.current_session_id);
+
+  // Total acumulado de la mesa — para mostrar el monto de la propina en el modal.
+  const tableTotal = tableOrders.reduce(
+    (s: number, o: any) => s + (o.orderItems?.reduce((si: number, i: any) => si + Number(i.unitPrice) * i.quantity, 0) || 0),
+    0,
+  );
 
   const [showRating, setShowRating]       = useState(false);
   const [ratingOrderId, setRatingOrderId] = useState<string | null>(null);
@@ -105,24 +113,30 @@ export default function MenuPage({
     }
   };
 
-  /** Activa bill_requested en la mesa e inserta una alerta BILL_REQUEST para el staff. */
-  const handleRequestBill = async () => {
+  /**
+   * Solicita la cuenta: marca bill_requested, registra el monto de propina elegido
+   * por el cliente (tip_amount / tip_included) e inserta una alerta BILL_REQUEST.
+   */
+  const handleRequestBill = async (tipAmount: number) => {
     if (!portal.table.data || isRequestingBill || billRequested || !restaurant?.id) return;
     setIsRequestingBill(true);
     try {
       const res = await fetch('/api/bill-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           table_id: portal.table.data.id,
           restaurant_id: restaurant.id,
-          table_number: portal.table.data.number
+          table_number: portal.table.data.number,
+          tip_included: tipAmount > 0,
+          tip_amount: tipAmount
         }),
       });
       if (res.ok) setBillRequested(true);
     } catch {
     } finally {
       setIsRequestingBill(false);
+      setShowTipModal(false);
     }
   };
 
@@ -291,9 +305,18 @@ export default function MenuPage({
           isCheckoutOpen={isCheckoutOpen}
           onOpenCuenta={() => setIsCuentaOpen(true)}
           onOpenCheckout={() => setIsCheckoutOpen(true)}
-          onConfirmBill={handleRequestBill}
+          onConfirmBill={() => setShowTipModal(true)}
           onCallWaiter={handleCallWaiter}
         />
+
+        {showTipModal && (
+          <TipModal
+            tableTotal={tableTotal}
+            submitting={isRequestingBill}
+            onConfirm={handleRequestBill}
+            onClose={() => setShowTipModal(false)}
+          />
+        )}
       </div>
   );
 }

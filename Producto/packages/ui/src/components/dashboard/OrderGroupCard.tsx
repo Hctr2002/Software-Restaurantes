@@ -134,7 +134,7 @@ export function orderTotal(order: Order): number {
   return (order.orderItems ?? []).reduce((s, i) => s + Number(i.unitPrice) * i.quantity, 0);
 }
 
-export function groupOrders(orders: Order[], billMap: Record<string, boolean>, tipMap: Record<string, boolean> = {}): TableGroup[] {
+export function groupOrders(orders: Order[], billMap: Record<string, boolean>, tipMap: Record<string, boolean> = {}, tipAmountMap: Record<string, number> = {}): TableGroup[] {
   const map = new Map<string, TableGroup>();
   for (const order of orders) {
     const key = order.sessionId ?? order.tableId ?? order.id;
@@ -148,6 +148,7 @@ export function groupOrders(orders: Order[], billMap: Record<string, boolean>, t
         total:            0,
         billRequested:    order.tableId ? (billMap[order.tableId] ?? false) : false,
         tipIncluded:      order.tableId ? (tipMap[order.tableId] ?? false) : false,
+        tipAmount:        order.tableId ? (tipAmountMap[order.tableId] ?? 0) : 0,
         oldestCreatedAt:  order.createdAt,
       });
     }
