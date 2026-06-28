@@ -1,6 +1,6 @@
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import { TIP_RATE } from '../constants/MB_Theme';
+import { effectiveTip } from './tip';
 
 interface ReceiptItem {
   name: string;
@@ -8,11 +8,12 @@ interface ReceiptItem {
   unitPrice: number;
 }
 
-interface ReceiptData {
+export interface ReceiptData {
   tableLabel: string;
   restaurantName?: string;
   items: ReceiptItem[];
-  tipIncluded?: boolean;
+  /** Monto de propina en pesos (0 = sin propina). */
+  tipAmount?: number;
   reference?: string;
   date?: Date;
 }
@@ -26,19 +27,32 @@ function esc(s: string): string {
 }
 
 function buildHtml(data: ReceiptData): string {
-  const { tableLabel, restaurantName, items, tipIncluded, reference, date = new Date() } = data;
+  const { tableLabel, restaurantName, items, tipAmount: rawTip, reference, date = new Date() } = data;
 
-  const subtotal = items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
-  const tipAmount = tipIncluded ? Math.round(subtotal * TIP_RATE) : 0;
+  // Consolidar ítems por nombre (paridad con la boleta web).
+  const consolidated = Object.values(
+    items.reduce((acc, i) => {
+      acc[i.name] = acc[i.name] ?? { name: i.name, quantity: 0, amount: 0 };
+      acc[i.name].quantity += i.quantity;
+      acc[i.name].amount += i.unitPrice * i.quantity;
+      return acc;
+    }, {} as Record<string, { name: string; quantity: number; amount: number }>),
+  );
+
+  const subtotal = consolidated.reduce((s, i) => s + i.amount, 0);
+  const neto = Math.round(subtotal / 1.19);
+  const iva = subtotal - neto;
+  const tipAmount = Math.max(0, Math.round(rawTip || 0));
+  const tipPct = subtotal > 0 ? Math.round((tipAmount / subtotal) * 100) : 0;
   const total = subtotal + tipAmount;
   const dateStr = date.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-  const rows = items
+  const rows = consolidated
     .map(
       i => `
       <tr>
         <td style="padding:8px 0;color:#e2e8f0;">${i.quantity}x ${esc(i.name)}</td>
-        <td style="padding:8px 0;text-align:right;color:#f7f4f3;font-weight:700;">${formatCLP(i.unitPrice * i.quantity)}</td>
+        <td style="padding:8px 0;text-align:right;color:#f7f4f3;font-weight:700;">${formatCLP(i.amount)}</td>
       </tr>`
     )
     .join('');
@@ -90,14 +104,24 @@ function buildHtml(data: ReceiptData): string {
 
   <hr class="divider"/>
 
-  ${tipIncluded ? `
+  <div style="display:flex;justify-content:space-between;padding:6px 0;color:rgba(255,255,255,0.55);font-size:13px;">
+    <span>NETO</span><span>${formatCLP(neto)}</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;padding:6px 0;color:rgba(255,255,255,0.55);font-size:13px;">
+    <span>IVA (19%)</span><span>${formatCLP(iva)}</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;padding:6px 0;color:#f7f4f3;font-size:13px;font-weight:700;">
+    <span>TOTAL CONSUMO</span><span>${formatCLP(subtotal)}</span>
+  </div>
+
+  ${tipAmount > 0 ? `
   <div style="display:flex;justify-content:space-between;padding:8px 0;color:#FFD700;">
-    <span style="font-size:11px;font-weight:900;letter-spacing:1px;">PROPINA 10%</span>
+    <span style="font-size:11px;font-weight:900;letter-spacing:1px;">PROPINA ${tipPct}%</span>
     <span style="font-size:14px;font-weight:900;">+${formatCLP(tipAmount)}</span>
   </div>` : ''}
 
   <div class="total-row">
-    <span class="total-label">TOTAL</span>
+    <span class="total-label">${tipAmount > 0 ? 'TOTAL A PAGAR (propina incluida)' : 'TOTAL A PAGAR'}</span>
     <span class="total-value">${formatCLP(total)}</span>
   </div>
 
@@ -110,6 +134,30 @@ function buildHtml(data: ReceiptData): string {
   </div>
 </body>
 </html>`;
+}
+
+/**
+ * Construye los datos de la boleta a partir de un grupo de cobro de la caja
+ * (mismas mesas/sesión). Usa la propina efectiva (monto real o fallback 10%).
+ */
+export function receiptDataFromGroup(
+  group: any,
+  opts: { restaurantName?: string; reference?: string } = {},
+): ReceiptData {
+  const items: ReceiptItem[] = (group?.orders ?? [])
+    .flatMap((o: any) => o.order_items ?? [])
+    .map((i: any) => ({
+      name: i.menu_items?.name ?? 'Ítem',
+      quantity: i.quantity,
+      unitPrice: Number(i.unit_price),
+    }));
+  return {
+    tableLabel: group?.sessionId ? 'Mesas fusionadas' : `Mesa ${group?.tableNumber ?? 'S/N'}`,
+    items,
+    tipAmount: effectiveTip(group?.total ?? 0, group?.tipIncluded, group?.tipAmount),
+    restaurantName: opts.restaurantName,
+    reference: opts.reference,
+  };
 }
 
 export async function shareReceipt(data: ReceiptData): Promise<void> {

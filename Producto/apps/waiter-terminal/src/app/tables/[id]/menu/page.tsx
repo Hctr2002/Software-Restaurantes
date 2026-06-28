@@ -26,6 +26,7 @@ export default function TableMenuPage() {
   const [showBillModal, setShowBillModal] = useState(false);
   const [requestingBill, setRequestingBill] = useState(false);
   const [orderNotes, setOrderNotes] = useState("");
+  const [billTip, setBillTip] = useState(0);
 
   const loading = menuLoading || tableLoading || ordersLoading;
 
@@ -49,6 +50,14 @@ export default function TableMenuPage() {
   };
 
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+  // Consumo acumulado de la mesa — base para sugerir la propina (10%).
+  const tableTotal = useMemo(
+    () => tableOrders.reduce(
+      (s: number, o: any) => s + (o.orderItems ?? []).reduce(
+        (si: number, i: any) => si + Number(i.unitPrice) * i.quantity, 0), 0),
+    [tableOrders],
+  );
 
   const handleSubmitOrder = async () => {
     if (!user?.restaurantId) {
@@ -124,13 +133,13 @@ export default function TableMenuPage() {
     }
   };
 
-  const handleRequestBill = async (includeTip: boolean) => {
+  const handleRequestBill = async (tipAmount: number) => {
     if (!user?.restaurantId || requestingBill || table?.status === 'FREE') return;
     setRequestingBill(true);
     try {
       const { error } = await supabase
         .from("tables")
-        .update({ bill_requested: true, tip_included: includeTip })
+        .update({ bill_requested: true, tip_included: tipAmount > 0, tip_amount: tipAmount })
         .eq("id", tableId);
 
       if (error) throw error;
@@ -180,6 +189,7 @@ export default function TableMenuPage() {
                       alert("Validación Estricta: Todos los pedidos deben estar ENTREGADOS antes de pedir la cuenta.");
                       return;
                     }
+                    setBillTip(Math.round(tableTotal * 0.1));
                     setShowBillModal(true);
                   }}
                   disabled={table?.status === 'FREE'}
@@ -292,24 +302,43 @@ export default function TableMenuPage() {
               <div className="text-center space-y-2">
                 <h2 className="text-2xl font-black tracking-tighter">Solicitar Cuenta</h2>
                 <p className="text-xs text-muted-foreground font-bold opacity-80">
-                  ¿El cliente desea incluir el <span className="text-warning font-black">10% de propina</span> sugerida?
+                  Propina sugerida del <span className="text-warning font-black">10%</span>. El cliente puede ajustar el monto o dejarlo en 0.
                 </p>
               </div>
-              <div className="space-y-3 pt-4">
+
+              {/* Resumen + monto de propina editable */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground font-bold">Consumo</span>
+                  <span className="font-black">${tableTotal.toLocaleString()}</span>
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 block">Monto de propina</label>
+                  <div className="flex items-center gap-2 bg-muted/30 border border-border rounded-2xl px-4 py-3 focus-within:border-warning/50 transition-colors">
+                    <span className="text-muted-foreground font-black text-lg">$</span>
+                    <input
+                      type="number"
+                      min={0}
+                      value={billTip}
+                      disabled={requestingBill}
+                      onChange={(e) => setBillTip(Math.max(0, Math.round(Number(e.target.value) || 0)))}
+                      className="flex-1 bg-transparent outline-none text-2xl font-black tracking-tight w-full"
+                    />
+                    <span className="text-warning font-black whitespace-nowrap">
+                      {tableTotal > 0 ? Math.round((billTip / tableTotal) * 100) : 0}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-2">
                 <Button
-                  onClick={() => handleRequestBill(true)}
+                  onClick={() => handleRequestBill(billTip)}
                   disabled={requestingBill}
                   className="w-full h-14 bg-warning hover:bg-warning/80 text-warning-foreground font-black uppercase text-[10px] tracking-[0.2em] rounded-[1.5rem]"
                 >
-                  {requestingBill ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sí, incluir propina"}
+                  {requestingBill ? <Loader2 className="w-4 h-4 animate-spin" /> : (billTip > 0 ? `Agregar propina ($${billTip.toLocaleString()})` : "Pedir cuenta sin propina")}
                 </Button>
-                <button
-                  onClick={() => handleRequestBill(false)}
-                  disabled={requestingBill}
-                  className="w-full h-14 bg-muted/30 hover:bg-muted/50 text-foreground font-black uppercase text-[10px] tracking-[0.2em] rounded-[1.5rem] border border-border flex items-center justify-center transition-colors"
-                >
-                  {requestingBill ? <Loader2 className="w-4 h-4 animate-spin" /> : "No incluir propina"}
-                </button>
                 <button
                   onClick={() => setShowBillModal(false)}
                   disabled={requestingBill}
