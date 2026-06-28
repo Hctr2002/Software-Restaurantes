@@ -17,7 +17,8 @@ import { useTheme } from '../../../context/ThemeContext';
 import { formatCurrency } from '../../../lib/dashboard';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { shareReceipt } from '../../../lib/receipt';
-import { TIP_RATE, TIP_COLOR } from '../../../constants/MB_Theme';
+import { TIP_COLOR } from '../../../constants/MB_Theme';
+import { effectiveTip, tipPercent } from '../../../lib/tip';
 
 interface PaymentModalProps {
   visible: boolean;
@@ -37,7 +38,8 @@ export default function PaymentModal({ visible, group, isProcessing, onClose, on
   const allItems = group.orders.flatMap((o: any) => o.order_items ?? []);
   const tableLabel = group.sessionId ? "Mesas fusionadas" : `Mesa ${group.tableNumber ?? "S/N"}`;
   const subtotal = group.total;
-  const tipAmount = group.tipIncluded ? Math.round(subtotal * TIP_RATE) : 0;
+  const tipAmount = effectiveTip(subtotal, group.tipIncluded, group.tipAmount);
+  const tipPct = tipPercent(subtotal, tipAmount);
   const totalToPay = subtotal + tipAmount;
 
   const handleConfirm = async () => {
@@ -55,7 +57,7 @@ export default function PaymentModal({ visible, group, isProcessing, onClose, on
           quantity: i.quantity,
           unitPrice: Number(i.unit_price),
         })),
-        tipIncluded: group.tipIncluded,
+        tipAmount,
         reference: reference || undefined,
       });
     } catch {
@@ -99,9 +101,9 @@ export default function PaymentModal({ visible, group, isProcessing, onClose, on
               <View style={styles.summaryCard}>
                 <Text style={[styles.summaryLabel, { color: colors.muted }]}>TOTAL A COBRAR</Text>
                 <Text style={[styles.summaryValue, { color: colors.text }]}>{formatCurrency(totalToPay)}</Text>
-                {group.tipIncluded && (
+                {tipAmount > 0 && (
                   <View style={[styles.tipRow, { backgroundColor: TIP_COLOR + '15', borderColor: TIP_COLOR + '30' }]}>
-                    <Text style={[styles.tipLabel, { color: TIP_COLOR }]}>Propina 10%</Text>
+                    <Text style={[styles.tipLabel, { color: TIP_COLOR }]}>Propina {tipPct}%</Text>
                     <Text style={[styles.tipValue, { color: TIP_COLOR }]}>+{formatCurrency(tipAmount)}</Text>
                   </View>
                 )}

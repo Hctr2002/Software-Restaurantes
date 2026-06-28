@@ -14,6 +14,7 @@ import { CheckoutModal } from './_components/CheckoutModal';
 import { ActiveOrdersModal } from './_components/ActiveOrdersModal';
 import { SuccessOverlay } from './_components/SuccessOverlay';
 import { RatingModal } from './_components/RatingModal';
+import { TipModal } from './_components/TipModal';
 
 interface CartItem {
   id: string;
@@ -48,6 +49,7 @@ export default function RestaurantMenuScreen() {
   const [isPlacing, setIsPlacing] = useState(false);
   const [callingWaiter, setCallingWaiter] = useState(false);
   const [requestingBill, setRequestingBill] = useState(false);
+  const [showTipModal, setShowTipModal] = useState(false);
 
   // Rating state
   const [showRating, setShowRating] = useState(false);
@@ -175,7 +177,15 @@ export default function RestaurantMenuScreen() {
     }
   };
 
-  const handleRequestBill = async () => {
+  // Total de la mesa para sugerir la propina (10%) en el modal.
+  const tableTotal = useMemo(
+    () => activeOrders.reduce(
+      (s: number, o: any) => s + (o.items ?? o.order_items ?? []).reduce(
+        (si: number, i: any) => si + Number(i.unit_price ?? i.unitPrice ?? 0) * (i.quantity ?? 0), 0), 0),
+    [activeOrders],
+  );
+
+  const handleRequestBill = async (tipAmount: number) => {
     if (!table || !restaurant || requestingBill || table.bill_requested) return;
     setRequestingBill(true);
     try {
@@ -183,11 +193,18 @@ export default function RestaurantMenuScreen() {
       await fetch(`${portalUrl}/api/bill-request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ table_id: table.id, restaurant_id: restaurant.id, table_number: table.number }),
+        body: JSON.stringify({
+          table_id: table.id,
+          restaurant_id: restaurant.id,
+          table_number: table.number,
+          tip_included: tipAmount > 0,
+          tip_amount: tipAmount,
+        }),
       });
       syncTableData(table.id);
     } finally {
       setRequestingBill(false);
+      setShowTipModal(false);
     }
   };
 
@@ -356,7 +373,7 @@ export default function RestaurantMenuScreen() {
         activeOrders={activeOrders}
         table={table}
         onCallWaiter={handleCallWaiter}
-        onConfirmBill={handleRequestBill}
+        onConfirmBill={() => { setShowActiveOrders(false); setShowTipModal(true); }}
         callingWaiter={callingWaiter}
         requestingBill={requestingBill}
         primaryColor={primaryColor}
@@ -381,6 +398,17 @@ export default function RestaurantMenuScreen() {
         primaryColor={primaryColor}
         bgColor={bgColor}
         textColor={textColor}
+      />
+
+      <TipModal
+        visible={showTipModal}
+        tableTotal={tableTotal}
+        submitting={requestingBill}
+        primaryColor={primaryColor}
+        bgColor={bgColor}
+        textColor={textColor}
+        onConfirm={handleRequestBill}
+        onClose={() => setShowTipModal(false)}
       />
     </View>
   );
