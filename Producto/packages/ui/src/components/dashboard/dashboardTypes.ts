@@ -34,8 +34,27 @@ export type TableGroup = {
   total: number;
   billRequested: boolean;
   tipIncluded: boolean;
+  /** Monto de propina elegido por el cliente. 0/ausente = sin monto fijo (usar fallback 10% si tipIncluded). */
+  tipAmount?: number;
   oldestCreatedAt: string;
 };
+
+/** Tasa de propina por defecto cuando solo se marcó tip_included (flujo garzón/legacy), sin monto fijo. */
+export const DEFAULT_TIP_RATE = 0.1;
+
+/**
+ * Propina efectiva a cobrar: si el cliente fijó un monto (tipAmount > 0) se usa ese;
+ * si no, y la propina está incluida, se cae al 10% del total (compatibilidad con el flujo del garzón).
+ */
+export function effectiveTip(total: number, tipIncluded: boolean, tipAmount?: number | null): number {
+  if (tipAmount && tipAmount > 0) return Math.round(tipAmount);
+  return tipIncluded ? Math.round(total * DEFAULT_TIP_RATE) : 0;
+}
+
+/** Porcentaje que representa la propina respecto al consumo, redondeado. */
+export function tipPercent(total: number, tip: number): number {
+  return total > 0 ? Math.round((tip / total) * 100) : 0;
+}
 
 export const TABLE_STATUSES = ["FREE", "OCCUPIED", "RESERVED", "CLEANING"];
 export const ORDER_STATUSES = ["PENDING", "VALIDATED", "PREPARING", "READY", "DELIVERED", "REJECTED"];

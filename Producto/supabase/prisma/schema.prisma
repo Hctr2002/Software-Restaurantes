@@ -143,6 +143,7 @@ model Table {
   updatedAt          DateTime    @default(now()) @updatedAt @db.Timestamptz(3)
   current_session_id String?     @db.Uuid
   tip_included       Boolean?    @default(false)
+  tip_amount         Int?        @default(0)
   orders             Order[]
   restaurant         Restaurant  @relation(fields: [restaurantId], references: [id])
 

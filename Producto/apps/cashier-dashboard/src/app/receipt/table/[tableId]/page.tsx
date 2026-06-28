@@ -43,7 +43,8 @@ export default async function ReceiptTablePage({
 }) {
   const { tableId } = await params;
   const { rid: restaurantId, tip, ref } = await searchParams;
-  const isTipIncluded = tip === "true";
+  // `tip` ahora es el monto de propina (en pesos). Se mantiene compatibilidad con "true" (10%).
+  const tipParam = tip === "true" ? -1 : Math.max(0, Math.round(Number(tip) || 0));
 
   if (!restaurantId) return notFound();
 
@@ -93,7 +94,10 @@ export default async function ReceiptTablePage({
   const safeOrders      = orders ?? [];
   const consolidatedItems = consolidateItems(safeOrders);
   const subtotal        = consolidatedItems.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
-  const tipAmount       = isTipIncluded ? subtotal * 0.1 : 0;
+  // tipParam === -1 → legacy "true" (10% del subtotal); de lo contrario es el monto fijo elegido.
+  const tipAmount       = tipParam === -1 ? Math.round(subtotal * 0.1) : tipParam;
+  const isTipIncluded   = tipAmount > 0;
+  const tipPct          = subtotal > 0 ? Math.round((tipAmount / subtotal) * 100) : 0;
   const paymentRef      = ref || null;
   const issuedAt        = safeOrders.at(-1)?.createdAt ?? new Date().toISOString();
 
@@ -174,7 +178,7 @@ export default async function ReceiptTablePage({
           <Row label="NETO" value={formatCLP(Math.round(subtotal / 1.19))} />
           <Row label="IVA (19%)" value={formatCLP(subtotal - Math.round(subtotal / 1.19))} />
           <Row label="TOTAL CONSUMO" value={formatCLP(subtotal)} />
-          {isTipIncluded && <Row label="Propina acordada (10%)" value={formatCLP(tipAmount)} />}
+          {isTipIncluded && <Row label={`Propina (${tipPct}%)`} value={formatCLP(tipAmount)} />}
           <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 900, fontSize: 18, marginTop: 8, color: "#111827" }}>
             <span>{isTipIncluded ? "TOTAL A PAGAR (propina incluida)" : "TOTAL A PAGAR"}</span>
             <span>{formatCLP(subtotal + tipAmount)}</span>
