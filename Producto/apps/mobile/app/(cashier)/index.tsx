@@ -19,6 +19,7 @@ import CashierOrderCard from './_components/CashierOrderCard';
 import PaymentModal from './_components/PaymentModal';
 import CashierAlertModal from './_components/CashierAlertModal';
 import { Alert } from 'react-native';
+import { shareReceipt, receiptDataFromGroup } from '../../lib/receipt';
 import Animated, { FadeInUp, FadeInRight } from 'react-native-reanimated';
 
 type CashierTab = 'pending' | 'history';
@@ -27,7 +28,7 @@ function orderTotal(order: any): number {
   return (order.order_items ?? []).reduce((s: number, i: any) => s + Number(i.unit_price) * i.quantity, 0);
 }
 
-function groupOrders(orders: any[], billMap: Record<string, boolean>, tipMap: Record<string, boolean>): any[] {
+function groupOrders(orders: any[], billMap: Record<string, boolean>, tipMap: Record<string, boolean>, tipAmountMap: Record<string, number> = {}): any[] {
   const map = new Map<string, any>();
   for (const order of orders) {
     const key = order.session_id ?? order.table_id ?? order.id;
@@ -41,6 +42,7 @@ function groupOrders(orders: any[], billMap: Record<string, boolean>, tipMap: Re
         total:            0,
         billRequested:    (order.table_id && billMap[order.table_id]) || false,
         tipIncluded:      (order.table_id && tipMap[order.table_id]) || false,
+        tipAmount:        (order.table_id && tipAmountMap[order.table_id]) || 0,
         oldestCreatedAt:  order.createdAt,
       });
     }
@@ -99,7 +101,7 @@ export default function CashierDashboard() {
       // Table Status (for bill requested)
       const { data: tableData } = await supabase
         .from('tables')
-        .select('id, bill_requested, tip_included')
+        .select('id, bill_requested, tip_included, tip_amount')
         .eq('restaurant_id', restaurantId);
 
       setOrders(pendingData || []);
@@ -137,10 +139,14 @@ export default function CashierDashboard() {
     Object.fromEntries(tables.map(t => [t.id, t.tip_included])),
   [tables]);
 
+  const tipAmountMap = useMemo(() =>
+    Object.fromEntries(tables.map(t => [t.id, t.tip_amount ?? 0])),
+  [tables]);
+
   const groups = useMemo(() => ({
-    pending: groupOrders(orders, billRequestedMap, tipIncludedMap),
-    history: groupOrders(history, billRequestedMap, tipIncludedMap),
-  }), [orders, history, billRequestedMap, tipIncludedMap]);
+    pending: groupOrders(orders, billRequestedMap, tipIncludedMap, tipAmountMap),
+    history: groupOrders(history, billRequestedMap, tipIncludedMap, tipAmountMap),
+  }), [orders, history, billRequestedMap, tipIncludedMap, tipAmountMap]);
 
   const totals = useMemo(() => ({
     pending: groups.pending.reduce((s, g) => s + g.total, 0),
@@ -164,12 +170,24 @@ export default function CashierDashboard() {
   }, [activeTab, groups, searchQuery]);
 
   const handleProcessPayment = async (reference: string) => {
-    if (!selectedGroup) return;
+    const grp = selectedGroup;
+    if (!grp) return;
+
+    // Validación: no cobrar si hay pedidos sin entregar (en cocina/bar o sin entregar por el garzón).
+    const pendientes = grp.orders.filter(
+      (o: any) => !['COMPLETED', 'REJECTED'].includes(o.status),
+    );
+    if (pendientes.some((o: any) => o.status !== 'DELIVERED')) {
+      Alert.alert(
+        'Operación denegada',
+        'Esta mesa tiene pedidos pendientes en cocina/bar o sin entregar por el garzón. Regularice el flujo antes de cobrar.',
+      );
+      return;
+    }
+
     setIsProcessing(true);
     try {
-      const orderIds = selectedGroup.orders
-        .filter((o: any) => !['COMPLETED', 'REJECTED'].includes(o.status))
-        .map((o: any) => o.id);
+      const orderIds = pendientes.map((o: any) => o.id);
 
       if (orderIds.length > 0) {
         if (reference) {
@@ -181,9 +199,16 @@ export default function CashierDashboard() {
 
         const { error } = await supabase.rpc('completar_pago_mesa', {
           p_order_ids: orderIds,
-          p_table_id: selectedGroup.tableId ?? null,
+          p_table_id: grp.tableId ?? null,
         });
         if (error) throw error;
+      }
+
+      // Boleta automática al cobrar (igual que el frontend web).
+      try {
+        await shareReceipt(receiptDataFromGroup(grp, { reference }));
+      } catch {
+        // El usuario canceló el compartir o no está disponible — el cobro ya se registró.
       }
 
       await fetchOrders();

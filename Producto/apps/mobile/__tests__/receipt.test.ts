@@ -49,9 +49,17 @@ describe('shareReceipt — HTML', () => {
     expect(html).not.toContain('PROPINA')
   })
 
-  it('con propina muestra la sección PROPINA 10%', async () => {
-    const html = await htmlFor({ ...baseData, tipIncluded: true })
-    expect(html).toContain('PROPINA')
+  it('con monto de propina muestra la sección PROPINA con su %', async () => {
+    // Subtotal 18.000; propina 1.800 = 10%
+    const html = await htmlFor({ ...baseData, tipAmount: 1800 })
+    expect(html).toContain('PROPINA 10%')
+  })
+
+  it('incluye desglose NETO + IVA (19%) y total consumo', async () => {
+    const html = await htmlFor(baseData)
+    expect(html).toContain('NETO')
+    expect(html).toContain('IVA (19%)')
+    expect(html).toContain('TOTAL CONSUMO')
   })
 
   it('escapa caracteres especiales del nombre', async () => {
