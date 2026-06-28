@@ -59,6 +59,7 @@ export type TableRecord = {
   helpRequested: boolean;
   current_session_id?: string | null;
   tip_included?: boolean;
+  tip_amount?: number | null;
 };
 
 export type OrderItem = {

@@ -16,16 +16,18 @@ export async function POST(req: NextRequest) {
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
   try {
-    const { table_id, restaurant_id, table_number, tip_included } = await req.json();
+    const { table_id, restaurant_id, table_number, tip_included, tip_amount } = await req.json();
 
     if (!table_id || !restaurant_id) {
       return NextResponse.json({ error: 'Faltan parámetros obligatorios' }, { status: 400 });
     }
 
-    // 1. Actualizar mesa — el cliente decide la propina al pedir la cuenta.
+    // 1. Actualizar mesa — el cliente decide el monto de propina al pedir la cuenta.
+    // tip_included se deriva del monto (>0) y, por compatibilidad, del flag recibido.
+    const tipAmount = Math.max(0, Math.round(Number(tip_amount) || 0));
     const { error: tErr } = await supabaseAdmin
       .from('tables')
-      .update({ bill_requested: true, tip_included: !!tip_included })
+      .update({ bill_requested: true, tip_included: tipAmount > 0 || !!tip_included, tip_amount: tipAmount })
       .eq('id', table_id);
 
     if (tErr) return NextResponse.json({ error: tErr.message }, { status: 500 });

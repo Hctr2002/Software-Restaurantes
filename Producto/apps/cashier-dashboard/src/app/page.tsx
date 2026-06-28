@@ -16,6 +16,7 @@ import {
   OrderCardSkeleton,
   OrderGroupCard,
   groupOrders,
+  effectiveTip,
   PaymentSlideOver,
   BillAlertIsland,
   useNotificationSound,
@@ -70,14 +71,18 @@ export default function CashierPage() {
     Object.fromEntries(tables.map((t) => [t.id, t.billRequested ?? false])), 
   [tables]);
 
-  const tipIncludedTables = useMemo(() => 
-    Object.fromEntries(tables.map((t) => [t.id, t.tip_included ?? false])), 
+  const tipIncludedTables = useMemo(() =>
+    Object.fromEntries(tables.map((t) => [t.id, t.tip_included ?? false])),
+  [tables]);
+
+  const tipAmountTables = useMemo(() =>
+    Object.fromEntries(tables.map((t) => [t.id, (t as any).tip_amount ?? 0])),
   [tables]);
 
   const groups = useMemo(() => ({
-    pending: groupOrders(orders, billRequestedTables, tipIncludedTables),
-    history: groupOrders(history, billRequestedTables, tipIncludedTables)
-  }), [orders, history, billRequestedTables, tipIncludedTables]);
+    pending: groupOrders(orders, billRequestedTables, tipIncludedTables, tipAmountTables),
+    history: groupOrders(history, billRequestedTables, tipIncludedTables, tipAmountTables)
+  }), [orders, history, billRequestedTables, tipIncludedTables, tipAmountTables]);
 
   const totals = useMemo(() => ({
     pending: groups.pending.reduce((s, g) => s + g.total, 0),
@@ -122,9 +127,10 @@ export default function CashierPage() {
         if (error) throw error;
       }
 
+      const tipAmt = effectiveTip(group.total, group.tipIncluded, group.tipAmount);
       const receiptUrl = group.sessionId
-        ? `/receipt/session/${group.sessionId}?rid=${user?.restaurantId}&tip=${group.tipIncluded}&ref=${encodeURIComponent(paymentReference)}`
-        : `/receipt/table/${group.tableId}?rid=${user?.restaurantId}&tip=${group.tipIncluded}&ref=${encodeURIComponent(paymentReference)}`;
+        ? `/receipt/session/${group.sessionId}?rid=${user?.restaurantId}&tip=${tipAmt}&ref=${encodeURIComponent(paymentReference)}`
+        : `/receipt/table/${group.tableId}?rid=${user?.restaurantId}&tip=${tipAmt}&ref=${encodeURIComponent(paymentReference)}`;
 
       window.open(receiptUrl, "_blank");
       setSelectedGroup(null);

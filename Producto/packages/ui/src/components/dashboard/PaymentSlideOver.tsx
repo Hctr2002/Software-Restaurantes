@@ -12,7 +12,7 @@ import { ArrowLeft, CreditCard, Hash, Loader2, Receipt } from "lucide-react";
 import { formatCLP } from "@menu-bites/auth";
 import { Badge } from "../Badge";
 import { Button } from "../ui/button";
-import { TableGroup } from "./dashboardTypes";
+import { TableGroup, effectiveTip, tipPercent } from "./dashboardTypes";
 
 interface Props {
   group: TableGroup;
@@ -27,6 +27,8 @@ export function PaymentSlideOver({
   group, paymentReference, isProcessing,
   onPaymentRefChange, onConfirm, onClose,
 }: Props) {
+  const tip = effectiveTip(group.total, group.tipIncluded, group.tipAmount);
+  const tipPct = tipPercent(group.total, tip);
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-end p-6 overflow-hidden pointer-events-none">
@@ -134,17 +136,17 @@ export function PaymentSlideOver({
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Neto Consumo</span>
                 <span className="text-sm font-black font-mono">{formatCLP(group.total)}</span>
               </div>
-              {group.tipIncluded && (
+              {tip > 0 && (
                 <div className="flex justify-between items-center text-muted-foreground/60">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Propina acordada (10%)</span>
-                  <span className="text-sm font-black font-mono">{formatCLP(group.total * 0.1)}</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Propina ({tipPct}%)</span>
+                  <span className="text-sm font-black font-mono">{formatCLP(tip)}</span>
                 </div>
               )}
               <div className="h-px bg-border" />
               <div className="flex justify-between items-center">
                 <span className="text-sm font-black text-primary uppercase tracking-[0.2em]">Total a Cobrar</span>
                 <span className="text-4xl font-black text-success tracking-tighter drop-shadow-[0_0_15px_hsl(var(--success)/0.3)]">
-                  {formatCLP(group.tipIncluded ? group.total * 1.1 : group.total)}
+                  {formatCLP(group.total + tip)}
                 </span>
               </div>
             </div>

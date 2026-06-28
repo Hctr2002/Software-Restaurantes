@@ -114,10 +114,10 @@ export default function MenuPage({
   };
 
   /**
-   * Solicita la cuenta: marca bill_requested, registra la elección de propina del
-   * cliente (tip_included) e inserta una alerta BILL_REQUEST para el staff.
+   * Solicita la cuenta: marca bill_requested, registra el monto de propina elegido
+   * por el cliente (tip_amount / tip_included) e inserta una alerta BILL_REQUEST.
    */
-  const handleRequestBill = async (includeTip: boolean) => {
+  const handleRequestBill = async (tipAmount: number) => {
     if (!portal.table.data || isRequestingBill || billRequested || !restaurant?.id) return;
     setIsRequestingBill(true);
     try {
@@ -128,7 +128,8 @@ export default function MenuPage({
           table_id: portal.table.data.id,
           restaurant_id: restaurant.id,
           table_number: portal.table.data.number,
-          tip_included: includeTip
+          tip_included: tipAmount > 0,
+          tip_amount: tipAmount
         }),
       });
       if (res.ok) setBillRequested(true);
