@@ -15,6 +15,8 @@ vi.mock('crypto', () => {
 })
 
 const calls: { table: string; method: string; payload: any }[] = []
+const rpcCalls: { fn: string; args: any }[] = []
+let rpcResult: any = { data: null, error: null }
 
 function chainFor(table: string, resolved: any) {
   const chain: any = {}
@@ -34,9 +36,14 @@ function chainFor(table: string, resolved: any) {
   return chain
 }
 
-function setupClient(results: Record<string, any>) {
+function setupClient(results: Record<string, any> = {}) {
+  if (results.__rpc) rpcResult = results.__rpc
   mockCreateClient.mockReturnValue({
     from: vi.fn((t: string) => chainFor(t, results[t] ?? { data: null, error: null })),
+    rpc: vi.fn((fn: string, args: any) => {
+      rpcCalls.push({ fn, args })
+      return Promise.resolve(rpcResult)
+    }),
   })
 }
 
@@ -75,11 +82,15 @@ function fullResults() {
   }
 }
 
-const orderInserts = () => calls.filter((c) => c.table === 'orders' && c.method === 'insert')
+// La escritura ahora es una RPC transaccional. Inspeccionamos sus argumentos.
+const rpcArgs = () => rpcCalls.find((c) => c.fn === 'create_order_tx')?.args
+const orderRows = (): any[] => rpcArgs()?.p_orders ?? []
 
 beforeEach(() => {
   vi.clearAllMocks()
   calls.length = 0
+  rpcCalls.length = 0
+  rpcResult = { data: null, error: null }
 })
 
 describe('POST /api/orders — validación', () => {
@@ -126,9 +137,9 @@ describe('POST /api/orders — split por estación', () => {
     expect(res.status).toBe(201)
     const json = await res.json()
     expect(json.orderIds).toHaveLength(1)
-    const inserts = orderInserts()
-    expect(inserts).toHaveLength(1)
-    expect(inserts[0].payload.station).toBe('KITCHEN')
+    const rows = orderRows()
+    expect(rows).toHaveLength(1)
+    expect(rows[0].station).toBe('KITCHEN')
   })
 
   it('201 con dos sub-pedidos (KITCHEN + BAR) y parent_order_id en el de barra', async () => {
@@ -141,26 +152,26 @@ describe('POST /api/orders — split por estación', () => {
     const json = await res.json()
     expect(json.orderIds).toHaveLength(2)
 
-    const inserts = orderInserts()
-    expect(inserts.map((c) => c.payload.station)).toEqual(['KITCHEN', 'BAR'])
+    const rows = orderRows()
+    expect(rows.map((r) => r.station)).toEqual(['KITCHEN', 'BAR'])
     // el sub-pedido de barra referencia al de cocina como parent
-    expect(inserts[1].payload.parent_order_id).toBe(inserts[0].payload.id)
+    expect(rows[1].parent_order_id).toBe(rows[0].id)
   })
 
   it('marca la mesa como OCCUPIED cuando hay table_id', async () => {
     setupClient(fullResults())
     const { POST } = await import('../app/api/orders/route')
     await POST(makePost({ restaurant_id: 'r1', table_id: 't1', total_amount: 2000, items: [kitchenItem, barItem] }))
-    const tableUpdate = calls.find((c) => c.table === 'tables' && c.method === 'update')
-    expect(tableUpdate?.payload).toMatchObject({ status: 'OCCUPIED' })
+    // La mesa se marca OCCUPIED dentro de la RPC transaccional (p_table_id).
+    expect(rpcArgs()?.p_table_id).toBe('t1')
   })
 
-  it('500 cuando falla la inserción del pedido', async () => {
+  it('500 cuando la RPC transaccional falla', async () => {
     setupClient({
       ...fullResults(),
       menu_items: { data: [{ id: 'mi-k', category_id: 'cat-k' }], error: null },
       categories: { data: [{ id: 'cat-k', target_station: 'KITCHEN' }], error: null },
-      orders: { data: null, error: { message: 'insert fail' } },
+      __rpc: { data: null, error: { message: 'tx fail' } },
     })
     const { POST } = await import('../app/api/orders/route')
     const res = await POST(makePost({ restaurant_id: 'r1', table_id: 't1', total_amount: 1000, items: [kitchenItem] }))
@@ -176,11 +187,11 @@ describe('POST /api/orders — session de mesa fusionada', () => {
       makePost({ restaurant_id: 'r1', table_id: 't1', total_amount: 2000, items: [kitchenItem, barItem] }),
     )
     expect(res.status).toBe(201)
-    const inserts = orderInserts()
-    expect(inserts).toHaveLength(2)
+    const rows = orderRows()
+    expect(rows).toHaveLength(2)
     // Ambos sub-pedidos (KITCHEN y BAR) comparten el session_id de la mesa fusionada,
     // para que la caja los agrupe en una sola cuenta.
-    expect(inserts.every((c) => c.payload.session_id === 'sess-merged')).toBe(true)
+    expect(rows.every((r) => r.session_id === 'sess-merged')).toBe(true)
   })
 
   it('session_id null cuando la mesa no está fusionada', async () => {
@@ -192,7 +203,7 @@ describe('POST /api/orders — session de mesa fusionada', () => {
     })
     const { POST } = await import('../app/api/orders/route')
     await POST(makePost({ restaurant_id: 'r1', table_id: 't1', total_amount: 1000, items: [kitchenItem] }))
-    const inserts = orderInserts()
-    expect(inserts[0].payload.session_id).toBeNull()
+    const rows = orderRows()
+    expect(rows[0].session_id).toBeNull()
   })
 })
