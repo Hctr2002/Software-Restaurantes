@@ -28,8 +28,10 @@ interface TipModalProps {
 }
 
 export function TipModal({ tableTotal, submitting, onConfirm, onClose }: TipModalProps) {
-  // Sugerencia inicial: 10% del consumo. El cliente puede editar el monto libremente.
-  const [amount, setAmount] = useState<number>(Math.round(tableTotal * DEFAULT_TIP_RATE));
+  // El monto se maneja como texto para permitir borrarlo (campo vacío) y evitar
+  // ceros a la izquierda ("05000"). El número se deriva de ese texto.
+  const [amountText, setAmountText] = useState<string>(String(Math.round(tableTotal * DEFAULT_TIP_RATE)));
+  const amount = Number(amountText) || 0;
 
   return (
     <div className="fixed inset-0 z-[60] animate-in fade-in duration-300">
@@ -59,12 +61,12 @@ export function TipModal({ tableTotal, submitting, onConfirm, onClose }: TipModa
           <div className="flex items-center gap-3 bg-foreground/[0.03] rounded-2xl px-5 py-4 border border-foreground/10 focus-within:border-primary/50 transition-colors">
             <span className="text-foreground/50 font-black text-lg">$</span>
             <input
-              type="number"
+              type="text"
               inputMode="numeric"
-              min={0}
-              value={amount}
+              value={amountText}
               disabled={submitting}
-              onChange={(e) => setAmount(Math.max(0, Math.round(Number(e.target.value) || 0)))}
+              placeholder="0"
+              onChange={(e) => setAmountText(e.target.value.replace(/[^0-9]/g, '').replace(/^0+(?=\d)/, ''))}
               className="flex-1 bg-transparent outline-none text-foreground font-black text-2xl tracking-tight w-full"
             />
           </div>
