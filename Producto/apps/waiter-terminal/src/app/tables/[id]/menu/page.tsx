@@ -26,7 +26,7 @@ export default function TableMenuPage() {
   const [showBillModal, setShowBillModal] = useState(false);
   const [requestingBill, setRequestingBill] = useState(false);
   const [orderNotes, setOrderNotes] = useState("");
-  const [billTip, setBillTip] = useState(0);
+  const [billTipText, setBillTipText] = useState('0');
 
   const loading = menuLoading || tableLoading || ordersLoading;
 
@@ -58,6 +58,9 @@ export default function TableMenuPage() {
         (si: number, i: any) => si + Number(i.unitPrice) * i.quantity, 0), 0),
     [tableOrders],
   );
+
+  // La propina se maneja como texto (permite vaciar el campo y evita ceros a la izquierda).
+  const billTip = Number(billTipText) || 0;
 
   const handleSubmitOrder = async () => {
     if (!user?.restaurantId) {
@@ -189,7 +192,7 @@ export default function TableMenuPage() {
                       alert("Validación Estricta: Todos los pedidos deben estar ENTREGADOS antes de pedir la cuenta.");
                       return;
                     }
-                    setBillTip(Math.round(tableTotal * 0.1));
+                    setBillTipText(String(Math.round(tableTotal * 0.1)));
                     setShowBillModal(true);
                   }}
                   disabled={table?.status === 'FREE'}
@@ -317,11 +320,12 @@ export default function TableMenuPage() {
                   <div className="flex items-center gap-2 bg-muted/30 border border-border rounded-2xl px-4 py-3 focus-within:border-warning/50 transition-colors">
                     <span className="text-muted-foreground font-black text-lg">$</span>
                     <input
-                      type="number"
-                      min={0}
-                      value={billTip}
+                      type="text"
+                      inputMode="numeric"
+                      value={billTipText}
                       disabled={requestingBill}
-                      onChange={(e) => setBillTip(Math.max(0, Math.round(Number(e.target.value) || 0)))}
+                      placeholder="0"
+                      onChange={(e) => setBillTipText(e.target.value.replace(/[^0-9]/g, '').replace(/^0+(?=\d)/, ''))}
                       className="flex-1 bg-transparent outline-none text-2xl font-black tracking-tight w-full"
                     />
                     <span className="text-warning font-black whitespace-nowrap">

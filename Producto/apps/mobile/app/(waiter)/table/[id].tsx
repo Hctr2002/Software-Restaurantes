@@ -231,6 +231,16 @@ export default function TableOrderScreen() {
     
     setIsPlacing(true);
     try {
+      // Obtener el current_session_id de la mesa para agrupar en mesas fusionadas
+      // (igual que el garzón web). Sin esto, en mesas fusionadas el pedido queda
+      // huérfano de la sesión y la caja lo muestra como cuenta separada.
+      const { data: tableData } = await supabase
+        .from('tables')
+        .select('current_session_id')
+        .eq('id', id)
+        .single();
+      const sessionId = tableData?.current_session_id ?? null;
+
       // Map categories to stations
       const categoryStationMap = new Map(
         categories.map(cat => [cat.id, cat.target_station || 'KITCHEN'])
@@ -254,6 +264,7 @@ export default function TableOrderScreen() {
           .insert({
             restaurant_id: restaurantId,
             table_id: id,
+            session_id: sessionId,
             status: 'VALIDATED',
             total_amount: stationTotal,
             station: station as any,
