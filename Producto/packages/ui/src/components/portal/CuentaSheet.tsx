@@ -90,7 +90,7 @@ export function CuentaSheet({ tableLabel, orders, onClose }: Props) {
               Mi Cuenta
             </PortalHeading>
             <PortalText muted className="text-xs mt-0.5">
-              Mesa {tableLabel} · Detalle de consumos
+              Detalle de consumos
             </PortalText>
           </div>
           {/* Botón para cerrar la vista */}

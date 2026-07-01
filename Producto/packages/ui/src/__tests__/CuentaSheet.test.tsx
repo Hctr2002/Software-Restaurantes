@@ -24,9 +24,11 @@ describe('CuentaSheet — renderizado', () => {
     expect(screen.getByText('Mi Cuenta')).toBeInTheDocument()
   })
 
-  it('muestra el label de la mesa en el subtítulo', () => {
+  it('muestra el subtítulo "Detalle de consumos" (sin duplicar la mesa)', () => {
     render(<CuentaSheet tableLabel="7" orders={[]} onClose={vi.fn()} />)
-    expect(screen.getByText(/Mesa 7/)).toBeInTheDocument()
+    expect(screen.getByText('Detalle de consumos')).toBeInTheDocument()
+    // La mesa ya no se repite en el subtítulo (solo aparece en el título del grupo).
+    expect(screen.queryByText(/Mesa 7/)).toBeNull()
   })
 
   it('muestra mensaje vacío cuando no hay pedidos', () => {
