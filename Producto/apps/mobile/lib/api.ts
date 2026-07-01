@@ -41,8 +41,9 @@ export const getApiUrl = (port: number = 3000, customEnvUrl?: string) => {
     return url;
   }
 
-  // En Producción
-  return customEnvUrl || process.env.EXPO_PUBLIC_API_URL || 'https://api.menubites.com';
+  // En Producción. El default apunta al portal real (el cliente pega a /api/* del
+  // customer-portal); api.menubites.com no existe. Se puede override con EXPO_PUBLIC_API_URL.
+  return customEnvUrl || process.env.EXPO_PUBLIC_API_URL || 'https://portal-menubites.vercel.app';
 };
 
 /**

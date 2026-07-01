@@ -24,11 +24,13 @@ function formatCLP(n: number): string {
 }
 
 export function TipModal({ visible, tableTotal, submitting, primaryColor, bgColor, textColor, onConfirm, onClose }: TipModalProps) {
-  // Sugerencia inicial 10%; el cliente puede dejar más, o 0 (sin propina).
-  const [amount, setAmount] = useState<number>(Math.round(tableTotal * DEFAULT_TIP_RATE));
+  // El monto se maneja como texto para permitir borrarlo (campo vacío) y evitar
+  // ceros a la izquierda ("05000"). El número se deriva de ese texto.
+  const [amountText, setAmountText] = useState<string>(String(Math.round(tableTotal * DEFAULT_TIP_RATE)));
+  const amount = Number(amountText) || 0;
 
   useEffect(() => {
-    if (visible) setAmount(Math.round(tableTotal * DEFAULT_TIP_RATE));
+    if (visible) setAmountText(String(Math.round(tableTotal * DEFAULT_TIP_RATE)));
   }, [visible, tableTotal]);
 
   const muted = textColor + '99';
@@ -59,8 +61,8 @@ export function TipModal({ visible, tableTotal, submitting, primaryColor, bgColo
           <View style={[styles.inputBox, { borderColor: textColor + '22' }]}>
             <Text style={[styles.currency, { color: muted }]}>$</Text>
             <TextInput
-              value={String(amount)}
-              onChangeText={(t) => setAmount(Math.max(0, Math.round(Number(t.replace(/[^0-9]/g, '')) || 0)))}
+              value={amountText}
+              onChangeText={(t) => setAmountText(t.replace(/[^0-9]/g, '').replace(/^0+(?=\d)/, ''))}
               keyboardType="number-pad"
               editable={!submitting}
               style={[styles.input, { color: textColor }]}
