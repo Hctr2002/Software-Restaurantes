@@ -34,9 +34,9 @@ describe('getApiUrl', () => {
     expect(getApiUrl(3000, 'https://api.midominio.com')).toBe('https://api.midominio.com')
   })
 
-  it('en producción sin override usa el dominio por defecto', async () => {
+  it('en producción sin override usa el portal por defecto', async () => {
     const getApiUrl = await loadGetApiUrl(false)
-    expect(getApiUrl(3000)).toBe('https://api.menubites.com')
+    expect(getApiUrl(3000)).toBe('https://portal-menubites.vercel.app')
   })
 
   it('en desarrollo (iOS) usa localhost con el puerto dado', async () => {
