@@ -74,58 +74,6 @@ function serviceClient() {
 }
 
 /**
- * Inserta una orden en la BD con un UUID generado localmente.
- * Retorna el id generado y el mensaje de error si ocurre uno.
- */
-async function insertOrder(
-  db: ReturnType<typeof serviceClient>,
-  params: {
-    restaurant_id: string;
-    table_id: string | null;
-    session_id: string | null;
-    station: 'KITCHEN' | 'BAR';
-    total_amount: number;
-    parent_order_id?: string;
-  }
-): Promise<{ id: string; error: string | null }> {
-  const id = randomUUID();
-  const { error } = await db.from('orders').insert({
-    id,
-    restaurant_id: params.restaurant_id,
-    table_id: params.table_id || null,
-    session_id: params.session_id ?? null,
-    status: 'PENDING',
-    total_amount: params.total_amount,
-    station: params.station,
-    parent_order_id: params.parent_order_id ?? null,
-    notes: 'Pedido desde portal web',
-  });
-  return { id, error: error?.message ?? null };
-}
-
-/**
- * Inserta los ítems de una orden en batch.
- * Retorna el mensaje de error o null si la inserción fue exitosa.
- */
-async function insertItems(
-  db: ReturnType<typeof serviceClient>,
-  orderId: string,
-  restaurant_id: string,
-  items: OrderItemPayload[]
-): Promise<string | null> {
-  const rows = items.map((item) => ({
-    id: randomUUID(),
-    order_id: orderId,
-    menu_item_id: item.menu_item_id,
-    restaurant_id,
-    quantity: item.quantity,
-    unit_price: item.unit_price,
-  }));
-  const { error } = await db.from('order_items').insert(rows);
-  return error?.message ?? null;
-}
-
-/**
  * POST /api/orders
  * Recibe el carrito del cliente, valida que los ítems pertenezcan al restaurante,
  * y crea sub-pedidos separados por estación (KITCHEN y/o BAR).
@@ -144,37 +92,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verificar restaurante activo
-    const { data: restaurant, error: restError } = await db
-      .from('restaurants')
-      .select('id')
-      .eq('id', restaurant_id)
-      .eq('status', 'ACTIVE')
-      .single();
-
-    if (restError || !restaurant) {
-      return NextResponse.json(
-        { error: 'Restaurante no encontrado o inactivo' },
-        { status: 404 }
-      );
-    }
-
-    // Obtener target_station de cada menu_item via su categoría (dos queries explícitas)
-    // Filtramos por restaurant_id para evitar que IDs de otros restaurantes sean resueltos
     const menuItemIds = items.map((i) => i.menu_item_id);
-    const { data: menuItemRows, error: miError } = await db
-      .from('menu_items')
-      .select('id, category_id')
-      .in('id', menuItemIds)
-      .eq('restaurant_id', restaurant_id);
 
-    if (miError) {
-      return NextResponse.json({ error: miError.message }, { status: 500 });
+    // ── Lecturas en PARALELO (1 sola ida a la BD) ────────────────────────────
+    // Independientes entre sí: restaurante activo, menu_items del pedido,
+    // categorías del restaurante (para resolver estación) y sesión de la mesa.
+    const [restaurantRes, menuItemsRes, categoriesRes, tableRes] = await Promise.all([
+      db.from('restaurants').select('id').eq('id', restaurant_id).eq('status', 'ACTIVE').single(),
+      db.from('menu_items').select('id, category_id').in('id', menuItemIds).eq('restaurant_id', restaurant_id),
+      db.from('categories').select('id, target_station').eq('restaurant_id', restaurant_id),
+      table_id
+        ? db.from('tables').select('current_session_id').eq('id', table_id).single()
+        : Promise.resolve({ data: null, error: null } as any),
+    ]);
+
+    if (restaurantRes.error || !restaurantRes.data) {
+      return NextResponse.json({ error: 'Restaurante no encontrado o inactivo' }, { status: 404 });
+    }
+    if (menuItemsRes.error) {
+      return NextResponse.json({ error: menuItemsRes.error.message }, { status: 500 });
     }
 
+    const menuItemRows = menuItemsRes.data ?? [];
     // Validar que todos los items existen y pertenecen al restaurante
-    if ((menuItemRows ?? []).length !== menuItemIds.length) {
-      const foundIds = new Set((menuItemRows ?? []).map((mi: any) => mi.id));
+    if (menuItemRows.length !== menuItemIds.length) {
+      const foundIds = new Set(menuItemRows.map((mi: any) => mi.id));
       const invalid = menuItemIds.filter((id) => !foundIds.has(id));
       return NextResponse.json(
         { error: `Items no válidos o de otro restaurante: ${invalid.join(', ')}` },
@@ -182,89 +124,67 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const categoryIds = [...new Set((menuItemRows ?? []).map((mi: any) => mi.category_id).filter(Boolean))];
-    const { data: categoryRows } = await db
-      .from('categories')
-      .select('id, target_station')
-      .in('id', categoryIds)
-      .eq('restaurant_id', restaurant_id);
+    // session_id de la mesa: agrupa el cobro en mesas fusionadas.
+    const session_id = (tableRes.data as any)?.current_session_id ?? null;
 
+    // Resolver la estación (KITCHEN/BAR) de cada ítem por su categoría (default KITCHEN).
     const categoryStationMap = new Map<string, 'KITCHEN' | 'BAR'>(
-      (categoryRows ?? []).map((c: any) => [c.id, c.target_station as 'KITCHEN' | 'BAR'])
+      (categoriesRes.data ?? []).map((c: any) => [c.id, c.target_station as 'KITCHEN' | 'BAR'])
     );
-
     const stationMap = new Map<string, 'KITCHEN' | 'BAR'>(
-      (menuItemRows ?? []).map((mi: any) => [
-        mi.id,
-        categoryStationMap.get(mi.category_id) ?? 'KITCHEN',
-      ])
+      menuItemRows.map((mi: any) => [mi.id, categoryStationMap.get(mi.category_id) ?? 'KITCHEN'])
     );
 
     const kitchenItems = items.filter((i) => stationMap.get(i.menu_item_id) === 'KITCHEN');
     const barItems     = items.filter((i) => stationMap.get(i.menu_item_id) === 'BAR');
-
     const kitchenTotal = kitchenItems.reduce((s, i) => s + i.unit_price * i.quantity, 0);
     const barTotal     = barItems.reduce((s, i) => s + i.unit_price * i.quantity, 0);
 
-    // Heredar el session_id de la mesa para agrupar el cobro en mesas fusionadas.
-    // Sin esto, una orden creada después de fusionar quedaría con session_id null
-    // y la caja la mostraría como una cuenta separada del grupo.
-    let session_id: string | null = null;
-    if (table_id) {
-      const { data: tableRow } = await db
-        .from('tables')
-        .select('current_session_id')
-        .eq('id', table_id)
-        .single();
-      session_id = tableRow?.current_session_id ?? null;
-    }
-
-    const orderIds: string[] = [];
-
-    // Crear sub-pedido KITCHEN
-    if (kitchenItems.length > 0) {
-      const { id: kitchenOrderId, error: koError } = await insertOrder(db, {
-        restaurant_id,
-        table_id,
-        session_id,
-        station: 'KITCHEN',
+    // ── Construir sub-órdenes con UUID local para insertarlas en una sola query ─
+    const kitchenOrderId = kitchenItems.length > 0 ? randomUUID() : null;
+    const barOrderId     = barItems.length > 0 ? randomUUID() : null;
+    const baseOrder = {
+      restaurant_id,
+      table_id: table_id || null,
+      session_id,
+      status: 'PENDING' as const,
+      notes: 'Pedido desde portal web',
+    };
+    const orderRows: any[] = [];
+    if (kitchenOrderId) {
+      orderRows.push({
+        ...baseOrder, id: kitchenOrderId, station: 'KITCHEN',
         total_amount: kitchenItems.length === items.length ? total_amount : kitchenTotal,
+        parent_order_id: null,
       });
-      if (koError) {
-        return NextResponse.json({ error: koError }, { status: 500 });
-      }
-      const itemsError = await insertItems(db, kitchenOrderId, restaurant_id, kitchenItems);
-      if (itemsError) {
-        return NextResponse.json({ error: itemsError }, { status: 500 });
-      }
-      orderIds.push(kitchenOrderId);
     }
-
-    // Crear sub-pedido BAR (referencia al pedido KITCHEN como parent si existe)
-    if (barItems.length > 0) {
-      const { id: barOrderId, error: boError } = await insertOrder(db, {
-        restaurant_id,
-        table_id,
-        session_id,
-        station: 'BAR',
+    if (barOrderId) {
+      orderRows.push({
+        ...baseOrder, id: barOrderId, station: 'BAR',
         total_amount: barItems.length === items.length ? total_amount : barTotal,
-        parent_order_id: orderIds[0],
+        parent_order_id: kitchenOrderId, // referencia al pedido de cocina si existe
       });
-      if (boError) {
-        return NextResponse.json({ error: boError }, { status: 500 });
-      }
-      const itemsError = await insertItems(db, barOrderId, restaurant_id, barItems);
-      if (itemsError) {
-        return NextResponse.json({ error: itemsError }, { status: 500 });
-      }
-      orderIds.push(barOrderId);
     }
 
-    // Marcar mesa como OCCUPIED
-    if (table_id) {
-      await db.from('tables').update({ status: 'OCCUPIED' }).eq('id', table_id);
+    // Ítems de todas las sub-órdenes
+    const itemRows = [
+      ...kitchenItems.map((it) => ({ id: randomUUID(), order_id: kitchenOrderId, menu_item_id: it.menu_item_id, restaurant_id, quantity: it.quantity, unit_price: it.unit_price })),
+      ...barItems.map((it) => ({ id: randomUUID(), order_id: barOrderId, menu_item_id: it.menu_item_id, restaurant_id, quantity: it.quantity, unit_price: it.unit_price })),
+    ];
+
+    // ── Escritura ATÓMICA en 1 ida (RPC transaccional) ───────────────────────
+    // Inserta órdenes + ítems y marca la mesa OCCUPIED todo-o-nada; si algo falla,
+    // se revierte completo (sin órdenes ni ítems huérfanos).
+    const { error: txError } = await db.rpc('create_order_tx', {
+      p_orders: orderRows,
+      p_items: itemRows,
+      p_table_id: table_id || null,
+    });
+    if (txError) {
+      return NextResponse.json({ error: txError.message }, { status: 500 });
     }
 
+    const orderIds = [kitchenOrderId, barOrderId].filter(Boolean) as string[];
     return NextResponse.json({ id: orderIds[0], orderIds }, { status: 201 });
   } catch (err: any) {
     console.error('[api/orders] Error inesperado:', err);

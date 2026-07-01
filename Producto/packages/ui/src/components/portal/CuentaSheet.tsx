@@ -65,7 +65,11 @@ export function CuentaSheet({ tableLabel, orders, onClose }: Props) {
   const ordersByTable: Record<string, typeof orders> = {};
 
   orders.forEach(order => {
-    const tableKey = order.tableNumber ? `Mesa ${order.tableNumber}` : "Sin Mesa";
+    // Las órdenes del portal no siempre traen el número de mesa; se usa la mesa
+    // actual (tableLabel) como respaldo en lugar de mostrar "Sin Mesa".
+    const tableKey = order.tableNumber
+      ? `Mesa ${order.tableNumber}`
+      : (tableLabel ? `Mesa ${tableLabel}` : "Sin Mesa");
     if (!ordersByTable[tableKey]) ordersByTable[tableKey] = [];
     ordersByTable[tableKey].push(order);
   });
@@ -86,7 +90,7 @@ export function CuentaSheet({ tableLabel, orders, onClose }: Props) {
               Mi Cuenta
             </PortalHeading>
             <PortalText muted className="text-xs mt-0.5">
-              Mesa {tableLabel} · Detalle de consumos
+              Detalle de consumos
             </PortalText>
           </div>
           {/* Botón para cerrar la vista */}

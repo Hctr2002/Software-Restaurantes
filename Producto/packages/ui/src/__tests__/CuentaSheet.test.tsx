@@ -24,9 +24,11 @@ describe('CuentaSheet — renderizado', () => {
     expect(screen.getByText('Mi Cuenta')).toBeInTheDocument()
   })
 
-  it('muestra el label de la mesa en el subtítulo', () => {
+  it('muestra el subtítulo "Detalle de consumos" (sin duplicar la mesa)', () => {
     render(<CuentaSheet tableLabel="7" orders={[]} onClose={vi.fn()} />)
-    expect(screen.getByText(/Mesa 7/)).toBeInTheDocument()
+    expect(screen.getByText('Detalle de consumos')).toBeInTheDocument()
+    // La mesa ya no se repite en el subtítulo (solo aparece en el título del grupo).
+    expect(screen.queryByText(/Mesa 7/)).toBeNull()
   })
 
   it('muestra mensaje vacío cuando no hay pedidos', () => {
@@ -44,8 +46,15 @@ describe('CuentaSheet — renderizado', () => {
     expect(screen.getByText('Mesa 3')).toBeInTheDocument()
   })
 
-  it('muestra "Sin Mesa" cuando tableNumber es null', () => {
-    render(<CuentaSheet tableLabel="–" orders={[makeOrder({ tableNumber: null } as any)]} onClose={vi.fn()} />)
+  it('usa la mesa actual (tableLabel) cuando el pedido no trae tableNumber', () => {
+    render(<CuentaSheet tableLabel="7" orders={[makeOrder({ tableNumber: null } as any)]} onClose={vi.fn()} />)
+    // El título del grupo cae al tableLabel en vez de "Sin Mesa"
+    expect(screen.getAllByText('Mesa 7').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Sin Mesa')).toBeNull()
+  })
+
+  it('muestra "Sin Mesa" solo si no hay tableNumber ni tableLabel', () => {
+    render(<CuentaSheet tableLabel="" orders={[makeOrder({ tableNumber: null } as any)]} onClose={vi.fn()} />)
     expect(screen.getByText('Sin Mesa')).toBeInTheDocument()
   })
 })
