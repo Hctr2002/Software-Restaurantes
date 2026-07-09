@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { 
   StyleSheet, 
   View, 
@@ -20,6 +20,7 @@ import PaymentModal from './_components/PaymentModal';
 import CashierAlertModal from './_components/CashierAlertModal';
 import { Alert } from 'react-native';
 import { shareReceipt, receiptDataFromGroup } from '../../lib/receipt';
+import { useKdsAudio } from '../../lib/useKdsAudio';
 import Animated, { FadeInUp, FadeInRight } from 'react-native-reanimated';
 
 type CashierTab = 'pending' | 'history';
@@ -61,6 +62,10 @@ export default function CashierDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
   const [tables, setTables] = useState<any[]>([]);
+
+  // Sonido al llegar una nueva solicitud de cuenta.
+  const { playNewOrder } = useKdsAudio(true);
+  const knownBillRef = useRef<Set<string> | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -130,6 +135,14 @@ export default function CashierDashboard() {
       supabase.removeChannel(channel);
     };
   }, [restaurantId, fetchOrders]);
+
+  // Sonido al llegar una nueva solicitud de cuenta. En la 1ª carga solo fija el baseline.
+  useEffect(() => {
+    const bill = new Set(tables.filter(t => t.bill_requested).map(t => t.id));
+    const prev = knownBillRef.current;
+    if (prev && [...bill].some(id => !prev.has(id))) playNewOrder();
+    knownBillRef.current = bill;
+  }, [tables, playNewOrder]);
 
   const billRequestedMap = useMemo(() =>
     Object.fromEntries(tables.map(t => [t.id, t.bill_requested])),
