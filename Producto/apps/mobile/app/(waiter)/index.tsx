@@ -12,6 +12,7 @@ import {
 import { LayoutDashboard, Clock } from 'lucide-react-native';
 import { MB_SPACING } from '../../constants/MB_Theme';
 import { supabase } from '../../lib/supabase';
+import { useKdsAudio } from '../../lib/useKdsAudio';
 import { uuidv4 } from '../../lib/uuid';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -41,6 +42,10 @@ export default function WaiterDashboard() {
   const [tipModalTable, setTipModalTable] = React.useState<any | null>(null);
   const [tables, setTables] = React.useState<any[]>([]);
   const [orders, setOrders] = React.useState<any[]>([]);
+
+  // Sonido de alerta al llegar novedades (pedidos listos/por validar, cuenta, ayuda).
+  const { playNewOrder, playUrgent } = useKdsAudio(true);
+  const knownAlertsRef = React.useRef<{ ready: Set<string>; pending: Set<string>; bill: Set<string>; help: Set<string> } | null>(null);
 
   const fetchData = React.useCallback(async () => {
     if (!restaurantId) return;
@@ -86,6 +91,23 @@ export default function WaiterDashboard() {
       supabase.removeChannel(ordersChannel);
     };
   }, [restaurantId, fetchData]);
+
+  // Sonido al llegar novedades: pedidos listos/por validar y cuentas → sonido normal;
+  // solicitudes de ayuda → sonido urgente. En la 1ª carga solo fija el baseline (no suena).
+  React.useEffect(() => {
+    const ready = new Set(orders.filter(o => o.status === 'READY').map(o => o.id));
+    const pending = new Set(orders.filter(o => o.status === 'PENDING').map(o => o.id));
+    const bill = new Set(tables.filter(t => t.bill_requested).map(t => t.id));
+    const help = new Set(tables.filter(t => t.help_requested).map(t => t.id));
+
+    const prev = knownAlertsRef.current;
+    if (prev) {
+      const isNew = (cur: Set<string>, old: Set<string>) => [...cur].some(id => !old.has(id));
+      if (isNew(help, prev.help)) playUrgent();
+      else if (isNew(ready, prev.ready) || isNew(pending, prev.pending) || isNew(bill, prev.bill)) playNewOrder();
+    }
+    knownAlertsRef.current = { ready, pending, bill, help };
+  }, [orders, tables, playNewOrder, playUrgent]);
 
   // Derived state
   const readyOrders = orders.filter(o => o.status === 'READY');
